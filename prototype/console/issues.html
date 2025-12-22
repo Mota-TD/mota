@@ -1,0 +1,2099 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>事项 - 摩塔 Mota</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/console.css">
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="console-page">
+    <!-- 顶部导航栏 -->
+    <header class="console-header">
+        <div class="console-header-left">
+            <!-- 移动端菜单按钮 -->
+            <button class="mobile-menu-btn" onclick="toggleSidebar()" title="菜单">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+            </button>
+            <a href="../index.html" class="console-logo">
+                <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
+                    <rect width="48" height="48" rx="10" fill="#2b7de9"/>
+                    <path d="M14 24L22 32L34 16" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>摩塔</span>
+            </a>
+            
+            <div class="team-switcher">
+                <button class="team-switcher-btn" onclick="toggleTeamSwitcher(event)" data-dropdown-trigger>
+                    <div class="team-avatar"><span>示</span></div>
+                    <span class="team-name">示例团队</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </button>
+                <div class="team-dropdown" id="teamDropdown" data-dropdown>
+                    <div class="dropdown-header">切换团队</div>
+                    <div class="dropdown-item active" data-team-id="1" onclick="switchTeam(1)">
+                        <div class="team-avatar"><span>示</span></div>
+                        <span>示例团队</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                    </div>
+                    <div class="dropdown-item" data-team-id="2" onclick="switchTeam(2)">
+                        <div class="team-avatar" style="background: #10b981;"><span>开</span></div>
+                        <span>开发团队</span>
+                    </div>
+                    <div class="dropdown-item" data-team-id="3" onclick="switchTeam(3)">
+                        <div class="team-avatar" style="background: #f59e0b;"><span>产</span></div>
+                        <span>产品团队</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="createNewTeam()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        <span>创建新团队</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="console-header-center">
+            <div class="global-search" onclick="openSearchModal()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" placeholder="搜索项目、事项、代码..." readonly>
+                <kbd>⌘K</kbd>
+            </div>
+        </div>
+        
+        <div class="console-header-right">
+            <div class="header-actions">
+                <div class="create-menu-wrapper">
+                    <button class="header-action-btn" title="新建" onclick="toggleCreateMenu(event)" data-dropdown-trigger>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                    </button>
+                    <div class="create-dropdown" id="createDropdown" data-dropdown>
+                        <div class="dropdown-item" onclick="openCreateIssueModal()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="8" x2="12" y2="12"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <span>新建事项</span>
+                        </div>
+                        <div class="dropdown-item" onclick="openCreateProjectModal()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            <span>新建项目</span>
+                        </div>
+                        <div class="dropdown-item" onclick="openCreateRepoModal()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M16 18l6-6-6-6"/>
+                                <path d="M8 6l-6 6 6 6"/>
+                            </svg>
+                            <span>创建仓库</span>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="dropdown-item" onclick="openCreateIterationModal()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23 4 23 10 17 10"/>
+                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                            </svg>
+                            <span>新建迭代</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="notification-wrapper">
+                    <button class="header-action-btn" title="通知" onclick="toggleNotifications(event)" data-dropdown-trigger>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
+                        <span class="notification-badge">3</span>
+                    </button>
+                    <div class="notification-dropdown" id="notificationDropdown" data-dropdown>
+                        <div class="dropdown-header">
+                            <span>通知</span>
+                            <a href="#" class="mark-all-read">全部已读</a>
+                        </div>
+                        <div class="notification-list">
+                            <a href="#" class="notification-item unread">
+                                <div class="notification-icon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="12" y1="8" x2="12" y2="12"/>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                    </svg>
+                                </div>
+                                <div class="notification-content">
+                                    <p><strong>张三</strong> 将事项 <strong>REQ-001</strong> 分配给了你</p>
+                                    <span class="notification-time">5分钟前</span>
+                                </div>
+                            </a>
+                            <a href="#" class="notification-item unread">
+                                <div class="notification-icon comment">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                    </svg>
+                                </div>
+                                <div class="notification-content">
+                                    <p><strong>李四</strong> 在 <strong>TASK-001</strong> 中提到了你</p>
+                                    <span class="notification-time">1小时前</span>
+                                </div>
+                            </a>
+                            <a href="#" class="notification-item">
+                                <div class="notification-icon success">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="20 6 9 17 4 12"/>
+                                    </svg>
+                                </div>
+                                <div class="notification-content">
+                                    <p>构建 <strong>#128</strong> 成功完成</p>
+                                    <span class="notification-time">2小时前</span>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="dropdown-footer">
+                            <a href="notifications.html">查看全部通知</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="user-menu">
+                <button class="user-menu-btn" onclick="toggleUserMenu(event)" data-dropdown-trigger>
+                    <div class="user-avatar">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" alt="用户头像">
+                    </div>
+                </button>
+                <div class="user-dropdown" id="userDropdown" data-dropdown>
+                    <div class="user-info">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" alt="用户头像">
+                        <div>
+                            <div class="user-name">张三</div>
+                            <div class="user-email">zhangsan@example.com</div>
+                        </div>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="window.location.href='profile-settings.html'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        <span>个人设置</span>
+                    </div>
+                    <div class="dropdown-item" onclick="window.location.href='settings.html'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                        </svg>
+                        <span>团队设置</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="logout()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16 17 21 12 16 7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                        <span>退出登录</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- 主体内容区域 -->
+    <div class="console-body">
+        <!-- 左侧导航栏 -->
+        <aside class="console-sidebar">
+            <nav class="sidebar-nav">
+                <div class="sidebar-section">
+                    <a href="dashboard.html" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"/>
+                            <rect x="14" y="3" width="7" height="7"/>
+                            <rect x="14" y="14" width="7" height="7"/>
+                            <rect x="3" y="14" width="7" height="7"/>
+                        </svg>
+                        <span>工作台</span>
+                    </a>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">项目协同</div>
+                    <a href="projects.html" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        <span>项目</span>
+                    </a>
+                    <a href="issues.html" class="sidebar-item active">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                        <span>事项</span>
+                        <span class="sidebar-badge">12</span>
+                    </a>
+                    <a href="iterations.html" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"/>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                        </svg>
+                        <span>迭代</span>
+                    </a>
+                    <a href="kanban.html" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="5" height="18" rx="1"/>
+                            <rect x="10" y="3" width="5" height="12" rx="1"/>
+                            <rect x="17" y="3" width="5" height="8" rx="1"/>
+                        </svg>
+                        <span>看板</span>
+                    </a>
+                    <a href="backlog.html" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                            <line x1="9" y1="12" x2="15" y2="12"/>
+                            <line x1="9" y1="16" x2="15" y2="16"/>
+                        </svg>
+                        <span>需求池</span>
+                    </a>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">代码管理</div>
+                    <a href="repos.html" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 18l6-6-6-6"/>
+                            <path d="M8 6l-6 6 6 6"/>
+                        </svg>
+                        <span>代码仓库</span>
+                    </a>
+                    <a href="merge-requests.html" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="18" cy="18" r="3"/>
+                            <circle cx="6" cy="6" r="3"/>
+                            <path d="M6 21V9a9 9 0 0 0 9 9"/>
+                        </svg>
+                        <span>合并请求</span>
+                        <span class="sidebar-badge">5</span>
+                    </a>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">持续集成</div>
+                    <a href="pipelines.html" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="6" y1="3" x2="6" y2="15"/>
+                            <circle cx="18" cy="6" r="3"/>
+                            <circle cx="6" cy="18" r="3"/>
+                            <path d="M18 9a9 9 0 0 1-9 9"/>
+                        </svg>
+                        <span>构建计划</span>
+                    </a>
+                    <a href="builds.html" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                        </svg>
+                        <span>构建记录</span>
+                    </a>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">制品管理</div>
+                    <a href="artifacts.html" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                            <line x1="12" y1="22.08" x2="12" y2="12"/>
+                        </svg>
+                        <span>制品仓库</span>
+                    </a>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">知识管理</div>
+                    <a href="wiki.html" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                        </svg>
+                        <span>知识库</span>
+                    </a>
+                    <a href="files.html" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
+                            <polyline points="13 2 13 9 20 9"/>
+                        </svg>
+                        <span>文件网盘</span>
+                    </a>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="settings.html" class="sidebar-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    <span>团队设置</span>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- 主内容区域 -->
+        <main class="console-main">
+            <div class="console-content">
+                <!-- 页面标题 -->
+                <div class="page-header-with-actions">
+                    <div class="page-header">
+                        <h1 class="page-title">事项</h1>
+                        <p class="page-subtitle">管理需求、任务和缺陷</p>
+                    </div>
+                    <div class="page-actions">
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" id="createIssueBtn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                新建事项
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"/>
+                                </svg>
+                            </button>
+                            <div class="dropdown-menu" id="createIssueMenu">
+                                <a href="#" class="dropdown-item" data-type="requirement">
+                                    <span class="issue-type-icon requirement">需</span>
+                                    新建需求
+                                </a>
+                                <a href="#" class="dropdown-item" data-type="task">
+                                    <span class="issue-type-icon task">任</span>
+                                    新建任务
+                                </a>
+                                <a href="#" class="dropdown-item" data-type="bug">
+                                    <span class="issue-type-icon bug">缺</span>
+                                    新建缺陷
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 事项类型标签页 -->
+                <div class="issue-tabs">
+                    <button class="issue-tab active" data-type="all">
+                        <span class="tab-icon all">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            </svg>
+                        </span>
+                        全部事项
+                        <span class="tab-count">45</span>
+                    </button>
+                    <button class="issue-tab" data-type="requirement">
+                        <span class="tab-icon requirement">需</span>
+                        需求
+                        <span class="tab-count">18</span>
+                    </button>
+                    <button class="issue-tab" data-type="task">
+                        <span class="tab-icon task">任</span>
+                        任务
+                        <span class="tab-count">15</span>
+                    </button>
+                    <button class="issue-tab" data-type="bug">
+                        <span class="tab-icon bug">缺</span>
+                        缺陷
+                        <span class="tab-count">12</span>
+                    </button>
+                </div>
+                
+                <!-- 筛选和搜索 -->
+                <div class="filter-bar">
+                    <div class="filter-left">
+                        <div class="filter-dropdown">
+                            <button class="filter-btn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                                </svg>
+                                筛选
+                            </button>
+                        </div>
+                        <div class="filter-tags">
+                            <span class="filter-tag">
+                                状态: 进行中
+                                <button class="filter-tag-remove">×</button>
+                            </span>
+                            <span class="filter-tag">
+                                优先级: 高
+                                <button class="filter-tag-remove">×</button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="filter-right">
+                        <div class="search-input">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            </svg>
+                            <input type="text" placeholder="搜索事项...">
+                        </div>
+                        <div class="view-toggle">
+                            <button class="view-btn active" title="列表视图">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="8" y1="6" x2="21" y2="6"/>
+                                    <line x1="8" y1="12" x2="21" y2="12"/>
+                                    <line x1="8" y1="18" x2="21" y2="18"/>
+                                    <line x1="3" y1="6" x2="3.01" y2="6"/>
+                                    <line x1="3" y1="12" x2="3.01" y2="12"/>
+                                    <line x1="3" y1="18" x2="3.01" y2="18"/>
+                                </svg>
+                            </button>
+                            <button class="view-btn" title="看板视图">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="7" height="7"/>
+                                    <rect x="14" y="3" width="7" height="7"/>
+                                    <rect x="14" y="14" width="7" height="7"/>
+                                    <rect x="3" y="14" width="7" height="7"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 事项列表 -->
+                <div class="issues-table-container">
+                    <table class="issues-table">
+                        <thead>
+                            <tr>
+                                <th class="col-checkbox">
+                                    <input type="checkbox" id="selectAll">
+                                </th>
+                                <th class="col-id">ID</th>
+                                <th class="col-type">类型</th>
+                                <th class="col-title">标题</th>
+                                <th class="col-status">状态</th>
+                                <th class="col-priority">优先级</th>
+                                <th class="col-assignee">处理人</th>
+                                <th class="col-iteration">迭代</th>
+                                <th class="col-date">截止日期</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 需求 1 -->
+                            <tr class="issue-row" data-id="REQ-001">
+                                <td class="col-checkbox">
+                                    <input type="checkbox">
+                                </td>
+                                <td class="col-id">
+                                    <a href="issue-detail.html?id=REQ-001">REQ-001</a>
+                                </td>
+                                <td class="col-type">
+                                    <span class="issue-type-badge requirement">需求</span>
+                                </td>
+                                <td class="col-title">
+                                    <a href="issue-detail.html?id=REQ-001" class="issue-title-link">
+                                        用户登录功能优化
+                                        <span class="issue-sub-count">3 子任务</span>
+                                    </a>
+                                </td>
+                                <td class="col-status">
+                                    <span class="status-badge processing">进行中</span>
+                                </td>
+                                <td class="col-priority">
+                                    <span class="priority-badge high">高</span>
+                                </td>
+                                <td class="col-assignee">
+                                    <div class="assignee">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=1" alt="">
+                                        <span>张三</span>
+                                    </div>
+                                </td>
+                                <td class="col-iteration">
+                                    <span class="iteration-badge">Sprint 12</span>
+                                </td>
+                                <td class="col-date">
+                                    <span class="date-text overdue">2024-01-15</span>
+                                </td>
+                            </tr>
+                            
+                            <!-- 任务 1 -->
+                            <tr class="issue-row" data-id="TASK-001">
+                                <td class="col-checkbox">
+                                    <input type="checkbox">
+                                </td>
+                                <td class="col-id">
+                                    <a href="issue-detail.html?id=TASK-001">TASK-001</a>
+                                </td>
+                                <td class="col-type">
+                                    <span class="issue-type-badge task">任务</span>
+                                </td>
+                                <td class="col-title">
+                                    <a href="issue-detail.html?id=TASK-001" class="issue-title-link">
+                                        实现登录表单验证
+                                    </a>
+                                </td>
+                                <td class="col-status">
+                                    <span class="status-badge completed">已完成</span>
+                                </td>
+                                <td class="col-priority">
+                                    <span class="priority-badge medium">中</span>
+                                </td>
+                                <td class="col-assignee">
+                                    <div class="assignee">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=2" alt="">
+                                        <span>李四</span>
+                                    </div>
+                                </td>
+                                <td class="col-iteration">
+                                    <span class="iteration-badge">Sprint 12</span>
+                                </td>
+                                <td class="col-date">
+                                    <span class="date-text">2024-01-10</span>
+                                </td>
+                            </tr>
+                            
+                            <!-- 缺陷 1 -->
+                            <tr class="issue-row" data-id="BUG-001">
+                                <td class="col-checkbox">
+                                    <input type="checkbox">
+                                </td>
+                                <td class="col-id">
+                                    <a href="issue-detail.html?id=BUG-001">BUG-001</a>
+                                </td>
+                                <td class="col-type">
+                                    <span class="issue-type-badge bug">缺陷</span>
+                                </td>
+                                <td class="col-title">
+                                    <a href="issue-detail.html?id=BUG-001" class="issue-title-link">
+                                        登录页面在Safari浏览器显示异常
+                                    </a>
+                                </td>
+                                <td class="col-status">
+                                    <span class="status-badge pending">待处理</span>
+                                </td>
+                                <td class="col-priority">
+                                    <span class="priority-badge high">高</span>
+                                </td>
+                                <td class="col-assignee">
+                                    <div class="assignee">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=3" alt="">
+                                        <span>王五</span>
+                                    </div>
+                                </td>
+                                <td class="col-iteration">
+                                    <span class="iteration-badge">Sprint 12</span>
+                                </td>
+                                <td class="col-date">
+                                    <span class="date-text urgent">2024-01-08</span>
+                                </td>
+                            </tr>
+                            
+                            <!-- 需求 2 -->
+                            <tr class="issue-row" data-id="REQ-002">
+                                <td class="col-checkbox">
+                                    <input type="checkbox">
+                                </td>
+                                <td class="col-id">
+                                    <a href="issue-detail.html?id=REQ-002">REQ-002</a>
+                                </td>
+                                <td class="col-type">
+                                    <span class="issue-type-badge requirement">需求</span>
+                                </td>
+                                <td class="col-title">
+                                    <a href="issue-detail.html?id=REQ-002" class="issue-title-link">
+                                        新增数据导出功能
+                                        <span class="issue-sub-count">5 子任务</span>
+                                    </a>
+                                </td>
+                                <td class="col-status">
+                                    <span class="status-badge pending">待处理</span>
+                                </td>
+                                <td class="col-priority">
+                                    <span class="priority-badge medium">中</span>
+                                </td>
+                                <td class="col-assignee">
+                                    <div class="assignee unassigned">
+                                        <span>待分配</span>
+                                    </div>
+                                </td>
+                                <td class="col-iteration">
+                                    <span class="iteration-badge">Sprint 13</span>
+                                </td>
+                                <td class="col-date">
+                                    <span class="date-text">2024-01-25</span>
+                                </td>
+                            </tr>
+                            
+                            <!-- 任务 2 -->
+                            <tr class="issue-row" data-id="TASK-002">
+                                <td class="col-checkbox">
+                                    <input type="checkbox">
+                                </td>
+                                <td class="col-id">
+                                    <a href="issue-detail.html?id=TASK-002">TASK-002</a>
+                                </td>
+                                <td class="col-type">
+                                    <span class="issue-type-badge task">任务</span>
+                                </td>
+                                <td class="col-title">
+                                    <a href="issue-detail.html?id=TASK-002" class="issue-title-link">
+                                        编写API接口文档
+                                    </a>
+                                </td>
+                                <td class="col-status">
+                                    <span class="status-badge processing">进行中</span>
+                                </td>
+                                <td class="col-priority">
+                                    <span class="priority-badge low">低</span>
+                                </td>
+                                <td class="col-assignee">
+                                    <div class="assignee">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=4" alt="">
+                                        <span>赵六</span>
+                                    </div>
+                                </td>
+                                <td class="col-iteration">
+                                    <span class="iteration-badge">Sprint 12</span>
+                                </td>
+                                <td class="col-date">
+                                    <span class="date-text">2024-01-20</span>
+                                </td>
+                            </tr>
+                            
+                            <!-- 缺陷 2 -->
+                            <tr class="issue-row" data-id="BUG-002">
+                                <td class="col-checkbox">
+                                    <input type="checkbox">
+                                </td>
+                                <td class="col-id">
+                                    <a href="issue-detail.html?id=BUG-002">BUG-002</a>
+                                </td>
+                                <td class="col-type">
+                                    <span class="issue-type-badge bug">缺陷</span>
+                                </td>
+                                <td class="col-title">
+                                    <a href="issue-detail.html?id=BUG-002" class="issue-title-link">
+                                        数据分页加载时偶发性报错
+                                    </a>
+                                </td>
+                                <td class="col-status">
+                                    <span class="status-badge processing">修复中</span>
+                                </td>
+                                <td class="col-priority">
+                                    <span class="priority-badge medium">中</span>
+                                </td>
+                                <td class="col-assignee">
+                                    <div class="assignee">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=5" alt="">
+                                        <span>钱七</span>
+                                    </div>
+                                </td>
+                                <td class="col-iteration">
+                                    <span class="iteration-badge">Sprint 12</span>
+                                </td>
+                                <td class="col-date">
+                                    <span class="date-text">2024-01-12</span>
+                                </td>
+                            </tr>
+                            
+                            <!-- 需求 3 -->
+                            <tr class="issue-row" data-id="REQ-003">
+                                <td class="col-checkbox">
+                                    <input type="checkbox">
+                                </td>
+                                <td class="col-id">
+                                    <a href="issue-detail.html?id=REQ-003">REQ-003</a>
+                                </td>
+                                <td class="col-type">
+                                    <span class="issue-type-badge requirement">需求</span>
+                                </td>
+                                <td class="col-title">
+                                    <a href="issue-detail.html?id=REQ-003" class="issue-title-link">
+                                        支持多语言国际化
+                                        <span class="issue-sub-count">8 子任务</span>
+                                    </a>
+                                </td>
+                                <td class="col-status">
+                                    <span class="status-badge pending">规划中</span>
+                                </td>
+                                <td class="col-priority">
+                                    <span class="priority-badge low">低</span>
+                                </td>
+                                <td class="col-assignee">
+                                    <div class="assignee">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=6" alt="">
+                                        <span>孙八</span>
+                                    </div>
+                                </td>
+                                <td class="col-iteration">
+                                    <span class="iteration-badge future">待规划</span>
+                                </td>
+                                <td class="col-date">
+                                    <span class="date-text">2024-02-28</span>
+                                </td>
+                            </tr>
+                            
+                            <!-- 任务 3 -->
+                            <tr class="issue-row" data-id="TASK-003">
+                                <td class="col-checkbox">
+                                    <input type="checkbox">
+                                </td>
+                                <td class="col-id">
+                                    <a href="issue-detail.html?id=TASK-003">TASK-003</a>
+                                </td>
+                                <td class="col-type">
+                                    <span class="issue-type-badge task">任务</span>
+                                </td>
+                                <td class="col-title">
+                                    <a href="issue-detail.html?id=TASK-003" class="issue-title-link">
+                                        优化首页加载性能
+                                    </a>
+                                </td>
+                                <td class="col-status">
+                                    <span class="status-badge completed">已完成</span>
+                                </td>
+                                <td class="col-priority">
+                                    <span class="priority-badge high">高</span>
+                                </td>
+                                <td class="col-assignee">
+                                    <div class="assignee">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=1" alt="">
+                                        <span>张三</span>
+                                    </div>
+                                </td>
+                                <td class="col-iteration">
+                                    <span class="iteration-badge">Sprint 11</span>
+                                </td>
+                                <td class="col-date">
+                                    <span class="date-text">2024-01-05</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 分页 -->
+                <div class="pagination">
+                    <div class="pagination-info">
+                        共 <strong>45</strong> 条记录，每页显示
+                        <select class="page-size-select">
+                            <option value="10">10</option>
+                            <option value="20" selected>20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                        条
+                    </div>
+                    <div class="pagination-controls">
+                        <button class="pagination-btn" disabled>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="15 18 9 12 15 6"/>
+                            </svg>
+                        </button>
+                        <button class="pagination-btn active">1</button>
+                        <button class="pagination-btn">2</button>
+                        <button class="pagination-btn">3</button>
+                        <button class="pagination-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- 新建事项模态框 -->
+    <div class="modal" id="createIssueModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container modal-lg">
+            <div class="modal-header">
+                <h3 class="modal-title">新建需求</h3>
+                <button class="modal-close" id="closeModal">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="issue-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label required">事项类型</label>
+                            <div class="issue-type-selector">
+                                <button type="button" class="type-option active" data-type="requirement">
+                                    <span class="issue-type-icon requirement">需</span>
+                                    需求
+                                </button>
+                                <button type="button" class="type-option" data-type="task">
+                                    <span class="issue-type-icon task">任</span>
+                                    任务
+                                </button>
+                                <button type="button" class="type-option" data-type="bug">
+                                    <span class="issue-type-icon bug">缺</span>
+                                    缺陷
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label class="form-label required">标题</label>
+                            <input type="text" class="form-input" placeholder="请输入事项标题">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label class="form-label">描述</label>
+                            <div class="rich-editor">
+                                <div class="editor-toolbar">
+                                    <button type="button" class="toolbar-btn" title="加粗">
+                                        <strong>B</strong>
+                                    </button>
+                                    <button type="button" class="toolbar-btn" title="斜体">
+                                        <em>I</em>
+                                    </button>
+                                    <button type="button" class="toolbar-btn" title="代码">
+                                        <code>&lt;/&gt;</code>
+                                    </button>
+                                    <button type="button" class="toolbar-btn" title="链接">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                                        </svg>
+                                    </button>
+                                    <button type="button" class="toolbar-btn" title="图片">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                                            <polyline points="21 15 16 10 5 21"/>
+                                        </svg>
+                                    </button>
+                                    <button type="button" class="toolbar-btn" title="列表">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="8" y1="6" x2="21" y2="6"/>
+                                            <line x1="8" y1="12" x2="21" y2="12"/>
+                                            <line x1="8" y1="18" x2="21" y2="18"/>
+                                            <line x1="3" y1="6" x2="3.01" y2="6"/>
+                                            <line x1="3" y1="12" x2="3.01" y2="12"/>
+                                            <line x1="3" y1="18" x2="3.01" y2="18"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <textarea class="editor-content" placeholder="请输入事项描述..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row two-cols">
+                        <div class="form-group">
+                            <label class="form-label">优先级</label>
+                            <select class="form-select">
+                                <option value="">请选择</option>
+                                <option value="high">高</option>
+                                <option value="medium">中</option>
+                                <option value="low">低</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">处理人</label>
+                            <select class="form-select">
+                                <option value="">请选择</option>
+                                <option value="1">张三</option>
+                                <option value="2">李四</option>
+                                <option value="3">王五</option>
+                                <option value="4">赵六</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row two-cols">
+                        <div class="form-group">
+                            <label class="form-label">所属迭代</label>
+                            <select class="form-select">
+                                <option value="">请选择</option>
+                                <option value="sprint12">Sprint 12</option>
+                                <option value="sprint13">Sprint 13</option>
+                                <option value="backlog">待规划</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">截止日期</label>
+                            <input type="date" class="form-input">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row two-cols">
+                        <div class="form-group">
+                            <label class="form-label">所属项目</label>
+                            <select class="form-select">
+                                <option value="">请选择</option>
+                                <option value="1">前端项目</option>
+                                <option value="2">后端服务</option>
+                                <option value="3">移动端App</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">标签</label>
+                            <input type="text" class="form-input" placeholder="输入标签，按回车添加">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelBtn">取消</button>
+                <button class="btn btn-primary">创建</button>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        /* 事项类型标签页 */
+        .issue-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 4px;
+            background: #fff;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+        }
+        
+        .issue-tab {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: none;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .issue-tab:hover {
+            background: var(--bg-light);
+            color: var(--text-primary);
+        }
+        
+        .issue-tab.active {
+            background: var(--primary-light);
+            color: var(--primary-color);
+        }
+        
+        .tab-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .tab-icon.all {
+            background: var(--bg-light);
+            color: var(--text-secondary);
+        }
+        
+        .tab-icon.requirement {
+            background: rgba(43, 125, 233, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .tab-icon.task {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+        }
+        
+        .tab-icon.bug {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-color);
+        }
+        
+        .tab-count {
+            padding: 2px 8px;
+            background: var(--bg-light);
+            border-radius: 10px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .issue-tab.active .tab-count {
+            background: rgba(43, 125, 233, 0.2);
+            color: var(--primary-color);
+        }
+        
+        /* 筛选栏 */
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 12px 16px;
+            background: #fff;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+        }
+        
+        .filter-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .filter-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: var(--bg-light);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .filter-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .filter-tags {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .filter-tag {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px 4px 10px;
+            background: var(--primary-light);
+            border-radius: 12px;
+            font-size: 12px;
+            color: var(--primary-color);
+        }
+        
+        .filter-tag-remove {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        
+        .filter-tag-remove:hover {
+            background: rgba(43, 125, 233, 0.2);
+        }
+        
+        .filter-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        /* 事项表格 */
+        .issues-table-container {
+            background: #fff;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .issues-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .issues-table th,
+        .issues-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .issues-table th {
+            background: var(--bg-light);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+        
+        .issues-table tbody tr:hover {
+            background: var(--bg-light);
+        }
+        
+        .issues-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .col-checkbox {
+            width: 40px;
+        }
+        
+        .col-id {
+            width: 100px;
+        }
+        
+        .col-id a {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+        
+        .col-type {
+            width: 80px;
+        }
+        
+        .issue-type-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .issue-type-badge.requirement {
+            background: rgba(43, 125, 233, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .issue-type-badge.task {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+        }
+        
+        .issue-type-badge.bug {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-color);
+        }
+        
+        .col-title {
+            min-width: 300px;
+        }
+        
+        .issue-title-link {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .issue-title-link:hover {
+            color: var(--primary-color);
+        }
+        
+        .issue-sub-count {
+            display: inline-block;
+            margin-left: 8px;
+            padding: 2px 6px;
+            background: var(--bg-light);
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 400;
+            color: var(--text-secondary);
+        }
+        
+        .col-status {
+            width: 100px;
+        }
+        
+        .col-priority {
+            width: 80px;
+        }
+        
+        .priority-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .priority-badge.high {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-color);
+        }
+        
+        .priority-badge.medium {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning-color);
+        }
+        
+        .priority-badge.low {
+            background: rgba(107, 114, 128, 0.1);
+            color: var(--text-secondary);
+        }
+        
+        .col-assignee {
+            width: 120px;
+        }
+        
+        .assignee {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .assignee img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+        }
+        
+        .assignee span {
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+        
+        .assignee.unassigned span {
+            color: var(--text-placeholder);
+        }
+        
+        .col-iteration {
+            width: 100px;
+        }
+        
+        .iteration-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            color: #8b5cf6;
+        }
+        
+        .iteration-badge.future {
+            background: var(--bg-light);
+            color: var(--text-secondary);
+        }
+        
+        .col-date {
+            width: 100px;
+        }
+        
+        .date-text {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        .date-text.overdue {
+            color: var(--error-color);
+        }
+        
+        .date-text.urgent {
+            color: var(--warning-color);
+        }
+        
+        /* 分页 */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            background: #fff;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+        }
+        
+        .pagination-info {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        .pagination-info strong {
+            color: var(--text-primary);
+        }
+        
+        .page-size-select {
+            padding: 4px 8px;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            margin: 0 4px;
+        }
+        
+        .pagination-controls {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .pagination-btn {
+            min-width: 32px;
+            height: 32px;
+            padding: 0 8px;
+            background: #fff;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+        }
+        
+        .pagination-btn:hover:not(:disabled) {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .pagination-btn.active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: #fff;
+        }
+        
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* 下拉菜单 */
+        .dropdown {
+            position: relative;
+        }
+        
+        .dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            min-width: 160px;
+            background: #fff;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all var(--transition-fast);
+            z-index: 100;
+        }
+        
+        .dropdown.active .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            font-size: 14px;
+            color: var(--text-primary);
+            transition: background var(--transition-fast);
+        }
+        
+        .dropdown-item:hover {
+            background: var(--bg-light);
+        }
+        
+        .issue-type-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .issue-type-icon.requirement {
+            background: rgba(43, 125, 233, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .issue-type-icon.task {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+        }
+        
+        .issue-type-icon.bug {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-color);
+        }
+        
+        /* 模态框 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 2000;
+            display: none;
+        }
+        
+        .modal.active {
+            display: block;
+        }
+        
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 560px;
+            max-height: 90vh;
+            background: #fff;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .modal-lg {
+            max-width: 720px;
+        }
+        
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-md);
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+        }
+        
+        .modal-close:hover {
+            background: var(--bg-light);
+            color: var(--text-primary);
+        }
+        
+        .modal-body {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+        
+        .modal-footer {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-light);
+        }
+        
+        /* 表单样式 */
+        .issue-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .form-row.two-cols .form-group {
+            flex: 1;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .form-group.full-width {
+            width: 100%;
+        }
+        
+        .form-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .form-label.required::after {
+            content: '*';
+            color: var(--error-color);
+            margin-left: 4px;
+        }
+        
+        .form-input,
+        .form-select {
+            padding: 10px 12px;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            color: var(--text-primary);
+            transition: all var(--transition-fast);
+        }
+        
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(43, 125, 233, 0.1);
+        }
+        
+        .issue-type-selector {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .type-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: var(--bg-light);
+            border: 2px solid transparent;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .type-option:hover {
+            background: var(--bg-hover);
+        }
+        
+        .type-option.active {
+            background: var(--primary-light);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        /* 富文本编辑器 */
+        .rich-editor {
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+        
+        .editor-toolbar {
+            display: flex;
+            gap: 4px;
+            padding: 8px 12px;
+            background: var(--bg-light);
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .toolbar-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+        }
+        
+        .toolbar-btn:hover {
+            background: #fff;
+            color: var(--text-primary);
+        }
+        
+        .editor-content {
+            width: 100%;
+            min-height: 150px;
+            padding: 12px;
+            border: none;
+            font-size: 14px;
+            color: var(--text-primary);
+            resize: vertical;
+        }
+        
+        .editor-content:focus {
+            outline: none;
+        }
+        
+        /* 页面标题带操作按钮 */
+        .page-header-with-actions {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        
+        .page-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .page-actions .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* 搜索输入框 */
+        .search-input {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--bg-light);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+        }
+        
+        .search-input svg {
+            color: var(--text-placeholder);
+        }
+        
+        .search-input input {
+            border: none;
+            background: none;
+            font-size: 14px;
+            color: var(--text-primary);
+            outline: none;
+            width: 200px;
+        }
+        
+        /* 视图切换 */
+        .view-toggle {
+            display: flex;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+        
+        .view-btn {
+            padding: 8px 12px;
+            background: #fff;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .view-btn:hover {
+            background: var(--bg-light);
+        }
+        
+        .view-btn.active {
+            background: var(--primary-light);
+            color: var(--primary-color);
+        }
+        /* Filter Dropdown - Page Specific */
+        .filter-dropdown {
+            position: relative;
+        }
+        
+        .filter-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 4px;
+            min-width: 280px;
+            background: #fff;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            z-index: 100;
+            display: none;
+        }
+        
+        .filter-dropdown-menu.active {
+            display: block;
+        }
+        
+        .filter-section {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .filter-section:last-child {
+            border-bottom: none;
+        }
+        
+        .filter-section-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        
+        .filter-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        
+        .filter-option {
+            padding: 6px 12px;
+            background: var(--bg-light);
+            border: 1px solid transparent;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .filter-option:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .filter-option.active {
+            background: var(--primary-light);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        /* Batch actions bar */
+        .batch-actions-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--primary-light);
+            border: 1px solid var(--primary-color);
+            border-radius: var(--radius-lg);
+            margin-bottom: 16px;
+        }
+        
+        .batch-count {
+            font-size: 14px;
+            color: var(--primary-color);
+        }
+        
+        .batch-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+        
+        .btn-danger {
+            background: var(--error-color);
+            color: #fff;
+            border: none;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .empty-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            color: var(--text-placeholder);
+        }
+        
+        .empty-content svg {
+            opacity: 0.5;
+        }
+        
+        .empty-content p {
+            font-size: 14px;
+            margin: 0;
+        }
+        
+        /* Pagination ellipsis */
+        .pagination-ellipsis {
+            padding: 0 8px;
+            color: var(--text-secondary);
+        }
+        
+        /* Selected row */
+        .issue-row.selected {
+            background: var(--primary-light);
+        }
+        
+    </style>
+    
+    <!-- Common JS Module -->
+    <script src="../js/common.js"></script>
+    <!-- Issues JS Module -->
+    <script src="../js/issues.js"></script>
+    
+    <script>
+        // Page-specific close all dropdowns (extends common)
+        const originalCloseAllDropdowns = window.closeAllDropdowns || function() {};
+        function closeAllDropdowns() {
+            originalCloseAllDropdowns();
+            document.querySelectorAll('.dropdown, .filter-dropdown-menu').forEach(el => {
+                el.classList.remove('active');
+            });
+        }
+        
+        // Open create issue modal with specific type (page-specific)
+        function openCreateIssueModalWithType(type) {
+            closeAllDropdowns();
+            const modal = document.getElementById('createIssueModal');
+            modal.classList.add('active');
+            
+            // Set the type
+            document.querySelectorAll('.type-option').forEach(opt => {
+                opt.classList.remove('active');
+                if (opt.dataset.type === type) {
+                    opt.classList.add('active');
+                }
+            });
+            
+            // Update modal title
+            const titles = {
+                'requirement': '新建需求',
+                'task': '新建任务',
+                'bug': '新建缺陷'
+            };
+            document.querySelector('.modal-title').textContent = titles[type] || '新建事项';
+        }
+        
+        // 下拉菜单切换
+        document.getElementById('createIssueBtn')?.addEventListener('click', function(e) {
+            e.stopPropagation();
+            closeAllDropdowns();
+            this.closest('.dropdown').classList.toggle('active');
+        });
+        
+        // 点击其他地方关闭下拉菜单
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.team-switcher, .create-menu-wrapper, .notification-wrapper, .user-menu, .dropdown, .filter-dropdown')) {
+                closeAllDropdowns();
+            }
+        });
+        
+        // 事项类型标签切换和筛选
+        document.querySelectorAll('.issue-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.issue-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                const type = this.dataset.type;
+                filterIssuesByType(type);
+            });
+        });
+        
+        // Filter issues by type
+        function filterIssuesByType(type) {
+            const rows = document.querySelectorAll('.issue-row');
+            rows.forEach(row => {
+                const issueId = row.dataset.id;
+                if (type === 'all') {
+                    row.style.display = '';
+                } else if (type === 'requirement' && issueId.startsWith('REQ')) {
+                    row.style.display = '';
+                } else if (type === 'task' && issueId.startsWith('TASK')) {
+                    row.style.display = '';
+                } else if (type === 'bug' && issueId.startsWith('BUG')) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+        
+        // 视图切换
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+        
+        // 模态框
+        const modal = document.getElementById('createIssueModal');
+        const closeModalBtn = document.getElementById('closeModal');
+        const cancelBtn = document.getElementById('cancelBtn');
+        
+        document.querySelectorAll('#createIssueMenu .dropdown-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const type = this.dataset.type;
+                openCreateIssueModalWithType(type);
+            });
+        });
+        
+        closeModalBtn?.addEventListener('click', function() {
+            modal.classList.remove('active');
+        });
+        
+        cancelBtn?.addEventListener('click', function() {
+            modal.classList.remove('active');
+        });
+        
+        document.querySelector('#createIssueModal .modal-overlay')?.addEventListener('click', function() {
+            modal.classList.remove('active');
+        });
+        
+        // 事项类型选择
+        document.querySelectorAll('.type-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.type-option').forEach(o => o.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Update modal title
+                const type = this.dataset.type;
+                const titles = {
+                    'requirement': '新建需求',
+                    'task': '新建任务',
+                    'bug': '新建缺陷'
+                };
+                document.querySelector('.modal-title').textContent = titles[type] || '新建事项';
+            });
+        });
+        
+        // 全选
+        document.getElementById('selectAll')?.addEventListener('change', function() {
+            document.querySelectorAll('.issues-table tbody input[type="checkbox"]').forEach(cb => {
+                cb.checked = this.checked;
+            });
+        });
+        
+        // Filter dropdown toggle
+        document.querySelector('.filter-btn')?.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const filterDropdown = this.closest('.filter-dropdown');
+            let menu = filterDropdown?.querySelector('.filter-dropdown-menu');
+            
+            if (!menu) {
+                // Create filter dropdown menu if it doesn't exist
+                menu = document.createElement('div');
+                menu.className = 'filter-dropdown-menu';
+                menu.innerHTML = `
+                    <div class="filter-section">
+                        <div class="filter-section-title">状态</div>
+                        <div class="filter-options">
+                            <span class="filter-option active">全部</span>
+                            <span class="filter-option">待处理</span>
+                            <span class="filter-option">进行中</span>
+                            <span class="filter-option">已完成</span>
+                        </div>
+                    </div>
+                    <div class="filter-section">
+                        <div class="filter-section-title">优先级</div>
+                        <div class="filter-options">
+                            <span class="filter-option active">全部</span>
+                            <span class="filter-option">高</span>
+                            <span class="filter-option">中</span>
+                            <span class="filter-option">低</span>
+                        </div>
+                    </div>
+                    <div class="filter-section">
+                        <div class="filter-section-title">处理人</div>
+                        <div class="filter-options">
+                            <span class="filter-option active">全部</span>
+                            <span class="filter-option">我负责的</span>
+                            <span class="filter-option">未分配</span>
+                        </div>
+                    </div>
+                `;
+                filterDropdown.appendChild(menu);
+                
+                // Add click handlers for filter options
+                menu.querySelectorAll('.filter-option').forEach(opt => {
+                    opt.addEventListener('click', function() {
+                        const section = this.closest('.filter-options');
+                        section.querySelectorAll('.filter-option').forEach(o => o.classList.remove('active'));
+                        this.classList.add('active');
+                    });
+                });
+            }
+            
+            closeAllDropdowns();
+            menu.classList.toggle('active');
+        });
+        
+        // Remove filter tag
+        document.querySelectorAll('.filter-tag-remove').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.closest('.filter-tag').remove();
+            });
+        });
+    </script>
+</body>
+</html>

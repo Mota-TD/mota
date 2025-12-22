@@ -1,0 +1,214 @@
+.container {
+  padding: 24px;
+  background: #f5f7fa;
+  min-height: calc(100vh - 64px);
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: calc(100vh - 64px);
+  background: #f5f7fa;
+}
+
+/* Page Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 24px;
+  background: linear-gradient(135deg, #2b7de9 0%, #1890ff 100%);
+  border-radius: 14px;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(43, 125, 233, 0.2);
+}
+
+.title {
+  display: flex;
+  align-items: center;
+}
+
+.title h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+}
+
+.header :global(.ant-btn) {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  border-radius: 8px;
+}
+
+.header :global(.ant-btn:hover) {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Notification Card */
+.notificationCard {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e8ecf0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.notificationCard :global(.ant-card-body) {
+  padding: 0;
+}
+
+/* Notification Item */
+.notificationItem {
+  padding: 18px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.notificationItem:last-child {
+  border-bottom: none;
+}
+
+.notificationItem:hover {
+  background: #f8fbff;
+}
+
+.notificationItem.unread {
+  background: linear-gradient(135deg, rgba(43, 125, 233, 0.06) 0%, rgba(24, 144, 255, 0.06) 100%);
+  border-left: 3px solid #2b7de9;
+}
+
+.notificationItem.unread:hover {
+  background: linear-gradient(135deg, rgba(43, 125, 233, 0.1) 0%, rgba(24, 144, 255, 0.1) 100%);
+}
+
+/* Icon Wrapper */
+.iconWrapper {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(43, 125, 233, 0.1) 0%, rgba(24, 144, 255, 0.1) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: #2b7de9;
+}
+
+.iconWrapper.success {
+  background: linear-gradient(135deg, rgba(82, 196, 26, 0.1) 0%, rgba(115, 209, 61, 0.1) 100%);
+  color: #52c41a;
+}
+
+.iconWrapper.warning {
+  background: linear-gradient(135deg, rgba(250, 173, 20, 0.1) 0%, rgba(255, 197, 61, 0.1) 100%);
+  color: #faad14;
+}
+
+.iconWrapper.error {
+  background: linear-gradient(135deg, rgba(255, 77, 79, 0.1) 0%, rgba(255, 120, 117, 0.1) 100%);
+  color: #ff4d4f;
+}
+
+/* Notification Content */
+.notificationContent {
+  flex: 1;
+  margin-left: 16px;
+}
+
+.notificationTitle {
+  color: #1a1a1a;
+  font-weight: 500;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.2s;
+}
+
+.notificationTitle:hover {
+  color: #2b7de9;
+}
+
+.notificationDesc {
+  color: #666;
+  font-size: 14px;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+.time {
+  font-size: 13px;
+  color: #8c8c8c;
+}
+
+/* Unread Badge */
+.unreadBadge {
+  width: 8px;
+  height: 8px;
+  background: #2b7de9;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Empty State */
+.emptyState {
+  padding: 60px 0;
+  text-align: center;
+}
+
+.emptyState :global(.ant-empty-description) {
+  color: #8c8c8c;
+  font-size: 15px;
+}
+
+/* Tabs */
+.notificationCard :global(.ant-tabs-nav) {
+  padding: 0 24px;
+  margin-bottom: 0;
+}
+
+.notificationCard :global(.ant-tabs-tab) {
+  padding: 16px 0;
+  font-weight: 500;
+}
+
+.notificationCard :global(.ant-tabs-tab-active) {
+  color: #2b7de9;
+}
+
+.notificationCard :global(.ant-tabs-ink-bar) {
+  background: #2b7de9;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+  
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px;
+  }
+  
+  .notificationItem {
+    padding: 14px 16px;
+  }
+  
+  .iconWrapper {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+}

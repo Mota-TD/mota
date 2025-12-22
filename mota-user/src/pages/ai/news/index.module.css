@@ -1,0 +1,239 @@
+/* AI新闻追踪页面样式 - 摩塔 Mota */
+.container {
+  padding: 0;
+  min-height: 100%;
+}
+
+/* 页面头部 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  border-radius: 16px;
+  color: #fff;
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.headerIcon {
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #fff;
+  backdrop-filter: blur(10px);
+}
+
+.header :global(.ant-typography) {
+  color: #fff !important;
+}
+
+.header :global(.ant-typography-secondary) {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.header :global(.ant-btn) {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+.header :global(.ant-btn:hover) {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* 主卡片 */
+.container :global(.ant-card) {
+  border-radius: 16px;
+  border: 1px solid #e8e9eb;
+}
+
+/* 筛选栏 */
+.filterBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.filterBar :global(.ant-input-affix-wrapper) {
+  border-radius: 10px;
+}
+
+.filterBar :global(.ant-select-selector) {
+  border-radius: 8px !important;
+}
+
+/* 新闻列表 */
+.newsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.newsCard {
+  border-radius: 12px !important;
+  border: 1px solid #e8e9eb !important;
+  transition: all 0.2s;
+}
+
+.newsCard:hover {
+  border-color: transparent !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.newsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.newsTitle {
+  margin-bottom: 10px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  line-height: 1.5 !important;
+}
+
+.newsTitle a {
+  color: #1a1f36;
+  transition: color 0.2s;
+}
+
+.newsTitle a:hover {
+  color: #f59e0b;
+}
+
+.newsSummary {
+  margin-bottom: 14px !important;
+  color: #718096 !important;
+  line-height: 1.7 !important;
+}
+
+.newsFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid #f5f5f5;
+}
+
+.newsFooter :global(.ant-tag) {
+  border-radius: 6px;
+  border: none;
+  background: #f5f7fa;
+  color: #718096;
+}
+
+/* 侧边卡片 */
+.sideCard {
+  margin-bottom: 16px;
+  border-radius: 12px !important;
+}
+
+.sideCard :global(.ant-card-head) {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 14px 20px;
+  min-height: auto;
+}
+
+.sideCard :global(.ant-card-head-title) {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.sideCard :global(.ant-card-body) {
+  padding: 16px 20px;
+}
+
+.tagCloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tagCloud :global(.ant-tag) {
+  margin: 0;
+  padding: 4px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tagCloud :global(.ant-tag:hover) {
+  transform: translateY(-1px);
+}
+
+.keywordList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.keywordList :global(.ant-tag) {
+  margin: 0;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: #f5f7fa;
+  border: 1px solid #e8e9eb;
+}
+
+.sideCard :global(.ant-list-item) {
+  padding: 10px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.sideCard :global(.ant-list-item:last-child) {
+  border-bottom: none;
+}
+
+/* 响应式 */
+@media (max-width: 992px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .filterBar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 576px) {
+  .header {
+    padding: 16px;
+    border-radius: 12px;
+  }
+  
+  .headerIcon {
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
+  }
+  
+  .newsFooter {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}

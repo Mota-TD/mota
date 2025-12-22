@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="摩塔Mota - 为团队打造的一站式协作管理平台，提供项目管理、任务管理、知识管理等团队协作功能">
+    <title>摩塔 Mota - 一站式团队协作管理平台</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/home.css">
+    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <!-- 顶部公告栏 -->
+    <div class="announcement-bar">
+        <div class="container">
+            <span>摩塔 Mota 全新版本正式上线！更强大的项目协同与效能洞察功能，快来体验吧！</span>
+            <button class="announcement-close" onclick="this.parentElement.parentElement.style.display='none'">×</button>
+        </div>
+    </div>
+
+    <!-- 导航栏 -->
+    <header class="navbar navbar-home">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <svg class="navbar-logo" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="20" cy="20" r="18" fill="url(#logo-gradient)"/>
+                    <path d="M12 20L18 26L28 14" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    <defs>
+                        <linearGradient id="logo-gradient" x1="0" y1="0" x2="40" y2="40">
+                            <stop offset="0%" stop-color="#2b7de9"/>
+                            <stop offset="100%" stop-color="#1a6dd6"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <span class="navbar-title">摩塔 Mota</span>
+            </div>
+            
+            <nav class="navbar-menu">
+                <div class="navbar-item dropdown">
+                    <span>产品</span>
+                    <svg class="dropdown-arrow" width="12" height="12" viewBox="0 0 12 12">
+                        <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    </svg>
+                    <div class="dropdown-menu dropdown-menu-lg">
+                        <div class="dropdown-section">
+                            <div class="dropdown-section-title">团队协作</div>
+                            <div class="dropdown-grid">
+                                <a href="products/project.html" class="dropdown-product">
+                                    <div class="dropdown-product-icon" style="background: #e8f4ff;">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="#2b7de9">
+                                            <rect x="3" y="3" width="7" height="7" rx="1"/>
+                                            <rect x="14" y="3" width="7" height="7" rx="1"/>
+                                            <rect x="3" y="14" width="7" height="7" rx="1"/>
+                                            <rect x="14" y="14" width="7" height="7" rx="1"/>
+                                        </svg>
+                                    </div>
+                                    <div class="dropdown-product-info">
+                                        <div class="dropdown-product-name">项目协同</div>
+                                        <div class="dropdown-product-desc">敏捷/瀑布项目管理</div>
+                                    </div>
+                                </a>
+                                <a href="products/wiki.html" class="dropdown-product">
+                                    <div class="dropdown-product-icon" style="background: #fdf4ff;">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="#a855f7">
+                                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20V22H6.5A2.5 2.5 0 0 1 4 19.5V4.5A2.5 2.5 0 0 1 6.5 2Z"/>
+                                        </svg>
+                                    </div>
+                                    <div class="dropdown-product-info">
+                                        <div class="dropdown-product-name">知识管理</div>
+                                        <div class="dropdown-product-desc">Wiki文档与知识库</div>
+                                    </div>
+                                </a>
+                                <a href="products/metrics.html" class="dropdown-product">
+                                    <div class="dropdown-product-icon" style="background: #f0fdf4;">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="#22c55e">
+                                            <path d="M18 20V10M12 20V4M6 20V14"/>
+                                        </svg>
+                                    </div>
+                                    <div class="dropdown-product-info">
+                                        <div class="dropdown-product-name">效能洞察</div>
+                                        <div class="dropdown-product-desc">团队效能度量分析</div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="navbar-item dropdown">
+                    <span>设计</span>
+                    <svg class="dropdown-arrow" width="12" height="12" viewBox="0 0 12 12">
+                        <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    </svg>
+                    <div class="dropdown-menu">
+                        <a href="design-philosophy.html" class="dropdown-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 16v-4M12 8h.01"/>
+                            </svg>
+                            设计理念
+                        </a>
+                        <a href="design.html" class="dropdown-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="7" height="7"/>
+                                <rect x="14" y="3" width="7" height="7"/>
+                                <rect x="14" y="14" width="7" height="7"/>
+                                <rect x="3" y="14" width="7" height="7"/>
+                            </svg>
+                            组件库
+                        </a>
+                    </div>
+                </div>
+                <a href="pricing.html" class="navbar-item">价格</a>
+                <div class="navbar-item dropdown">
+                    <span>支持</span>
+                    <svg class="dropdown-arrow" width="12" height="12" viewBox="0 0 12 12">
+                        <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    </svg>
+                    <div class="dropdown-menu">
+                        <a href="support/docs.html" class="dropdown-item">帮助文档</a>
+                        <a href="support/api.html" class="dropdown-item">API文档</a>
+                        <a href="support/changelog.html" class="dropdown-item">更新日志</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="support/contact.html" class="dropdown-item">联系我们</a>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="navbar-actions">
+                <a href="login.html" class="btn btn-ghost">登录</a>
+                <a href="register.html" class="btn btn-primary">免费试用</a>
+                <button class="navbar-toggle hide-desktop" onclick="toggleMobileMenu()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 6H21M3 12H21M3 18H21" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 移动端菜单 -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <span class="navbar-title">摩塔 Mota</span>
+            <button class="mobile-menu-close" onclick="toggleMobileMenu()">×</button>
+        </div>
+        <nav class="mobile-menu-nav">
+            <a href="products/project.html">项目协同</a>
+            <a href="products/wiki.html">知识管理</a>
+            <a href="products/metrics.html">效能洞察</a>
+            <a href="design-philosophy.html">设计理念</a>
+            <a href="design.html">组件库</a>
+            <a href="pricing.html">价格</a>
+            <a href="support/docs.html">帮助文档</a>
+        </nav>
+        <div class="mobile-menu-actions">
+            <a href="login.html" class="btn btn-secondary btn-block">登录</a>
+            <a href="register.html" class="btn btn-primary btn-block">免费试用</a>
+        </div>
+    </div>
+
+    <!-- Hero区域 -->
+    <section class="hero">
+        <div class="hero-bg">
+            <div class="hero-bg-gradient"></div>
+            <div class="hero-bg-pattern"></div>
+        </div>
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    为团队打造的<br>
+                    <span class="hero-title-highlight">一站式</span>协作平台
+                </h1>
+                <p class="hero-subtitle">
+                    提供项目管理、任务管理、知识管理、效能洞察等全方位团队协作功能，让团队协作更高效，助力企业提升管理效能
+                </p>
+                <div class="hero-actions">
+                    <a href="register.html" class="btn btn-primary btn-lg">
+                        <span>预约演示</span>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="2" fill="none"/>
+                        </svg>
+                    </a>
+                    <a href="support/docs.html" class="btn btn-secondary btn-lg">帮助文档</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <div class="hero-stat-value">3,000,000+</div>
+                        <div class="hero-stat-label">开发者</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-value">50,000+</div>
+                        <div class="hero-stat-label">企业</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-value">100+</div>
+                        <div class="hero-stat-label">中国500强企业</div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="images/hero-illustration.svg" alt="摩塔Mota平台示意图">
+            </div>
+        </div>
+    </section>
+
+    <!-- 一站式工作流 -->
+    <section class="workflow-section">
+        <div class="workflow-header">
+            <h2 class="section-title">一站式<span class="text-primary">团队协作</span>工作流</h2>
+            <p class="section-subtitle">可视化、标准化、高效化</p>
+        </div>
+        <div class="container">
+            <div class="workflow-grid">
+                <a href="products/project.html" class="workflow-card">
+                    <div class="workflow-card-icon">
+                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                            <rect width="48" height="48" rx="12" fill="#e8f4ff"/>
+                            <rect x="12" y="12" width="10" height="10" rx="2" fill="#2b7de9"/>
+                            <rect x="26" y="12" width="10" height="10" rx="2" fill="#2b7de9"/>
+                            <rect x="12" y="26" width="10" height="10" rx="2" fill="#2b7de9"/>
+                            <rect x="26" y="26" width="10" height="10" rx="2" fill="#2b7de9"/>
+                        </svg>
+                    </div>
+                    <h3 class="workflow-card-title">项目协同</h3>
+                    <p class="workflow-card-desc">在这里对产品进行构想和规划，规范每一个需求、任务的流转，让团队开启高效协同。</p>
+                    <span class="workflow-card-link">
+                        进一步了解
+                        <svg width="16" height="16" viewBox="0 0 16 16">
+                            <path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="2" fill="none"/>
+                        </svg>
+                    </span>
+                </a>
+                <a href="products/wiki.html" class="workflow-card">
+                    <div class="workflow-card-icon">
+                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                            <rect width="48" height="48" rx="12" fill="#fdf4ff"/>
+                            <path d="M12 36.5C12 34.5 13.5 33 15.5 33H36M15.5 10H36V38H15.5C13.5 38 12 36.5 12 34.5V13.5C12 11.5 13.5 10 15.5 10Z" stroke="#a855f7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="workflow-card-title">知识管理</h3>
+                    <p class="workflow-card-desc">Wiki文档与知识库，沉淀团队知识资产，促进知识共享与传承。</p>
+                    <span class="workflow-card-link">
+                        进一步了解
+                        <svg width="16" height="16" viewBox="0 0 16 16">
+                            <path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="2" fill="none"/>
+                        </svg>
+                    </span>
+                </a>
+                <a href="products/metrics.html" class="workflow-card">
+                    <div class="workflow-card-icon">
+                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                            <rect width="48" height="48" rx="12" fill="#f0fdf4"/>
+                            <path d="M32 34V22M24 34V14M16 34V26" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="workflow-card-title">效能洞察</h3>
+                    <p class="workflow-card-desc">多维度团队效能度量，数据驱动持续改进，提升团队整体效能。</p>
+                    <span class="workflow-card-link">
+                        进一步了解
+                        <svg width="16" height="16" viewBox="0 0 16 16">
+                            <path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="2" fill="none"/>
+                        </svg>
+                    </span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 角色价值 -->
+    <section class="roles-section">
+        <div class="container">
+            <h2 class="section-title text-center">多角色无缝协作，打破协同边界</h2>
+            <div class="roles-grid">
+                <div class="role-card role-card-primary">
+                    <div class="role-card-header">
+                        <div class="role-avatar">
+                            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                                <circle cx="24" cy="20" r="8" fill="white"/>
+                                <path d="M12 40C12 33.4 17.4 28 24 28C30.6 28 36 33.4 36 40" stroke="white" stroke-width="3"/>
+                            </svg>
+                        </div>
+                        <h3 class="role-title">企业管理者</h3>
+                    </div>
+                    <div class="role-subtitle">组织与个人目标轻松对齐</div>
+                    <ul class="role-features">
+                        <li>高效制定组织战略目标，分解至团队、个人</li>
+                        <li>将个人目标分解为任务，目标执行进度实时对齐</li>
+                        <li>通过评价回顾，复盘目标执行路径中的不足</li>
+                    </ul>
+                </div>
+                <div class="role-card">
+                    <div class="role-card-header">
+                        <div class="role-avatar role-avatar-secondary">
+                            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                                <rect x="10" y="14" width="28" height="20" rx="2" stroke="#2b7de9" stroke-width="2"/>
+                                <path d="M10 20H38" stroke="#2b7de9" stroke-width="2"/>
+                                <circle cx="16" cy="28" r="2" fill="#2b7de9"/>
+                            </svg>
+                        </div>
+                        <h3 class="role-title">项目管理者</h3>
+                    </div>
+                    <div class="role-subtitle">项目进度全局管控</div>
+                    <ul class="role-features">
+                        <li>规划项目进度，项目风险跟踪管理</li>
+                        <li>支持甘特图、工时燃尽图等多维度项目视角</li>
+                        <li>通过故事点和工时估算资源投入</li>
+                    </ul>
+                </div>
+                <div class="role-card">
+                    <div class="role-card-header">
+                        <div class="role-avatar role-avatar-secondary">
+                            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                                <path d="M24 10V38M10 24H38" stroke="#2b7de9" stroke-width="2"/>
+                                <circle cx="24" cy="24" r="14" stroke="#2b7de9" stroke-width="2"/>
+                            </svg>
+                        </div>
+                        <h3 class="role-title">产品经理</h3>
+                    </div>
+                    <div class="role-subtitle">产品需求高效管理</div>
+                    <ul class="role-features">
+                        <li>在「Backlog」中管理产品构想与需求</li>
+                        <li>按照史诗、用户故事等粒度拆分需求</li>
+                        <li>通过 Wiki 编写、归档、共享产品文档</li>
+                    </ul>
+                </div>
+                <div class="role-card">
+                    <div class="role-card-header">
+                        <div class="role-avatar role-avatar-secondary">
+                            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                                <path d="M16 14L10 24L16 34" stroke="#2b7de9" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M32 14L38 24L32 34" stroke="#2b7de9" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M28 10L20 38" stroke="#2b7de9" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <h3 class="role-title">开发工程师</h3>
+                    </div>
+                    <div class="role-subtitle">开发任务清晰明确</div>
+                    <ul class="role-features">
+                        <li>可视化看板直观展示需求排期、进度</li>
+                        <li>通过高亮标签快速识别需求进度风险</li>
+                        <li>任务分配与协作一目了然</li>
+                    </ul>
+                </div>
+                <div class="role-card">
+                    <div class="role-card-header">
+                        <div class="role-avatar role-avatar-secondary">
+                            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                                <path d="M32 34V22M24 34V14M16 34V26" stroke="#2b7de9" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <h3 class="role-title">团队负责人</h3>
+                    </div>
+                    <div class="role-subtitle">团队效能全面洞察</div>
+                    <ul class="role-features">
+                        <li>多维度团队效能数据分析</li>
+                        <li>识别团队瓶颈与改进点</li>
+                        <li>数据驱动持续优化</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 核心优势展示 -->
+    <section class="pipeline-section">
+        <div class="container">
+            <div class="pipeline-content">
+                <div class="pipeline-info">
+                    <h2 class="section-title">高效团队协作流程</h2>
+                    <p class="section-desc">从需求规划到交付验收，全流程可视化管理，提升团队协作效率</p>
+                    <ul class="pipeline-features">
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="#22c55e">
+                                <circle cx="10" cy="10" r="10"/>
+                                <path d="M6 10L9 13L14 7" stroke="white" stroke-width="2"/>
+                            </svg>
+                            <span>需求规划与任务分解</span>
+                        </li>
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="#22c55e">
+                                <circle cx="10" cy="10" r="10"/>
+                                <path d="M6 10L9 13L14 7" stroke="white" stroke-width="2"/>
+                            </svg>
+                            <span>迭代管理与进度跟踪</span>
+                        </li>
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="#22c55e">
+                                <circle cx="10" cy="10" r="10"/>
+                                <path d="M6 10L9 13L14 7" stroke="white" stroke-width="2"/>
+                            </svg>
+                            <span>知识沉淀与团队成长</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="pipeline-demo">
+                    <div class="pipeline-stages">
+                        <div class="pipeline-stage pipeline-stage-success">
+                            <div class="pipeline-stage-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                    <rect x="3" y="3" width="7" height="7" rx="1"/>
+                                    <rect x="14" y="3" width="7" height="7" rx="1"/>
+                                    <rect x="3" y="14" width="7" height="7" rx="1"/>
+                                    <rect x="14" y="14" width="7" height="7" rx="1"/>
+                                </svg>
+                            </div>
+                            <div class="pipeline-stage-name">需求规划</div>
+                            <div class="pipeline-stage-time">已完成</div>
+                        </div>
+                        <div class="pipeline-connector"></div>
+                        <div class="pipeline-stage pipeline-stage-success">
+                            <div class="pipeline-stage-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                    <polyline points="23 4 23 10 17 10"/>
+                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                                </svg>
+                            </div>
+                            <div class="pipeline-stage-name">迭代开发</div>
+                            <div class="pipeline-stage-time">已完成</div>
+                        </div>
+                        <div class="pipeline-connector"></div>
+                        <div class="pipeline-stage pipeline-stage-success">
+                            <div class="pipeline-stage-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                    <path d="M9 11L12 14L22 4M21 12V19C21 20.1 20.1 21 19 21H5C3.9 21 3 20.1 3 19V5C3 3.9 3.9 3 5 3H16"/>
+                                </svg>
+                            </div>
+                            <div class="pipeline-stage-name">测试验收</div>
+                            <div class="pipeline-stage-time">已完成</div>
+                        </div>
+                        <div class="pipeline-connector"></div>
+                        <div class="pipeline-stage pipeline-stage-running">
+                            <div class="pipeline-stage-icon">
+                                <div class="loading"></div>
+                            </div>
+                            <div class="pipeline-stage-name">交付上线</div>
+                            <div class="pipeline-stage-time">进行中...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 客户案例 -->
+    <section class="customers-section">
+        <div class="container">
+            <h2 class="section-title text-center">受到众多企业信赖</h2>
+            <p class="section-subtitle text-center">超过 50,000 家企业选择摩塔 Mota</p>
+            <div class="customers-logos">
+                <div class="customer-logo">
+                    <div class="customer-logo-placeholder">企业A</div>
+                </div>
+                <div class="customer-logo">
+                    <div class="customer-logo-placeholder">企业B</div>
+                </div>
+                <div class="customer-logo">
+                    <div class="customer-logo-placeholder">企业C</div>
+                </div>
+                <div class="customer-logo">
+                    <div class="customer-logo-placeholder">企业D</div>
+                </div>
+                <div class="customer-logo">
+                    <div class="customer-logo-placeholder">企业E</div>
+                </div>
+                <div class="customer-logo">
+                    <div class="customer-logo-placeholder">企业F</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA区域 -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <div class="cta-text">
+                    <h2 class="cta-title">现在开始，<br>在摩塔软件工厂开启<br>数字化变革</h2>
+                    <div class="cta-actions">
+                        <a href="register.html" class="btn btn-primary btn-lg">免费试用</a>
+                        <a href="contact.html" class="btn btn-secondary btn-lg">联系销售</a>
+                    </div>
+                </div>
+                <div class="cta-image">
+                    <img src="images/cta-illustration.svg" alt="开始使用摩塔">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-main">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <svg class="navbar-logo" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="20" cy="20" r="18" fill="url(#footer-logo-gradient)"/>
+                            <path d="M12 20L18 26L28 14" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                            <defs>
+                                <linearGradient id="footer-logo-gradient" x1="0" y1="0" x2="40" y2="40">
+                                    <stop offset="0%" stop-color="#2b7de9"/>
+                                    <stop offset="100%" stop-color="#1a6dd6"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <span>摩塔 Mota</span>
+                    </div>
+                    <p class="footer-desc">一站式团队协作管理平台</p>
+                    <div class="footer-contact">
+                        <p>support@mota.example.com</p>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4 class="footer-column-title">产品</h4>
+                        <ul>
+                            <li><a href="products/project.html">项目协同</a></li>
+                            <li><a href="products/wiki.html">知识管理</a></li>
+                            <li><a href="products/metrics.html">效能洞察</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4 class="footer-column-title">解决方案</h4>
+                        <ul>
+                            <li><a href="solutions/agile.html">敏捷研发</a></li>
+                            <li><a href="solutions/traditional.html">传统研发</a></li>
+                            <li><a href="solutions/team.html">团队协作</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4 class="footer-column-title">设计资源</h4>
+                        <ul>
+                            <li><a href="design-philosophy.html">设计理念</a></li>
+                            <li><a href="design.html">组件库</a></li>
+                            <li><a href="support/docs.html">帮助中心</a></li>
+                            <li><a href="support/api.html">API文档</a></li>
+                            <li><a href="support/changelog.html">更新日志</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4 class="footer-column-title">公司</h4>
+                        <ul>
+                            <li><a href="about.html">关于我们</a></li>
+                            <li><a href="careers.html">加入我们</a></li>
+                            <li><a href="contact.html">联系我们</a></li>
+                            <li><a href="privacy.html">隐私政策</a></li>
+                            <li><a href="terms.html">服务协议</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="footer-copyright">© 2024 摩塔 Mota. All rights reserved.</p>
+                <div class="footer-social">
+                    <a href="#" class="footer-social-link" title="微博">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                            <circle cx="10" cy="10" r="8"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="footer-social-link" title="微信">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                            <circle cx="10" cy="10" r="8"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="footer-social-link" title="GitHub">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                            <circle cx="10" cy="10" r="8"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 在线客服按钮由 home.js 动态创建 -->
+
+    <!-- 首页 JavaScript -->
+    <script src="js/home.js"></script>
+</body>
+</html>

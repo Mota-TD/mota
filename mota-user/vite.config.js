@@ -1,0 +1,28 @@
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
+// https://vitejs.dev/config/
+export default defineConfig({
+    plugins: [react()],
+    resolve: {
+        alias: {
+            '@': path.resolve(__dirname, './src'),
+        },
+    },
+    server: {
+        port: 3000,
+        open: true,
+    },
+    css: {
+        preprocessorOptions: {
+            less: {
+                javascriptEnabled: true,
+                modifyVars: {
+                    // Ant Design 主题定制
+                    '@primary-color': '#2b7de9',
+                    '@border-radius-base': '8px',
+                },
+            },
+        },
+    },
+});

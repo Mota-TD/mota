@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mota UI 组件库 - 摩塔</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/design.css">
+    <style>
+        /* 组件库文档样式 */
+        :root {
+            --mota-primary: #2b7de9;
+            --mota-primary-light: rgba(43, 125, 233, 0.1);
+            --mota-primary-dark: #1a5fb4;
+            --mota-success: #52c41a;
+            --mota-success-light: rgba(82, 196, 26, 0.1);
+            --mota-warning: #faad14;
+            --mota-warning-light: rgba(250, 173, 20, 0.1);
+            --mota-error: #ff4d4f;
+            --mota-error-light: rgba(255, 77, 79, 0.1);
+            --mota-info: #1890ff;
+            --mota-info-light: rgba(24, 144, 255, 0.1);
+            --mota-text-primary: #1f2937;
+            --mota-text-secondary: #6b7280;
+            --mota-text-tertiary: #9ca3af;
+            --mota-border: #e5e7eb;
+            --mota-bg-white: #ffffff;
+            --mota-bg-light: #f9fafb;
+            --mota-bg-hover: #f3f4f6;
+            --mota-radius-sm: 4px;
+            --mota-radius-md: 8px;
+            --mota-radius-lg: 12px;
+            --mota-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --mota-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --mota-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--mota-bg-light);
+            color: var(--mota-text-primary);
+            line-height: 1.6;
+        }
+
+        .design-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏 */
+        .design-sidebar {
+            width: 280px;
+            background: var(--mota-bg-white);
+            border-right: 1px solid var(--mota-border);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .design-sidebar__header {
+            padding: 24px;
+            border-bottom: 1px solid var(--mota-border);
+        }
+
+        .design-sidebar__logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--mota-text-primary);
+            text-decoration: none;
+        }
+
+        .design-sidebar__logo img {
+            height: 32px;
+        }
+
+        .design-sidebar__version {
+            display: inline-block;
+            padding: 2px 8px;
+            background: var(--mota-primary-light);
+            color: var(--mota-primary);
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 4px;
+            margin-left: 8px;
+        }
+
+        .design-sidebar__nav {
+            padding: 16px 0;
+        }
+
+        .design-nav-group {
+            margin-bottom: 8px;
+        }
+
+        .design-nav-group__title {
+            padding: 8px 24px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--mota-text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .design-nav-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 24px;
+            color: var(--mota-text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .design-nav-item:hover {
+            background: var(--mota-bg-hover);
+            color: var(--mota-text-primary);
+        }
+
+        .design-nav-item.is-active {
+            background: var(--mota-primary-light);
+            color: var(--mota-primary);
+            font-weight: 500;
+        }
+
+        /* 主内容区 */
+        .design-main {
+            flex: 1;
+            margin-left: 280px;
+            padding: 32px 48px;
+            max-width: 1200px;
+        }
+
+        .design-header {
+            margin-bottom: 48px;
+        }
+
+        .design-header__title {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--mota-text-primary);
+            margin-bottom: 16px;
+        }
+
+        .design-header__desc {
+            font-size: 18px;
+            color: var(--mota-text-secondary);
+            max-width: 600px;
+        }
+
+        .design-header__badges {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .design-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--mota-bg-white);
+            border: 1px solid var(--mota-border);
+            border-radius: 20px;
+            font-size: 13px;
+            color: var(--mota-text-secondary);
+        }
+
+        .design-badge svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* 组件区块 */
+        .design-section {
+            margin-bottom: 64px;
+        }
+
+        .design-section__title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--mota-text-primary);
+            margin-bottom: 8px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--mota-border);
+        }
+
+        .design-section__desc {
+            font-size: 15px;
+            color: var(--mota-text-secondary);
+            margin-bottom: 24px;
+        }
+
+        /* 组件展示卡片 */
+        .design-demo {
+            background: var(--mota-bg-white);
+            border: 1px solid var(--mota-border);
+            border-radius: var(--mota-radius-lg);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .design-demo__preview {
+            padding: 32px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .design-demo__preview--vertical {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .design-demo__code {
+            background: #1e1e1e;
+            padding: 20px 24px;
+            border-top: 1px solid var(--mota-border);
+            overflow-x: auto;
+        }
+
+        .design-demo__code pre {
+            margin: 0;
+            font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #d4d4d4;
+        }
+
+        .design-demo__code .keyword { color: #569cd6; }
+        .design-demo__code .string { color: #ce9178; }
+        .design-demo__code .tag { color: #4ec9b0; }
+        .design-demo__code .attr { color: #9cdcfe; }
+        .design-demo__code .comment { color: #6a9955; }
+
+        /* 按钮组件 */
+        .mota-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            border-radius: var(--mota-radius-md);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .mota-btn--primary {
+            background: var(--mota-primary);
+            color: white;
+        }
+
+        .mota-btn--primary:hover {
+            background: var(--mota-primary-dark);
+        }
+
+        .mota-btn--secondary {
+            background: var(--mota-bg-light);
+            color: var(--mota-text-primary);
+            border: 1px solid var(--mota-border);
+        }
+
+        .mota-btn--secondary:hover {
+            background: var(--mota-bg-hover);
+        }
+
+        .mota-btn--outline {
+            background: transparent;
+            color: var(--mota-primary);
+            border: 1px solid var(--mota-primary);
+        }
+
+        .mota-btn--outline:hover {
+            background: var(--mota-primary-light);
+        }
+
+        .mota-btn--ghost {
+            background: transparent;
+            color: var(--mota-text-primary);
+        }
+
+        .mota-btn--ghost:hover {
+            background: var(--mota-bg-hover);
+        }
+
+        .mota-btn--danger {
+            background: var(--mota-error);
+            color: white;
+        }
+
+        .mota-btn--danger:hover {
+            background: #e04345;
+        }
+
+        .mota-btn--success {
+            background: var(--mota-success);
+            color: white;
+        }
+
+        .mota-btn--warning {
+            background: var(--mota-warning);
+            color: white;
+        }
+
+        .mota-btn--small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .mota-btn--large {
+            padding: 14px 28px;
+            font-size: 16px;
+        }
+
+        .mota-btn--round {
+            border-radius: 50px;
+        }
+
+        .mota-btn--block {
+            width: 100%;
+        }
+
+        .mota-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 输入框组件 */
+        .mota-input {
+            width: 240px;
+            padding: 10px 14px;
+            font-size: 14px;
+            border: 1px solid var(--mota-border);
+            border-radius: var(--mota-radius-md);
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .mota-input:focus {
+            border-color: var(--mota-primary);
+            box-shadow: 0 0 0 3px var(--mota-primary-light);
+        }
+
+        .mota-input--error {
+            border-color: var(--mota-error);
+        }
+
+        .mota-input--error:focus {
+            box-shadow: 0 0 0 3px var(--mota-error-light);
+        }
+
+        /* 标签组件 */
+        .mota-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 4px;
+            background: var(--mota-bg-light);
+            color: var(--mota-text-secondary);
+        }
+
+        .mota-tag--primary {
+            background: var(--mota-primary-light);
+            color: var(--mota-primary);
+        }
+
+        .mota-tag--success {
+            background: var(--mota-success-light);
+            color: var(--mota-success);
+        }
+
+        .mota-tag--warning {
+            background: var(--mota-warning-light);
+            color: var(--mota-warning);
+        }
+
+        .mota-tag--error {
+            background: var(--mota-error-light);
+            color: var(--mota-error);
+        }
+
+        /* 卡片组件 */
+        .mota-card {
+            background: var(--mota-bg-white);
+            border: 1px solid var(--mota-border);
+            border-radius: var(--mota-radius-lg);
+            overflow: hidden;
+        }
+
+        .mota-card__header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--mota-border);
+        }
+
+        .mota-card__title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--mota-text-primary);
+        }
+
+        .mota-card__body {
+            padding: 20px;
+        }
+
+        /* 头像组件 */
+        .mota-avatar {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--mota-primary);
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .mota-avatar--small {
+            width: 32px;
+            height: 32px;
+            font-size: 14px;
+        }
+
+        .mota-avatar--large {
+            width: 48px;
+            height: 48px;
+            font-size: 20px;
+        }
+
+        .mota-avatar--square {
+            border-radius: var(--mota-radius-md);
+        }
+
+        /* 徽章组件 */
+        .mota-badge {
+            position: relative;
+            display: inline-flex;
+        }
+
+        .mota-badge__content {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 6px;
+            background: var(--mota-error);
+            color: white;
+            font-size: 11px;
+            font-weight: 500;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mota-badge__content--dot {
+            min-width: 8px;
+            width: 8px;
+            height: 8px;
+            padding: 0;
+        }
+
+        /* 开关组件 */
+        .mota-switch {
+            position: relative;
+            display: inline-flex;
+            width: 44px;
+            height: 24px;
+            background: var(--mota-border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mota-switch.is-checked {
+            background: var(--mota-primary);
+        }
+
+        .mota-switch__thumb {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.2s;
+            box-shadow: var(--mota-shadow-sm);
+        }
+
+        .mota-switch.is-checked .mota-switch__thumb {
+            left: 22px;
+        }
+
+        /* 进度条组件 */
+        .mota-progress {
+            width: 100%;
+        }
+
+        .mota-progress__track {
+            height: 8px;
+            background: var(--mota-bg-light);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .mota-progress__bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--mota-primary), #5ba3f5);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        /* 警告提示组件 */
+        .mota-alert {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: var(--mota-radius-md);
+        }
+
+        .mota-alert--info {
+            background: var(--mota-info-light);
+            color: var(--mota-info);
+        }
+
+        .mota-alert--success {
+            background: var(--mota-success-light);
+            color: var(--mota-success);
+        }
+
+        .mota-alert--warning {
+            background: var(--mota-warning-light);
+            color: var(--mota-warning);
+        }
+
+        .mota-alert--error {
+            background: var(--mota-error-light);
+            color: var(--mota-error);
+        }
+
+        .mota-alert__icon {
+            flex-shrink: 0;
+        }
+
+        .mota-alert__icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* 安装指南 */
+        .install-guide {
+            background: var(--mota-bg-white);
+            border: 1px solid var(--mota-border);
+            border-radius: var(--mota-radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .install-guide__title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .install-guide__code {
+            background: #1e1e1e;
+            padding: 16px 20px;
+            border-radius: var(--mota-radius-md);
+            font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+            font-size: 14px;
+            color: #d4d4d4;
+            overflow-x: auto;
+        }
+
+        .install-guide__code .prompt {
+            color: #6a9955;
+        }
+
+        /* 特性列表 */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .feature-card {
+            background: var(--mota-bg-white);
+            border: 1px solid var(--mota-border);
+            border-radius: var(--mota-radius-lg);
+            padding: 24px;
+            transition: all 0.2s;
+        }
+
+        .feature-card:hover {
+            box-shadow: var(--mota-shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .feature-card__icon {
+            width: 48px;
+            height: 48px;
+            background: var(--mota-primary-light);
+            border-radius: var(--mota-radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .feature-card__icon svg {
+            width: 24px;
+            height: 24px;
+            color: var(--mota-primary);
+        }
+
+        .feature-card__title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .feature-card__desc {
+            font-size: 14px;
+            color: var(--mota-text-secondary);
+            line-height: 1.6;
+        }
+
+        /* 颜色展示 */
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+        }
+
+        .color-item {
+            background: var(--mota-bg-white);
+            border: 1px solid var(--mota-border);
+            border-radius: var(--mota-radius-md);
+            overflow: hidden;
+        }
+
+        .color-item__preview {
+            height: 80px;
+        }
+
+        .color-item__info {
+            padding: 12px;
+        }
+
+        .color-item__name {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .color-item__value {
+            font-size: 12px;
+            color: var(--mota-text-tertiary);
+            font-family: monospace;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .design-sidebar {
+                display: none;
+            }
+
+            .design-main {
+                margin-left: 0;
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="design-layout">
+        <!-- 侧边栏 -->
+        <aside class="design-sidebar">
+            <div class="design-sidebar__header">
+                <a href="index.html" class="design-sidebar__logo">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <rect width="32" height="32" rx="8" fill="#2b7de9"/>
+                        <path d="M8 12L16 8L24 12V20L16 24L8 20V12Z" stroke="white" stroke-width="2" fill="none"/>
+                        <circle cx="16" cy="16" r="3" fill="white"/>
+                    </svg>
+                    Mota UI
+                    <span class="design-sidebar__version">v1.0</span>
+                </a>
+            </div>
+            <nav class="design-sidebar__nav">
+                <div class="design-nav-group">
+                    <div class="design-nav-group__title">导航</div>
+                    <a href="index.html" class="design-nav-item">← 返回官网</a>
+                    <a href="design-philosophy.html" class="design-nav-item">设计理念</a>
+                </div>
+                <div class="design-nav-group">
+                    <div class="design-nav-group__title">开始使用</div>
+                    <a href="#overview" class="design-nav-item is-active">概述</a>
+                    <a href="#install" class="design-nav-item">安装</a>
+                    <a href="#quickstart" class="design-nav-item">快速开始</a>
+                </div>
+                <div class="design-nav-group">
+                    <div class="design-nav-group__title">设计规范</div>
+                    <a href="#colors" class="design-nav-item">色彩</a>
+                    <a href="#typography" class="design-nav-item">字体</a>
+                    <a href="#spacing" class="design-nav-item">间距</a>
+                </div>
+                <div class="design-nav-group">
+                    <div class="design-nav-group__title">基础组件</div>
+                    <a href="#button" class="design-nav-item">Button 按钮</a>
+                    <a href="#input" class="design-nav-item">Input 输入框</a>
+                    <a href="#select" class="design-nav-item">Select 选择器</a>
+                    <a href="#checkbox" class="design-nav-item">Checkbox 复选框</a>
+                    <a href="#switch" class="design-nav-item">Switch 开关</a>
+                </div>
+                <div class="design-nav-group">
+                    <div class="design-nav-group__title">数据展示</div>
+                    <a href="#card" class="design-nav-item">Card 卡片</a>
+                    <a href="#table" class="design-nav-item">Table 表格</a>
+                    <a href="#tag" class="design-nav-item">Tag 标签</a>
+                    <a href="#avatar" class="design-nav-item">Avatar 头像</a>
+                    <a href="#badge" class="design-nav-item">Badge 徽章</a>
+                </div>
+                <div class="design-nav-group">
+                    <div class="design-nav-group__title">反馈组件</div>
+                    <a href="#modal" class="design-nav-item">Modal 弹窗</a>
+                    <a href="#alert" class="design-nav-item">Alert 警告</a>
+                    <a href="#progress" class="design-nav-item">Progress 进度条</a>
+                </div>
+                <div class="design-nav-group">
+                    <div class="design-nav-group__title">导航组件</div>
+                    <a href="#menu" class="design-nav-item">Menu 菜单</a>
+                    <a href="#tabs" class="design-nav-item">Tabs 标签页</a>
+                    <a href="#breadcrumb" class="design-nav-item">Breadcrumb 面包屑</a>
+                    <a href="#pagination" class="design-nav-item">Pagination 分页</a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="design-main">
+            <!-- 头部 -->
+            <header class="design-header" id="overview">
+                <h1 class="design-header__title">Mota UI 组件库</h1>
+                <p class="design-header__desc">
+                    一套现代化的企业级 UI 组件库，基于摩塔设计规范，支持 React 和 Vue 框架，
+                    助力团队快速构建高质量的研发协同平台。
+                </p>
+                <div class="design-header__badges">
+                    <span class="design-badge">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </svg>
+                        50+ 组件
+                    </span>
+                    <span class="design-badge">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 6v6l4 2"/>
+                        </svg>
+                        TypeScript
+                    </span>
+                    <span class="design-badge">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                            <path d="M22 6l-10 7L2 6"/>
+                        </svg>
+                        React & Vue
+                    </span>
+                    <span class="design-badge">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 3v18M3 12h18"/>
+                        </svg>
+                        MIT License
+                    </span>
+                </div>
+            </header>
+
+            <!-- 特性 -->
+            <section class="design-section">
+                <h2 class="design-section__title">核心特性</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-card__icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature-card__title">丰富的组件</h3>
+                        <p class="feature-card__desc">提供 50+ 高质量组件，覆盖表单、数据展示、反馈、导航等常见场景。</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-card__icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <path d="M3 9h18M9 21V9"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature-card__title">统一设计语言</h3>
+                        <p class="feature-card__desc">基于摩塔设计规范，提供一致的视觉体验和交互模式。</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-card__icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2v20M2 12h20"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature-card__title">框架无关</h3>
+                        <p class="feature-card__desc">同时支持 React 和 Vue 框架，CSS 样式可独立使用。</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-card__icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 6v6l4 2"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature-card__title">TypeScript 支持</h3>
+                        <p class="feature-card__desc">完整的类型定义，提供良好的开发体验和代码提示。</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-card__icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature-card__title">暗色主题</h3>
+                        <p class="feature-card__desc">内置暗色主题支持，一键切换明暗模式。</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-card__icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                <path d="M22 6l-10 7L2 6"/>
+                            </svg>
+                        </div>
+                        <h3 class="feature-card__title">响应式设计</h3>
+                        <p class="feature-card__desc">组件自适应不同屏幕尺寸，支持移动端和桌面端。</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 安装 -->
+            <section class="design-section" id="install">
+                <h2 class="design-section__title">安装</h2>
+                <div class="install-guide">
+                    <h3 class="install-guide__title">使用 npm</h3>
+                    <div class="install-guide__code">
+                        <span class="prompt">$</span> npm install @mota/ui
+                    </div>
+                </div>
+                <div class="install-guide">
+                    <h3 class="install-guide__title">使用 yarn</h3>
+                    <div class="install-guide__code">
+                        <span class="prompt">$</span> yarn add @mota/ui
+                    </div>
+                </div>
+                <div class="install-guide">
+                    <h3 class="install-guide__title">使用 pnpm</h3>
+                    <div class="install-guide__code">
+                        <span class="prompt">$</span> pnpm add @mota/ui
+                    </div>
+                </div>
+            </section>
+
+            <!-- 快速开始 -->
+            <section class="design-section" id="quickstart">
+                <h2 class="design-section__title">快速开始</h2>
+                <div class="install-guide">
+                    <h3 class="install-guide__title">React 项目</h3>
+                    <div class="install-guide__code">
+<pre><span class="keyword">import</span> <span class="string">'@mota/ui/dist/index.css'</span>;
+<span class="keyword">import</span> { Button, Input, Card } <span class="keyword">from</span> <span class="string">'@mota/ui/react'</span>;
+
+<span class="keyword">function</span> <span class="tag">App</span>() {
+  <span class="keyword">return</span> (
+    &lt;<span class="tag">Card</span> <span class="attr">title</span>=<span class="string">"欢迎使用 Mota UI"</span>&gt;
+      &lt;<span class="tag">Input</span> <span class="attr">placeholder</span>=<span class="string">"请输入内容"</span> /&gt;
+      &lt;<span class="tag">Button</span> <span class="attr">variant</span>=<span class="string">"primary"</span>&gt;提交&lt;/<span class="tag">Button</span>&gt;
+    &lt;/<span class="tag">Card</span>&gt;
+  );
+}</pre>
+                    </div>
+                </div>
+                <div class="install-guide">
+                    <h3 class="install-guide__title">Vue 项目</h3>
+                    <div class="install-guide__code">
+<pre><span class="keyword">import</span> <span class="string">'@mota/ui/dist/index.css'</span>;
+<span class="keyword">import</span> MotaUI <span class="keyword">from</span> <span class="string">'@mota/ui/vue'</span>;
+
+<span class="keyword">const</span> app = createApp(App);
+app.use(MotaUI);
+app.mount(<span class="string">'#app'</span>);
+
+<span class="comment">// 在模板中使用</span>
+&lt;<span class="tag">template</span>&gt;
+  &lt;<span class="tag">m-card</span> <span class="attr">title</span>=<span class="string">"欢迎使用 Mota UI"</span>&gt;
+    &lt;<span class="tag">m-input</span> <span class="attr">placeholder</span>=<span class="string">"请输入内容"</span> /&gt;
+    &lt;<span class="tag">m-button</span> <span class="attr">variant</span>=<span class="string">"primary"</span>&gt;提交&lt;/<span class="tag">m-button</span>&gt;
+  &lt;/<span class="tag">m-card</span>&gt;
+&lt;/<span class="tag">template</span>&gt;</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 色彩 -->
+            <section class="design-section" id="colors">
+                <h2 class="design-section__title">色彩</h2>
+                <p class="design-section__desc">摩塔设计系统的色彩体系，包含主色、功能色和中性色。</p>
+                <div class="color-grid">
+                    <div class="color-item">
+                        <div class="color-item__preview" style="background: #2b7de9;"></div>
+                        <div class="color-item__info">
+                            <div class="color-item__name">Primary</div>
+                            <div class="color-item__value">#2b7de9</div>
+                        </div>
+                    </div>
+                    <div class="color-item">
+                        <div class="color-item__preview" style="background: #52c41a;"></div>
+                        <div class="color-item__info">
+                            <div class="color-item__name">Success</div>
+                            <div class="color-item__value">#52c41a</div>
+                        </div>
+                    </div>
+                    <div class="color-item">
+                        <div class="color-item__preview" style="background: #faad14;"></div>
+                        <div class="color-item__info">
+                            <div class="color-item__name">Warning</div>
+                            <div class="color-item__value">#faad14</div>
+                        </div>
+                    </div>
+                    <div class="color-item">
+                        <div class="color-item__preview" style="background: #ff4d4f;"></div>
+                        <div class="color-item__info">
+                            <div class="color-item__name">Error</div>
+                            <div class="color-item__value">#ff4d4f</div>
+                        </div>
+                    </div>
+                    <div class="color-item">
+                        <div class="color-item__preview" style="background: #1890ff;"></div>
+                        <div class="color-item__info">
+                            <div class="color-item__name">Info</div>
+                            <div class="color-item__value">#1890ff</div>
+                        </div>
+                    </div>
+                    <div class="color-item">
+                        <div class="color-item__preview" style="background: #1f2937;"></div>
+                        <div class="color-item__info">
+                            <div class="color-item__name">Text Primary</div>
+                            <div class="color-item__value">#1f2937</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Button 按钮 -->
+            <section class="design-section" id="button">
+                <h2 class="design-section__title">Button 按钮</h2>
+                <p class="design-section__desc">按钮用于触发一个操作，如提交表单、打开对话框等。</p>
+                
+                <h3 style="font-size: 16px; margin-bottom: 16px; color: var(--mota-text-primary);">按钮类型</h3>
+                <div class="design-demo">
+                    <div class="design-demo__preview">
+                        <button class="mota-btn mota-btn--primary">主要按钮</button>
+                        <button class="mota-btn mota-btn--secondary">次要按钮</button>
+                        <button class="mota-btn mota-btn--outline">边框按钮</button>
+                        <button class="mota-btn mota-btn--ghost">幽灵按钮</button>
+                        <button class="mota-btn mota-btn--danger">危险按钮</button>
+                    </div>
+                    <div class="design-demo__code">
+<pre>&lt;<span class="tag">Button</span> <span class="attr">variant</span>=<span class="string">"primary"</span>&gt;主要按钮&lt;/<span class="tag">Button</span>&gt;
+&lt;<span class="tag">Button</span> <span class="attr">variant</span>=<span class="string">"secondary"</span>&gt;次要按钮&lt;/<span class="tag">Button</span>&gt;
+&lt;<span class="tag">Button</span> <span class="attr">variant</span>=<span class="string">"outline"</span>&gt;边框按钮&lt;/<span class="tag">Button</span>&gt;
+&lt;<span class="tag">Button</span> <span class="attr">variant</span>=<span class="string">"ghost"</span>&gt;幽灵按钮&lt;/<span class="tag">Button</span>&gt;
+&lt;<span class="tag">Button</span> <span class="attr">variant</span>=<span class="string">"danger"</span>&gt;危险按钮&lt;/<span class="tag">Button</span>&gt;</pre>
+                    </div>
+                </div>
+
+                <h3 style="font-size: 16px; margin-bottom: 16px; color: var(--mota-text-primary);">按钮尺寸</h3>
+                <div class="design-demo">
+                    <div class="design-demo__preview">
+                        <button class="mota-btn mota-btn--primary mota-btn--small">小型按钮</button>
+                        <button class="mota-btn mota-btn--primary">默认按钮</button>
+                        <button class="mota-btn mota-btn--primary mota-btn--large">大型按钮</button>
+                    </div>
+                    <div class="design-demo__code">
+<pre>&lt;<span class="tag">Button</span> <span class="attr">size</span>=<span class="string">"small"</span>&gt;小型按钮&lt;/<span class="tag">Button</span>&gt;
+&lt;<span class="tag">Button</span> <span class="attr">size</span>=<span class="string">"medium"</span>&gt;默认按钮&lt;/<span class="tag">Button</span>&gt;
+&lt;<span class="tag">Button</span> <span class="attr">size</span>=<span class="string">"large"</span>&gt;大型按钮&lt;/<span class="tag">Button</span>&gt;</pre>
+                    </div>
+                </div>
+
+                <h3 style="font-size: 16px; margin-bottom: 16px; color: var(--mota-text-primary);">按钮形状</h3>
+                <div class="design-demo">
+                    <div class="design-demo__preview">
+                        <button class="mota-btn mota-btn--primary">默认形状</button>
+                        <button class="mota-btn mota-btn--primary mota-btn--round">圆角按钮</button>
+                    </div>
+                    <div class="design-demo__code">
+<pre>&lt;<span class="tag">Button</span>&gt;默认形状&lt;/<span class="tag">Button</span>&gt;
+&lt;<span class="tag">Button</span> <span class="attr">shape</span>=<span class="string">"round"</span>&gt;圆角按钮&lt;/<span class="tag">Button</span>&gt;</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Input 输入框 -->
+            <section class="design-section" id="input">
+                <h2 class="design-section__title">Input 输入框</h2>
+                <p class="design-section__desc">输入框用于接收用户输入的文本信息。</p>
+                
+                <div class="design-demo">
+                    <div class="design-demo__preview design-demo__preview--vertical">
+                        <input type="text" class="mota-input" placeholder="请输入内容">
+                        <input type="text" class="mota-input mota-input--error" placeholder="错误状态">
+                        <input type="text" class="mota-input" placeholder="禁用状态" disabled>
+                    </div>
+                    <div class="design-demo__code">
+<pre>&lt;<span class="tag">Input</span> <span class="attr">placeholder</span>=<span class="string">"请输入内容"</span> /&gt;
+&lt;<span class="tag">Input</span> <span class="attr">placeholder</span>=<span class="string">"错误状态"</span> <span class="attr">error</span> /&gt;
+&lt;<span class="tag">Input</span> <span class="attr">placeholder</span>=<span class="string">"禁用状态"</span> <span class="attr">disabled</span> /&gt;</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tag 标签 -->
+            <section class="design-section" id="tag">
+                <h2 class="design-section__title">Tag 标签</h2>
+                <p class="design-section__desc">标签用于标记和分类。</p>
+                
+                <div class="design-demo">
+                    <div class="design-demo__preview">
+                        <span class="mota-tag">默认标签</span>
+                        <span class="mota-tag mota-tag--primary">主要标签</span>
+                        <span class="mota-tag mota-tag--success">成功标签</span>
+                        <span class="mota-tag mota-tag--warning">警告标签</span>
+                        <span class="mota-tag mota-tag--error">错误标签</span>
+                    </div>
+                    <div class="design-demo__code">
+<pre>&lt;<span class="tag">Tag</span>&gt;默认标签&lt;/<span class="tag">Tag</span>&gt;
+&lt;<span class="tag">Tag</span> <span class="attr">color</span>=<span class="string">"primary"</span>&gt;主要标签&lt;/<span class="tag">Tag</span>&gt;
+&lt;<span class="tag">Tag</span> <span class="attr">color</span>=<span class="string">"success"</span>&gt;成功标签&lt;/<span class="tag">Tag</span>&gt;
+&lt;<span class="tag">Tag</span> <span class="attr">color</span>=<span class="string">"warning"</span>&gt;警告标签&lt;/<span class="tag">Tag</span>&gt;
+&lt;<span class="tag">Tag</span> <span class="attr">color</span>=<span class="string">"error"</span>&gt;错误标签&lt;/<span class="tag">Tag</span>&gt;</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Avatar 头像 -->
+            <section class="design-section" id="avatar">
+                <h2 class="design-section__title">Avatar 头像</h2>
+                <p class="design-section__desc">头像用于展示用户或事物的图像。</p>
+                
+                <div class="design-demo">
+                    <div class="design-demo__preview">
+                        <span class="mota-avatar mota-avatar--small">小</span>
+                        <span class="mota-avatar">中</span>
+                        <span class="mota-avatar mota-avatar--large">大</span>
+                        <span class="mota-avatar mota-avatar--square">方</span>
+                    </div>
+                    <div class="design-demo__code">
+<pre>&lt;<span class="tag">Avatar</span> <span class="attr">size</span>=<span class="string">"small"</span>&gt;小&lt;/<span class="tag">Avatar</span>&gt;
+&lt;<span class="tag">Avatar</span>&gt;中&lt;/<span class="tag">Avatar</span>&gt;
+&lt;<span class="tag">Avatar</span> <span class="attr">size</span>=<span class="string">"large"</span>&gt;大&lt;/<span class="tag">Avatar</span>&gt;
+&lt;<span class="tag">Avatar</span> <span class="attr">shape</span>=<span class="string">"square"</span>&gt;方&lt;/<span class="tag">Avatar</span>&gt;</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Badge 徽章 -->
+            <section class="design-section" id="badge">
+                <h2 class="design-section__title">Badge 徽章</h2>
+                <p class="design-section__desc">徽章用于展示数字或状态标记。</p>
+                
+                <div class="design-demo">
+                    <div class="design-demo__preview">
+                        <span class="mota-badge">
+                            <span class="mota-avatar">U</span>
+                            <span class="mota-badge__content">5</span>
+                        </span>
+                        <span class="mota-badge" style="margin-left: 24px;">
+                            <span class="mota-avatar">U</span>
+                            <span class="mota-badge__content">99+</span>
+                        </span>
+                        <span class="mota-badge" style="margin-left: 24px;">
+                            <span class="mota-avatar">U</span>
+                            <span class="mota-badge__content mota-badge__content--dot"></span>
+                        </span>
+                    </div>
+                    <div class="design-demo__code">
+<pre>&lt;<span class="tag">Badge</span> <span class="attr">count</span>=<span class="string">{5}</span>&gt;
+  &lt;<span class="tag">Avatar</span>&gt;U&lt;/<span class="tag">Avatar</span>&gt;
+&lt;/<span class="tag">Badge</span>&gt;
+&lt;<span class="tag">Badge</span> <span class="attr">count</span>=<span class="string">{100}</span> <span class="attr">maxCount</span>=<span class="string">{99}</span>&gt;
+  &lt;<span class="tag">Avatar</span>&gt;U&lt;/<span class="tag">Avatar</span>&gt;
+&lt;/<span class="tag">Badge</span>&gt;
+&lt;<span class="tag">Badge</span> <span class="attr">dot</span>&gt;
+  &lt;<span class="tag">Avatar</span>&gt;U&lt;/<span class="tag">Avatar</span>&gt;
+&lt;/<span class="tag">Badge</span>&gt;</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Switch 开关 -->
+            <section class="design-section" id="switch">
+                <h2 class="design-section__title">Switch 开关</h2>
+                <p class="design-section__desc">开关用于切换两种状态。</p>
+                
+                <div class="design-demo">
+                    <div class="design-demo__preview">
+                        <div class="mota-switch" onclick="this.classList.toggle('is-checked')">
+                            <span class="mota-switch__thumb"></span>
+                        </div>
+                        <div class="mota-switch is-checked" onclick="this.classList.toggle('is-checked')">
+                            <span class="mota-switch__thumb"></span>
+                        </div>
+                    </div>
+                    <div class="design-demo__code">
+<pre>&lt;<span class="tag">Switch</span> /&gt;
+&lt;<span class="tag">Switch</span> <span class="attr">checked</span> /&gt;</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Progress 进度条 -->
+            <section class="design-section" id="progress">
+                <h2 class="design-section__title">Progress 进度条</h2>
+                <p class="design-section__desc">进度条用于展示操作的当前进度。</p>
+                
+                <div class="design-demo">
+                    <div class="design-demo__preview design-demo__preview--vertical" style="width: 100%;">
+                        <div class="mota-progress" style="width: 100%;">
+                            <div class="mota-progress__track">
+                                <div class="mota-progress__bar" style="width: 30%;"></div>
+                            </div>
+                        </div>
+                        <div class="mota-progress" style="width: 100%;">
+                            <div class="mota-progress__track">
+                                <div class="mota-progress__bar" style="width: 70%;"></div>
+                            </div>
+                        </div>
+                        <div class="mota-progress" style="width: 100%;">
+                            <div class="mota-progress__track">
+                                <div class="mota-progress__bar" style="width: 100%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="design-demo__code">
+<pre>&lt;<span class="tag">Progress</span> <span class="attr">percent</span>=<span class="string">{30}</span> /&gt;
+&lt;<span class="tag">Progress</span> <span class="attr">percent</span>=<span class="string">{70}</span> /&gt;
+&lt;<span class="tag">Progress</span> <span class="attr">percent</span>=<span class="string">{100}</span> /&gt;</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Alert 警告 -->
+            <section class="design-section" id="alert">
+                <h2 class="design-section__title">Alert 警告</h2>
+                <p class="design-section__desc">警告提示用于展示重要的提示信息。</p>
+                
+                <div class="design-demo">
+                    <div class="design-demo__preview design-demo__preview--vertical" style="width: 100%;">
+                        <div class="mota-alert mota-alert--info" style="width: 100%;">
+                            <span class="mota-alert__icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 16v-4M12 8h.01"/>
+                                </svg>
+                            </span>
+                            <span>这是一条信息提示</span>
+                        </div>
+                        <div class="mota-alert mota-alert--success" style="width: 100%;">
+                            <span class="mota-alert__icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M9 12l2 2 4-4"/>
+                                </svg>
+                            </span>
+                            <span>这是一条成功提示</span>
+                        </div>
+                        <div class="mota-alert mota-alert--warning" style="width: 100%;">
+                            <span class="mota-alert__icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 9v4M12 17h.01"/>
+                                    <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                                </svg>
+                            </span>
+                            <span>这是一条警告提示</span>
+                        </div>
+                        <div class="mota-alert mota-alert--error" style="width: 100%;">
+                            <span class="mota-alert__icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M15 9l-6 6M9 9l6 6"/>
+                                </svg>
+                            </span>
+                            <span>这是一条错误提示</span>
+                        </div>
+                    </div>
+                    <div class="design-demo__code">
+<pre>&lt;<span class="tag">Alert</span> <span class="attr">type</span>=<span class="string">"info"</span> <span class="attr">message</span>=<span class="string">"这是一条信息提示"</span> /&gt;
+&lt;<span class="tag">Alert</span> <span class="attr">type</span>=<span class="string">"success"</span> <span class="attr">message</span>=<span class="string">"这是一条成功提示"</span> /&gt;
+&lt;<span class="tag">Alert</span> <span class="attr">type</span>=<span class="string">"warning"</span> <span class="attr">message</span>=<span class="string">"这是一条警告提示"</span> /&gt;
+&lt;<span class="tag">Alert</span> <span class="attr">type</span>=<span class="string">"error"</span> <span class="attr">message</span>=<span class="string">"这是一条错误提示"</span> /&gt;</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Card 卡片 -->
+            <section class="design-section" id="card">
+                <h2 class="design-section__title">Card 卡片</h2>
+                <p class="design-section__desc">卡片是一种容器，用于展示相关的内容和操作。</p>
+                
+                <div class="design-demo">
+                    <div class="design-demo__preview" style="width: 100%;">
+                        <div class="mota-card" style="width: 320px;">
+                            <div class="mota-card__header">
+                                <div class="mota-card__title">卡片标题</div>
+                            </div>
+                            <div class="mota-card__body">
+                                <p style="color: var(--mota-text-secondary); margin: 0;">这是卡片的内容区域，可以放置任意内容。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="design-demo__code">
+<pre>&lt;<span class="tag">Card</span> <span class="attr">title</span>=<span class="string">"卡片标题"</span>&gt;
+  &lt;<span class="tag">p</span>&gt;这是卡片的内容区域，可以放置任意内容。&lt;/<span class="tag">p</span>&gt;
+&lt;/<span class="tag">Card</span>&gt;</pre>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        // 导航高亮
+        document.querySelectorAll('.design-nav-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                document.querySelectorAll('.design-nav-item').forEach(i => i.classList.remove('is-active'));
+                this.classList.add('is-active');
+            });
+        });
+
+        // 滚动监听
+        const sections = document.querySelectorAll('.design-section[id]');
+        const navItems = document.querySelectorAll('.design-nav-item');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (scrollY >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navItems.forEach(item => {
+                item.classList.remove('is-active');
+                if (item.getAttribute('href') === '#' + current) {
+                    item.classList.add('is-active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

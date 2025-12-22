@@ -1,0 +1,1390 @@
+/* 首页样式 - 摩塔 Mota */
+.homePage {
+  min-height: 100vh;
+  background: #fff;
+}
+
+/* 容器 */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Logo样式 */
+.logoWrapper {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #2b7de9 0%, #1a6dd6 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(43, 125, 233, 0.3);
+}
+
+.logoIcon {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* 导航栏 */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 72px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  z-index: 1000;
+}
+
+.navbarContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navbarBrand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navbarTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1f36;
+  letter-spacing: -0.5px;
+}
+
+.navbarMenu {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navbarItem {
+  position: relative;
+  font-size: 15px;
+  color: #4a5568;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.navbarItem:hover {
+  color: #2b7de9;
+  background: rgba(43, 125, 233, 0.06);
+}
+
+.navDropdown {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+  padding: 16px;
+  min-width: 280px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s;
+  z-index: 100;
+}
+
+.navbarItem:hover .navDropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.navDropdownItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+
+.navDropdownItem:hover {
+  background: #f5f7fa;
+}
+
+.navDropdownItem > span {
+  font-size: 20px;
+  color: #2b7de9;
+  margin-top: 2px;
+}
+
+.navDropdownTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1f36;
+  margin-bottom: 2px;
+}
+
+.navDropdownDesc {
+  font-size: 13px;
+  color: #718096;
+}
+
+.navbarActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.loginBtn {
+  font-size: 15px;
+  color: #4a5568;
+}
+
+.registerBtn {
+  height: 40px;
+  padding: 0 24px;
+  font-size: 15px;
+  border-radius: 10px;
+}
+
+/* Hero区域 */
+.hero {
+  position: relative;
+  padding: 160px 0 100px;
+  overflow: hidden;
+}
+
+.heroBg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+}
+
+.heroBgGradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #f8faff 0%, #e8f4ff 50%, #f0f5ff 100%);
+}
+
+.heroBgPattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle at 1px 1px, #e0e7ff 1px, transparent 0);
+  background-size: 40px 40px;
+  opacity: 0.5;
+}
+
+.heroBgOrbs {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+
+.orb1 {
+  position: absolute;
+  top: 10%;
+  right: 10%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(43, 125, 233, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 8s ease-in-out infinite;
+}
+
+.orb2 {
+  position: absolute;
+  bottom: 20%;
+  left: 5%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 10s ease-in-out infinite reverse;
+}
+
+.orb3 {
+  position: absolute;
+  top: 40%;
+  left: 30%;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(34, 197, 94, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-20px) scale(1.05); }
+}
+
+.hero .container {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 80px;
+}
+
+.heroContent {
+  flex: 1;
+  max-width: 560px;
+}
+
+.heroBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, rgba(43, 125, 233, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+  border-radius: 100px;
+  font-size: 14px;
+  color: #2b7de9;
+  font-weight: 500;
+  margin-bottom: 24px;
+}
+
+.heroBadge span:first-child {
+  color: #a855f7;
+}
+
+.heroTitle {
+  font-size: 52px;
+  font-weight: 800;
+  line-height: 1.15;
+  color: #1a1f36;
+  margin-bottom: 24px;
+  letter-spacing: -1px;
+}
+
+.heroTitleHighlight {
+  background: linear-gradient(135deg, #2b7de9 0%, #667eea 50%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.heroSubtitle {
+  font-size: 18px;
+  line-height: 1.7;
+  color: #4a5568;
+  margin-bottom: 36px;
+}
+
+.heroActions {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 48px;
+}
+
+.heroBtn {
+  height: 52px;
+  padding: 0 32px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 8px 24px rgba(43, 125, 233, 0.3);
+}
+
+.heroBtnSecondary {
+  height: 52px;
+  padding: 0 28px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-color: #e2e8f0;
+}
+
+.heroBtnSecondary:hover {
+  border-color: #2b7de9;
+  color: #2b7de9;
+}
+
+.heroTrust {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.heroTrustLabel {
+  font-size: 14px;
+  color: #718096;
+}
+
+.heroTrustLogos {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.trustNumber {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2b7de9;
+}
+
+.trustText {
+  font-size: 14px;
+  color: #4a5568;
+}
+
+.heroImage {
+  flex: 1;
+  max-width: 560px;
+}
+
+.heroImageWrapper {
+  position: relative;
+}
+
+.heroCard {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.heroCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e8e9eb;
+}
+
+.heroCardDots {
+  display: flex;
+  gap: 6px;
+}
+
+.heroCardDots span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #e2e8f0;
+}
+
+.heroCardDots span:first-child { background: #ff5f57; }
+.heroCardDots span:nth-child(2) { background: #febc2e; }
+.heroCardDots span:last-child { background: #28c840; }
+
+.heroCardTitle {
+  font-size: 13px;
+  color: #718096;
+  font-weight: 500;
+}
+
+.heroCardBody {
+  padding: 24px;
+}
+
+.heroCardInput {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #f5f7fa;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.heroCardIcon {
+  font-size: 20px;
+  color: #2b7de9;
+}
+
+.heroCardInput span {
+  font-size: 14px;
+  color: #718096;
+}
+
+.heroCardOutput {
+  background: #fff;
+  border: 1px solid #e8e9eb;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.heroCardOutputHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e8e9eb;
+}
+
+.heroCardOutputHeader > span:first-child {
+  color: #2b7de9;
+}
+
+.heroCardOutputHeader > span:nth-child(2) {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1f36;
+  flex: 1;
+}
+
+.heroCardBadge {
+  font-size: 11px;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, #2b7de9 0%, #667eea 100%);
+  color: #fff;
+  border-radius: 100px;
+  font-weight: 500;
+}
+
+.heroCardOutputContent {
+  padding: 16px;
+}
+
+.heroCardLine {
+  height: 10px;
+  background: linear-gradient(90deg, #e8f4ff 0%, #f0f5ff 100%);
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.heroCardLine:last-child {
+  margin-bottom: 0;
+}
+
+.floatingCard1 {
+  position: absolute;
+  top: 20px;
+  right: -40px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  animation: floatCard 4s ease-in-out infinite;
+}
+
+.floatingCard2 {
+  position: absolute;
+  bottom: 40px;
+  left: -30px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  animation: floatCard 5s ease-in-out infinite reverse;
+}
+
+@keyframes floatCard {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.floatingIcon {
+  font-size: 18px;
+  color: #22c55e;
+}
+
+.floatingCard1 span,
+.floatingCard2 span {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1f36;
+}
+
+/* Hero Kanban样式 */
+.heroCardKanban {
+  display: flex;
+  gap: 12px;
+}
+
+.kanbanColumn {
+  flex: 1;
+  min-width: 0;
+}
+
+.kanbanHeader {
+  font-size: 11px;
+  font-weight: 600;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.kanbanCard {
+  background: #f8fafc;
+  border: 1px solid #e8e9eb;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.kanbanCardActive {
+  background: #e8f4ff;
+  border-color: #2b7de9;
+}
+
+.kanbanCardDone {
+  background: #f0fdf4;
+  border-color: #22c55e;
+}
+
+.kanbanCardTitle {
+  font-size: 12px;
+  font-weight: 500;
+  color: #1a1f36;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kanbanCardMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.kanbanTag {
+  font-size: 10px;
+  padding: 2px 6px;
+  background: #fee2e2;
+  color: #dc2626;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.kanbanProgress {
+  font-size: 10px;
+  color: #2b7de9;
+  font-weight: 600;
+}
+
+.kanbanDoneIcon {
+  font-size: 14px;
+  color: #22c55e;
+}
+
+/* 四大支柱区域 */
+.pillarsSection {
+  padding: 100px 0;
+  background: #f8fafc;
+}
+
+.pillarsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-top: 60px;
+}
+
+.pillarCard {
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px;
+  border: 1px solid #e8e9eb;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.pillarCard:hover {
+  border-color: transparent;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  transform: translateY(-4px);
+}
+
+.pillarIcon {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+}
+
+.pillarTitle {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a1f36;
+  margin-bottom: 12px;
+}
+
+.pillarDesc {
+  font-size: 14px;
+  color: #718096;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.pillarFeatures {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+}
+
+.pillarFeatures li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #4a5568;
+  margin-bottom: 8px;
+}
+
+.pillarFeatures li span {
+  color: #22c55e;
+  font-size: 12px;
+}
+
+/* 功能区域 */
+.featuresSection {
+  padding: 100px 0;
+  background: #fff;
+}
+
+.sectionHeader {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.sectionBadge {
+  display: inline-block;
+  padding: 8px 20px;
+  background: linear-gradient(135deg, rgba(43, 125, 233, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+  border-radius: 100px;
+  font-size: 14px;
+  color: #2b7de9;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.sectionTitle {
+  font-size: 40px;
+  font-weight: 700;
+  color: #1a1f36;
+  margin-bottom: 16px;
+  letter-spacing: -0.5px;
+}
+
+.textPrimary {
+  color: #2b7de9;
+}
+
+.sectionSubtitle {
+  font-size: 18px;
+  color: #718096;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.featureCard {
+  background: #fff;
+  border: 1px solid #e8e9eb;
+  border-radius: 20px;
+  padding: 32px;
+  transition: all 0.3s ease;
+}
+
+.featureCard:hover {
+  border-color: transparent;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  transform: translateY(-4px);
+}
+
+.featureCardLarge {
+  grid-column: span 2;
+  display: flex;
+  gap: 32px;
+  padding: 40px;
+}
+
+.featureCardIcon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+
+.featureCardLarge .featureCardIcon {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 0;
+}
+
+.featureCardContent {
+  flex: 1;
+}
+
+.featureCardTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1f36;
+  margin-bottom: 12px;
+}
+
+.featureCardDesc {
+  font-size: 15px;
+  color: #718096;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.featureCardList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px 0;
+}
+
+.featureCardList li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #4a5568;
+  margin-bottom: 10px;
+}
+
+.featureCardList li span {
+  color: #22c55e;
+}
+
+.featureCardLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #2b7de9;
+  font-weight: 500;
+  transition: gap 0.2s;
+}
+
+.featureCardLink:hover {
+  gap: 10px;
+}
+
+/* 核心价值区域 */
+.valueSection {
+  padding: 100px 0;
+  background: #f8fafc;
+}
+
+.valueGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin-top: 60px;
+}
+
+.valueCard {
+  background: #fff;
+  border-radius: 20px;
+  padding: 40px;
+  border: 1px solid #e8e9eb;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.valueCard:hover {
+  border-color: transparent;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  transform: translateY(-4px);
+}
+
+.valueNumber {
+  font-size: 48px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #2b7de9 0%, #667eea 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+}
+
+.valueTitle {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a1f36;
+  margin-bottom: 12px;
+}
+
+.valueDesc {
+  font-size: 15px;
+  color: #718096;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.valueFeatures {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.valueFeatures li {
+  font-size: 13px;
+  color: #4a5568;
+  padding: 6px 14px;
+  background: #f5f7fa;
+  border-radius: 100px;
+}
+
+/* 角色区域 */
+.rolesSection {
+  padding: 100px 0;
+  background: #fff;
+}
+
+.rolesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 60px;
+}
+
+.roleCard {
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px;
+  border: 1px solid #e8e9eb;
+  transition: all 0.3s ease;
+}
+
+.roleCard:hover {
+  border-color: transparent;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+}
+
+.roleCardPrimary {
+  background: linear-gradient(135deg, #2b7de9 0%, #667eea 100%);
+  color: #fff;
+  border: none;
+}
+
+.roleCardPrimary .roleTitle,
+.roleCardPrimary .roleSubtitle {
+  color: #fff;
+}
+
+.roleCardPrimary .roleFeatures li {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.roleCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.roleAvatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.roleAvatarSecondary {
+  background: #e8f4ff;
+}
+
+.roleTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1f36;
+}
+
+.roleSubtitle {
+  font-size: 14px;
+  color: #718096;
+  margin-bottom: 20px;
+}
+
+.roleFeatures {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.roleFeatures li {
+  font-size: 14px;
+  color: #4a5568;
+  line-height: 2;
+  padding-left: 20px;
+  position: relative;
+}
+
+.roleFeatures li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.roleCardPrimary .roleFeatures li::before {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* 技术优势区域 */
+.techSection {
+  padding: 100px 0;
+  background: #f8fafc;
+}
+
+.techGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-top: 60px;
+}
+
+.techCard {
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px;
+  text-align: center;
+  border: 1px solid #e8e9eb;
+  transition: all 0.3s ease;
+}
+
+.techCard:hover {
+  border-color: transparent;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  transform: translateY(-4px);
+}
+
+.techCardIcon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 20px;
+  background: linear-gradient(135deg, rgba(43, 125, 233, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #2b7de9;
+}
+
+.techCardTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1f36;
+  margin-bottom: 12px;
+}
+
+.techCardDesc {
+  font-size: 14px;
+  color: #718096;
+  line-height: 1.6;
+}
+
+/* CTA区域 */
+.ctaSection {
+  padding: 100px 0;
+  background: linear-gradient(135deg, #1a1f36 0%, #2d3561 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.ctaSection::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
+  background-size: 40px 40px;
+}
+
+.ctaContent {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 80px;
+}
+
+.ctaText {
+  flex: 1;
+  max-width: 500px;
+}
+
+.ctaTitle {
+  font-size: 42px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.3;
+  margin-bottom: 20px;
+}
+
+.ctaTitleHighlight {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.ctaDesc {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 36px;
+  line-height: 1.6;
+}
+
+.ctaActions {
+  display: flex;
+  gap: 16px;
+}
+
+.ctaBtn {
+  height: 52px;
+  padding: 0 32px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ctaBtnGhost {
+  height: 52px;
+  padding: 0 28px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 12px;
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.ctaBtnGhost:hover {
+  border-color: #fff;
+  color: #fff;
+}
+
+.ctaImage {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.ctaImageWrapper {
+  position: relative;
+}
+
+.ctaCard {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 32px 40px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ctaCardIcon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #2b7de9 0%, #667eea 100%);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #fff;
+}
+
+.ctaCardTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.ctaCardDesc {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* 页脚 */
+.footer {
+  background: #1a1f36;
+  color: #fff;
+  padding: 80px 0 32px;
+}
+
+.footerMain {
+  display: flex;
+  gap: 80px;
+  margin-bottom: 60px;
+}
+
+.footerBrand {
+  flex: 1;
+  max-width: 300px;
+}
+
+.footerLogo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.footerLogo span {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.footerDesc {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 8px;
+}
+
+.footerSlogan {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 20px;
+}
+
+.footerContact p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.footerLinks {
+  flex: 2;
+  display: flex;
+  gap: 60px;
+}
+
+.footerColumn h4,
+.footerColumnTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+.footerColumn ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footerColumn li {
+  margin-bottom: 14px;
+}
+
+.footerColumn a {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footerColumn a:hover {
+  color: #fff;
+}
+
+.footerBottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 32px;
+}
+
+.footerCopyright {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.footerSocial {
+  display: flex;
+  gap: 24px;
+}
+
+.socialLink {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.socialLink:hover {
+  color: #fff;
+}
+
+/* 响应式设计 */
+@media (max-width: 1024px) {
+  .hero .container {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .heroContent {
+    max-width: 100%;
+  }
+  
+  .heroActions {
+    justify-content: center;
+  }
+  
+  .heroTrust {
+    justify-content: center;
+  }
+  
+  .heroImage {
+    max-width: 100%;
+  }
+  
+  .featuresGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .featureCardLarge {
+    grid-column: span 2;
+  }
+  
+  .pillarsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .valueGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .rolesGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .techGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .ctaContent {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .ctaActions {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbarMenu {
+    display: none;
+  }
+  
+  .heroTitle {
+    font-size: 36px;
+  }
+  
+  .sectionTitle {
+    font-size: 28px;
+  }
+  
+  .featuresGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .featureCardLarge {
+    grid-column: span 1;
+    flex-direction: column;
+  }
+  
+  .pillarsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .valueGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .rolesGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .techGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .footerMain {
+    flex-direction: column;
+    gap: 40px;
+  }
+  
+  .footerLinks {
+    flex-wrap: wrap;
+    gap: 32px;
+  }
+  
+  .footerBottom {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  
+  .floatingCard1,
+  .floatingCard2 {
+    display: none;
+  }
+}

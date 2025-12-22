@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人设置 - 摩塔 Mota</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/console.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="console-page">
+    <!-- 顶部导航栏 -->
+    <header class="console-header">
+        <div class="console-header-left">
+            <!-- 移动端菜单按钮 -->
+            <button class="mobile-menu-btn" onclick="toggleSidebar()" title="菜单">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+            </button>
+            
+            <a href="../index.html" class="console-logo">
+                <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
+                    <rect width="48" height="48" rx="10" fill="#2b7de9"/>
+                    <path d="M14 24L22 32L34 16" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>摩塔</span>
+            </a>
+            
+            <div class="team-switcher">
+                <button class="team-switcher-btn">
+                    <div class="team-avatar"><span>示</span></div>
+                    <span class="team-name">示例团队</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <div class="console-header-center">
+            <div class="global-search">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" placeholder="搜索项目、事项、代码...">
+                <kbd>⌘K</kbd>
+            </div>
+        </div>
+        
+        <div class="console-header-right">
+            <div class="header-actions">
+                <button class="header-action-btn" title="新建">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                </button>
+                <button class="header-action-btn" title="通知">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                    <span class="notification-badge">3</span>
+                </button>
+            </div>
+            
+            <div class="user-menu">
+                <button class="user-menu-btn">
+                    <div class="user-avatar">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" alt="用户头像">
+                    </div>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- 主体内容区域 -->
+    <div class="console-body">
+        <!-- 左侧导航栏 -->
+        <aside class="console-sidebar settings-sidebar">
+            <nav class="sidebar-nav">
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">个人设置</div>
+                    <a href="#profile" class="sidebar-item active">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        <span>基本信息</span>
+                    </a>
+                    <a href="#security" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                        <span>账号安全</span>
+                    </a>
+                    <a href="#notifications" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
+                        <span>通知设置</span>
+                    </a>
+                    <a href="#ssh-keys" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+                        </svg>
+                        <span>SSH 公钥</span>
+                    </a>
+                    <a href="#tokens" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+                        </svg>
+                        <span>访问令牌</span>
+                    </a>
+                    <a href="#preferences" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                        </svg>
+                        <span>偏好设置</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+        
+        <!-- 主内容区域 -->
+        <main class="console-main">
+            <div class="console-content profile-settings-layout">
+                <!-- 基本信息 -->
+                <section id="profile" class="settings-section">
+                    <div class="section-header">
+                        <h2>基本信息</h2>
+                        <p>管理您的个人资料和公开信息</p>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <div class="avatar-section">
+                            <div class="current-avatar">
+                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" alt="用户头像">
+                            </div>
+                            <div class="avatar-actions">
+                                <button class="btn btn-outline">上传新头像</button>
+                                <button class="btn btn-text">删除</button>
+                                <p class="avatar-hint">支持 JPG、PNG 格式，文件大小不超过 2MB</p>
+                            </div>
+                        </div>
+                        
+                        <form class="settings-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>用户名</label>
+                                    <input type="text" value="zhangsan" disabled>
+                                    <span class="form-hint">用户名创建后不可修改</span>
+                                </div>
+                                <div class="form-group">
+                                    <label>昵称</label>
+                                    <input type="text" value="张三">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>邮箱</label>
+                                    <input type="email" value="zhangsan@example.com">
+                                    <span class="form-hint verified">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                            <polyline points="22 4 12 14.01 9 11.01"/>
+                                        </svg>
+                                        已验证
+                                    </span>
+                                </div>
+                                <div class="form-group">
+                                    <label>手机号</label>
+                                    <input type="tel" value="138****8888">
+                                    <span class="form-hint verified">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                            <polyline points="22 4 12 14.01 9 11.01"/>
+                                        </svg>
+                                        已验证
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group full-width">
+                                <label>个人简介</label>
+                                <textarea rows="3" placeholder="介绍一下自己...">全栈开发工程师，专注于云原生和DevOps领域</textarea>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>公司/组织</label>
+                                    <input type="text" value="摩塔科技">
+                                </div>
+                                <div class="form-group">
+                                    <label>职位</label>
+                                    <input type="text" value="高级开发工程师">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group full-width">
+                                <label>个人网站</label>
+                                <input type="url" placeholder="https://example.com">
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">保存更改</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+                
+                <!-- 账号安全 -->
+                <section id="security" class="settings-section">
+                    <div class="section-header">
+                        <h2>账号安全</h2>
+                        <p>管理您的密码和安全设置</p>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <div class="security-item">
+                            <div class="security-info">
+                                <div class="security-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                    </svg>
+                                </div>
+                                <div class="security-content">
+                                    <h4>登录密码</h4>
+                                    <p>上次修改于 2024-01-01</p>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline">修改密码</button>
+                        </div>
+                        
+                        <div class="security-item">
+                            <div class="security-info">
+                                <div class="security-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                                        <line x1="12" y1="18" x2="12.01" y2="18"/>
+                                    </svg>
+                                </div>
+                                <div class="security-content">
+                                    <h4>两步验证</h4>
+                                    <p>使用手机验证码进行二次验证</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch active">
+                                <input type="checkbox" id="twoFactor" checked>
+                                <label for="twoFactor"></label>
+                            </div>
+                        </div>
+                        
+                        <div class="security-item">
+                            <div class="security-info">
+                                <div class="security-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                    </svg>
+                                </div>
+                                <div class="security-content">
+                                    <h4>登录设备管理</h4>
+                                    <p>查看和管理已登录的设备</p>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline">查看设备</button>
+                        </div>
+                        
+                        <div class="security-item">
+                            <div class="security-info">
+                                <div class="security-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <polyline points="12 6 12 12 16 14"/>
+                                    </svg>
+                                </div>
+                                <div class="security-content">
+                                    <h4>登录历史</h4>
+                                    <p>查看账号的登录记录</p>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline">查看历史</button>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- SSH 公钥 -->
+                <section id="ssh-keys" class="settings-section">
+                    <div class="section-header">
+                        <h2>SSH 公钥</h2>
+                        <p>管理用于 Git 操作的 SSH 公钥</p>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <div class="ssh-keys-list">
+                            <div class="ssh-key-item">
+                                <div class="key-info">
+                                    <div class="key-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+                                        </svg>
+                                    </div>
+                                    <div class="key-content">
+                                        <h4>MacBook Pro</h4>
+                                        <p class="key-fingerprint">SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8</p>
+                                        <p class="key-meta">添加于 2024-01-10 · 最后使用于 2小时前</p>
+                                    </div>
+                                </div>
+                                <button class="btn btn-text danger">删除</button>
+                            </div>
+                            
+                            <div class="ssh-key-item">
+                                <div class="key-info">
+                                    <div class="key-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+                                        </svg>
+                                    </div>
+                                    <div class="key-content">
+                                        <h4>Office Desktop</h4>
+                                        <p class="key-fingerprint">SHA256:xYz123AbCdEfGhIjKlMnOpQrStUvWxYz123AbCdEfGh</p>
+                                        <p class="key-meta">添加于 2023-12-15 · 最后使用于 1天前</p>
+                                    </div>
+                                </div>
+                                <button class="btn btn-text danger">删除</button>
+                            </div>
+                        </div>
+                        
+                        <div class="add-key-section">
+                            <button class="btn btn-primary" id="addKeyBtn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                添加 SSH 公钥
+                            </button>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- 访问令牌 -->
+                <section id="tokens" class="settings-section">
+                    <div class="section-header">
+                        <h2>访问令牌</h2>
+                        <p>管理用于 API 访问的个人访问令牌</p>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <div class="tokens-list">
+                            <div class="token-item">
+                                <div class="token-info">
+                                    <div class="token-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                            <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+                                        </svg>
+                                    </div>
+                                    <div class="token-content">
+                                        <h4>CI/CD Pipeline Token</h4>
+                                        <div class="token-scopes">
+                                            <span class="scope-badge">repo</span>
+                                            <span class="scope-badge">write:packages</span>
+                                        </div>
+                                        <p class="token-meta">创建于 2024-01-05 · 过期于 2024-07-05 · 最后使用于 1小时前</p>
+                                    </div>
+                                </div>
+                                <div class="token-actions">
+                                    <button class="btn btn-outline btn-sm">重新生成</button>
+                                    <button class="btn btn-text danger">删除</button>
+                                </div>
+                            </div>
+                            
+                            <div class="token-item">
+                                <div class="token-info">
+                                    <div class="token-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                            <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+                                        </svg>
+                                    </div>
+                                    <div class="token-content">
+                                        <h4>IDE Integration</h4>
+                                        <div class="token-scopes">
+                                            <span class="scope-badge">repo</span>
+                                            <span class="scope-badge">read:user</span>
+                                        </div>
+                                        <p class="token-meta">创建于 2023-11-20 · 永不过期 · 最后使用于 3天前</p>
+                                    </div>
+                                </div>
+                                <div class="token-actions">
+                                    <button class="btn btn-outline btn-sm">重新生成</button>
+                                    <button class="btn btn-text danger">删除</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="add-token-section">
+                            <button class="btn btn-primary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                创建新令牌
+                            </button>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- 偏好设置 -->
+                <section id="preferences" class="settings-section">
+                    <div class="section-header">
+                        <h2>偏好设置</h2>
+                        <p>自定义您的使用体验</p>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <div class="preference-group">
+                            <h4>外观</h4>
+                            <div class="preference-item">
+                                <div class="preference-info">
+                                    <span class="preference-label">主题</span>
+                                    <span class="preference-desc">选择界面主题</span>
+                                </div>
+                                <div class="theme-options">
+                                    <button class="theme-option active">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="5"/>
+                                            <line x1="12" y1="1" x2="12" y2="3"/>
+                                            <line x1="12" y1="21" x2="12" y2="23"/>
+                                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                                            <line x1="1" y1="12" x2="3" y2="12"/>
+                                            <line x1="21" y1="12" x2="23" y2="12"/>
+                                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                                        </svg>
+                                        浅色
+                                    </button>
+                                    <button class="theme-option">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                                        </svg>
+                                        深色
+                                    </button>
+                                    <button class="theme-option">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                                            <line x1="8" y1="21" x2="16" y2="21"/>
+                                            <line x1="12" y1="17" x2="12" y2="21"/>
+                                        </svg>
+                                        跟随系统
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="preference-item">
+                                <div class="preference-info">
+                                    <span class="preference-label">语言</span>
+                                    <span class="preference-desc">选择界面语言</span>
+                                </div>
+                                <select class="preference-select">
+                                    <option value="zh-CN" selected>简体中文</option>
+                                    <option value="zh-TW">繁體中文</option>
+                                    <option value="en">English</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="preference-group">
+                            <h4>编辑器</h4>
+                            <div class="preference-item">
+                                <div class="preference-info">
+                                    <span class="preference-label">代码字体</span>
+                                    <span class="preference-desc">代码编辑器使用的字体</span>
+                                </div>
+                                <select class="preference-select">
+                                    <option value="jetbrains-mono" selected>JetBrains Mono</option>
+                                    <option value="fira-code">Fira Code</option>
+                                    <option value="source-code-pro">Source Code Pro</option>
+                                    <option value="monaco">Monaco</option>
+                                </select>
+                            </div>
+                            
+                            <div class="preference-item">
+                                <div class="preference-info">
+                                    <span class="preference-label">Tab 宽度</span>
+                                    <span class="preference-desc">代码缩进的空格数</span>
+                                </div>
+                                <select class="preference-select">
+                                    <option value="2">2 空格</option>
+                                    <option value="4" selected>4 空格</option>
+                                    <option value="8">8 空格</option>
+                                </select>
+                            </div>
+                            
+                            <div class="preference-item">
+                                <div class="preference-info">
+                                    <span class="preference-label">显示行号</span>
+                                    <span class="preference-desc">在代码编辑器中显示行号</span>
+                                </div>
+                                <div class="toggle-switch active">
+                                    <input type="checkbox" id="showLineNumbers" checked>
+                                    <label for="showLineNumbers"></label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="preference-group">
+                            <h4>Git</h4>
+                            <div class="preference-item">
+                                <div class="preference-info">
+                                    <span class="preference-label">默认分支</span>
+                                    <span class="preference-desc">新建仓库时的默认分支名</span>
+                                </div>
+                                <input type="text" class="preference-input" value="main">
+                            </div>
+                            
+                            <div class="preference-item">
+                                <div class="preference-info">
+                                    <span class="preference-label">GPG 签名</span>
+                                    <span class="preference-desc">对提交进行 GPG 签名</span>
+                                </div>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="gpgSign">
+                                    <label for="gpgSign"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+    
+    <style>
+        /* 个人设置布局 */
+        .profile-settings-layout {
+            padding: 24px;
+            max-width: 900px;
+        }
+        
+        .settings-sidebar {
+            width: 220px;
+        }
+        
+        /* 设置区块 */
+        .settings-section {
+            margin-bottom: 48px;
+        }
+        
+        .section-header {
+            margin-bottom: 20px;
+        }
+        
+        .section-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+        
+        .section-header p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .settings-card {
+            background: #fff;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+        }
+        
+        /* 头像区域 */
+        .avatar-section {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 24px;
+        }
+        
+        .current-avatar img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid var(--border-light);
+        }
+        
+        .avatar-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .avatar-actions .btn {
+            width: fit-content;
+        }
+        
+        .avatar-hint {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        
+        /* 表单 */
+        .settings-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .form-group label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            padding: 10px 14px;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            color: var(--text-primary);
+            transition: all var(--transition-fast);
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+        
+        .form-group input:disabled {
+            background: var(--bg-light);
+            color: var(--text-secondary);
+        }
+        
+        .form-hint {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .form-hint.verified {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #22c55e;
+        }
+        
+        .form-actions {
+            padding-top: 16px;
+            border-top: 1px solid var(--border-light);
+        }
+        
+        /* 安全设置 */
+        .security-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .security-item:last-child {
+            border-bottom: none;
+        }
+        
+        .security-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .security-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-light);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+        }
+        
+        .security-content h4 {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        
+        .security-content p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        /* 开关 */
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-switch label {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #e5e7eb;
+            border-radius: 24px;
+            transition: all var(--transition-fast);
+        }
+        
+        .toggle-switch label:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            border-radius: 50%;
+            transition: all var(--transition-fast);
+        }
+        
+        .toggle-switch input:checked + label {
+            background-color: var(--primary-color);
+        }
+        
+        .toggle-switch input:checked + label:before {
+            transform: translateX(20px);
+        }
+        
+        /* SSH 公钥 */
+        .ssh-keys-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .ssh-key-item {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            padding: 16px;
+            background: var(--bg-light);
+            border-radius: var(--radius-md);
+        }
+        
+        .key-info {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .key-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            border-radius: var(--radius-md);
+            color: var(--primary-color);
+        }
+        
+        .key-content h4 {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        
+        .key-fingerprint {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        
+        .key-meta {
+            font-size: 12px;
+            color: var(--text-placeholder);
+        }
+        
+        /* 访问令牌 */
+        .tokens-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .token-item {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            padding: 16px;
+            background: var(--bg-light);
+            border-radius: var(--radius-md);
+        }
+        
+        .token-info {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .token-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            border-radius: var(--radius-md);
+            color: var(--primary-color);
+        }
+        
+        .token-content h4 {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        
+        .token-scopes {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        
+        .scope-badge {
+            padding: 2px 8px;
+            background: var(--primary-light);
+            color: var(--primary-color);
+            border-radius: 4px;
+            font-size: 11px;
+        }
+        
+        .token-meta {
+            font-size: 12px;
+            color: var(--text-placeholder);
+        }
+        
+        .token-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        /* 偏好设置 */
+        .preference-group {
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 24px;
+        }
+        
+        .preference-group:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .preference-group h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+        
+        .preference-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+        }
+        
+        .preference-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .preference-label {
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+        
+        .preference-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .preference-select,
+        .preference-input {
+            padding: 8px 12px;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            min-width: 160px;
+        }
+        
+        .theme-options {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .theme-option {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: var(--bg-light);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .theme-option:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .theme-option.active {
+            background: var(--primary-light);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .btn-text.danger {
+            color: #ef4444;
+        }
+        
+        .btn-text.danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+    </style>
+    
+    <!-- 引入通用 JavaScript 模块 -->
+    <script src="../js/common.js"></script>
+    <script src="../js/profile-settings.js"></script>
+</body>
+</html>

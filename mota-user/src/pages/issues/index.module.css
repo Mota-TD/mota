@@ -1,0 +1,160 @@
+/* 任务列表页面样式 - 摩塔 Mota */
+.issues {
+  padding: 0;
+}
+
+/* 页面头部 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  border-radius: 16px;
+  color: #fff;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.header :global(.ant-btn-primary) {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: none;
+}
+
+.header :global(.ant-btn-primary:hover) {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* 工具栏 */
+.toolbar {
+  margin-bottom: 20px;
+  padding: 16px 20px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e8e9eb;
+}
+
+.filters {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filters :global(.ant-input-affix-wrapper) {
+  border-radius: 10px;
+}
+
+.filters :global(.ant-select-selector) {
+  border-radius: 10px !important;
+}
+
+.filters :global(.ant-btn) {
+  border-radius: 8px;
+}
+
+/* 表格样式 */
+.issues :global(.ant-table) {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e8e9eb;
+}
+
+.issues :global(.ant-table-thead > tr > th) {
+  background: #f9fafb;
+  font-weight: 600;
+  color: #1a1f36;
+  border-bottom: 1px solid #e8e9eb;
+  padding: 14px 16px;
+}
+
+.issues :global(.ant-table-tbody > tr > td) {
+  border-bottom: 1px solid #f5f5f5;
+  padding: 14px 16px;
+}
+
+.issues :global(.ant-table-tbody > tr:hover > td) {
+  background: #f9fafb;
+}
+
+.issues :global(.ant-table-tbody > tr:last-child > td) {
+  border-bottom: none;
+}
+
+.issues :global(.ant-pagination) {
+  margin-top: 20px;
+}
+
+.issues :global(.ant-pagination-item) {
+  border-radius: 8px;
+}
+
+.issues :global(.ant-pagination-item-active) {
+  border-color: #8b5cf6;
+}
+
+.issues :global(.ant-pagination-item-active a) {
+  color: #8b5cf6;
+}
+
+/* 任务标识 */
+.issueKey {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 13px;
+  color: #8b5cf6;
+  cursor: pointer;
+  font-weight: 500;
+  padding: 2px 8px;
+  background: rgba(139, 92, 246, 0.1);
+  border-radius: 4px;
+}
+
+.issueKey:hover {
+  background: rgba(139, 92, 246, 0.15);
+}
+
+/* 标签样式 */
+.issues :global(.ant-tag) {
+  border-radius: 6px;
+  border: none;
+  font-weight: 500;
+}
+
+/* 创建弹窗 */
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* 响应式 */
+@media (max-width: 992px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .filters {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 576px) {
+  .header {
+    padding: 16px;
+    border-radius: 12px;
+  }
+  
+  .toolbar {
+    padding: 12px 16px;
+  }
+}

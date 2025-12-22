@@ -1,0 +1,178 @@
+/* 登录页面样式 - 科技感未来风格 */
+.loginContainer {
+  width: 100%;
+  max-width: 380px;
+}
+
+.loginHeader {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.loginHeader h2 {
+  font-size: 28px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #fff 0%, #90caf9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.5px;
+}
+
+.loginHeader p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Form Styles */
+.loginContainer :global(.ant-form-item) {
+  margin-bottom: 24px;
+}
+
+.loginContainer :global(.ant-input-affix-wrapper),
+.loginContainer :global(.ant-input) {
+  height: 50px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 15px;
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+.loginContainer :global(.ant-input-affix-wrapper:hover),
+.loginContainer :global(.ant-input:hover) {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.loginContainer :global(.ant-input-affix-wrapper:focus),
+.loginContainer :global(.ant-input-affix-wrapper-focused),
+.loginContainer :global(.ant-input:focus) {
+  border-color: #2b7de9;
+  background: rgba(43, 125, 233, 0.08);
+  box-shadow: 0 0 0 2px rgba(43, 125, 233, 0.15);
+}
+
+.loginContainer :global(.ant-input-affix-wrapper .ant-input) {
+  background: transparent;
+  color: #fff;
+}
+
+.loginContainer :global(.ant-input::placeholder) {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.loginContainer :global(.ant-input-prefix) {
+  color: rgba(255, 255, 255, 0.4);
+  margin-right: 12px;
+  font-size: 16px;
+}
+
+.loginContainer :global(.ant-input-password-icon) {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.loginContainer :global(.ant-input-password-icon:hover) {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.loginContainer :global(.ant-btn-primary) {
+  height: 50px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #2b7de9 0%, #1565c0 100%);
+  border: none;
+  box-shadow: 0 4px 16px rgba(43, 125, 233, 0.35);
+  transition: all 0.3s ease;
+}
+
+.loginContainer :global(.ant-btn-primary:hover) {
+  background: linear-gradient(135deg, #1976d2 0%, #0d47a1 100%);
+  box-shadow: 0 6px 24px rgba(43, 125, 233, 0.45);
+  transform: translateY(-1px);
+}
+
+.loginContainer :global(.ant-checkbox-wrapper) {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.loginContainer :global(.ant-checkbox-wrapper:hover) {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.loginContainer :global(.ant-checkbox-inner) {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.loginContainer :global(.ant-checkbox:hover .ant-checkbox-inner) {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.loginContainer :global(.ant-checkbox-checked .ant-checkbox-inner) {
+  background: #2b7de9;
+  border-color: #2b7de9;
+}
+
+.loginOptions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.forgotLink {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.forgotLink:hover {
+  color: #64b5f6;
+}
+
+.loginFooter {
+  text-align: center;
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.loginFooter p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 0;
+}
+
+.loginFooter a {
+  color: #64b5f6;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.loginFooter a:hover {
+  color: #90caf9;
+}
+
+/* 响应式 */
+@media (max-width: 576px) {
+  .loginContainer {
+    max-width: 100%;
+  }
+  
+  .loginHeader h2 {
+    font-size: 24px;
+  }
+  
+  .loginContainer :global(.ant-input-affix-wrapper),
+  .loginContainer :global(.ant-input),
+  .loginContainer :global(.ant-btn-primary) {
+    height: 46px;
+  }
+}

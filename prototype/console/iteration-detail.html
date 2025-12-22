@@ -1,0 +1,2160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprint 12 - 迭代详情 - 摩塔 Mota</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/console.css">
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="console-page">
+    <!-- 顶部导航栏 -->
+    <header class="console-header">
+        <div class="console-header-left">
+            <!-- 移动端菜单按钮 -->
+            <button class="mobile-menu-btn" onclick="toggleSidebar()" title="菜单">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+            </button>
+            <a href="../index.html" class="console-logo">
+                <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
+                    <rect width="48" height="48" rx="10" fill="#2b7de9"/>
+                    <path d="M14 24L22 32L34 16" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>摩塔</span>
+            </a>
+            
+            <div class="team-switcher">
+                <button class="team-switcher-btn" onclick="toggleTeamSwitcher(event)">
+                    <div class="team-avatar"><span>示</span></div>
+                    <span class="team-name">示例团队</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </button>
+                <!-- Team Switcher Dropdown -->
+                <div class="team-dropdown" id="teamDropdown">
+                    <div class="dropdown-header">切换团队</div>
+                    <div class="dropdown-body">
+                        <a href="#" class="team-option active">
+                            <div class="team-avatar"><span>示</span></div>
+                            <div class="team-info">
+                                <span class="team-name">示例团队</span>
+                                <span class="team-role">管理员</span>
+                            </div>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="team-option">
+                            <div class="team-avatar" style="background: #10b981;"><span>开</span></div>
+                            <div class="team-info">
+                                <span class="team-name">开发团队</span>
+                                <span class="team-role">成员</span>
+                            </div>
+                        </a>
+                        <a href="#" class="team-option">
+                            <div class="team-avatar" style="background: #f59e0b;"><span>产</span></div>
+                            <div class="team-info">
+                                <span class="team-name">产品团队</span>
+                                <span class="team-role">成员</span>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="dropdown-footer">
+                        <a href="#" class="create-team-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                            创建新团队
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="console-header-center">
+            <div class="global-search" onclick="openSearchModal()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" placeholder="搜索项目、事项、代码..." readonly>
+                <kbd>⌘K</kbd>
+            </div>
+        </div>
+        
+        <div class="console-header-right">
+            <div class="header-actions">
+                <div class="create-menu-wrapper">
+                    <button class="header-action-btn" title="新建" onclick="toggleCreateMenu(event)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                    </button>
+                    <!-- Create Menu Dropdown -->
+                    <div class="create-dropdown" id="createDropdown">
+                        <div class="dropdown-header">快速创建</div>
+                        <div class="dropdown-body">
+                            <a href="#" class="dropdown-item" onclick="openAddIssueModal()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                </svg>
+                                添加事项到迭代
+                            </a>
+                            <a href="issue-detail.html" class="dropdown-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                </svg>
+                                新建需求
+                            </a>
+                            <a href="issue-detail.html" class="dropdown-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                    <polyline points="22 4 12 14.01 9 11.01"/>
+                                </svg>
+                                新建任务
+                            </a>
+                            <a href="issue-detail.html" class="dropdown-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <line x1="12" y1="8" x2="12" y2="12"/>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                </svg>
+                                新建缺陷
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="notification-wrapper">
+                    <button class="header-action-btn" title="通知" onclick="toggleNotificationDropdown(event)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
+                        <span class="notification-badge">3</span>
+                    </button>
+                    <!-- Notification Dropdown -->
+                    <div class="notification-dropdown" id="notificationDropdown">
+                        <div class="dropdown-header">
+                            <span>通知</span>
+                            <a href="#" class="mark-all-read">全部已读</a>
+                        </div>
+                        <div class="dropdown-body">
+                            <a href="#" class="notification-item unread">
+                                <div class="notification-icon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="23 4 23 10 17 10"/>
+                                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                                    </svg>
+                                </div>
+                                <div class="notification-content">
+                                    <p class="notification-text"><strong>Sprint 12</strong> 即将结束，剩余 5 天</p>
+                                    <span class="notification-time">10 分钟前</span>
+                                </div>
+                            </a>
+                            <a href="#" class="notification-item unread">
+                                <div class="notification-icon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                        <polyline points="22 4 12 14.01 9 11.01"/>
+                                    </svg>
+                                </div>
+                                <div class="notification-content">
+                                    <p class="notification-text"><strong>李四</strong> 完成了任务 "用户登录功能优化"</p>
+                                    <span class="notification-time">30 分钟前</span>
+                                </div>
+                            </a>
+                            <a href="#" class="notification-item unread">
+                                <div class="notification-icon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="12" y1="8" x2="12" y2="12"/>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                    </svg>
+                                </div>
+                                <div class="notification-content">
+                                    <p class="notification-text"><strong>王五</strong> 报告了一个新缺陷</p>
+                                    <span class="notification-time">1 小时前</span>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="dropdown-footer">
+                            <a href="notifications.html">查看全部通知</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="user-menu">
+                <button class="user-menu-btn" onclick="toggleUserMenu(event)">
+                    <div class="user-avatar">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" alt="用户头像">
+                    </div>
+                </button>
+                <!-- User Menu Dropdown -->
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="user-info">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" alt="用户头像">
+                        <div class="user-details">
+                            <span class="user-name">张三</span>
+                            <span class="user-email">zhangsan@example.com</span>
+                        </div>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-body">
+                        <a href="profile-settings.html" class="dropdown-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                            个人设置
+                        </a>
+                        <a href="settings.html" class="dropdown-item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="3"/>
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                            </svg>
+                            团队设置
+                        </a>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-body">
+                        <a href="../login.html" class="dropdown-item text-danger">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                <polyline points="16 17 21 12 16 7"/>
+                                <line x1="21" y1="12" x2="9" y2="12"/>
+                            </svg>
+                            退出登录
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- 主体内容区域 -->
+    <div class="console-body">
+        <!-- 左侧导航栏 -->
+        <aside class="console-sidebar">
+            <nav class="sidebar-nav">
+                <div class="sidebar-section">
+                    <a href="dashboard.html" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"/>
+                            <rect x="14" y="3" width="7" height="7"/>
+                            <rect x="14" y="14" width="7" height="7"/>
+                            <rect x="3" y="14" width="7" height="7"/>
+                        </svg>
+                        <span>工作台</span>
+                    </a>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">项目协同</div>
+                    <a href="projects.html" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        <span>项目</span>
+                    </a>
+                    <a href="issues.html" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                        <span>事项</span>
+                        <span class="sidebar-badge">12</span>
+                    </a>
+                    <a href="iterations.html" class="sidebar-item active">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"/>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                        </svg>
+                        <span>迭代</span>
+                    </a>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">代码管理</div>
+                    <a href="repos.html" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 18l6-6-6-6"/>
+                            <path d="M8 6l-6 6 6 6"/>
+                        </svg>
+                        <span>代码仓库</span>
+                    </a>
+                    <a href="merge-requests.html" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="18" cy="18" r="3"/>
+                            <circle cx="6" cy="6" r="3"/>
+                            <path d="M6 21V9a9 9 0 0 0 9 9"/>
+                        </svg>
+                        <span>合并请求</span>
+                        <span class="sidebar-badge">5</span>
+                    </a>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">持续集成</div>
+                    <a href="pipelines.html" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="6" y1="3" x2="6" y2="15"/>
+                            <circle cx="18" cy="6" r="3"/>
+                            <circle cx="6" cy="18" r="3"/>
+                            <path d="M18 9a9 9 0 0 1-9 9"/>
+                        </svg>
+                        <span>构建计划</span>
+                    </a>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <a href="settings.html" class="sidebar-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    <span>团队设置</span>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- 主内容区域 -->
+        <main class="console-main">
+            <div class="console-content iteration-detail-page">
+                <!-- 面包屑导航 -->
+                <div class="breadcrumb">
+                    <a href="projects.html">项目</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <a href="project-detail.html">前端项目</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <a href="iterations.html">迭代</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-current">Sprint 12</span>
+                </div>
+                
+                <!-- 迭代头部 -->
+                <div class="iteration-header">
+                    <div class="iteration-header-left">
+                        <div class="iteration-status-badge active">进行中</div>
+                        <h1 class="iteration-title">Sprint 12</h1>
+                        <p class="iteration-date">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                            2024-01-08 ~ 2024-01-21 (剩余 5 天)
+                        </p>
+                    </div>
+                    <div class="iteration-header-actions">
+                        <button class="btn btn-secondary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                            编辑
+                        </button>
+                        <button class="btn btn-primary" onclick="openAddIssueModal()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                            添加事项
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 迭代统计 -->
+                <div class="iteration-stats-row">
+                    <div class="iteration-stat-item">
+                        <span class="stat-value">12</span>
+                        <span class="stat-label">总事项</span>
+                    </div>
+                    <div class="iteration-stat-item">
+                        <span class="stat-value completed">8</span>
+                        <span class="stat-label">已完成</span>
+                    </div>
+                    <div class="iteration-stat-item">
+                        <span class="stat-value processing">3</span>
+                        <span class="stat-label">进行中</span>
+                    </div>
+                    <div class="iteration-stat-item">
+                        <span class="stat-value pending">1</span>
+                        <span class="stat-label">待处理</span>
+                    </div>
+                    <div class="iteration-stat-item">
+                        <span class="stat-value">26</span>
+                        <span class="stat-label">故事点</span>
+                    </div>
+                    <div class="iteration-progress-bar">
+                        <div class="progress-label">
+                            <span>完成进度</span>
+                            <span class="progress-percent">65%</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill" style="width: 65%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 视图切换标签 -->
+                <div class="view-tabs">
+                    <button class="view-tab active" data-view="kanban">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="18"/>
+                            <rect x="14" y="3" width="7" height="10"/>
+                        </svg>
+                        看板
+                    </button>
+                    <button class="view-tab" data-view="list">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="8" y1="6" x2="21" y2="6"/>
+                            <line x1="8" y1="12" x2="21" y2="12"/>
+                            <line x1="8" y1="18" x2="21" y2="18"/>
+                            <line x1="3" y1="6" x2="3.01" y2="6"/>
+                            <line x1="3" y1="12" x2="3.01" y2="12"/>
+                            <line x1="3" y1="18" x2="3.01" y2="18"/>
+                        </svg>
+                        列表
+                    </button>
+                    <button class="view-tab" data-view="burndown">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="20" x2="18" y2="10"/>
+                            <line x1="12" y1="20" x2="12" y2="4"/>
+                            <line x1="6" y1="20" x2="6" y2="14"/>
+                        </svg>
+                        燃尽图
+                    </button>
+                </div>
+                
+                <!-- 看板视图 -->
+                <div class="view-content active" id="kanban-view">
+                    <div class="kanban-board">
+                        <!-- 待处理列 -->
+                        <div class="kanban-column" data-status="pending">
+                            <div class="kanban-column-header">
+                                <div class="column-title">
+                                    <span class="column-status-dot pending"></span>
+                                    <span>待处理</span>
+                                    <span class="column-count">1</span>
+                                </div>
+                                <button class="column-add-btn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="12" y1="5" x2="12" y2="19"/>
+                                        <line x1="5" y1="12" x2="19" y2="12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="kanban-column-body">
+                                <div class="kanban-card" draggable="true">
+                                    <div class="card-header">
+                                        <span class="issue-type-icon requirement">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                                <polyline points="14 2 14 8 20 8"/>
+                                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                                <line x1="16" y1="17" x2="8" y2="17"/>
+                                            </svg>
+                                        </span>
+                                        <span class="issue-id">#1024</span>
+                                    </div>
+                                    <a href="issue-detail.html" class="card-title">新增数据导出功能</a>
+                                    <div class="card-meta">
+                                        <span class="priority-badge high">高</span>
+                                        <span class="story-points">5 SP</span>
+                                    </div>
+                                    <div class="card-footer">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=1" alt="" class="assignee-avatar">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 进行中列 -->
+                        <div class="kanban-column" data-status="processing">
+                            <div class="kanban-column-header">
+                                <div class="column-title">
+                                    <span class="column-status-dot processing"></span>
+                                    <span>进行中</span>
+                                    <span class="column-count">3</span>
+                                </div>
+                                <button class="column-add-btn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="12" y1="5" x2="12" y2="19"/>
+                                        <line x1="5" y1="12" x2="19" y2="12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="kanban-column-body">
+                                <div class="kanban-card" draggable="true">
+                                    <div class="card-header">
+                                        <span class="issue-type-icon requirement">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                                <polyline points="14 2 14 8 20 8"/>
+                                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                                <line x1="16" y1="17" x2="8" y2="17"/>
+                                            </svg>
+                                        </span>
+                                        <span class="issue-id">#1020</span>
+                                    </div>
+                                    <a href="issue-detail.html" class="card-title">用户登录功能优化</a>
+                                    <div class="card-meta">
+                                        <span class="priority-badge high">高</span>
+                                        <span class="story-points">8 SP</span>
+                                    </div>
+                                    <div class="card-footer">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=2" alt="" class="assignee-avatar">
+                                    </div>
+                                </div>
+                                
+                                <div class="kanban-card" draggable="true">
+                                    <div class="card-header">
+                                        <span class="issue-type-icon task">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                                <polyline points="22 4 12 14.01 9 11.01"/>
+                                            </svg>
+                                        </span>
+                                        <span class="issue-id">#1022</span>
+                                    </div>
+                                    <a href="issue-detail.html" class="card-title">编写API接口文档</a>
+                                    <div class="card-meta">
+                                        <span class="priority-badge medium">中</span>
+                                        <span class="story-points">3 SP</span>
+                                    </div>
+                                    <div class="card-footer">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=3" alt="" class="assignee-avatar">
+                                    </div>
+                                </div>
+                                
+                                <div class="kanban-card" draggable="true">
+                                    <div class="card-header">
+                                        <span class="issue-type-icon bug">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10"/>
+                                                <line x1="12" y1="8" x2="12" y2="12"/>
+                                                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                            </svg>
+                                        </span>
+                                        <span class="issue-id">#1023</span>
+                                    </div>
+                                    <a href="issue-detail.html" class="card-title">登录页面在Safari浏览器显示异常</a>
+                                    <div class="card-meta">
+                                        <span class="priority-badge high">高</span>
+                                        <span class="story-points">2 SP</span>
+                                    </div>
+                                    <div class="card-footer">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=4" alt="" class="assignee-avatar">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 测试中列 -->
+                        <div class="kanban-column" data-status="testing">
+                            <div class="kanban-column-header">
+                                <div class="column-title">
+                                    <span class="column-status-dot testing"></span>
+                                    <span>测试中</span>
+                                    <span class="column-count">2</span>
+                                </div>
+                                <button class="column-add-btn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="12" y1="5" x2="12" y2="19"/>
+                                        <line x1="5" y1="12" x2="19" y2="12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="kanban-column-body">
+                                <div class="kanban-card" draggable="true">
+                                    <div class="card-header">
+                                        <span class="issue-type-icon task">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                                <polyline points="22 4 12 14.01 9 11.01"/>
+                                            </svg>
+                                        </span>
+                                        <span class="issue-id">#1018</span>
+                                    </div>
+                                    <a href="issue-detail.html" class="card-title">实现登录表单验证</a>
+                                    <div class="card-meta">
+                                        <span class="priority-badge medium">中</span>
+                                        <span class="story-points">3 SP</span>
+                                    </div>
+                                    <div class="card-footer">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=2" alt="" class="assignee-avatar">
+                                    </div>
+                                </div>
+                                
+                                <div class="kanban-card" draggable="true">
+                                    <div class="card-header">
+                                        <span class="issue-type-icon task">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                                <polyline points="22 4 12 14.01 9 11.01"/>
+                                            </svg>
+                                        </span>
+                                        <span class="issue-id">#1019</span>
+                                    </div>
+                                    <a href="issue-detail.html" class="card-title">添加记住密码功能</a>
+                                    <div class="card-meta">
+                                        <span class="priority-badge low">低</span>
+                                        <span class="story-points">2 SP</span>
+                                    </div>
+                                    <div class="card-footer">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=3" alt="" class="assignee-avatar">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 已完成列 -->
+                        <div class="kanban-column" data-status="completed">
+                            <div class="kanban-column-header">
+                                <div class="column-title">
+                                    <span class="column-status-dot completed"></span>
+                                    <span>已完成</span>
+                                    <span class="column-count">6</span>
+                                </div>
+                            </div>
+                            <div class="kanban-column-body">
+                                <div class="kanban-card completed" draggable="true">
+                                    <div class="card-header">
+                                        <span class="issue-type-icon task">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                                <polyline points="22 4 12 14.01 9 11.01"/>
+                                            </svg>
+                                        </span>
+                                        <span class="issue-id">#1015</span>
+                                    </div>
+                                    <a href="issue-detail.html" class="card-title">设计登录页面UI</a>
+                                    <div class="card-meta">
+                                        <span class="story-points">3 SP</span>
+                                    </div>
+                                    <div class="card-footer">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=5" alt="" class="assignee-avatar">
+                                    </div>
+                                </div>
+                                
+                                <div class="kanban-card completed" draggable="true">
+                                    <div class="card-header">
+                                        <span class="issue-type-icon task">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                                <polyline points="22 4 12 14.01 9 11.01"/>
+                                            </svg>
+                                        </span>
+                                        <span class="issue-id">#1016</span>
+                                    </div>
+                                    <a href="issue-detail.html" class="card-title">实现登录API接口</a>
+                                    <div class="card-meta">
+                                        <span class="story-points">5 SP</span>
+                                    </div>
+                                    <div class="card-footer">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=6" alt="" class="assignee-avatar">
+                                    </div>
+                                </div>
+                                
+                                <div class="kanban-card completed" draggable="true">
+                                    <div class="card-header">
+                                        <span class="issue-type-icon task">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                                <polyline points="22 4 12 14.01 9 11.01"/>
+                                            </svg>
+                                        </span>
+                                        <span class="issue-id">#1017</span>
+                                    </div>
+                                    <a href="issue-detail.html" class="card-title">集成第三方登录</a>
+                                    <div class="card-meta">
+                                        <span class="story-points">5 SP</span>
+                                    </div>
+                                    <div class="card-footer">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=2" alt="" class="assignee-avatar">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 列表视图 -->
+                <div class="view-content" id="list-view">
+                    <div class="issues-table-container">
+                        <table class="issues-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-id">ID</th>
+                                    <th class="col-title">标题</th>
+                                    <th class="col-type">类型</th>
+                                    <th class="col-status">状态</th>
+                                    <th class="col-priority">优先级</th>
+                                    <th class="col-assignee">负责人</th>
+                                    <th class="col-points">故事点</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="col-id">#1024</td>
+                                    <td class="col-title"><a href="issue-detail.html">新增数据导出功能</a></td>
+                                    <td class="col-type"><span class="type-badge requirement">需求</span></td>
+                                    <td class="col-status"><span class="status-badge pending">待处理</span></td>
+                                    <td class="col-priority"><span class="priority-badge high">高</span></td>
+                                    <td class="col-assignee">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=1" alt="" class="table-avatar">
+                                        张三
+                                    </td>
+                                    <td class="col-points">5</td>
+                                </tr>
+                                <tr>
+                                    <td class="col-id">#1020</td>
+                                    <td class="col-title"><a href="issue-detail.html">用户登录功能优化</a></td>
+                                    <td class="col-type"><span class="type-badge requirement">需求</span></td>
+                                    <td class="col-status"><span class="status-badge processing">进行中</span></td>
+                                    <td class="col-priority"><span class="priority-badge high">高</span></td>
+                                    <td class="col-assignee">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=2" alt="" class="table-avatar">
+                                        李四
+                                    </td>
+                                    <td class="col-points">8</td>
+                                </tr>
+                                <tr>
+                                    <td class="col-id">#1022</td>
+                                    <td class="col-title"><a href="issue-detail.html">编写API接口文档</a></td>
+                                    <td class="col-type"><span class="type-badge task">任务</span></td>
+                                    <td class="col-status"><span class="status-badge processing">进行中</span></td>
+                                    <td class="col-priority"><span class="priority-badge medium">中</span></td>
+                                    <td class="col-assignee">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=3" alt="" class="table-avatar">
+                                        王五
+                                    </td>
+                                    <td class="col-points">3</td>
+                                </tr>
+                                <tr>
+                                    <td class="col-id">#1023</td>
+                                    <td class="col-title"><a href="issue-detail.html">登录页面在Safari浏览器显示异常</a></td>
+                                    <td class="col-type"><span class="type-badge bug">缺陷</span></td>
+                                    <td class="col-status"><span class="status-badge processing">进行中</span></td>
+                                    <td class="col-priority"><span class="priority-badge high">高</span></td>
+                                    <td class="col-assignee">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=4" alt="" class="table-avatar">
+                                        赵六
+                                    </td>
+                                    <td class="col-points">2</td>
+                                </tr>
+                                <tr>
+                                    <td class="col-id">#1018</td>
+                                    <td class="col-title"><a href="issue-detail.html">实现登录表单验证</a></td>
+                                    <td class="col-type"><span class="type-badge task">任务</span></td>
+                                    <td class="col-status"><span class="status-badge testing">测试中</span></td>
+                                    <td class="col-priority"><span class="priority-badge medium">中</span></td>
+                                    <td class="col-assignee">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=2" alt="" class="table-avatar">
+                                        李四
+                                    </td>
+                                    <td class="col-points">3</td>
+                                </tr>
+                                <tr>
+                                    <td class="col-id">#1015</td>
+                                    <td class="col-title"><a href="issue-detail.html">设计登录页面UI</a></td>
+                                    <td class="col-type"><span class="type-badge task">任务</span></td>
+                                    <td class="col-status"><span class="status-badge completed">已完成</span></td>
+                                    <td class="col-priority"><span class="priority-badge medium">中</span></td>
+                                    <td class="col-assignee">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=5" alt="" class="table-avatar">
+                                        钱七
+                                    </td>
+                                    <td class="col-points">3</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- 燃尽图视图 -->
+                <div class="view-content" id="burndown-view">
+                    <div class="burndown-container">
+                        <div class="burndown-header">
+                            <h3>迭代燃尽图</h3>
+                            <div class="burndown-legend">
+                                <span class="legend-item">
+                                    <span class="legend-line ideal"></span>
+                                    理想燃尽
+                                </span>
+                                <span class="legend-item">
+                                    <span class="legend-line actual"></span>
+                                    实际燃尽
+                                </span>
+                            </div>
+                        </div>
+                        <div class="burndown-chart">
+                            <svg viewBox="0 0 800 400" class="chart-svg">
+                                <!-- 网格线 -->
+                                <g class="grid-lines">
+                                    <line x1="60" y1="50" x2="60" y2="350" stroke="#e5e7eb" stroke-width="1"/>
+                                    <line x1="60" y1="350" x2="760" y2="350" stroke="#e5e7eb" stroke-width="1"/>
+                                    <!-- 水平网格线 -->
+                                    <line x1="60" y1="110" x2="760" y2="110" stroke="#f3f4f6" stroke-width="1"/>
+                                    <line x1="60" y1="170" x2="760" y2="170" stroke="#f3f4f6" stroke-width="1"/>
+                                    <line x1="60" y1="230" x2="760" y2="230" stroke="#f3f4f6" stroke-width="1"/>
+                                    <line x1="60" y1="290" x2="760" y2="290" stroke="#f3f4f6" stroke-width="1"/>
+                                </g>
+                                
+                                <!-- Y轴标签 -->
+                                <g class="y-labels" fill="#6b7280" font-size="12">
+                                    <text x="50" y="55" text-anchor="end">26</text>
+                                    <text x="50" y="115" text-anchor="end">20</text>
+                                    <text x="50" y="175" text-anchor="end">15</text>
+                                    <text x="50" y="235" text-anchor="end">10</text>
+                                    <text x="50" y="295" text-anchor="end">5</text>
+                                    <text x="50" y="355" text-anchor="end">0</text>
+                                </g>
+                                
+                                <!-- X轴标签 -->
+                                <g class="x-labels" fill="#6b7280" font-size="12">
+                                    <text x="60" y="375" text-anchor="middle">1/8</text>
+                                    <text x="160" y="375" text-anchor="middle">1/10</text>
+                                    <text x="260" y="375" text-anchor="middle">1/12</text>
+                                    <text x="360" y="375" text-anchor="middle">1/14</text>
+                                    <text x="460" y="375" text-anchor="middle">1/16</text>
+                                    <text x="560" y="375" text-anchor="middle">1/18</text>
+                                    <text x="660" y="375" text-anchor="middle">1/20</text>
+                                    <text x="760" y="375" text-anchor="middle">1/21</text>
+                                </g>
+                                
+                                <!-- 理想燃尽线 -->
+                                <line x1="60" y1="50" x2="760" y2="350" stroke="#94a3b8" stroke-width="2" stroke-dasharray="8,4"/>
+                                
+                                <!-- 实际燃尽线 -->
+                                <polyline 
+                                    points="60,50 160,80 260,110 360,150 460,200 560,260" 
+                                    fill="none" 
+                                    stroke="#2b7de9" 
+                                    stroke-width="3"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"/>
+                                
+                                <!-- 数据点 -->
+                                <g class="data-points">
+                                    <circle cx="60" cy="50" r="5" fill="#2b7de9"/>
+                                    <circle cx="160" cy="80" r="5" fill="#2b7de9"/>
+                                    <circle cx="260" cy="110" r="5" fill="#2b7de9"/>
+                                    <circle cx="360" cy="150" r="5" fill="#2b7de9"/>
+                                    <circle cx="460" cy="200" r="5" fill="#2b7de9"/>
+                                    <circle cx="560" cy="260" r="5" fill="#2b7de9"/>
+                                </g>
+                                
+                                <!-- 今日标记 -->
+                                <line x1="560" y1="50" x2="560" y2="350" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4,4"/>
+                                <text x="560" y="40" fill="#f59e0b" font-size="12" text-anchor="middle">今日</text>
+                            </svg>
+                        </div>
+                        
+                        <div class="burndown-stats">
+                            <div class="burndown-stat-item">
+                                <span class="stat-label">计划故事点</span>
+                                <span class="stat-value">26 SP</span>
+                            </div>
+                            <div class="burndown-stat-item">
+                                <span class="stat-label">已完成故事点</span>
+                                <span class="stat-value">17 SP</span>
+                            </div>
+                            <div class="burndown-stat-item">
+                                <span class="stat-label">剩余故事点</span>
+                                <span class="stat-value">9 SP</span>
+                            </div>
+                            <div class="burndown-stat-item">
+                                <span class="stat-label">预计完成日期</span>
+                                <span class="stat-value">1月20日</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 迭代回顾区域 -->
+                <div class="iteration-retrospective">
+                    <div class="retrospective-header">
+                        <h3>迭代回顾</h3>
+                        <button class="btn btn-secondary btn-sm">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                            编辑回顾
+                        </button>
+                    </div>
+                    <div class="retrospective-content">
+                        <div class="retrospective-column good">
+                            <div class="column-header">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+                                </svg>
+                                <span>做得好的</span>
+                            </div>
+                            <ul class="retrospective-list">
+                                <li>团队协作效率提升，每日站会准时进行</li>
+                                <li>代码评审质量提高，发现问题更及时</li>
+                                <li>需求拆分更加合理，任务粒度适中</li>
+                            </ul>
+                        </div>
+                        <div class="retrospective-column improve">
+                            <div class="column-header">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <line x1="12" y1="8" x2="12" y2="12"/>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                </svg>
+                                <span>需要改进的</span>
+                            </div>
+                            <ul class="retrospective-list">
+                                <li>代码评审覆盖率需要提高</li>
+                                <li>文档更新不够及时</li>
+                                <li>跨团队沟通需要加强</li>
+                            </ul>
+                        </div>
+                        <div class="retrospective-column action">
+                            <div class="column-header">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                                </svg>
+                                <span>行动计划</span>
+                            </div>
+                            <ul class="retrospective-list">
+                                <li>下个迭代增加测试任务的故事点</li>
+                                <li>每个需求完成后立即更新文档</li>
+                                <li>每周增加一次跨团队同步会议</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Add Issue Modal -->
+    <div class="modal" id="addIssueModal">
+        <div class="modal-overlay" onclick="closeAddIssueModal()"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">添加事项到迭代</h3>
+                <button class="modal-close" onclick="closeAddIssueModal()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="search-issues">
+                    <div class="search-input-wrapper">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input type="text" class="form-input" placeholder="搜索事项...">
+                    </div>
+                </div>
+                <div class="available-issues">
+                    <div class="issue-checkbox-item">
+                        <input type="checkbox" id="issue1">
+                        <label for="issue1">
+                            <span class="issue-type requirement">需求</span>
+                            <span class="issue-id">#1025</span>
+                            <span class="issue-title">用户权限管理功能</span>
+                        </label>
+                    </div>
+                    <div class="issue-checkbox-item">
+                        <input type="checkbox" id="issue2">
+                        <label for="issue2">
+                            <span class="issue-type task">任务</span>
+                            <span class="issue-id">#1026</span>
+                            <span class="issue-title">优化数据库查询性能</span>
+                        </label>
+                    </div>
+                    <div class="issue-checkbox-item">
+                        <input type="checkbox" id="issue3">
+                        <label for="issue3">
+                            <span class="issue-type bug">缺陷</span>
+                            <span class="issue-id">#1027</span>
+                            <span class="issue-title">修复导出功能异常</span>
+                        </label>
+                    </div>
+                    <div class="issue-checkbox-item">
+                        <input type="checkbox" id="issue4">
+                        <label for="issue4">
+                            <span class="issue-type requirement">需求</span>
+                            <span class="issue-id">#1028</span>
+                            <span class="issue-title">添加数据统计报表</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeAddIssueModal()">取消</button>
+                <button class="btn btn-primary">添加选中事项</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Iteration Modal -->
+    <div class="modal" id="editIterationModal">
+        <div class="modal-overlay" onclick="closeEditIterationModal()"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">编辑迭代</h3>
+                <button class="modal-close" onclick="closeEditIterationModal()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="iteration-form">
+                    <div class="form-group">
+                        <label class="form-label required">迭代名称</label>
+                        <input type="text" class="form-input" value="Sprint 12">
+                    </div>
+                    
+                    <div class="form-row two-cols">
+                        <div class="form-group">
+                            <label class="form-label required">开始日期</label>
+                            <input type="date" class="form-input" value="2024-01-08">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">结束日期</label>
+                            <input type="date" class="form-input" value="2024-01-21">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">迭代目标</label>
+                        <textarea class="form-textarea" placeholder="描述本次迭代的目标...">完成用户登录功能的开发和测试</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">迭代状态</label>
+                        <select class="form-select">
+                            <option value="upcoming">未开始</option>
+                            <option value="current" selected>进行中</option>
+                            <option value="completed">已完成</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeEditIterationModal()">取消</button>
+                <button class="btn btn-primary">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Global Search Modal -->
+    <div class="search-modal-overlay" id="searchModalOverlay" onclick="closeSearchModal()">
+        <div class="search-modal" onclick="event.stopPropagation()">
+            <div class="search-modal-header">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" class="search-modal-input" placeholder="搜索事项、项目、代码..." autofocus>
+                <kbd>ESC</kbd>
+            </div>
+            <div class="search-modal-body">
+                <div class="search-section">
+                    <div class="search-section-title">本迭代事项</div>
+                    <a href="issue-detail.html" class="search-result-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                        </svg>
+                        <div class="result-info">
+                            <span class="result-title">#1024 新增数据导出功能</span>
+                            <span class="result-meta">需求 · 待处理</span>
+                        </div>
+                    </a>
+                    <a href="issue-detail.html" class="search-result-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                        </svg>
+                        <div class="result-info">
+                            <span class="result-title">#1020 用户登录功能优化</span>
+                            <span class="result-meta">需求 · 进行中</span>
+                        </div>
+                    </a>
+                    <a href="issue-detail.html" class="search-result-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                        <div class="result-info">
+                            <span class="result-title">#1023 登录页面在Safari浏览器显示异常</span>
+                            <span class="result-meta">缺陷 · 进行中</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="search-section">
+                    <div class="search-section-title">快捷操作</div>
+                    <a href="#" class="search-result-item" onclick="closeSearchModal(); openAddIssueModal();">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        <div class="result-info">
+                            <span class="result-title">添加事项到迭代</span>
+                        </div>
+                    </a>
+                    <a href="kanban.html" class="search-result-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="5" height="18" rx="1"/>
+                            <rect x="10" y="3" width="5" height="12" rx="1"/>
+                            <rect x="17" y="3" width="5" height="8" rx="1"/>
+                        </svg>
+                        <div class="result-info">
+                            <span class="result-title">查看看板</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        /* 迭代详情页面样式 */
+        .iteration-detail-page {
+            max-width: 1600px;
+        }
+        
+        /* 面包屑 */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .breadcrumb a {
+            color: var(--text-secondary);
+        }
+        
+        .breadcrumb a:hover {
+            color: var(--primary-color);
+        }
+        
+        .breadcrumb-separator {
+            color: var(--text-placeholder);
+        }
+        
+        .breadcrumb-current {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        
+        /* 迭代头部 */
+        .iteration-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        
+        .iteration-header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .iteration-status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            width: fit-content;
+        }
+        
+        .iteration-status-badge.active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+        }
+        
+        .iteration-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        
+        .iteration-date {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+        
+        .iteration-header-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        /* 迭代统计行 */
+        .iteration-stats-row {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            padding: 20px 24px;
+            background: #fff;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            margin-bottom: 24px;
+        }
+        
+        .iteration-stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .iteration-stat-item .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .iteration-stat-item .stat-value.completed {
+            color: var(--success-color);
+        }
+        
+        .iteration-stat-item .stat-value.processing {
+            color: var(--primary-color);
+        }
+        
+        .iteration-stat-item .stat-value.pending {
+            color: var(--text-secondary);
+        }
+        
+        .iteration-stat-item .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        .iteration-progress-bar {
+            flex: 1;
+            max-width: 300px;
+            margin-left: auto;
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        
+        .progress-percent {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .progress-track {
+            height: 8px;
+            background: var(--bg-light);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), #60a5fa);
+            border-radius: 4px;
+        }
+        
+        /* 视图切换标签 */
+        .view-tabs {
+            display: flex;
+            gap: 4px;
+            padding: 4px;
+            background: #fff;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            margin-bottom: 24px;
+            width: fit-content;
+        }
+        
+        .view-tab {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: none;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .view-tab:hover {
+            background: var(--bg-light);
+            color: var(--text-primary);
+        }
+        
+        .view-tab.active {
+            background: var(--primary-light);
+            color: var(--primary-color);
+        }
+        
+        /* 视图内容 */
+        .view-content {
+            display: none;
+        }
+        
+        .view-content.active {
+            display: block;
+        }
+        
+        /* 看板样式 */
+        .kanban-board {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding-bottom: 16px;
+        }
+        
+        .kanban-column {
+            flex: 0 0 300px;
+            background: var(--bg-light);
+            border-radius: var(--radius-lg);
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 400px);
+        }
+        
+        .kanban-column-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .column-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .column-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .column-status-dot.pending {
+            background: var(--text-secondary);
+        }
+        
+        .column-status-dot.processing {
+            background: var(--primary-color);
+        }
+        
+        .column-status-dot.testing {
+            background: var(--warning-color);
+        }
+        
+        .column-status-dot.completed {
+            background: var(--success-color);
+        }
+        
+        .column-count {
+            padding: 2px 8px;
+            background: #fff;
+            border-radius: 10px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .column-add-btn {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .column-add-btn:hover {
+            background: #fff;
+            color: var(--primary-color);
+        }
+        
+        .kanban-column-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        /* 看板卡片 */
+        .kanban-card {
+            background: #fff;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            cursor: grab;
+            transition: all var(--transition-fast);
+        }
+        
+        .kanban-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        
+        .kanban-card.completed {
+            opacity: 0.7;
+        }
+        
+        .kanban-card .card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .issue-type-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .issue-type-icon.requirement {
+            background: rgba(43, 125, 233, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .issue-type-icon.task {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+        }
+        
+        .issue-type-icon.bug {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-color);
+        }
+        
+        .issue-id {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .kanban-card .card-title {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        
+        .kanban-card .card-title:hover {
+            color: var(--primary-color);
+        }
+        
+        .kanban-card .card-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .priority-badge {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .priority-badge.high {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-color);
+        }
+        
+        .priority-badge.medium {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning-color);
+        }
+        
+        .priority-badge.low {
+            background: rgba(107, 114, 128, 0.1);
+            color: var(--text-secondary);
+        }
+        
+        .story-points {
+            font-size: 11px;
+            color: var(--text-secondary);
+            background: var(--bg-light);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        
+        .kanban-card .card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        
+        .assignee-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+        }
+        
+        /* 列表视图 */
+        .issues-table-container {
+            background: #fff;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+        
+        .issues-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .issues-table th,
+        .issues-table td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .issues-table th {
+            background: var(--bg-light);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+        
+        .issues-table td {
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+        
+        .issues-table tr:hover {
+            background: var(--bg-light);
+        }
+        
+        .issues-table .col-title a {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        
+        .issues-table .col-title a:hover {
+            color: var(--primary-color);
+        }
+        
+        .type-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .type-badge.requirement {
+            background: rgba(43, 125, 233, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .type-badge.task {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+        }
+        
+        .type-badge.bug {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-color);
+        }
+        
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-badge.pending {
+            background: rgba(107, 114, 128, 0.1);
+            color: var(--text-secondary);
+        }
+        
+        .status-badge.processing {
+            background: rgba(43, 125, 233, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .status-badge.testing {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning-color);
+        }
+        
+        .status-badge.completed {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+        }
+        
+        .table-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        
+        .col-assignee {
+            display: flex;
+            align-items: center;
+        }
+        
+        /* 燃尽图 */
+        .burndown-container {
+            background: #fff;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+        }
+        
+        .burndown-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        
+        .burndown-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        
+        .burndown-legend {
+            display: flex;
+            gap: 24px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        .legend-line {
+            width: 24px;
+            height: 3px;
+            border-radius: 2px;
+        }
+        
+        .legend-line.ideal {
+            background: #94a3b8;
+        }
+        
+        .legend-line.actual {
+            background: var(--primary-color);
+        }
+        
+        .burndown-chart {
+            margin-bottom: 24px;
+        }
+        
+        .chart-svg {
+            width: 100%;
+            height: auto;
+        }
+        
+        .burndown-stats {
+            display: flex;
+            gap: 48px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-light);
+        }
+        
+        .burndown-stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .burndown-stat-item .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        .burndown-stat-item .stat-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        /* 迭代回顾 */
+        .iteration-retrospective {
+            margin-top: 32px;
+            background: #fff;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+        }
+        
+        .retrospective-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .retrospective-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        
+        .retrospective-content {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        
+        .retrospective-column {
+            padding: 16px;
+            border-radius: var(--radius-md);
+        }
+        
+        .retrospective-column.good {
+            background: rgba(16, 185, 129, 0.05);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        
+        .retrospective-column.improve {
+            background: rgba(245, 158, 11, 0.05);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+        
+        .retrospective-column.action {
+            background: rgba(43, 125, 233, 0.05);
+            border: 1px solid rgba(43, 125, 233, 0.2);
+        }
+        
+        .retrospective-column .column-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .retrospective-column.good .column-header {
+            color: var(--success-color);
+        }
+        
+        .retrospective-column.improve .column-header {
+            color: var(--warning-color);
+        }
+        
+        .retrospective-column.action .column-header {
+            color: var(--primary-color);
+        }
+        
+        .retrospective-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .retrospective-list li {
+            padding: 8px 0;
+            font-size: 13px;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .retrospective-list li:last-child {
+            border-bottom: none;
+        }
+        
+        /* 按钮样式 */
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+        
+        /* 响应式 */
+        @media (max-width: 1200px) {
+            .retrospective-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .burndown-stats {
+                flex-wrap: wrap;
+                gap: 24px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .iteration-header {
+                flex-direction: column;
+                gap: 16px;
+            }
+            
+            .iteration-stats-row {
+                flex-wrap: wrap;
+                gap: 16px;
+            }
+            
+            .iteration-progress-bar {
+                width: 100%;
+                max-width: none;
+                margin-left: 0;
+            }
+        }
+        
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 2000;
+            display: none;
+        }
+        
+        .modal.active {
+            display: block;
+        }
+        
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            background: #fff;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-md);
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+        }
+        
+        .modal-close:hover {
+            background: var(--bg-light);
+            color: var(--text-primary);
+        }
+        
+        .modal-body {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+        
+        .modal-footer {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-light);
+        }
+        
+        /* Add Issue Modal Styles */
+        .search-issues {
+            margin-bottom: 16px;
+        }
+        
+        .search-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+        }
+        
+        .search-input-wrapper svg {
+            color: var(--text-secondary);
+        }
+        
+        .search-input-wrapper .form-input {
+            flex: 1;
+            border: none;
+            padding: 0;
+        }
+        
+        .search-input-wrapper .form-input:focus {
+            box-shadow: none;
+        }
+        
+        .available-issues {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .issue-checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            transition: all 0.15s ease;
+        }
+        
+        .issue-checkbox-item:hover {
+            background: var(--bg-light);
+        }
+        
+        .issue-checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .issue-checkbox-item label {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        .issue-checkbox-item .issue-type {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .issue-checkbox-item .issue-type.requirement {
+            background: rgba(43, 125, 233, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .issue-checkbox-item .issue-type.task {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+        }
+        
+        .issue-checkbox-item .issue-type.bug {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-color);
+        }
+        
+        .issue-checkbox-item .issue-id {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .issue-checkbox-item .issue-title {
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+        
+        /* Form Styles */
+        .iteration-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .form-row.two-cols .form-group {
+            flex: 1;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .form-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .form-label.required::after {
+            content: '*';
+            color: var(--error-color);
+            margin-left: 4px;
+        }
+        
+        .form-input,
+        .form-select,
+        .form-textarea {
+            padding: 10px 12px;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            color: var(--text-primary);
+            transition: all var(--transition-fast);
+        }
+        
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(43, 125, 233, 0.1);
+        }
+        
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        /* Issue points badge */
+        .issue-points {
+            padding: 2px 6px;
+            background: var(--bg-light);
+            border-radius: 4px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-left: auto;
+        }
+        
+        /* Drag over state */
+        .kanban-column-body.drag-over {
+            background: rgba(43, 125, 233, 0.05);
+            border: 2px dashed var(--primary-color);
+            border-radius: var(--radius-md);
+        }
+        
+        /* Complete iteration button */
+        .complete-iteration-btn {
+            margin-left: 8px;
+        }
+    </style>
+    
+    <!-- Common JavaScript Module -->
+    <script src="../js/common.js"></script>
+    <!-- Iteration Detail Module -->
+    <script src="../js/iteration-detail.js"></script>
+    
+    <script>
+        // Page-specific modal functions (extend the module)
+        function openAddIssueModal() {
+            if (window.iterationDetailModule) {
+                window.iterationDetailModule.openAddIssueModal();
+            } else {
+                openModal('addIssueModal');
+            }
+        }
+        
+        function closeAddIssueModal() {
+            closeModal('addIssueModal');
+        }
+        
+        function openEditIterationModal() {
+            if (window.iterationDetailModule) {
+                window.iterationDetailModule.openEditModal();
+            } else {
+                openModal('editIterationModal');
+            }
+        }
+        
+        function closeEditIterationModal() {
+            closeModal('editIterationModal');
+        }
+    </script>
+</body>
+</html>

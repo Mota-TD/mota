@@ -1,0 +1,200 @@
+/* 设置页面样式 - 摩塔 Mota */
+.container {
+  padding: 0;
+  min-height: 100%;
+}
+
+/* 页面头部 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  border-radius: 16px;
+  color: #fff;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* 设置卡片 */
+.container :global(.ant-card) {
+  border-radius: 16px;
+  border: 1px solid #e8e9eb;
+}
+
+.container :global(.ant-card-head) {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 16px 24px;
+}
+
+.container :global(.ant-card-head-title) {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* 标签页 */
+.container :global(.ant-tabs-nav) {
+  margin-bottom: 0;
+}
+
+.container :global(.ant-tabs-tab) {
+  padding: 12px 16px;
+  font-weight: 500;
+}
+
+.container :global(.ant-tabs-tab-active) {
+  color: #6366f1;
+}
+
+.container :global(.ant-tabs-ink-bar) {
+  background: #6366f1;
+}
+
+.tabContent {
+  padding: 24px 0;
+}
+
+.tabContent h3 {
+  margin-bottom: 20px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1f36;
+}
+
+/* 表单样式 */
+.container :global(.ant-form-item-label > label) {
+  font-weight: 500;
+  color: #1a1f36;
+}
+
+.container :global(.ant-input),
+.container :global(.ant-select-selector),
+.container :global(.ant-input-password) {
+  border-radius: 10px !important;
+}
+
+.container :global(.ant-input:hover),
+.container :global(.ant-select-selector:hover) {
+  border-color: #6366f1 !important;
+}
+
+.container :global(.ant-input:focus),
+.container :global(.ant-input-focused),
+.container :global(.ant-select-focused .ant-select-selector) {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+}
+
+/* 危险区域 */
+.dangerZone {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 1px solid #fecaca;
+  border-radius: 14px;
+  padding: 24px;
+}
+
+.dangerZone h3 {
+  color: #dc2626;
+  margin-bottom: 8px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.dangerZone > p {
+  color: #9ca3af;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.dangerItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #fff;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+
+.dangerItem:last-child {
+  margin-bottom: 0;
+}
+
+.dangerItem h4 {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1f36;
+}
+
+.dangerItem p {
+  margin: 0;
+  color: #9ca3af;
+  font-size: 13px;
+}
+
+.dangerItem :global(.ant-btn-dangerous) {
+  border-radius: 8px;
+}
+
+/* 设置项 */
+.settingItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.settingItem:last-child {
+  border-bottom: none;
+}
+
+.settingInfo {
+  flex: 1;
+}
+
+.settingTitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1f36;
+  margin-bottom: 4px;
+}
+
+.settingDesc {
+  font-size: 13px;
+  color: #718096;
+}
+
+/* 响应式布局 */
+@media (max-width: 992px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 576px) {
+  .header {
+    padding: 16px;
+    border-radius: 12px;
+  }
+  
+  .dangerItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .dangerZone {
+    padding: 16px;
+  }
+}

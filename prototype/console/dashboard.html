@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工作台 - 摩塔 Mota</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/console.css">
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="console-page">
+    <!-- 顶部导航栏 -->
+    <header class="console-header">
+        <div class="console-header-left">
+            <!-- 移动端菜单按钮 -->
+            <button class="mobile-menu-btn" onclick="toggleSidebar()" title="菜单">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+            </button>
+            <a href="../index.html" class="console-logo">
+                <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
+                    <rect width="48" height="48" rx="10" fill="#2b7de9"/>
+                    <path d="M14 24L22 32L34 16" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>摩塔</span>
+            </a>
+            
+            <!-- 团队切换 -->
+            <div class="team-switcher">
+                <button class="team-switcher-btn" onclick="toggleTeamSwitcher(event)">
+                    <div class="team-avatar">
+                        <span>示</span>
+                    </div>
+                    <span class="team-name">示例团队</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </button>
+                <div class="team-dropdown" id="teamDropdown">
+                    <div class="dropdown-header">切换团队</div>
+                    <div class="dropdown-item active">
+                        <div class="team-avatar"><span>示</span></div>
+                        <span>示例团队</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                    </div>
+                    <div class="dropdown-item">
+                        <div class="team-avatar" style="background: #10b981;"><span>开</span></div>
+                        <span>开发团队</span>
+                    </div>
+                    <div class="dropdown-item">
+                        <div class="team-avatar" style="background: #f59e0b;"><span>产</span></div>
+                        <span>产品团队</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        <span>创建新团队</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="console-header-center">
+            <!-- 全局搜索 -->
+            <div class="global-search" onclick="openSearchModal()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" placeholder="搜索项目、事项..." readonly>
+                <kbd>⌘K</kbd>
+            </div>
+        </div>
+        
+        <div class="console-header-right">
+            <!-- 快捷操作 -->
+            <div class="header-actions">
+                <div class="create-menu-wrapper">
+                    <button class="header-action-btn" title="新建" onclick="toggleCreateMenu(event)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                    </button>
+                    <div class="create-dropdown" id="createDropdown">
+                        <div class="dropdown-item" onclick="openCreateIssueModal()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="8" x2="12" y2="12"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <span>新建事项</span>
+                        </div>
+                        <div class="dropdown-item" onclick="openCreateProjectModal()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            <span>新建项目</span>
+                        </div>
+                        <div class="dropdown-item" onclick="openCreateIterationModal()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23 4 23 10 17 10"/>
+                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                            </svg>
+                            <span>新建迭代</span>
+                        </div>
+                        <div class="dropdown-item" onclick="showToast('新建文档功能开发中')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                            </svg>
+                            <span>新建文档</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="notification-wrapper">
+                    <button class="header-action-btn" title="通知" onclick="toggleNotifications(event)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
+                        <span class="notification-badge">3</span>
+                    </button>
+                    <div class="notification-dropdown" id="notificationDropdown">
+                        <div class="dropdown-header">
+                            <span>通知</span>
+                            <a href="notifications.html">查看全部</a>
+                        </div>
+                        <div class="notification-list">
+                            <div class="notification-item unread" onclick="window.location.href='issue-detail.html'">
+                                <div class="notification-icon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="12" y1="8" x2="12" y2="12"/>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                    </svg>
+                                </div>
+                                <div class="notification-content">
+                                    <p>李四 将事项 #1024 分配给了你</p>
+                                    <span class="notification-time">5分钟前</span>
+                                </div>
+                            </div>
+                            <div class="notification-item unread" onclick="window.location.href='iteration-detail.html'">
+                                <div class="notification-icon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="23 4 23 10 17 10"/>
+                                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                                    </svg>
+                                </div>
+                                <div class="notification-content">
+                                    <p>Sprint 12 迭代即将结束</p>
+                                    <span class="notification-time">1小时前</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="header-action-btn" title="帮助" onclick="showToast('帮助中心开发中')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- 用户菜单 -->
+            <div class="user-menu">
+                <button class="user-menu-btn" onclick="toggleUserMenu(event)">
+                    <div class="user-avatar">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" alt="用户头像">
+                    </div>
+                </button>
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="user-info">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" alt="用户头像">
+                        <div>
+                            <div class="user-name">张三</div>
+                            <div class="user-email">zhangsan@example.com</div>
+                        </div>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="window.location.href='profile-settings.html'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        <span>个人设置</span>
+                    </div>
+                    <div class="dropdown-item" onclick="window.location.href='settings.html'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                        </svg>
+                        <span>团队设置</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="window.location.href='../login.html'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16 17 21 12 16 7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                        <span>退出登录</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- 主体内容区域 -->
+    <div class="console-body">
+        <!-- 左侧导航栏 -->
+        <aside class="console-sidebar">
+            <nav class="sidebar-nav">
+                <div class="sidebar-section">
+                    <a href="dashboard.html" class="sidebar-item active">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"/>
+                            <rect x="14" y="3" width="7" height="7"/>
+                            <rect x="14" y="14" width="7" height="7"/>
+                            <rect x="3" y="14" width="7" height="7"/>
+                        </svg>
+                        <span>工作台</span>
+                    </a>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">项目协同</div>
+                    <a href="projects.html" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        <span>项目</span>
+                    </a>
+                    <a href="issues.html" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                        <span>事项</span>
+                        <span class="sidebar-badge">12</span>
+                    </a>
+                    <a href="iterations.html" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"/>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                        </svg>
+                        <span>迭代</span>
+                    </a>
+                    <a href="kanban.html" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="5" height="18" rx="1"/>
+                            <rect x="10" y="3" width="5" height="12" rx="1"/>
+                            <rect x="17" y="3" width="5" height="8" rx="1"/>
+                        </svg>
+                        <span>看板</span>
+                    </a>
+                    <a href="backlog.html" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                            <line x1="9" y1="12" x2="15" y2="12"/>
+                            <line x1="9" y1="16" x2="15" y2="16"/>
+                        </svg>
+                        <span>需求池</span>
+                    </a>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">知识管理</div>
+                    <a href="wiki.html" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                        </svg>
+                        <span>知识库</span>
+                    </a>
+                    <a href="files.html" class="sidebar-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
+                            <polyline points="13 2 13 9 20 9"/>
+                        </svg>
+                        <span>文件网盘</span>
+                    </a>
+                </div>
+            </nav>
+            
+            <!-- 侧边栏底部 -->
+            <div class="sidebar-footer">
+                <a href="settings.html" class="sidebar-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    <span>团队设置</span>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- 主内容区域 -->
+        <main class="console-main">
+            <div class="console-content">
+                <!-- 页面标题 -->
+                <div class="page-header">
+                    <h1 class="page-title">工作台</h1>
+                    <p class="page-subtitle">欢迎回来，张三！这是您的工作概览。</p>
+                </div>
+                
+                <!-- 统计卡片 -->
+                <div class="stats-grid">
+                    <div class="stat-card" data-stat="pendingIssues" onclick="window.location.href='issues.html'">
+                        <div class="stat-icon" style="background: rgba(43, 125, 233, 0.1); color: #2b7de9;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="8" x2="12" y2="12"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <span class="stat-value">24</span>
+                            <span class="stat-label">待处理事项</span>
+                        </div>
+                        <div class="stat-trend up">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                                <polyline points="17 6 23 6 23 12"/>
+                            </svg>
+                            <span>+12%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card" data-stat="completedIssues" onclick="window.location.href='issues.html?status=done'">
+                        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <span class="stat-value">156</span>
+                            <span class="stat-label">已完成事项</span>
+                        </div>
+                        <div class="stat-trend up">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                                <polyline points="17 6 23 6 23 12"/>
+                            </svg>
+                            <span>+8%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card" data-stat="activeIterations" onclick="window.location.href='iterations.html'">
+                        <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23 4 23 10 17 10"/>
+                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <span class="stat-value">3</span>
+                            <span class="stat-label">进行中迭代</span>
+                        </div>
+                        <div class="stat-trend up">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                                <polyline points="17 6 23 6 23 12"/>
+                            </svg>
+                            <span>+1</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card" data-stat="teamMembers" onclick="window.location.href='members.html'">
+                        <div class="stat-icon" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <span class="stat-value">12</span>
+                            <span class="stat-label">团队成员</span>
+                        </div>
+                        <div class="stat-trend up">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                                <polyline points="17 6 23 6 23 12"/>
+                            </svg>
+                            <span>+2</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 主要内容区域 -->
+                <div class="dashboard-grid">
+                    <!-- 我的待办事项 -->
+                    <div class="dashboard-card todo-card">
+                        <div class="card-header">
+                            <h3 class="card-title">我的待办</h3>
+                            <div class="card-actions">
+                                <button class="card-action-btn" onclick="dashboardModule.refreshDashboard()" title="刷新">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="23 4 23 10 17 10"/>
+                                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                                    </svg>
+                                </button>
+                                <a href="issues.html" class="card-link">查看全部</a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="issue-list" id="todoList">
+                                <!-- 待办事项由 JavaScript 动态渲染 -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 最近活动 -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3 class="card-title">最近活动</h3>
+                            <a href="notifications.html" class="card-link">查看全部</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="activity-list" id="activityFeed">
+                                <!-- 活动动态由 JavaScript 动态渲染 -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 最近项目 -->
+                    <div class="dashboard-card projects-card">
+                        <div class="card-header">
+                            <h3 class="card-title">最近项目</h3>
+                            <a href="projects.html" class="card-link">查看全部</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="projects-grid" id="recentProjects">
+                                <!-- 最近项目由 JavaScript 动态渲染 -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 日历组件 -->
+                    <div class="dashboard-card calendar-card">
+                        <div class="card-header">
+                            <h3 class="card-title">日程安排</h3>
+                            <button class="btn btn-sm btn-outline" onclick="dashboardModule.openAddEventModal()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                添加事件
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="calendar-widget" id="calendarWidget">
+                                <!-- 日历由 JavaScript 动态渲染 -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 事项趋势图表 -->
+                    <div class="dashboard-card chart-card">
+                        <div class="card-header">
+                            <h3 class="card-title">事项趋势</h3>
+                            <select class="chart-period-select" onchange="dashboardModule.updateChartPeriod(this.value)">
+                                <option value="week">本周</option>
+                                <option value="month">本月</option>
+                                <option value="quarter">本季度</option>
+                            </select>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container" id="issuesTrendChart">
+                                <!-- 图表由 JavaScript 动态渲染 -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 快捷入口 -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3 class="card-title">快捷入口</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="quick-actions">
+                                <a href="#" class="quick-action" data-action="create-issue" onclick="event.preventDefault(); openCreateIssueModal();">
+                                    <div class="quick-action-icon" style="background: rgba(43, 125, 233, 0.1); color: #2b7de9;">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <line x1="12" y1="8" x2="12" y2="16"/>
+                                            <line x1="8" y1="12" x2="16" y2="12"/>
+                                        </svg>
+                                    </div>
+                                    <span>创建事项</span>
+                                </a>
+                                <a href="#" class="quick-action" data-action="create-project" onclick="event.preventDefault(); openCreateProjectModal();">
+                                    <div class="quick-action-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                                            <line x1="12" y1="11" x2="12" y2="17"/>
+                                            <line x1="9" y1="14" x2="15" y2="14"/>
+                                        </svg>
+                                    </div>
+                                    <span>新建项目</span>
+                                </a>
+                                <a href="#" class="quick-action" data-action="create-iteration" onclick="event.preventDefault(); openCreateIterationModal();">
+                                    <div class="quick-action-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="23 4 23 10 17 10"/>
+                                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                                        </svg>
+                                    </div>
+                                    <span>新建迭代</span>
+                                </a>
+                                <a href="#" class="quick-action" data-action="create-doc" onclick="event.preventDefault(); showToast('新建文档功能开发中');">
+                                    <div class="quick-action-icon" style="background: rgba(236, 72, 153, 0.1); color: #ec4899;">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                                            <line x1="12" y1="6" x2="12" y2="12"/>
+                                            <line x1="9" y1="9" x2="15" y2="9"/>
+                                        </svg>
+                                    </div>
+                                    <span>新建文档</span>
+                                </a>
+                                <a href="members.html" class="quick-action" data-action="invite-member">
+                                    <div class="quick-action-icon" style="background: rgba(20, 184, 166, 0.1); color: #14b8a6;">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                            <circle cx="8.5" cy="7" r="4"/>
+                                            <line x1="20" y1="8" x2="20" y2="14"/>
+                                            <line x1="23" y1="11" x2="17" y2="11"/>
+                                        </svg>
+                                    </div>
+                                    <span>邀请成员</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- 搜索弹窗 -->
+    <div class="search-modal-overlay" id="searchModalOverlay" onclick="closeSearchModal()">
+        <div class="search-modal" onclick="event.stopPropagation()">
+            <div class="search-modal-header">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" placeholder="搜索项目、事项..." id="searchModalInput" autofocus>
+                <kbd>ESC</kbd>
+            </div>
+            <div class="search-modal-body">
+                <div class="search-section">
+                    <div class="search-section-title">快速操作</div>
+                    <div class="search-item" onclick="openCreateIssueModal(); closeSearchModal();">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        <span>新建事项</span>
+                    </div>
+                    <div class="search-item" onclick="openCreateProjectModal(); closeSearchModal();">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        <span>新建项目</span>
+                    </div>
+                </div>
+                <div class="search-section">
+                    <div class="search-section-title">最近访问</div>
+                    <div class="search-item" onclick="window.location.href='project-detail.html'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        <span>前端项目</span>
+                        <span class="search-item-meta">项目</span>
+                    </div>
+                    <div class="search-item" onclick="window.location.href='issue-detail.html'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                        <span>#1024 登录页面在移动端显示异常</span>
+                        <span class="search-item-meta">事项</span>
+                    </div>
+                    <div class="search-item" onclick="window.location.href='iteration-detail.html'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"/>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                        </svg>
+                        <span>Sprint 12</span>
+                        <span class="search-item-meta">迭代</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 新建事项弹窗 -->
+    <div class="modal-overlay" id="createIssueModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>新建事项</h3>
+                <button class="modal-close" onclick="closeCreateIssueModal()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>标题 <span class="required">*</span></label>
+                    <input type="text" placeholder="请输入事项标题" id="issueTitle">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>类型</label>
+                        <select id="issueType">
+                            <option value="requirement">需求</option>
+                            <option value="task">任务</option>
+                            <option value="bug">缺陷</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>优先级</label>
+                        <select id="issuePriority">
+                            <option value="high">高</option>
+                            <option value="medium" selected>中</option>
+                            <option value="low">低</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>所属项目</label>
+                    <select id="issueProject">
+                        <option value="1">前端项目</option>
+                        <option value="2">后端服务</option>
+                        <option value="3">移动端项目</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>描述</label>
+                    <textarea placeholder="请输入事项描述" rows="4" id="issueDescription"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeCreateIssueModal()">取消</button>
+                <button class="btn btn-primary" onclick="createIssue()">创建</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 新建项目弹窗 -->
+    <div class="modal-overlay" id="createProjectModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>新建项目</h3>
+                <button class="modal-close" onclick="closeCreateProjectModal()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>项目名称 <span class="required">*</span></label>
+                    <input type="text" placeholder="请输入项目名称" id="projectName">
+                </div>
+                <div class="form-group">
+                    <label>项目标识 <span class="required">*</span></label>
+                    <input type="text" placeholder="例如：frontend-web" id="projectKey">
+                </div>
+                <div class="form-group">
+                    <label>项目描述</label>
+                    <textarea placeholder="请输入项目描述" rows="3" id="projectDescription"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeCreateProjectModal()">取消</button>
+                <button class="btn btn-primary" onclick="createProject()">创建</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 新建迭代弹窗 -->
+    <div class="modal-overlay" id="createIterationModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>新建迭代</h3>
+                <button class="modal-close" onclick="closeCreateIterationModal()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>迭代名称 <span class="required">*</span></label>
+                    <input type="text" placeholder="例如：Sprint 15" id="iterationName">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>开始日期</label>
+                        <input type="date" id="iterationStartDate">
+                    </div>
+                    <div class="form-group">
+                        <label>结束日期</label>
+                        <input type="date" id="iterationEndDate">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>迭代目标</label>
+                    <textarea placeholder="请输入迭代目标" rows="3" id="iterationGoal"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeCreateIterationModal()">取消</button>
+                <button class="btn btn-primary" onclick="createIteration()">创建</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 日历事件弹窗 -->
+    <div class="modal-overlay" id="eventModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>事件详情</h3>
+                <button class="modal-close" onclick="closeModal('eventModal')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="event-list">
+                    <!-- 事件列表由 JavaScript 动态渲染 -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('eventModal')">关闭</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 添加事件弹窗 -->
+    <div class="modal-overlay" id="addEventModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>添加日程事件</h3>
+                <button class="modal-close" onclick="closeModal('addEventModal')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>事件标题 <span class="required">*</span></label>
+                    <input type="text" placeholder="请输入事件标题" id="eventTitle">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>日期</label>
+                        <input type="date" id="eventDate">
+                    </div>
+                    <div class="form-group">
+                        <label>时间</label>
+                        <input type="time" id="eventTime">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>事件类型</label>
+                    <select id="eventType">
+                        <option value="meeting">会议</option>
+                        <option value="release">发布</option>
+                        <option value="review">评审</option>
+                        <option value="deadline">截止日期</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>事件颜色</label>
+                    <div class="color-picker">
+                        <label class="color-option">
+                            <input type="radio" name="eventColor" value="#2b7de9" checked>
+                            <span class="color-swatch" style="background: #2b7de9"></span>
+                        </label>
+                        <label class="color-option">
+                            <input type="radio" name="eventColor" value="#10b981">
+                            <span class="color-swatch" style="background: #10b981"></span>
+                        </label>
+                        <label class="color-option">
+                            <input type="radio" name="eventColor" value="#f59e0b">
+                            <span class="color-swatch" style="background: #f59e0b"></span>
+                        </label>
+                        <label class="color-option">
+                            <input type="radio" name="eventColor" value="#8b5cf6">
+                            <span class="color-swatch" style="background: #8b5cf6"></span>
+                        </label>
+                        <label class="color-option">
+                            <input type="radio" name="eventColor" value="#ec4899">
+                            <span class="color-swatch" style="background: #ec4899"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('addEventModal')">取消</button>
+                <button class="btn btn-primary" onclick="dashboardModule.saveEvent()">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast 通知容器 -->
+    <div class="toast" id="toast"></div>
+    
+    <style>
+        /* Dashboard 页面特定样式 */
+        .stat-card {
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .issue-item, .build-item {
+            cursor: pointer;
+            transition: background var(--transition-fast);
+        }
+        
+        .issue-item:hover, .build-item:hover {
+            background: var(--bg-light);
+        }
+        
+        /* 待办事项样式 */
+        .todo-checkbox {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+        
+        .todo-checkbox:hover {
+            color: var(--primary-color);
+        }
+        
+        .todo-actions {
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+        }
+        
+        .issue-item:hover .todo-actions {
+            opacity: 1;
+        }
+        
+        .todo-action-btn {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .todo-action-btn:hover {
+            background: var(--bg-light);
+            color: var(--primary-color);
+        }
+        
+        .todo-action-btn:last-child:hover {
+            color: var(--error-color);
+        }
+        
+        .issue-due-date {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+        
+        /* 最近项目样式 */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .project-card {
+            padding: 16px;
+            background: var(--bg-light);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .project-card:hover {
+            background: #fff;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .project-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .project-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        
+        .project-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .project-name {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .project-key {
+            margin: 2px 0 0;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .project-star {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: all var(--transition-fast);
+        }
+        
+        .project-star:hover {
+            color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+        }
+        
+        .project-star.starred {
+            color: #f59e0b;
+        }
+        
+        .project-desc {
+            margin: 0 0 12px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+        
+        .project-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .project-stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+        
+        /* 日历样式 */
+        .calendar-widget {
+            width: 100%;
+        }
+        
+        .calendar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        
+        .calendar-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .calendar-nav {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .calendar-nav:hover {
+            background: var(--bg-light);
+            color: var(--text-primary);
+        }
+        
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+        
+        .calendar-weekdays span {
+            text-align: center;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            padding: 4px;
+        }
+        
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+        
+        .calendar-day {
+            position: relative;
+            text-align: center;
+            font-size: 12px;
+            padding: 8px 4px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .calendar-day:hover {
+            background: var(--bg-light);
+        }
+        
+        .calendar-day.other-month {
+            color: var(--text-placeholder);
+        }
+        
+        .calendar-day.today {
+            background: var(--primary-color);
+            color: #fff;
+            font-weight: 600;
+        }
+        
+        .calendar-day.has-events::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--primary-color);
+        }
+        
+        .calendar-day.today.has-events::after {
+            background: #fff;
+        }
+        
+        .event-dot {
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+        }
+        
+        .calendar-events {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-light);
+        }
+        
+        .calendar-events-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        
+        .calendar-event {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--bg-light);
+            border-radius: var(--radius-sm);
+            border-left: 3px solid;
+            margin-bottom: 8px;
+        }
+        
+        .calendar-event:last-child {
+            margin-bottom: 0;
+        }
+        
+        .event-time {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .event-title {
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+        
+        /* 图表样式 */
+        .chart-container {
+            width: 100%;
+            min-height: 180px;
+        }
+        
+        .chart-legend {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .chart-legend.vertical {
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+        
+        .line-chart {
+            width: 100%;
+        }
+        
+        .line-chart svg {
+            width: 100%;
+            height: 120px;
+        }
+        
+        .chart-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+        }
+        
+        .chart-labels span {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+        
+        .donut-chart {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+        
+        .donut-chart svg {
+            width: 120px;
+            height: 120px;
+        }
+        
+        .chart-center-text {
+            fill: var(--text-primary);
+        }
+        
+        .chart-period-select {
+            padding: 4px 8px;
+            font-size: 12px;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            background: #fff;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+        
+        /* 卡片操作按钮 */
+        .card-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .card-action-btn {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .card-action-btn:hover {
+            background: var(--bg-light);
+            color: var(--primary-color);
+        }
+        
+        /* 颜色选择器 */
+        .color-picker {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .color-option {
+            cursor: pointer;
+        }
+        
+        .color-option input {
+            display: none;
+        }
+        
+        .color-swatch {
+            display: block;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            transition: all var(--transition-fast);
+        }
+        
+        .color-option input:checked + .color-swatch {
+            border-color: var(--text-primary);
+            transform: scale(1.1);
+        }
+        
+        /* 单选按钮组 */
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .radio-option {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 12px;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .radio-option:hover {
+            border-color: var(--primary-color);
+        }
+        
+        .radio-option input {
+            display: none;
+        }
+        
+        .radio-option input:checked + .radio-label {
+            color: var(--primary-color);
+        }
+        
+        .radio-option input:checked ~ .radio-desc {
+            color: var(--text-primary);
+        }
+        
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .radio-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-left: 24px;
+        }
+        
+        /* 复选框组 */
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .checkbox-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        .checkbox-option input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        
+        .checkbox-option span {
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+        
+        /* 事件列表样式 */
+        .event-list .event-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 12px;
+            background: var(--bg-light);
+            border-radius: var(--radius-md);
+            border-left: 3px solid;
+            margin-bottom: 8px;
+        }
+        
+        .event-list .event-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .event-list .event-time {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .event-list .event-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .event-list .event-type {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        /* 空状态 */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state svg {
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+        
+        .empty-state p {
+            margin: 0;
+            font-size: 14px;
+        }
+        
+        /* 活动状态标签 */
+        .activity-status {
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: var(--radius-sm);
+        }
+        
+        .activity-status.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+        
+        .activity-status.failed {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+        
+        /* 旋转动画 */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        /* 响应式布局 */
+        @media (max-width: 1200px) {
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+    
+    <!-- 引入通用 JavaScript 模块 -->
+    <script src="../js/common.js"></script>
+    <!-- 引入工作台 JavaScript 模块 -->
+    <script src="../js/dashboard.js"></script>
+</body>
+</html>
