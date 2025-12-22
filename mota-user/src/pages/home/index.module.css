@@ -29,6 +29,12 @@
   font-weight: 700;
 }
 
+.logoImage {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+}
+
 /* 导航栏 */
 .navbar {
   position: fixed;
@@ -614,13 +620,12 @@
   background: #fff;
   border-radius: 20px;
   padding: 32px;
-  border: 1px solid #e8e9eb;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
   transition: all 0.3s ease;
   text-align: center;
 }
 
 .pillarCard:hover {
-  border-color: transparent;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
   transform: translateY(-4px);
 }
@@ -720,14 +725,13 @@
 
 .featureCard {
   background: #fff;
-  border: 1px solid #e8e9eb;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
   border-radius: 20px;
   padding: 32px;
   transition: all 0.3s ease;
 }
 
 .featureCard:hover {
-  border-color: transparent;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
   transform: translateY(-4px);
 }
@@ -824,13 +828,12 @@
   background: #fff;
   border-radius: 20px;
   padding: 40px;
-  border: 1px solid #e8e9eb;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
   transition: all 0.3s ease;
   text-align: center;
 }
 
 .valueCard:hover {
-  border-color: transparent;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
   transform: translateY(-4px);
 }
@@ -894,12 +897,11 @@
   background: #fff;
   border-radius: 20px;
   padding: 32px;
-  border: 1px solid #e8e9eb;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
   transition: all 0.3s ease;
 }
 
 .roleCard:hover {
-  border-color: transparent;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
 }
 
@@ -995,12 +997,11 @@
   border-radius: 20px;
   padding: 32px;
   text-align: center;
-  border: 1px solid #e8e9eb;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
   transition: all 0.3s ease;
 }
 
 .techCard:hover {
-  border-color: transparent;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
   transform: translateY(-4px);
 }

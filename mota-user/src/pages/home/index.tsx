@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Button } from 'antd'
+import { Button, Popover } from 'antd'
 import {
   CheckCircleOutlined,
   RightOutlined,
@@ -29,6 +29,20 @@ import styles from './index.module.css'
 /**
  * 官网首页 - AI驱动的项目管理与团队协作平台
  */
+// WeChat QR Code component for contact
+const WeChatQRContent = () => (
+  <div style={{ textAlign: 'center', padding: '12px' }}>
+    <img
+      src="/wechat-qr.png"
+      alt="微信二维码"
+      style={{ width: '200px', height: '200px', marginBottom: '12px', display: 'block', margin: '0 auto 12px' }}
+    />
+    <p style={{ color: '#666', fontSize: '14px', margin: 0 }}>
+      扫一扫上面的二维码图案，加我为朋友
+    </p>
+  </div>
+)
+
 const Home = () => {
   return (
     <div className={styles.homePage}>
@@ -36,50 +50,9 @@ const Home = () => {
       <header className={styles.navbar}>
         <div className={styles.navbarContainer}>
           <div className={styles.navbarBrand}>
-            <div className={styles.logoWrapper}>
-              <div className={styles.logoIcon}>M</div>
-            </div>
+            <img src="/logo.svg" alt="摩塔 Mota" className={styles.logoImage} />
             <span className={styles.navbarTitle}>摩塔 Mota</span>
           </div>
-          
-          <nav className={styles.navbarMenu}>
-            <div className={styles.navbarItem}>
-              <span>产品功能</span>
-              <div className={styles.navDropdown}>
-                <div className={styles.navDropdownItem}>
-                  <ProjectOutlined />
-                  <div>
-                    <div className={styles.navDropdownTitle}>项目管理</div>
-                    <div className={styles.navDropdownDesc}>敏捷项目管理与任务协作</div>
-                  </div>
-                </div>
-                <div className={styles.navDropdownItem}>
-                  <TeamOutlined />
-                  <div>
-                    <div className={styles.navDropdownTitle}>团队协作</div>
-                    <div className={styles.navDropdownDesc}>高效团队沟通与协作</div>
-                  </div>
-                </div>
-                <div className={styles.navDropdownItem}>
-                  <RobotOutlined />
-                  <div>
-                    <div className={styles.navDropdownTitle}>AI智能</div>
-                    <div className={styles.navDropdownDesc}>AI辅助决策与方案生成</div>
-                  </div>
-                </div>
-                <div className={styles.navDropdownItem}>
-                  <BookOutlined />
-                  <div>
-                    <div className={styles.navDropdownTitle}>知识管理</div>
-                    <div className={styles.navDropdownDesc}>企业知识智能管理</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className={styles.navbarItem}>解决方案</div>
-            <div className={styles.navbarItem}>价格</div>
-            <div className={styles.navbarItem}>帮助中心</div>
-          </nav>
           
           <div className={styles.navbarActions}>
             <Link to="/login">
@@ -107,7 +80,7 @@ const Home = () => {
           <div className={styles.heroContent}>
             <div className={styles.heroBadge}>
               <StarOutlined />
-              <span>AI原生 · 企业级协作平台</span>
+              <span>AI驱动智能协作平台</span>
             </div>
             <h1 className={styles.heroTitle}>
               让<span className={styles.heroTitleHighlight}>智能</span>连接每一次协作<br/>
@@ -564,7 +537,7 @@ const Home = () => {
                 <span className={styles.ctaTitleHighlight}>新时代</span>
               </h2>
               <p className={styles.ctaDesc}>
-                免费试用，无需信用卡。立即体验AI驱动的项目管理与团队协作平台。
+                完全免费开放，永久免费使用。立即体验AI驱动的项目管理与团队协作平台。
               </p>
               <div className={styles.ctaActions}>
                 <Link to="/register">
@@ -572,9 +545,16 @@ const Home = () => {
                     免费开始使用 <RightOutlined />
                   </Button>
                 </Link>
-                <Button size="large" ghost className={styles.ctaBtnGhost}>
-                  联系销售
-                </Button>
+                <Popover
+                  content={<WeChatQRContent />}
+                  title="联系我们"
+                  trigger="hover"
+                  placement="top"
+                >
+                  <Button size="large" ghost className={styles.ctaBtnGhost}>
+                    联系我们
+                  </Button>
+                </Popover>
               </div>
             </div>
             <div className={styles.ctaImage}>
@@ -600,9 +580,7 @@ const Home = () => {
           <div className={styles.footerMain}>
             <div className={styles.footerBrand}>
               <div className={styles.footerLogo}>
-                <div className={styles.logoWrapper}>
-                  <div className={styles.logoIcon}>M</div>
-                </div>
+                <img src="/logo.svg" alt="摩塔 Mota" className={styles.logoImage} />
                 <span>摩塔 Mota</span>
               </div>
               <p className={styles.footerDesc}>AI驱动的项目管理与团队协作平台</p>

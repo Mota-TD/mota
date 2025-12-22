@@ -11,14 +11,15 @@
 .registerHeader h2 {
   font-size: 32px;
   font-weight: 700;
-  color: #1a1f36;
+  color: #fff;
   margin: 0 0 12px 0;
   letter-spacing: -0.5px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .registerHeader p {
   font-size: 15px;
-  color: #718096;
+  color: rgba(255, 255, 255, 0.7);
   margin: 0;
 }
 
@@ -47,6 +48,24 @@
 
 .steps :global(.ant-steps-item-title) {
   font-weight: 500;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.steps :global(.ant-steps-item-wait .ant-steps-item-title) {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+.steps :global(.ant-steps-item-wait .ant-steps-item-icon) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.steps :global(.ant-steps-item-wait .ant-steps-item-icon .ant-steps-icon) {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.steps :global(.ant-steps-item-tail::after) {
+  background-color: rgba(255, 255, 255, 0.2) !important;
 }
 
 .stepContent {
@@ -60,8 +79,12 @@
 
 .stepContent :global(.ant-form-item-label > label) {
   font-weight: 500;
-  color: #4a5568;
+  color: rgba(255, 255, 255, 0.85) !important;
   font-size: 14px;
+}
+
+.stepContent :global(.ant-form-item-label > label.ant-form-item-required::before) {
+  color: #ff6b6b !important;
 }
 
 .stepContent :global(.ant-input-affix-wrapper),
@@ -71,6 +94,13 @@
   border: 1px solid #e2e8f0;
   font-size: 15px;
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.stepContent :global(.ant-input-affix-wrapper .ant-input) {
+  height: auto;
+  line-height: 1.5;
 }
 
 .stepContent :global(.ant-input-affix-wrapper:hover),
@@ -88,6 +118,8 @@
 .stepContent :global(.ant-input-prefix) {
   color: #a0aec0;
   margin-right: 10px;
+  display: flex;
+  align-items: center;
 }
 
 .stepContent :global(.ant-btn-primary) {
@@ -123,7 +155,11 @@
 
 .stepContent :global(.ant-checkbox-wrapper) {
   font-size: 14px;
-  color: #4a5568;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.stepContent :global(.ant-checkbox-wrapper span:not(.ant-checkbox)) {
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .stepContent :global(.ant-checkbox-checked .ant-checkbox-inner) {
@@ -233,17 +269,30 @@
   margin: 0;
 }
 
+/* Dark theme adjustments for team options */
+.teamOption {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.teamOption:hover {
+  background: #fff;
+}
+
+.teamOption.active {
+  background: #fff;
+}
+
 /* Register Footer */
 .registerFooter {
   text-align: center;
   margin-top: 28px;
   padding-top: 24px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .registerFooter p {
   font-size: 15px;
-  color: #718096;
+  color: rgba(255, 255, 255, 0.7);
   margin: 0;
 }
 

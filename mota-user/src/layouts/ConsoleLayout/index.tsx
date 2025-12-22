@@ -241,7 +241,7 @@ const ConsoleLayout = () => {
       >
         <div className={styles.siderHeader}>
           <div className={styles.logo} onClick={() => navigate('/dashboard')}>
-            <div className={styles.logoIcon}>M</div>
+            <img src="/logo.svg" alt="摩塔" className={styles.logoImage} />
             {!collapsed && <span className={styles.logoText}>摩塔</span>}
           </div>
         </div>

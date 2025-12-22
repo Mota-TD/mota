@@ -58,6 +58,12 @@
   box-shadow: 0 4px 12px rgba(43, 125, 233, 0.25);
 }
 
+.logoImage {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+
 .logoText {
   font-size: 18px;
   font-weight: 700;

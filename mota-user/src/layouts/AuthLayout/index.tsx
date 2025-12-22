@@ -12,16 +12,7 @@ const AuthLayout = () => {
       <div className={styles.authBrand}>
         <div className={styles.brandContent}>
           <div className={styles.brandLogo}>
-            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-              <rect width="48" height="48" rx="12" fill="url(#logoGradient)"/>
-              <path d="M14 24L22 32L34 16" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-              <defs>
-                <linearGradient id="logoGradient" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#2b7de9"/>
-                  <stop offset="1" stopColor="#1976d2"/>
-                </linearGradient>
-              </defs>
-            </svg>
+            <img src="/logo.svg" alt="摩塔 Mota" width="48" height="48" />
             <span>摩塔 Mota</span>
           </div>
           <h1 className={styles.brandTitle}>AI驱动的<br/>智能协作平台</h1>
