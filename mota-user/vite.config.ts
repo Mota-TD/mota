@@ -13,6 +13,25 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true,
+    proxy: {
+      // 代理 API 请求到网关服务
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false,
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('proxy error', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log('Sending Request:', req.method, req.url, '-> target:', proxyReq.path);
+          });
+          proxy.on('proxyRes', (proxyRes, req, _res) => {
+            console.log('Received Response:', proxyRes.statusCode, req.url);
+          });
+        },
+      },
+    },
   },
   css: {
     preprocessorOptions: {

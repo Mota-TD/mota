@@ -1,0 +1,3 @@
+com\mota\api\auth\dto\LoginResponse$LoginResponseBuilder.class
+com\mota\api\auth\dto\LoginResponse.class
+com\mota\api\auth\dto\LoginRequest.class

@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Form, Input, Button, Checkbox, message, Steps } from 'antd'
 import { UserOutlined, LockOutlined, MailOutlined, MobileOutlined, SafetyOutlined, TeamOutlined } from '@ant-design/icons'
-import { userApi } from '@/services/mock/api'
+import { register as registerApi } from '@/services/api/auth'
+import { ApiError } from '@/services/request'
 import styles from './index.module.css'
 
 /**
@@ -31,11 +32,20 @@ const Register = () => {
     setLoading(true)
     try {
       const finalData = { ...formData, ...values }
-      await userApi.register(finalData)
+      await registerApi({
+        username: finalData.name,
+        email: finalData.email,
+        password: finalData.password,
+        confirmPassword: finalData.confirmPassword,
+      })
       message.success('注册成功！')
       navigate('/login')
-    } catch (error: any) {
-      message.error(error.message || '注册失败')
+    } catch (error) {
+      if (error instanceof ApiError) {
+        message.error(error.message || '注册失败')
+      } else {
+        message.error('网络错误，请稍后重试')
+      }
     } finally {
       setLoading(false)
     }

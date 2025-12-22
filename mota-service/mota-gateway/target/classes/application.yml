@@ -1,0 +1,120 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: mota-gateway
+  profiles:
+    active: dev
+  config:
+    import: optional:nacos:${spring.application.name}.yml
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_SERVER:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:}
+        group: ${NACOS_GROUP:DEFAULT_GROUP}
+      config:
+        server-addr: ${NACOS_SERVER:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:}
+        group: ${NACOS_GROUP:DEFAULT_GROUP}
+        file-extension: yml
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        # 认证服务
+        - id: mota-auth-service
+          uri: lb://mota-auth-service
+          predicates:
+            - Path=/api/v1/auth/**
+          filters:
+            - StripPrefix=0
+
+        # 用户服务
+        - id: mota-user-service
+          uri: lb://mota-user-service
+          predicates:
+            - Path=/api/v1/users/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # 项目服务
+        - id: mota-project-service
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/projects/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # 任务服务
+        - id: mota-issue-service
+          uri: lb://mota-issue-service
+          predicates:
+            - Path=/api/v1/issues/**,/api/v1/sprints/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+      # 全局跨域配置
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origins:
+              - "http://localhost:3000"
+              - "http://localhost:3001"
+              - "http://localhost:5173"
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowed-headers: "*"
+            allow-credentials: true
+            max-age: 3600
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      database: 0
+
+# JWT配置
+jwt:
+  secret: ${JWT_SECRET:bW90YS1zZWNyZXQta2V5LWZvci1qd3QtdG9rZW4tZ2VuZXJhdGlvbi1tdXN0LWJlLWF0LWxlYXN0LTI1Ni1iaXRz}
+  expiration: 86400000
+  refresh-expiration: 604800000
+
+# 白名单配置
+gateway:
+  white-list:
+    - /api/v1/auth/login
+    - /api/v1/auth/register
+    - /api/v1/auth/refresh
+    - /api/v1/auth/captcha
+    - /actuator/**
+    - /doc.html
+    - /webjars/**
+    - /swagger-resources/**
+    - /v3/api-docs/**
+
+# 日志配置
+logging:
+  level:
+    com.mota: debug
+    org.springframework.cloud.gateway: debug
+
+# Actuator配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  endpoint:
+    health:
+      show-details: always

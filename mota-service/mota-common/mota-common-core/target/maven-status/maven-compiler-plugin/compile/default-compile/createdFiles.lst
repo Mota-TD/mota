@@ -1,0 +1,8 @@
+com\mota\common\core\base\PageQuery.class
+com\mota\common\core\result\ResultCode.class
+com\mota\common\core\result\Result.class
+com\mota\common\core\result\PageResult.class
+com\mota\common\core\exception\GlobalExceptionHandler.class
+com\mota\common\core\result\IResultCode.class
+com\mota\common\core\base\BaseEntity.class
+com\mota\common\core\exception\BusinessException.class

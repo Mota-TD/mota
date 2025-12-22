@@ -1,0 +1,7 @@
+com\mota\auth\AuthApplication.class
+com\mota\auth\config\SecurityConfig.class
+com\mota\auth\entity\User.class
+com\mota\auth\controller\AuthController.class
+com\mota\auth\service\AuthService.class
+com\mota\auth\service\impl\AuthServiceImpl.class
+com\mota\auth\mapper\UserMapper.class

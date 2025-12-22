@@ -1,0 +1,2 @@
+com\mota\common\redis\config\RedisConfig.class
+com\mota\common\redis\service\RedisService.class
