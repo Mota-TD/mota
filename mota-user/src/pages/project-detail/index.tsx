@@ -169,7 +169,7 @@ const ProjectDetail = () => {
       dataIndex: 'key',
       key: 'key',
       width: 100,
-      render: (key: string) => <a onClick={() => navigate(`/issues/${key}`)}>{key}</a>
+      render: (key: string, record: Issue) => <a onClick={() => navigate(`/issues/${record.id}`)}>{key}</a>
     },
     {
       title: '标题',

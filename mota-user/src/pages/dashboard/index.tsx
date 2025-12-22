@@ -175,10 +175,10 @@ const Dashboard = () => {
 
   // 快捷操作
   const quickActions = [
-    { icon: <PlusCircleOutlined />, label: '创建任务', path: '/issues/new', color: 'blue' },
-    { icon: <FolderAddOutlined />, label: '新建项目', path: '/projects/new', color: 'green' },
-    { icon: <SyncOutlined />, label: '新建迭代', path: '/iterations/new', color: 'orange' },
-    { icon: <FileAddOutlined />, label: '新建文档', path: '/wiki/new', color: 'pink' },
+    { icon: <PlusCircleOutlined />, label: '创建任务', path: '/issues', color: 'blue' },
+    { icon: <FolderAddOutlined />, label: '新建项目', path: '/projects', color: 'green' },
+    { icon: <SyncOutlined />, label: '新建迭代', path: '/iterations', color: 'orange' },
+    { icon: <FileAddOutlined />, label: '新建文档', path: '/wiki', color: 'pink' },
     { icon: <UserAddOutlined />, label: '邀请成员', path: '/members', color: 'teal' }
   ]
 

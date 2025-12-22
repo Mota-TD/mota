@@ -207,19 +207,19 @@ const ConsoleLayout = () => {
       key: 'create-project',
       icon: <ProjectOutlined />,
       label: '新建项目',
-      onClick: () => navigate('/projects/new'),
+      onClick: () => navigate('/projects'),
     },
     {
       key: 'create-issue',
       icon: <BugOutlined />,
       label: '创建任务',
-      onClick: () => navigate('/issues/new'),
+      onClick: () => navigate('/issues'),
     },
     {
       key: 'create-doc',
       icon: <FileTextOutlined />,
       label: '新建文档',
-      onClick: () => navigate('/wiki/new'),
+      onClick: () => navigate('/wiki'),
     },
   ]
 

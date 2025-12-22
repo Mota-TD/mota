@@ -31,7 +31,7 @@ const Kanban = () => {
   const [columns, setColumns] = useState<KanbanColumn[]>([
     { id: 'open', title: '待处理', status: 'open', issues: [], limit: 10 },
     { id: 'in_progress', title: '进行中', status: 'in_progress', issues: [], limit: 5 },
-    { id: 'review', title: '待评审', status: 'review', issues: [], limit: 5 },
+    { id: 'testing', title: '测试中', status: 'testing', issues: [], limit: 5 },
     { id: 'done', title: '已完成', status: 'done', issues: [] }
   ])
   const [draggedIssue, setDraggedIssue] = useState<any>(null)

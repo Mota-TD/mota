@@ -74,9 +74,16 @@ const Login = () => {
             <Form.Item name="remember" valuePropName="checked" noStyle>
               <Checkbox>记住我</Checkbox>
             </Form.Item>
-            <Link to="/forgot-password" className={styles.forgotLink}>
+            <a
+              href="#"
+              className={styles.forgotLink}
+              onClick={(e) => {
+                e.preventDefault()
+                message.info('请联系管理员重置密码')
+              }}
+            >
               忘记密码？
-            </Link>
+            </a>
           </div>
         </Form.Item>
 
