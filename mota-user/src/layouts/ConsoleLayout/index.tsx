@@ -6,20 +6,15 @@ import {
   DashboardOutlined,
   ProjectOutlined,
   BugOutlined,
-  AppstoreOutlined,
-  UnorderedListOutlined,
   CalendarOutlined,
   FileTextOutlined,
   BookOutlined,
-  TeamOutlined,
-  SettingOutlined,
   BellOutlined,
   SearchOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   LogoutOutlined,
   UserOutlined,
-  BarChartOutlined,
   RobotOutlined,
   FilePptOutlined,
   GlobalOutlined,
@@ -27,10 +22,8 @@ import {
   ThunderboltOutlined,
   QuestionCircleOutlined,
   PlusOutlined,
-  FundProjectionScreenOutlined,
   CheckSquareOutlined,
-  ExperimentOutlined,
-  ScheduleOutlined
+  ExperimentOutlined
 } from '@ant-design/icons'
 import { useAuthStore } from '@/store/auth'
 import styles from './index.module.css'
@@ -48,7 +41,7 @@ const ConsoleLayout = () => {
   const { user, logout } = useAuthStore()
   const [collapsed, setCollapsed] = useState(false)
 
-  // 菜单项配置 - 按照产品设计文档重新组织
+  // 菜单项配置 - 只显示一级菜单，二级菜单在工作区切换
   const menuItems: MenuItem[] = [
     {
       key: '/dashboard',
@@ -99,58 +92,14 @@ const ConsoleLayout = () => {
       label: collapsed ? '' : '项目协同',
       children: [
         {
-          key: 'project-management',
+          key: '/projects',
           icon: <ProjectOutlined />,
           label: '项目管理',
-          children: [
-            {
-              key: '/projects',
-              icon: <UnorderedListOutlined />,
-              label: '项目列表',
-            },
-            {
-              key: '/project-analytics',
-              icon: <BarChartOutlined />,
-              label: '项目分析',
-            },
-            {
-              key: '/project-kanban',
-              icon: <AppstoreOutlined />,
-              label: '项目看板',
-            },
-            {
-              key: '/project-gantt',
-              icon: <ScheduleOutlined />,
-              label: '项目甘特图',
-            },
-          ],
         },
         {
-          key: 'task-management',
+          key: '/issues',
           icon: <CheckSquareOutlined />,
           label: '任务管理',
-          children: [
-            {
-              key: '/issues',
-              icon: <UnorderedListOutlined />,
-              label: '任务列表',
-            },
-            {
-              key: '/task-analytics',
-              icon: <BarChartOutlined />,
-              label: '任务分析',
-            },
-            {
-              key: '/kanban',
-              icon: <AppstoreOutlined />,
-              label: '任务看板',
-            },
-            {
-              key: '/task-gantt',
-              icon: <ScheduleOutlined />,
-              label: '任务甘特图',
-            },
-          ],
         },
         {
           key: '/requirements',
@@ -188,21 +137,9 @@ const ConsoleLayout = () => {
       type: 'divider',
     },
     {
-      key: 'settings-group',
-      type: 'group',
-      label: collapsed ? '' : '设置',
-      children: [
-        {
-          key: '/members',
-          icon: <TeamOutlined />,
-          label: '成员管理',
-        },
-        {
-          key: '/settings',
-          icon: <SettingOutlined />,
-          label: '系统设置',
-        },
-      ],
+      key: '/help',
+      icon: <QuestionCircleOutlined />,
+      label: '帮助中心',
     },
   ]
 
@@ -290,14 +227,6 @@ const ConsoleLayout = () => {
               }
             }}
           />
-        </div>
-        <div className={styles.siderFooter}>
-          {!collapsed && (
-            <div className={styles.helpLink}>
-              <QuestionCircleOutlined />
-              <span>帮助中心</span>
-            </div>
-          )}
         </div>
       </Sider>
       <Layout className={styles.mainLayout}>

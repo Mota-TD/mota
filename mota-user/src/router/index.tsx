@@ -16,17 +16,10 @@ const Register = lazy(() => import('@/pages/auth/Register'))
 // 控制台页面
 const Dashboard = lazy(() => import('@/pages/dashboard'))
 const Projects = lazy(() => import('@/pages/projects'))
-const ProjectAnalytics = lazy(() => import('@/pages/project-analytics'))
-const ProjectKanban = lazy(() => import('@/pages/project-kanban'))
-const ProjectGantt = lazy(() => import('@/pages/project-gantt'))
 const Issues = lazy(() => import('@/pages/issues'))
-const TaskAnalytics = lazy(() => import('@/pages/task-analytics'))
-const Kanban = lazy(() => import('@/pages/kanban'))
-const TaskGantt = lazy(() => import('@/pages/task-gantt'))
 const Requirements = lazy(() => import('@/pages/requirements'))
 const Testing = lazy(() => import('@/pages/testing'))
 const Iterations = lazy(() => import('@/pages/iterations'))
-const Backlog = lazy(() => import('@/pages/backlog'))
 const Wiki = lazy(() => import('@/pages/wiki'))
 const Members = lazy(() => import('@/pages/members'))
 const Settings = lazy(() => import('@/pages/settings'))
@@ -174,7 +167,7 @@ export const routes: RouteObject[] = [
       }
     ]
   },
-  // 项目协同路由
+  // 项目管理路由 - 包含项目列表、项目分析、项目看板、项目甘特图（通过tab切换）
   {
     path: '/projects',
     element: (
@@ -195,13 +188,13 @@ export const routes: RouteObject[] = [
         path: ':id',
         element: (
           <Suspense fallback={<Loading />}>
-            <Projects />
+            <ProjectDetail />
           </Suspense>
         )
       },
     ]
   },
-  // 事项路由
+  // 任务管理路由 - 包含任务列表、任务分析、任务看板、任务甘特图（通过tab切换）
   {
     path: '/issues',
     element: (
@@ -226,166 +219,6 @@ export const routes: RouteObject[] = [
           </Suspense>
         )
       }
-    ]
-  },
-  // 看板路由
-  {
-    path: '/kanban',
-    element: (
-      <Suspense fallback={<Loading />}>
-        <ConsoleLayout />
-      </Suspense>
-    ),
-    children: [
-      {
-        index: true,
-        element: (
-          <Suspense fallback={<Loading />}>
-            <Kanban />
-          </Suspense>
-        )
-      },
-    ]
-  },
-  // 待办事项路由
-  {
-    path: '/backlog',
-    element: (
-      <Suspense fallback={<Loading />}>
-        <ConsoleLayout />
-      </Suspense>
-    ),
-    children: [
-      {
-        index: true,
-        element: (
-          <Suspense fallback={<Loading />}>
-            <Backlog />
-          </Suspense>
-        )
-      },
-    ]
-  },
-  // 迭代路由
-  {
-    path: '/iterations',
-    element: (
-      <Suspense fallback={<Loading />}>
-        <ConsoleLayout />
-      </Suspense>
-    ),
-    children: [
-      {
-        index: true,
-        element: (
-          <Suspense fallback={<Loading />}>
-            <Iterations />
-          </Suspense>
-        )
-      },
-      {
-        path: ':id',
-        element: (
-          <Suspense fallback={<Loading />}>
-            <Iterations />
-          </Suspense>
-        )
-      },
-    ]
-  },
-  // 项目分析路由
-  {
-    path: '/project-analytics',
-    element: (
-      <Suspense fallback={<Loading />}>
-        <ConsoleLayout />
-      </Suspense>
-    ),
-    children: [
-      {
-        index: true,
-        element: (
-          <Suspense fallback={<Loading />}>
-            <ProjectAnalytics />
-          </Suspense>
-        )
-      },
-    ]
-  },
-  // 项目看板路由
-  {
-    path: '/project-kanban',
-    element: (
-      <Suspense fallback={<Loading />}>
-        <ConsoleLayout />
-      </Suspense>
-    ),
-    children: [
-      {
-        index: true,
-        element: (
-          <Suspense fallback={<Loading />}>
-            <ProjectKanban />
-          </Suspense>
-        )
-      },
-    ]
-  },
-  // 项目甘特图路由
-  {
-    path: '/project-gantt',
-    element: (
-      <Suspense fallback={<Loading />}>
-        <ConsoleLayout />
-      </Suspense>
-    ),
-    children: [
-      {
-        index: true,
-        element: (
-          <Suspense fallback={<Loading />}>
-            <ProjectGantt />
-          </Suspense>
-        )
-      },
-    ]
-  },
-  // 任务分析路由
-  {
-    path: '/task-analytics',
-    element: (
-      <Suspense fallback={<Loading />}>
-        <ConsoleLayout />
-      </Suspense>
-    ),
-    children: [
-      {
-        index: true,
-        element: (
-          <Suspense fallback={<Loading />}>
-            <TaskAnalytics />
-          </Suspense>
-        )
-      },
-    ]
-  },
-  // 任务甘特图路由
-  {
-    path: '/task-gantt',
-    element: (
-      <Suspense fallback={<Loading />}>
-        <ConsoleLayout />
-      </Suspense>
-    ),
-    children: [
-      {
-        index: true,
-        element: (
-          <Suspense fallback={<Loading />}>
-            <TaskGantt />
-          </Suspense>
-        )
-      },
     ]
   },
   // 需求管理路由
@@ -426,6 +259,33 @@ export const routes: RouteObject[] = [
       },
     ]
   },
+  // 迭代路由
+  {
+    path: '/iterations',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <Iterations />
+          </Suspense>
+        )
+      },
+      {
+        path: ':id',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <IterationDetail />
+          </Suspense>
+        )
+      },
+    ]
+  },
   // Wiki路由
   {
     path: '/wiki',
@@ -445,7 +305,7 @@ export const routes: RouteObject[] = [
       },
     ]
   },
-  // 成员管理路由
+  // 成员管理路由（已移除，设置分组不再显示）
   {
     path: '/members',
     element: (
@@ -464,7 +324,7 @@ export const routes: RouteObject[] = [
       },
     ]
   },
-  // 设置路由
+  // 设置路由（已移除，设置分组不再显示）
   {
     path: '/settings',
     element: (
@@ -516,6 +376,25 @@ export const routes: RouteObject[] = [
         element: (
           <Suspense fallback={<Loading />}>
             <Notifications />
+          </Suspense>
+        )
+      },
+    ]
+  },
+  // 帮助中心路由
+  {
+    path: '/help',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <Dashboard />
           </Suspense>
         )
       },
