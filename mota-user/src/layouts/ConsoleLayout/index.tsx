@@ -202,11 +202,24 @@ const ConsoleLayout = () => {
   // 根据当前路由获取主题配置
   const getThemeConfig = () => {
     const path = location.pathname
+    // 工作台
     if (path.startsWith('/dashboard')) {
       return { menuClass: styles.themeBlue, logoClass: styles.logoBlue }
-    } else if (path.startsWith('/ai/')) {
-      return { menuClass: styles.themeIndigo, logoClass: styles.logoIndigo }
-    } else if (path.startsWith('/projects')) {
+    }
+    // AI助理 - 每个子页面不同颜色
+    else if (path.startsWith('/ai/solution')) {
+      return { menuClass: styles.themeAiBlue, logoClass: styles.logoAiBlue }
+    } else if (path.startsWith('/ai/ppt')) {
+      return { menuClass: styles.themeAiOrange, logoClass: styles.logoAiOrange }
+    } else if (path.startsWith('/ai/training')) {
+      return { menuClass: styles.themeAiPurple, logoClass: styles.logoAiPurple }
+    } else if (path.startsWith('/ai/news')) {
+      return { menuClass: styles.themeAiGreen, logoClass: styles.logoAiGreen }
+    } else if (path.startsWith('/ai/history')) {
+      return { menuClass: styles.themeGray, logoClass: styles.logoGray }
+    }
+    // 项目协同
+    else if (path.startsWith('/projects')) {
       return { menuClass: styles.themeBlue, logoClass: styles.logoBlue }
     } else if (path.startsWith('/issues')) {
       return { menuClass: styles.themeGreen, logoClass: styles.logoGreen }
@@ -216,9 +229,13 @@ const ConsoleLayout = () => {
       return { menuClass: styles.themeOrange, logoClass: styles.logoOrange }
     } else if (path.startsWith('/iterations')) {
       return { menuClass: styles.themeCyan, logoClass: styles.logoCyan }
-    } else if (path.startsWith('/wiki')) {
+    }
+    // 知识库
+    else if (path.startsWith('/wiki')) {
       return { menuClass: styles.themePink, logoClass: styles.logoPink }
-    } else if (path.startsWith('/help')) {
+    }
+    // 帮助中心
+    else if (path.startsWith('/help')) {
       return { menuClass: styles.themeGray, logoClass: styles.logoGray }
     }
     // 默认蓝色

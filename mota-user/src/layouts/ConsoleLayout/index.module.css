@@ -179,13 +179,31 @@
   color: #ec4899 !important;
 }
 
-/* 主题颜色 - 靛蓝色 (AI助理) */
-.themeIndigo :global(.ant-menu-item-selected) {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(129, 140, 248, 0.1) 100%) !important;
-  color: #6366f1 !important;
+/* 主题颜色 - AI方案生成 (科技蓝) */
+.themeAiBlue :global(.ant-menu-item-selected) {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(96, 165, 250, 0.1) 100%) !important;
+  color: #3b82f6 !important;
 }
 
-/* 主题颜色 - 灰色 (帮助中心) */
+/* 主题颜色 - AI PPT生成 (活力橙) */
+.themeAiOrange :global(.ant-menu-item-selected) {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(251, 146, 60, 0.1) 100%) !important;
+  color: #f97316 !important;
+}
+
+/* 主题颜色 - AI模型训练 (科技紫) */
+.themeAiPurple :global(.ant-menu-item-selected) {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(167, 139, 250, 0.1) 100%) !important;
+  color: #8b5cf6 !important;
+}
+
+/* 主题颜色 - AI新闻追踪 (清新绿) */
+.themeAiGreen :global(.ant-menu-item-selected) {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(52, 211, 153, 0.1) 100%) !important;
+  color: #10b981 !important;
+}
+
+/* 主题颜色 - 灰色 (帮助中心/历史记录) */
 .themeGray :global(.ant-menu-item-selected) {
   background: linear-gradient(135deg, rgba(107, 114, 128, 0.1) 0%, rgba(156, 163, 175, 0.1) 100%) !important;
   color: #6b7280 !important;
@@ -216,12 +234,25 @@
   color: #ec4899 !important;
 }
 
-.logoIndigo {
-  color: #6366f1 !important;
-}
-
 .logoGray {
   color: #6b7280 !important;
+}
+
+/* AI子页面Logo颜色 */
+.logoAiBlue {
+  color: #3b82f6 !important;
+}
+
+.logoAiOrange {
+  color: #f97316 !important;
+}
+
+.logoAiPurple {
+  color: #8b5cf6 !important;
+}
+
+.logoAiGreen {
+  color: #10b981 !important;
 }
 
 .siderFooter {
