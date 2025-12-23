@@ -119,6 +119,11 @@ const ConsoleLayout = () => {
           icon: <CalendarOutlined />,
           label: '迭代管理',
         },
+        {
+          key: '/analytics',
+          icon: <BarChartOutlined />,
+          label: '项目分析',
+        },
       ],
     },
     {
@@ -133,21 +138,6 @@ const ConsoleLayout = () => {
           key: '/wiki',
           icon: <BookOutlined />,
           label: '知识库',
-        },
-      ],
-    },
-    {
-      type: 'divider',
-    },
-    {
-      key: 'metrics-group',
-      type: 'group',
-      label: collapsed ? '' : '效能洞察',
-      children: [
-        {
-          key: '/metrics',
-          icon: <BarChartOutlined />,
-          label: '效能度量',
         },
       ],
     },

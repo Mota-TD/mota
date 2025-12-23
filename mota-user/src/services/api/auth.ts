@@ -69,8 +69,8 @@ export function logout(): Promise<void> {
 /**
  * 刷新 Token
  */
-export function refreshToken(refreshToken: string): Promise<LoginResponse> {
-  return post<LoginResponse>('/api/v1/auth/refresh', { refreshToken })
+export function refreshToken(token: string): Promise<LoginResponse> {
+  return post<LoginResponse>(`/api/v1/auth/refresh?refreshToken=${encodeURIComponent(token)}`, null)
 }
 
 /**

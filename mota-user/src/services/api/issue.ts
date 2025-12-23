@@ -70,7 +70,7 @@ export interface UpdateIssueRequest {
 /**
  * 获取事项列表
  */
-export function getIssues(params?: {
+export async function getIssues(params?: {
   projectId?: number
   sprintId?: number
   status?: string
@@ -80,7 +80,17 @@ export function getIssues(params?: {
   page?: number
   pageSize?: number
 }): Promise<IssueListResponse> {
-  return get<IssueListResponse>('/api/v1/issues', params)
+  const list = await get<Issue[]>('/api/v1/issues', {
+    projectId: params?.projectId,
+    sprintId: params?.sprintId,
+    status: params?.status === 'all' ? undefined : params?.status,
+    type: params?.type === 'all' ? undefined : params?.type,
+    assigneeId: params?.assignee
+  })
+  return {
+    list: list || [],
+    total: list?.length || 0
+  }
 }
 
 /**
@@ -128,12 +138,18 @@ export function updateIssueStatus(id: number, status: IssueStatus): Promise<Issu
 /**
  * 获取我的事项
  */
-export function getMyIssues(params?: {
+export async function getMyIssues(params?: {
   status?: string
   page?: number
   pageSize?: number
 }): Promise<IssueListResponse> {
-  return get<IssueListResponse>('/api/v1/issues/my', params)
+  const list = await get<Issue[]>('/api/v1/issues/my', {
+    status: params?.status === 'all' ? undefined : params?.status
+  })
+  return {
+    list: list || [],
+    total: list?.length || 0
+  }
 }
 
 /**

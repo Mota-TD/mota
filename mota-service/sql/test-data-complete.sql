@@ -84,21 +84,21 @@ INSERT INTO project_member (id, project_id, user_id, role, joined_at, created_at
 -- =====================================================
 INSERT INTO sprint (id, project_id, name, goal, status, start_date, end_date, total_points, completed_points, created_at, updated_at) VALUES
 -- Mota项目迭代
-(1, 1, 'Sprint 1 - 基础架构', '完成项目基础架构搭建，包括前后端框架、数据库设计、CI/CD流程', 'completed', '2024-01-01', '2024-01-14', 34, 34, NOW(), NOW()),
-(2, 1, 'Sprint 2 - 用户认证', '实现用户注册、登录、权限管理等核心功能', 'completed', '2024-01-15', '2024-01-28', 29, 29, NOW(), NOW()),
-(3, 1, 'Sprint 3 - 项目管理', '实现项目创建、成员管理、迭代规划等功能', 'completed', '2024-01-29', '2024-02-11', 32, 32, NOW(), NOW()),
-(4, 1, 'Sprint 4 - 任务管理', '实现任务创建、分配、状态流转、看板视图等功能', 'active', '2024-02-12', '2024-02-25', 30, 12, NOW(), NOW()),
-(5, 1, 'Sprint 5 - AI智能', '集成AI能力，实现智能需求生成、代码建议等功能', 'planning', '2024-02-26', '2024-03-10', 29, 0, NOW(), NOW()),
+(1, 1, '迭代1 - 基础架构', '完成项目基础架构搭建，包括前后端框架、数据库设计、CI/CD流程', 'completed', '2024-01-01', '2024-01-14', 34, 34, NOW(), NOW()),
+(2, 1, '迭代2 - 用户认证', '实现用户注册、登录、权限管理等核心功能', 'completed', '2024-01-15', '2024-01-28', 29, 29, NOW(), NOW()),
+(3, 1, '迭代3 - 项目管理', '实现项目创建、成员管理、迭代规划等功能', 'completed', '2024-01-29', '2024-02-11', 32, 32, NOW(), NOW()),
+(4, 1, '迭代4 - 任务管理', '实现任务创建、分配、状态流转、看板视图等功能', 'active', '2024-02-12', '2024-02-25', 30, 12, NOW(), NOW()),
+(5, 1, '迭代5 - AI智能', '集成AI能力，实现智能需求生成、代码建议等功能', 'planning', '2024-02-26', '2024-03-10', 29, 0, NOW(), NOW()),
 -- 电商平台迭代
-(6, 2, 'Sprint 1 - 服务拆分', '将单体应用拆分为微服务架构', 'completed', '2024-03-01', '2024-03-14', 40, 40, NOW(), NOW()),
-(7, 2, 'Sprint 2 - 订单服务', '重构订单服务，优化下单流程', 'completed', '2024-03-15', '2024-03-28', 35, 35, NOW(), NOW()),
-(8, 2, 'Sprint 3 - 支付服务', '重构支付服务，接入多种支付渠道', 'active', '2024-03-29', '2024-04-11', 32, 10, NOW(), NOW()),
+(6, 2, '迭代1 - 服务拆分', '将单体应用拆分为微服务架构', 'completed', '2024-03-01', '2024-03-14', 40, 40, NOW(), NOW()),
+(7, 2, '迭代2 - 订单服务', '重构订单服务，优化下单流程', 'completed', '2024-03-15', '2024-03-28', 35, 35, NOW(), NOW()),
+(8, 2, '迭代3 - 支付服务', '重构支付服务，接入多种支付渠道', 'active', '2024-03-29', '2024-04-11', 32, 10, NOW(), NOW()),
 -- 移动端App迭代
-(9, 3, 'Sprint 1 - UI框架', '搭建移动端UI框架和组件库', 'completed', '2024-02-01', '2024-02-14', 28, 28, NOW(), NOW()),
-(10, 3, 'Sprint 2 - 首页模块', '实现App首页和推荐功能', 'active', '2024-02-15', '2024-02-28', 25, 12, NOW(), NOW()),
+(9, 3, '迭代1 - UI框架', '搭建移动端UI框架和组件库', 'completed', '2024-02-01', '2024-02-14', 28, 28, NOW(), NOW()),
+(10, 3, '迭代2 - 首页模块', '实现App首页和推荐功能', 'active', '2024-02-15', '2024-02-28', 25, 12, NOW(), NOW()),
 -- AI客服迭代
-(11, 5, 'Sprint 1 - 对话引擎', '搭建基础对话引擎和知识库', 'completed', '2024-04-01', '2024-04-14', 38, 38, NOW(), NOW()),
-(12, 5, 'Sprint 2 - 多轮对话', '实现多轮对话和上下文理解', 'active', '2024-04-15', '2024-04-28', 35, 16, NOW(), NOW());
+(11, 5, '迭代1 - 对话引擎', '搭建基础对话引擎和知识库', 'completed', '2024-04-01', '2024-04-14', 38, 38, NOW(), NOW()),
+(12, 5, '迭代2 - 多轮对话', '实现多轮对话和上下文理解', 'active', '2024-04-15', '2024-04-28', 35, 16, NOW(), NOW());
 
 -- =====================================================
 -- 5. 任务/事项数据 (issue)
@@ -166,7 +166,7 @@ INSERT INTO activity (id, type, action, target, target_id, user_id, project_id, 
 (9, 'issue', '创建了Bug', '修复订单金额计算bug', 16, 5, 2, '昨天', DATE_SUB(NOW(), INTERVAL 1 DAY)),
 
 -- 本周的活动
-(10, 'sprint', '创建了迭代', 'Sprint 5 - AI智能', 5, 2, 1, '2天前', DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(10, 'sprint', '创建了迭代', '迭代5 - AI智能', 5, 2, 1, '2天前', DATE_SUB(NOW(), INTERVAL 2 DAY)),
 (11, 'issue', '开始处理任务', '优化任务加载性能', 8, 4, 1, '2天前', DATE_SUB(NOW(), INTERVAL 2 DAY)),
 (12, 'issue', '开始处理任务', '上下文管理模块', 21, 4, 5, '3天前', DATE_SUB(NOW(), INTERVAL 3 DAY)),
 (13, 'issue', '完成了任务', '对话日志记录', 24, 8, 5, '3天前', DATE_SUB(NOW(), INTERVAL 3 DAY)),
@@ -174,10 +174,10 @@ INSERT INTO activity (id, type, action, target, target_id, user_id, project_id, 
 (15, 'project', '更新了项目', 'Mota 项目管理系统', 1, 1, 1, '5天前', DATE_SUB(NOW(), INTERVAL 5 DAY)),
 
 -- 更早的活动
-(16, 'sprint', '创建了迭代', 'Sprint 3 - 支付服务', 8, 2, 2, '1周前', DATE_SUB(NOW(), INTERVAL 7 DAY)),
+(16, 'sprint', '创建了迭代', '迭代3 - 支付服务', 8, 2, 2, '1周前', DATE_SUB(NOW(), INTERVAL 7 DAY)),
 (17, 'issue', '修复了Bug', '修复任务列表分页bug', 7, 3, 1, '1周前', DATE_SUB(NOW(), INTERVAL 7 DAY)),
 (18, 'issue', '开始处理任务', '推荐算法接入', 18, 6, 3, '1周前', DATE_SUB(NOW(), INTERVAL 8 DAY)),
-(19, 'sprint', '创建了迭代', 'Sprint 2 - 多轮对话', 12, 3, 5, '10天前', DATE_SUB(NOW(), INTERVAL 10 DAY)),
+(19, 'sprint', '创建了迭代', '迭代2 - 多轮对话', 12, 3, 5, '10天前', DATE_SUB(NOW(), INTERVAL 10 DAY)),
 (20, 'member', '添加了成员', '周八', NULL, 2, 1, '2周前', DATE_SUB(NOW(), INTERVAL 14 DAY));
 
 -- =====================================================
@@ -187,7 +187,7 @@ INSERT INTO activity (id, type, action, target, target_id, user_id, project_id, 
 INSERT INTO notification (id, type, title, content, user_id, is_read, related_id, related_type, created_at) VALUES
 -- 管理员的通知
 (1, 'member', '新成员加入', '周八已加入项目"Mota 项目管理系统"', 1, 0, 1, 'project', NOW()),
-(2, 'sprint', '迭代已完成', 'Sprint 3 - 项目管理 已完成', 1, 1, 3, 'sprint', DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(2, 'sprint', '迭代已完成', '迭代3 - 项目管理 已完成', 1, 1, 3, 'sprint', DATE_SUB(NOW(), INTERVAL 1 DAY)),
 
 -- 张三的通知
 (3, 'issue', '任务已完成', '李四完成了任务"实现任务创建功能"', 2, 0, 1, 'issue', NOW()),
@@ -196,7 +196,7 @@ INSERT INTO notification (id, type, title, content, user_id, is_read, related_id
 
 -- 李四的通知
 (6, 'issue', '任务已分配', '张三将任务"支付宝支付接入"分配给你', 3, 0, 12, 'issue', DATE_SUB(NOW(), INTERVAL 4 HOUR)),
-(7, 'sprint', '迭代即将结束', 'Sprint 4 - 任务管理 将于3天后结束', 3, 0, 4, 'sprint', DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(7, 'sprint', '迭代即将结束', '迭代4 - 任务管理 将于3天后结束', 3, 0, 4, 'sprint', DATE_SUB(NOW(), INTERVAL 1 DAY)),
 (8, 'review', '代码评审请求', '王五请求你评审代码', 3, 1, 3, 'issue', DATE_SUB(NOW(), INTERVAL 2 DAY)),
 
 -- 王五的通知

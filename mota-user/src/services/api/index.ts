@@ -6,7 +6,6 @@ export * from './auth'
 export * from './project'
 export * from './issue'
 export * from './activity'
-export * from './metrics'
 export * from './user'
 export * from './sprint'
 export * from './wiki'
@@ -17,7 +16,6 @@ export * from './ai'
 import * as projectApi from './project'
 import * as issueApi from './issue'
 import * as activityApi from './activity'
-import * as metricsApi from './metrics'
 import * as userApi from './user'
 import * as sprintApi from './sprint'
 import * as wikiApi from './wiki'
@@ -28,7 +26,6 @@ export {
   projectApi,
   issueApi,
   activityApi,
-  metricsApi,
   userApi,
   sprintApi,
   wikiApi,

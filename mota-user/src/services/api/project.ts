@@ -46,13 +46,20 @@ export interface UpdateProjectRequest {
 /**
  * 获取项目列表
  */
-export function getProjects(params?: {
+export async function getProjects(params?: {
   status?: string
   search?: string
   page?: number
   pageSize?: number
 }): Promise<ProjectListResponse> {
-  return get<ProjectListResponse>('/api/v1/projects', params)
+  const list = await get<Project[]>('/api/v1/projects', {
+    keyword: params?.search,
+    status: params?.status === 'all' ? undefined : params?.status
+  })
+  return {
+    list: list || [],
+    total: list?.length || 0
+  }
 }
 
 /**

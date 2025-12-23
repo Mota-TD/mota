@@ -14,10 +14,13 @@ import styles from './index.module.css'
 
 interface Member {
   id: number
-  name: string
+  name?: string
+  username?: string
+  nickname?: string
   email: string
-  avatar: string
-  role: string
+  avatar?: string
+  role?: string
+  status?: string
 }
 
 const roleOptions = [
@@ -45,7 +48,14 @@ const MembersPage = () => {
     try {
       const res = await userApi.getUsers()
       const membersList = (res as any).list || res || []
-      setMembers(membersList)
+      // 转换字段名以匹配前端接口
+      const transformedList = membersList.map((user: any) => ({
+        ...user,
+        name: user.name || user.nickname || user.username || '未知用户',
+        avatar: user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`,
+        role: user.role || 'member'
+      }))
+      setMembers(transformedList)
     } catch (error) {
       console.error('Failed to load members:', error)
     } finally {
@@ -57,10 +67,12 @@ const MembersPage = () => {
     return roleOptions.find(r => r.value === role) || { label: role, color: 'default' }
   }
 
-  const filteredMembers = members.filter(m => 
-    m.name.toLowerCase().includes(searchText.toLowerCase()) ||
-    m.email.toLowerCase().includes(searchText.toLowerCase())
-  )
+  const filteredMembers = members.filter(m => {
+    const name = m.name || m.nickname || m.username || ''
+    const email = m.email || ''
+    return name.toLowerCase().includes(searchText.toLowerCase()) ||
+           email.toLowerCase().includes(searchText.toLowerCase())
+  })
 
   const handleAdd = () => {
     setEditingMember(null)

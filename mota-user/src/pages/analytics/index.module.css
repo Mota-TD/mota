@@ -1,0 +1,185 @@
+.container {
+  padding: 24px;
+  background: #f5f7fa;
+  min-height: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+}
+
+.tabs {
+  background: transparent;
+}
+
+.tabs :global(.ant-tabs-nav) {
+  margin-bottom: 16px;
+}
+
+.tabContent {
+  min-height: 400px;
+}
+
+.statCard {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.statCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.statCard :global(.ant-statistic-title) {
+  color: #8c8c8c;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.statCard :global(.ant-statistic-content) {
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.statExtra {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.chartCard {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  height: 100%;
+}
+
+.chartCard :global(.ant-card-head) {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.chartCard :global(.ant-card-head-title) {
+  font-weight: 600;
+}
+
+.tableCard {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.tableCard :global(.ant-card-head) {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.tableCard :global(.ant-card-head-title) {
+  font-weight: 600;
+}
+
+.statusItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+}
+
+.statusLabel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.typeDistribution {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.typeItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.typeHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.trendChart {
+  padding: 16px 0;
+}
+
+.trendItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.trendBars {
+  display: flex;
+  gap: 16px;
+  height: 150px;
+  align-items: flex-end;
+}
+
+.trendBar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 40px;
+}
+
+.barFill {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  transition: height 0.3s ease;
+  min-height: 4px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .headerRight {
+    width: 100%;
+  }
+
+  .headerRight :global(.ant-space) {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .trendBars {
+    height: 100px;
+  }
+}

@@ -27,25 +27,13 @@ const Login = () => {
     return Promise.resolve()
   }
 
-  // 密码校验规则：8~18位，必须包含数字和大小写字母，特殊字符可选
+  // 密码校验规则：6~18位
   const passwordValidator = (_: unknown, value: string) => {
     if (!value) {
       return Promise.reject(new Error('请输入密码'))
     }
-    if (value.length < 8 || value.length > 18) {
-      return Promise.reject(new Error('密码长度为8~18位'))
-    }
-    // 必须包含数字
-    if (!/\d/.test(value)) {
-      return Promise.reject(new Error('密码必须包含数字'))
-    }
-    // 必须包含小写字母
-    if (!/[a-z]/.test(value)) {
-      return Promise.reject(new Error('密码必须包含小写字母'))
-    }
-    // 必须包含大写字母
-    if (!/[A-Z]/.test(value)) {
-      return Promise.reject(new Error('密码必须包含大写字母'))
+    if (value.length < 6 || value.length > 18) {
+      return Promise.reject(new Error('密码长度为6~18位'))
     }
     return Promise.resolve()
   }
@@ -115,7 +103,7 @@ const Login = () => {
         >
           <Input.Password
             prefix={<LockOutlined />}
-            placeholder="请输入密码（8~18位，含数字和大小写字母）"
+            placeholder="请输入密码（6~18位）"
             autoComplete="new-password"
           />
         </Form.Item>

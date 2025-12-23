@@ -25,10 +25,10 @@ const Members = lazy(() => import('@/pages/members'))
 const Settings = lazy(() => import('@/pages/settings'))
 const Profile = lazy(() => import('@/pages/profile'))
 const Notifications = lazy(() => import('@/pages/notifications'))
-const Metrics = lazy(() => import('@/pages/metrics'))
 const ProjectDetail = lazy(() => import('@/pages/project-detail'))
 const IssueDetail = lazy(() => import('@/pages/issue-detail'))
 const IterationDetail = lazy(() => import('@/pages/iteration-detail'))
+const Analytics = lazy(() => import('@/pages/analytics'))
 const NotFound = lazy(() => import('@/pages/NotFound'))
 
 // AI模块页面
@@ -52,6 +52,7 @@ const Loading = () => (
 
 // 路由配置
 export const routes: RouteObject[] = [
+  // 首页 - 独立路由
   {
     path: '/',
     element: (
@@ -60,8 +61,9 @@ export const routes: RouteObject[] = [
       </Suspense>
     )
   },
+  // 认证相关路由
   {
-    path: '/',
+    path: '/login',
     element: (
       <Suspense fallback={<Loading />}>
         <AuthLayout />
@@ -69,15 +71,25 @@ export const routes: RouteObject[] = [
     ),
     children: [
       {
-        path: 'login',
+        index: true,
         element: (
           <Suspense fallback={<Loading />}>
             <Login />
           </Suspense>
         )
-      },
+      }
+    ]
+  },
+  {
+    path: '/register',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <AuthLayout />
+      </Suspense>
+    ),
+    children: [
       {
-        path: 'register',
+        index: true,
         element: (
           <Suspense fallback={<Loading />}>
             <Register />
@@ -86,8 +98,9 @@ export const routes: RouteObject[] = [
       }
     ]
   },
+  // 控制台路由
   {
-    path: '/',
+    path: '/dashboard',
     element: (
       <Suspense fallback={<Loading />}>
         <ConsoleLayout />
@@ -95,16 +108,26 @@ export const routes: RouteObject[] = [
     ),
     children: [
       {
-        path: 'dashboard',
+        index: true,
         element: (
           <Suspense fallback={<Loading />}>
             <Dashboard />
           </Suspense>
         )
       },
-      // AI模块路由
+    ]
+  },
+  // AI模块路由
+  {
+    path: '/ai',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
       {
-        path: 'ai/solution',
+        path: 'solution',
         element: (
           <Suspense fallback={<Loading />}>
             <AISolution />
@@ -112,7 +135,7 @@ export const routes: RouteObject[] = [
         )
       },
       {
-        path: 'ai/ppt',
+        path: 'ppt',
         element: (
           <Suspense fallback={<Loading />}>
             <AIPPT />
@@ -120,7 +143,7 @@ export const routes: RouteObject[] = [
         )
       },
       {
-        path: 'ai/training',
+        path: 'training',
         element: (
           <Suspense fallback={<Loading />}>
             <AITraining />
@@ -128,7 +151,7 @@ export const routes: RouteObject[] = [
         )
       },
       {
-        path: 'ai/news',
+        path: 'news',
         element: (
           <Suspense fallback={<Loading />}>
             <AINews />
@@ -136,16 +159,26 @@ export const routes: RouteObject[] = [
         )
       },
       {
-        path: 'ai/history',
+        path: 'history',
         element: (
           <Suspense fallback={<Loading />}>
             <AIHistory />
           </Suspense>
         )
-      },
-      // 项目协同路由
+      }
+    ]
+  },
+  // 项目协同路由
+  {
+    path: '/projects',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
       {
-        path: 'projects',
+        index: true,
         element: (
           <Suspense fallback={<Loading />}>
             <Projects />
@@ -153,15 +186,26 @@ export const routes: RouteObject[] = [
         )
       },
       {
-        path: 'projects/:id',
+        path: ':id',
         element: (
           <Suspense fallback={<Loading />}>
-            <ProjectDetail />
+            <Projects />
           </Suspense>
         )
       },
+    ]
+  },
+  // 事项路由
+  {
+    path: '/issues',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
       {
-        path: 'issues',
+        index: true,
         element: (
           <Suspense fallback={<Loading />}>
             <Issues />
@@ -169,31 +213,64 @@ export const routes: RouteObject[] = [
         )
       },
       {
-        path: 'issues/:id',
+        path: ':id',
         element: (
           <Suspense fallback={<Loading />}>
             <IssueDetail />
           </Suspense>
         )
-      },
+      }
+    ]
+  },
+  // 看板路由
+  {
+    path: '/kanban',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
       {
-        path: 'kanban',
+        index: true,
         element: (
           <Suspense fallback={<Loading />}>
             <Kanban />
           </Suspense>
         )
       },
+    ]
+  },
+  // 待办事项路由
+  {
+    path: '/backlog',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
       {
-        path: 'backlog',
+        index: true,
         element: (
           <Suspense fallback={<Loading />}>
             <Backlog />
           </Suspense>
         )
       },
+    ]
+  },
+  // 迭代路由
+  {
+    path: '/iterations',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
       {
-        path: 'iterations',
+        index: true,
         element: (
           <Suspense fallback={<Loading />}>
             <Iterations />
@@ -201,63 +278,130 @@ export const routes: RouteObject[] = [
         )
       },
       {
-        path: 'iterations/:id',
+        path: ':id',
         element: (
           <Suspense fallback={<Loading />}>
-            <IterationDetail />
+            <Iterations />
           </Suspense>
         )
       },
+    ]
+  },
+  // 项目分析路由
+  {
+    path: '/analytics',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
       {
-        path: 'wiki',
+        index: true,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <Analytics />
+          </Suspense>
+        )
+      },
+    ]
+  },
+  // Wiki路由
+  {
+    path: '/wiki',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
         element: (
           <Suspense fallback={<Loading />}>
             <Wiki />
           </Suspense>
         )
       },
+    ]
+  },
+  // 成员管理路由
+  {
+    path: '/members',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
       {
-        path: 'members',
+        index: true,
         element: (
           <Suspense fallback={<Loading />}>
             <Members />
           </Suspense>
         )
       },
+    ]
+  },
+  // 设置路由
+  {
+    path: '/settings',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
       {
-        path: 'settings',
+        index: true,
         element: (
           <Suspense fallback={<Loading />}>
             <Settings />
           </Suspense>
         )
       },
+    ]
+  },
+  // 个人资料路由
+  {
+    path: '/profile',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
       {
-        path: 'profile',
+        index: true,
         element: (
           <Suspense fallback={<Loading />}>
             <Profile />
           </Suspense>
         )
       },
+    ]
+  },
+  // 通知路由
+  {
+    path: '/notifications',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
       {
-        path: 'notifications',
+        index: true,
         element: (
           <Suspense fallback={<Loading />}>
             <Notifications />
           </Suspense>
         )
       },
-      {
-        path: 'metrics',
-        element: (
-          <Suspense fallback={<Loading />}>
-            <Metrics />
-          </Suspense>
-        )
-      }
     ]
   },
+  // 404 路由
   {
     path: '*',
     element: (

@@ -1,39 +1,115 @@
-import { useEffect, useState } from 'react'
-import { Card, Row, Col, Statistic, List, Avatar, Tag, Progress, Typography, Spin, Button, Input, Space, Tooltip, message } from 'antd'
+import { useEffect, useState, useMemo } from 'react'
+import { Card, Row, Col, List, Avatar, Tag, Progress, Typography, Spin, Button, Input, message } from 'antd'
 import {
   ProjectOutlined,
   BugOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
   TeamOutlined,
-  RiseOutlined,
   FileTextOutlined,
   CalendarOutlined,
-  PlusCircleOutlined,
-  FolderAddOutlined,
-  SyncOutlined,
-  FileAddOutlined,
-  UserAddOutlined,
   RobotOutlined,
   BulbOutlined,
   FilePptOutlined,
   BookOutlined,
   GlobalOutlined,
-  ThunderboltOutlined,
   SendOutlined,
   ArrowRightOutlined,
   FireOutlined,
-  TrophyOutlined,
-  StarOutlined
+  TrophyOutlined
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import * as projectApi from '@/services/api/project'
 import * as issueApi from '@/services/api/issue'
 import * as activityApi from '@/services/api/activity'
-import * as metricsApi from '@/services/api/metrics'
+import * as aiApi from '@/services/api/ai'
 import styles from './index.module.css'
 
 const { Title, Text, Paragraph } = Typography
+
+// 问候语库 - 根据时间段分类
+const greetingMessages = {
+  morning: [
+    { greeting: '早上好', quote: '新的一天，新的开始，愿你满怀希望！' },
+    { greeting: '早安', quote: '每一个清晨都是一份礼物，好好珍惜今天。' },
+    { greeting: '早上好', quote: '阳光正好，微风不燥，愿你今天收获满满。' },
+    { greeting: '早安', quote: '美好的一天从现在开始，加油！' },
+    { greeting: '早上好', quote: '今天也要元气满满地开始工作哦！' },
+    { greeting: '早安', quote: '愿你的努力都不被辜负，梦想都能实现。' },
+    { greeting: '早上好', quote: '新的一天，愿所有美好如期而至。' },
+    { greeting: '早安', quote: '保持热爱，奔赴山海，今天继续加油！' },
+    // 新增早晨问候语
+    { greeting: '早上好', quote: '晨起有粥温，日常有陪伴，愿你晨起温暖，日日安然。' },
+    { greeting: '早安', quote: '轻轻道一声早安，愿你卸下疲惫，带着温柔开启新一天。' },
+    { greeting: '早上好', quote: '晨光为你铺路，清风为你祝福，今天只管大步向前～' },
+    { greeting: '早安', quote: '哪怕生活偶尔有小烦恼，清晨的阳光也会帮你扫掉呀。' },
+    { greeting: '早上好', quote: '记得吃早餐哦，好好吃饭，好好生活，就是最棒的日常。' },
+  ],
+  afternoon: [
+    { greeting: '下午好', quote: '午后时光，别忘了给自己一杯咖啡的休息。' },
+    { greeting: '下午好', quote: '坚持就是胜利，下午继续保持专注！' },
+    { greeting: '下午好', quote: '阳光温暖，愿你的心情也如此明媚。' },
+    { greeting: '下午好', quote: '工作之余，记得起身活动一下哦。' },
+    { greeting: '下午好', quote: '每一份努力都在为未来铺路，继续加油！' },
+    { greeting: '下午好', quote: '保持节奏，稳步前进，你做得很好！' },
+    { greeting: '下午好', quote: '困了就休息一下，效率比时长更重要。' },
+    { greeting: '下午好', quote: '相信自己，你比想象中更优秀！' },
+    // 新增下午问候语
+    { greeting: '下午好', quote: '午后的阳光慢慢晃，愿你的烦恼慢慢散，轻松过下午～' },
+    { greeting: '下午好', quote: '忙了半天啦，喝口水歇一歇，你已经很棒了。' },
+    { greeting: '下午好', quote: '不必事事追求完美，尽力就好，下午也要温柔待自己。' },
+    { greeting: '下午好', quote: '风遇山止，船到岸停，你的努力，自有归处。' },
+    { greeting: '下午好', quote: '把烦恼暂时放下，哪怕只是十分钟，享受此刻的温柔呀。' },
+  ],
+  evening: [
+    { greeting: '傍晚好', quote: '夕阳西下，今天的工作即将收尾，辛苦了！' },
+    { greeting: '傍晚好', quote: '忙碌了一天，记得给自己一个微笑。' },
+    { greeting: '傍晚好', quote: '日落时分，愿你带着满满的收获回家。' },
+    { greeting: '傍晚好', quote: '今天的努力，是明天的底气。' },
+    { greeting: '傍晚好', quote: '工作告一段落，生活同样精彩。' },
+    { greeting: '傍晚好', quote: '感谢今天努力的自己，明天继续加油！' },
+    // 新增傍晚问候语
+    { greeting: '傍晚好', quote: '落日余晖温柔，晚风轻拂肩头，愿你卸下疲惫，拥抱轻松。' },
+    { greeting: '傍晚好', quote: '傍晚的风会吹散一天的疲惫，回家的路要走得慢悠悠～' },
+    { greeting: '傍晚好', quote: '不管今天过得怎么样，日落都在告诉你：该歇歇啦。' },
+    { greeting: '傍晚好', quote: '愿晚餐有暖胃的汤，身边有暖心的人，傍晚安～' },
+    { greeting: '傍晚好', quote: '把今天的不开心都留给落日，明天又是崭新的呀。' },
+  ],
+  night: [
+    { greeting: '晚上好', quote: '夜深了，注意休息，明天又是元气满满的一天。' },
+    { greeting: '晚上好', quote: '星光不负赶路人，你的努力终将闪耀。' },
+    { greeting: '晚上好', quote: '今天辛苦了，好好休息，晚安！' },
+    { greeting: '晚上好', quote: '夜晚是思考的好时光，也别忘了照顾自己。' },
+    { greeting: '晚上好', quote: '愿你今夜好梦，明日好运。' },
+    { greeting: '晚上好', quote: '加班的你最棒，但也要注意身体哦！' },
+    { greeting: '晚上好', quote: '月光温柔，愿你的梦想也如此美好。' },
+    { greeting: '深夜好', quote: '夜猫子也要注意休息，身体是革命的本钱！' },
+    // 新增夜晚问候语
+    { greeting: '晚上好', quote: '夜色温柔，别再想白天的忙碌啦，好好和自己相处吧。' },
+    { greeting: '晚上好', quote: '关掉烦恼，打开轻松，愿今夜的梦都是甜的～' },
+    { greeting: '深夜好', quote: '如果还没睡，记得泡杯热饮，别让深夜的凉冲淡你的温柔。' },
+    { greeting: '晚上好', quote: '今天所有的奔波，都是为了明天更好的生活，晚安啦。' },
+    { greeting: '深夜好', quote: '哪怕熬夜赶路，也要记得抬头看看星星，它们都在为你亮着。' },
+    { greeting: '晚上好', quote: '卸下所有防备，好好睡一觉，醒来又是元气满满的你。' },
+  ],
+};
+
+// 获取当前时间段
+const getTimeOfDay = (): 'morning' | 'afternoon' | 'evening' | 'night' => {
+  const hour = new Date().getHours()
+  if (hour >= 5 && hour < 12) return 'morning'
+  if (hour >= 12 && hour < 17) return 'afternoon'
+  if (hour >= 17 && hour < 20) return 'evening'
+  return 'night'
+}
+
+// 获取随机问候语
+const getRandomGreeting = () => {
+  const timeOfDay = getTimeOfDay()
+  const messages = greetingMessages[timeOfDay]
+  const randomIndex = Math.floor(Math.random() * messages.length)
+  return messages[randomIndex]
+}
 
 /**
  * 仪表盘页面 - 工作台
@@ -53,7 +129,10 @@ const Dashboard = () => {
   const [recentProjects, setRecentProjects] = useState<any[]>([])
   const [myIssues, setMyIssues] = useState<any[]>([])
   const [activities, setActivities] = useState<any[]>([])
-  const [metrics, setMetrics] = useState<any>(null)
+  const [news, setNews] = useState<any[]>([])
+
+  // 使用 useMemo 确保每次页面加载时随机选择一条问候语，但在组件生命周期内保持不变
+  const greetingData = useMemo(() => getRandomGreeting(), [])
 
   useEffect(() => {
     loadDashboardData()
@@ -86,9 +165,13 @@ const Dashboard = () => {
       const activitiesRes = await activityApi.getRecentActivities(6)
       setActivities(activitiesRes || [])
       
-      // 加载效能指标
-      const metricsData = await metricsApi.getMetrics()
-      setMetrics(metricsData)
+      // 加载新闻
+      try {
+        const newsRes = await aiApi.getNews({ pageSize: 5 })
+        setNews(newsRes.list || [])
+      } catch (e) {
+        console.error('Failed to load news:', e)
+      }
     } catch (error) {
       console.error('Failed to load dashboard data:', error)
       message.error('加载数据失败，请检查后端服务是否启动')
@@ -177,15 +260,6 @@ const Dashboard = () => {
     }
   ]
 
-  // 快捷操作
-  const quickActions = [
-    { icon: <PlusCircleOutlined />, label: '创建任务', path: '/issues', color: 'blue' },
-    { icon: <FolderAddOutlined />, label: '新建项目', path: '/projects', color: 'green' },
-    { icon: <SyncOutlined />, label: '新建迭代', path: '/iterations', color: 'orange' },
-    { icon: <FileAddOutlined />, label: '新建文档', path: '/wiki', color: 'pink' },
-    { icon: <UserAddOutlined />, label: '邀请成员', path: '/members', color: 'teal' }
-  ]
-
   if (loading) {
     return (
       <div className={styles.loading}>
@@ -200,9 +274,14 @@ const Dashboard = () => {
       <div className={styles.welcomeSection}>
         <div className={styles.welcomeContent}>
           <div className={styles.welcomeText}>
-            <Title level={3} className={styles.welcomeTitle}>
-              早上好，欢迎回来 👋
-            </Title>
+            <div className={styles.welcomeTitleRow}>
+              <Title level={3} className={styles.welcomeTitle}>
+                {greetingData.greeting}，欢迎回来 👋
+              </Title>
+              <Text className={styles.welcomeQuote}>
+                💡 {greetingData.quote}
+              </Text>
+            </div>
             <Text type="secondary" className={styles.welcomeDesc}>
               今天有 {stats.inProgressIssues} 个任务进行中，{stats.completedIssues} 个任务已完成
             </Text>
@@ -415,9 +494,39 @@ const Dashboard = () => {
       </Row>
 
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+        {/* 新闻追踪 */}
+        <Col xs={24} lg={12}>
+          <Card
+            title={
+              <div className={styles.cardTitle}>
+                <GlobalOutlined className={styles.cardTitleIcon} />
+                <span>新闻追踪</span>
+              </div>
+            }
+            extra={<a onClick={() => navigate('/ai/news')}>更多 <ArrowRightOutlined /></a>}
+            className={styles.newsCard}
+          >
+            <List
+              dataSource={news}
+              renderItem={(item: any) => (
+                <List.Item className={styles.newsItem}>
+                  <div className={styles.newsContent}>
+                    <div className={styles.newsTitle}>{item.title}</div>
+                    <div className={styles.newsMeta}>
+                      <Tag color="blue">{item.category}</Tag>
+                      <Text type="secondary" style={{ fontSize: 12 }}>{item.source} · {item.publishTime}</Text>
+                    </div>
+                  </div>
+                </List.Item>
+              )}
+              locale={{ emptyText: '暂无新闻' }}
+            />
+          </Card>
+        </Col>
+
         {/* 动态 */}
-        <Col xs={24} lg={16}>
-          <Card 
+        <Col xs={24} lg={12}>
+          <Card
             title={
               <div className={styles.cardTitle}>
                 <CalendarOutlined className={styles.cardTitleIcon} />
@@ -457,99 +566,7 @@ const Dashboard = () => {
             />
           </Card>
         </Col>
-
-        {/* 效能概览 */}
-        <Col xs={24} lg={8}>
-          <Card 
-            title={
-              <div className={styles.cardTitle}>
-                <RiseOutlined className={styles.cardTitleIcon} />
-                <span>效能概览</span>
-              </div>
-            }
-            className={styles.metricsCard}
-          >
-            {metrics && (
-              <div className={styles.metricsContent}>
-                <div className={styles.metricItem}>
-                  <div className={styles.metricIcon}>
-                    <ThunderboltOutlined />
-                  </div>
-                  <div className={styles.metricInfo}>
-                    <div className={styles.metricLabel}>部署频率</div>
-                    <div className={styles.metricValue}>
-                      {metrics.dora?.deploymentFrequency?.value || 0} 
-                      <span className={styles.metricUnit}>{metrics.dora?.deploymentFrequency?.unit || '次/周'}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className={styles.metricItem}>
-                  <div className={styles.metricIcon}>
-                    <ClockCircleOutlined />
-                  </div>
-                  <div className={styles.metricInfo}>
-                    <div className={styles.metricLabel}>变更前置时间</div>
-                    <div className={styles.metricValue}>
-                      {metrics.dora?.leadTime?.value || 0}
-                      <span className={styles.metricUnit}>{metrics.dora?.leadTime?.unit || '天'}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className={styles.metricItem}>
-                  <div className={styles.metricIcon}>
-                    <BugOutlined />
-                  </div>
-                  <div className={styles.metricInfo}>
-                    <div className={styles.metricLabel}>变更失败率</div>
-                    <div className={styles.metricValue}>
-                      {metrics.dora?.changeFailureRate?.value || 0}
-                      <span className={styles.metricUnit}>{metrics.dora?.changeFailureRate?.unit || '%'}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className={styles.metricItem}>
-                  <div className={styles.metricIcon}>
-                    <SyncOutlined />
-                  </div>
-                  <div className={styles.metricInfo}>
-                    <div className={styles.metricLabel}>平均恢复时间</div>
-                    <div className={styles.metricValue}>
-                      {metrics.dora?.mttr?.value || 0}
-                      <span className={styles.metricUnit}>{metrics.dora?.mttr?.unit || '小时'}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </Card>
-        </Col>
       </Row>
-
-      {/* 快捷入口 */}
-      <Card 
-        title={
-          <div className={styles.cardTitle}>
-            <StarOutlined className={styles.cardTitleIcon} />
-            <span>快捷入口</span>
-          </div>
-        }
-        className={styles.quickActionsCard}
-      >
-        <div className={styles.quickActions}>
-          {quickActions.map((action, index) => (
-            <div 
-              key={index}
-              className={styles.quickAction} 
-              onClick={() => navigate(action.path)}
-            >
-              <div className={`${styles.quickActionIcon} ${styles[action.color]}`}>
-                {action.icon}
-              </div>
-              <span className={styles.quickActionLabel}>{action.label}</span>
-            </div>
-          ))}
-        </div>
-      </Card>
     </div>
   )
 }
