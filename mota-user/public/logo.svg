@@ -27,6 +27,6 @@
   
   <!-- M letter - large, bold, thicker middle strokes -->
   <!-- Top at y=6 (aligned with tower top), bottom at y=36 (top of base) -->
-  <!-- Thicker strokes for better appearance -->
-  <path d="M5 36 L5 6 L15 6 L24 20 L33 6 L43 6 L43 36 L35 36 L35 16 L24 32 L13 16 L13 36 Z" fill="white"/>
+  <!-- Middle diagonal strokes made thicker to match side width -->
+  <path d="M5 36 L5 6 L15 6 L24 18 L33 6 L43 6 L43 36 L35 36 L35 18 L24 34 L13 18 L13 36 Z" fill="white"/>
 </svg>
