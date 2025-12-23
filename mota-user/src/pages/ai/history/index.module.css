@@ -4,14 +4,14 @@
   min-height: 100%;
 }
 
-/* 页面头部 */
+/* 页面头部 - 灰色 */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
   border-radius: 16px;
   color: #fff;
 }
@@ -104,11 +104,11 @@
 }
 
 .container :global(.ant-pagination-item-active) {
-  border-color: #6366f1;
+  border-color: #6b7280;
 }
 
 .container :global(.ant-pagination-item-active a) {
-  color: #6366f1;
+  color: #6b7280;
 }
 
 /* 预览弹窗 */

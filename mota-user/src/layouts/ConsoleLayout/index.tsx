@@ -204,42 +204,42 @@ const ConsoleLayout = () => {
     const path = location.pathname
     // 工作台
     if (path.startsWith('/dashboard')) {
-      return { menuClass: styles.themeBlue, logoClass: styles.logoBlue }
+      return { menuClass: styles.themeBlue, logoClass: styles.logoBlue, logoColor: '#2b7de9' }
     }
     // AI助理 - 每个子页面不同颜色
     else if (path.startsWith('/ai/solution')) {
-      return { menuClass: styles.themeAiBlue, logoClass: styles.logoAiBlue }
+      return { menuClass: styles.themeAiBlue, logoClass: styles.logoAiBlue, logoColor: '#3b82f6' }
     } else if (path.startsWith('/ai/ppt')) {
-      return { menuClass: styles.themeAiOrange, logoClass: styles.logoAiOrange }
+      return { menuClass: styles.themeAiOrange, logoClass: styles.logoAiOrange, logoColor: '#f97316' }
     } else if (path.startsWith('/ai/training')) {
-      return { menuClass: styles.themeAiPurple, logoClass: styles.logoAiPurple }
+      return { menuClass: styles.themeAiPurple, logoClass: styles.logoAiPurple, logoColor: '#8b5cf6' }
     } else if (path.startsWith('/ai/news')) {
-      return { menuClass: styles.themeAiGreen, logoClass: styles.logoAiGreen }
+      return { menuClass: styles.themeAiGreen, logoClass: styles.logoAiGreen, logoColor: '#10b981' }
     } else if (path.startsWith('/ai/history')) {
-      return { menuClass: styles.themeGray, logoClass: styles.logoGray }
+      return { menuClass: styles.themeGray, logoClass: styles.logoGray, logoColor: '#6b7280' }
     }
     // 项目协同
     else if (path.startsWith('/projects')) {
-      return { menuClass: styles.themeBlue, logoClass: styles.logoBlue }
+      return { menuClass: styles.themeBlue, logoClass: styles.logoBlue, logoColor: '#2b7de9' }
     } else if (path.startsWith('/issues')) {
-      return { menuClass: styles.themeGreen, logoClass: styles.logoGreen }
+      return { menuClass: styles.themeGreen, logoClass: styles.logoGreen, logoColor: '#52c41a' }
     } else if (path.startsWith('/requirements')) {
-      return { menuClass: styles.themePurple, logoClass: styles.logoPurple }
+      return { menuClass: styles.themePurple, logoClass: styles.logoPurple, logoColor: '#722ed1' }
     } else if (path.startsWith('/testing')) {
-      return { menuClass: styles.themeOrange, logoClass: styles.logoOrange }
+      return { menuClass: styles.themeOrange, logoClass: styles.logoOrange, logoColor: '#fa8c16' }
     } else if (path.startsWith('/iterations')) {
-      return { menuClass: styles.themeCyan, logoClass: styles.logoCyan }
+      return { menuClass: styles.themeCyan, logoClass: styles.logoCyan, logoColor: '#13c2c2' }
     }
     // 知识库
     else if (path.startsWith('/wiki')) {
-      return { menuClass: styles.themePink, logoClass: styles.logoPink }
+      return { menuClass: styles.themePink, logoClass: styles.logoPink, logoColor: '#ec4899' }
     }
     // 帮助中心
     else if (path.startsWith('/help')) {
-      return { menuClass: styles.themeGray, logoClass: styles.logoGray }
+      return { menuClass: styles.themeGray, logoClass: styles.logoGray, logoColor: '#6b7280' }
     }
     // 默认蓝色
-    return { menuClass: styles.themeBlue, logoClass: '' }
+    return { menuClass: styles.themeBlue, logoClass: '', logoColor: '#2b7de9' }
   }
 
   const themeConfig = getThemeConfig()
@@ -256,7 +256,27 @@ const ConsoleLayout = () => {
       >
         <div className={styles.siderHeader}>
           <div className={styles.logo} onClick={() => navigate('/dashboard')}>
-            <img src="/logo.svg" alt="摩塔 Mota" className={styles.logoImage} />
+            <svg
+              width="36"
+              height="36"
+              viewBox="0 0 48 48"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className={styles.logoImage}
+            >
+              <rect
+                width="48"
+                height="48"
+                rx="10"
+                fill={themeConfig.logoColor}
+                style={{ transition: 'fill 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}
+              />
+              <rect x="4" y="36" width="40" height="8" rx="2" fill="white" opacity="0.35"/>
+              <rect x="8" y="26" width="32" height="8" rx="2" fill="white" opacity="0.35"/>
+              <rect x="12" y="16" width="24" height="8" rx="2" fill="white" opacity="0.35"/>
+              <rect x="16" y="6" width="16" height="8" rx="2" fill="white" opacity="0.35"/>
+              <path d="M5 36 L5 6 L15 6 L24 18 L33 6 L43 6 L43 36 L35 36 L35 18 L24 34 L13 18 L13 36 Z" fill="white"/>
+            </svg>
             {!collapsed && <span className={`${styles.logoText} ${themeConfig.logoClass}`}>摩塔 Mota</span>}
           </div>
         </div>

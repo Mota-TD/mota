@@ -4,14 +4,14 @@
   min-height: 100%;
 }
 
-/* 页面头部 */
+/* 页面头部 - 科技紫 */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
   border-radius: 16px;
   color: #fff;
 }
@@ -95,7 +95,7 @@
 .statCard :global(.ant-statistic-content-prefix) {
   font-size: 20px;
   margin-right: 8px;
-  color: #10b981;
+  color: #8b5cf6;
 }
 
 .statusCard {
@@ -131,7 +131,7 @@
 
 .completedIcon {
   font-size: 56px;
-  color: #10b981;
+  color: #8b5cf6;
 }
 
 .idleStatus {
@@ -175,8 +175,8 @@
 }
 
 .uploadCard :global(.ant-upload-drag:hover) {
-  border-color: #10b981;
-  background: rgba(16, 185, 129, 0.02);
+  border-color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.02);
 }
 
 .uploadCard :global(.ant-upload-drag-icon) {

@@ -64,6 +64,11 @@
   border-radius: 10px;
 }
 
+/* SVG Logo 渐变过渡动画 */
+.logoImage rect:first-of-type {
+  transition: fill 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .logoText {
   font-size: 18px;
   font-weight: 700;
