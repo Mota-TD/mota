@@ -101,7 +101,9 @@ async function request<T>(url: string, config: RequestConfig = {}): Promise<T> {
         // 响应不是 JSON，使用默认错误消息
       }
       
-      if (response.status === 401) {
+      // 401 错误不再自动重定向，让调用方处理（可能回退到 mock 数据）
+      // 只有在明确是认证失败（非后端服务问题）时才重定向
+      if (response.status === 401 && errorMessage.includes('token')) {
         useAuthStore.getState().logout()
         window.location.href = '/login'
       }

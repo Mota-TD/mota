@@ -20,10 +20,10 @@ spring:
         group: ${NACOS_GROUP:DEFAULT_GROUP}
         file-extension: yml
   datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:mota}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:mota}?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:mota}
+    password: ${DB_PASSWORD:mota123}
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
       initial-size: 5

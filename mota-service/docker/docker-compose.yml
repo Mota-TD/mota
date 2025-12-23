@@ -1,23 +1,25 @@
 version: '3.8'
 
 services:
-  # PostgreSQL 数据库
-  postgres:
-    image: postgres:16
-    container_name: mota-postgres
+  # MySQL 数据库
+  mysql:
+    image: mysql:8.0
+    container_name: mota-mysql
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: mota
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: mota
+      MYSQL_USER: mota
+      MYSQL_PASSWORD: mota123
       TZ: Asia/Shanghai
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-authentication-plugin=mysql_native_password
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot123"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -60,5 +62,5 @@ services:
       start_period: 60s
 
 volumes:
-  postgres_data:
+  mysql_data:
   redis_data:

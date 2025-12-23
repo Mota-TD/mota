@@ -31,8 +31,6 @@ import * as projectApi from '@/services/api/project'
 import * as issueApi from '@/services/api/issue'
 import * as activityApi from '@/services/api/activity'
 import * as metricsApi from '@/services/api/metrics'
-// 保留 mock API 作为后备
-import { projectApi as mockProjectApi, issueApi as mockIssueApi, activityApi as mockActivityApi, metricsApi as mockMetricsApi } from '@/services/mock/api'
 import styles from './index.module.css'
 
 const { Title, Text, Paragraph } = Typography
@@ -64,32 +62,14 @@ const Dashboard = () => {
   const loadDashboardData = async () => {
     setLoading(true)
     try {
-      // 尝试调用真实 API，失败则使用 mock 数据
-      let projects: any[] = []
-      let issues: any[] = []
-      let activitiesData: any[] = []
-      let metricsData: any = null
-
       // 加载项目列表
-      try {
-        const projectsRes = await projectApi.getProjects()
-        projects = projectsRes.list || []
-      } catch (err) {
-        console.warn('Real API failed, using mock data for projects:', err)
-        const mockRes = await mockProjectApi.getProjects()
-        projects = mockRes.data.list || []
-      }
+      const projectsRes = await projectApi.getProjects()
+      const projects = projectsRes.list || []
       setRecentProjects(projects.slice(0, 4))
       
       // 加载我的事项
-      try {
-        const issuesRes = await issueApi.getIssues()
-        issues = issuesRes.list || []
-      } catch (err) {
-        console.warn('Real API failed, using mock data for issues:', err)
-        const mockRes = await mockIssueApi.getIssues()
-        issues = mockRes.data.list || []
-      }
+      const issuesRes = await issueApi.getIssues()
+      const issues = issuesRes.list || []
       setMyIssues(issues.slice(0, 5))
       
       // 计算统计数据
@@ -103,28 +83,15 @@ const Dashboard = () => {
       })
       
       // 加载活动记录
-      try {
-        const activitiesRes = await activityApi.getRecentActivities(6)
-        activitiesData = activitiesRes || []
-      } catch (err) {
-        console.warn('Real API failed, using mock data for activities:', err)
-        const mockRes = await mockActivityApi.getActivities()
-        activitiesData = mockRes.data.slice(0, 6)
-      }
-      setActivities(activitiesData)
+      const activitiesRes = await activityApi.getRecentActivities(6)
+      setActivities(activitiesRes || [])
       
       // 加载效能指标
-      try {
-        metricsData = await metricsApi.getMetrics()
-      } catch (err) {
-        console.warn('Real API failed, using mock data for metrics:', err)
-        const mockRes = await mockMetricsApi.getMetrics()
-        metricsData = mockRes.data
-      }
+      const metricsData = await metricsApi.getMetrics()
       setMetrics(metricsData)
     } catch (error) {
       console.error('Failed to load dashboard data:', error)
-      message.error('加载数据失败，请稍后重试')
+      message.error('加载数据失败，请检查后端服务是否启动')
     } finally {
       setLoading(false)
     }

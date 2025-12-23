@@ -26,8 +26,12 @@ export default defineConfig({
           proxy.on('proxyReq', (proxyReq, req, _res) => {
             console.log('Sending Request:', req.method, req.url, '-> target:', proxyReq.path);
           });
-          proxy.on('proxyRes', (proxyRes, req, _res) => {
+          proxy.on('proxyRes', (proxyRes, req, res) => {
             console.log('Received Response:', proxyRes.statusCode, req.url);
+            // 移除 WWW-Authenticate 头，防止浏览器弹出基本认证对话框
+            if (proxyRes.statusCode === 401) {
+              delete proxyRes.headers['www-authenticate'];
+            }
           });
         },
       },

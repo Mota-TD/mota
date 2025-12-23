@@ -26,7 +26,6 @@ import {
 } from '@ant-design/icons'
 import * as issueApi from '@/services/api/issue'
 import * as projectApi from '@/services/api/project'
-import { issueApi as mockIssueApi, projectApi as mockProjectApi } from '@/services/mock/api'
 import styles from './index.module.css'
 
 interface Issue {
@@ -78,24 +77,16 @@ const Issues = () => {
 
   const loadProjects = async () => {
     try {
-      // 尝试调用真实 API
       const res = await projectApi.getProjects()
       setProjects(res.list || [])
     } catch (error) {
-      console.warn('Real API failed, using mock data:', error)
-      try {
-        const mockRes = await mockProjectApi.getProjects()
-        setProjects(mockRes.data.list || mockRes.data)
-      } catch (mockError) {
-        console.error('Failed to load projects:', mockError)
-      }
+      console.error('Failed to load projects:', error)
     }
   }
 
   const loadIssues = async () => {
     setLoading(true)
     try {
-      // 尝试调用真实 API
       const res = await issueApi.getIssues({
         projectId: filters.projectId,
         status: filters.status,
@@ -105,19 +96,7 @@ const Issues = () => {
       setIssues((res.list || []) as Issue[])
       setTotal(res.total || 0)
     } catch (error) {
-      console.warn('Real API failed, using mock data:', error)
-      try {
-        const mockRes = await mockIssueApi.getIssues({
-          projectId: filters.projectId,
-          status: filters.status,
-          type: filters.type,
-          search: searchText || undefined
-        })
-        setIssues((mockRes.data.list || []) as Issue[])
-        setTotal(mockRes.data.total || 0)
-      } catch (mockError) {
-        console.error('Failed to load issues:', mockError)
-      }
+      console.error('Failed to load issues:', error)
     } finally {
       setLoading(false)
     }
@@ -130,23 +109,13 @@ const Issues = () => {
 
   const handleCreateIssue = async (values: any) => {
     try {
-      // 尝试调用真实 API
       await issueApi.createIssue(values)
       message.success('事项创建成功')
       setCreateModalVisible(false)
       form.resetFields()
       loadIssues()
     } catch (error: any) {
-      console.warn('Real API failed, trying mock:', error)
-      try {
-        await mockIssueApi.createIssue(values)
-        message.success('事项创建成功')
-        setCreateModalVisible(false)
-        form.resetFields()
-        loadIssues()
-      } catch (mockError: any) {
-        message.error(mockError.message || '创建失败')
-      }
+      message.error(error.message || '创建失败')
     }
   }
 
@@ -159,19 +128,11 @@ const Issues = () => {
       cancelText: '取消',
       onOk: async () => {
         try {
-          // 尝试调用真实 API
           await issueApi.deleteIssue(issueId)
           message.success('事项已删除')
           loadIssues()
         } catch (error) {
-          console.warn('Real API failed, trying mock:', error)
-          try {
-            await mockIssueApi.deleteIssue(issueId)
-            message.success('事项已删除')
-            loadIssues()
-          } catch (mockError) {
-            message.error('删除失败')
-          }
+          message.error('删除失败')
         }
       }
     })

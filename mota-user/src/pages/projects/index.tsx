@@ -30,7 +30,6 @@ import {
   UnorderedListOutlined
 } from '@ant-design/icons'
 import * as projectApi from '@/services/api/project'
-import { projectApi as mockProjectApi } from '@/services/mock/api'
 import styles from './index.module.css'
 
 /**
@@ -58,18 +57,10 @@ const Projects = () => {
   const loadProjects = async () => {
     setLoading(true)
     try {
-      // 尝试调用真实 API
       const res = await projectApi.getProjects()
       setProjects(res.list || [])
     } catch (error) {
-      console.warn('Real API failed, using mock data:', error)
-      try {
-        // 回退到 mock 数据
-        const mockRes = await mockProjectApi.getProjects()
-        setProjects(mockRes.data.list || mockRes.data)
-      } catch (mockError) {
-        console.error('Failed to load projects:', mockError)
-      }
+      console.error('Failed to load projects:', error)
     } finally {
       setLoading(false)
     }
@@ -94,23 +85,13 @@ const Projects = () => {
 
   const handleCreateProject = async (values: any) => {
     try {
-      // 尝试调用真实 API
       await projectApi.createProject(values)
       message.success('项目创建成功')
       setCreateModalVisible(false)
       form.resetFields()
       loadProjects()
     } catch (error: any) {
-      console.warn('Real API failed, trying mock:', error)
-      try {
-        await mockProjectApi.createProject(values)
-        message.success('项目创建成功')
-        setCreateModalVisible(false)
-        form.resetFields()
-        loadProjects()
-      } catch (mockError: any) {
-        message.error(mockError.message || '创建失败')
-      }
+      message.error(error.message || '创建失败')
     }
   }
 
@@ -135,19 +116,11 @@ const Projects = () => {
       cancelText: '取消',
       onOk: async () => {
         try {
-          // 尝试调用真实 API
           await projectApi.deleteProject(projectId)
           message.success('项目已删除')
           loadProjects()
         } catch (error) {
-          console.warn('Real API failed, trying mock:', error)
-          try {
-            await mockProjectApi.deleteProject(projectId)
-            message.success('项目已删除')
-            loadProjects()
-          } catch (mockError) {
-            message.error('删除失败')
-          }
+          message.error('删除失败')
         }
       }
     })
