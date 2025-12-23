@@ -16,8 +16,15 @@ const Register = lazy(() => import('@/pages/auth/Register'))
 // 控制台页面
 const Dashboard = lazy(() => import('@/pages/dashboard'))
 const Projects = lazy(() => import('@/pages/projects'))
+const ProjectAnalytics = lazy(() => import('@/pages/project-analytics'))
+const ProjectKanban = lazy(() => import('@/pages/project-kanban'))
+const ProjectGantt = lazy(() => import('@/pages/project-gantt'))
 const Issues = lazy(() => import('@/pages/issues'))
+const TaskAnalytics = lazy(() => import('@/pages/task-analytics'))
 const Kanban = lazy(() => import('@/pages/kanban'))
+const TaskGantt = lazy(() => import('@/pages/task-gantt'))
+const Requirements = lazy(() => import('@/pages/requirements'))
+const Testing = lazy(() => import('@/pages/testing'))
 const Iterations = lazy(() => import('@/pages/iterations'))
 const Backlog = lazy(() => import('@/pages/backlog'))
 const Wiki = lazy(() => import('@/pages/wiki'))
@@ -28,7 +35,6 @@ const Notifications = lazy(() => import('@/pages/notifications'))
 const ProjectDetail = lazy(() => import('@/pages/project-detail'))
 const IssueDetail = lazy(() => import('@/pages/issue-detail'))
 const IterationDetail = lazy(() => import('@/pages/iteration-detail'))
-const Analytics = lazy(() => import('@/pages/analytics'))
 const NotFound = lazy(() => import('@/pages/NotFound'))
 
 // AI模块页面
@@ -289,7 +295,7 @@ export const routes: RouteObject[] = [
   },
   // 项目分析路由
   {
-    path: '/analytics',
+    path: '/project-analytics',
     element: (
       <Suspense fallback={<Loading />}>
         <ConsoleLayout />
@@ -300,7 +306,121 @@ export const routes: RouteObject[] = [
         index: true,
         element: (
           <Suspense fallback={<Loading />}>
-            <Analytics />
+            <ProjectAnalytics />
+          </Suspense>
+        )
+      },
+    ]
+  },
+  // 项目看板路由
+  {
+    path: '/project-kanban',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <ProjectKanban />
+          </Suspense>
+        )
+      },
+    ]
+  },
+  // 项目甘特图路由
+  {
+    path: '/project-gantt',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <ProjectGantt />
+          </Suspense>
+        )
+      },
+    ]
+  },
+  // 任务分析路由
+  {
+    path: '/task-analytics',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <TaskAnalytics />
+          </Suspense>
+        )
+      },
+    ]
+  },
+  // 任务甘特图路由
+  {
+    path: '/task-gantt',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <TaskGantt />
+          </Suspense>
+        )
+      },
+    ]
+  },
+  // 需求管理路由
+  {
+    path: '/requirements',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <Requirements />
+          </Suspense>
+        )
+      },
+    ]
+  },
+  // 测试管理路由
+  {
+    path: '/testing',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <Testing />
           </Suspense>
         )
       },

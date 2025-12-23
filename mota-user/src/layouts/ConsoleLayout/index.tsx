@@ -26,7 +26,11 @@ import {
   HistoryOutlined,
   ThunderboltOutlined,
   QuestionCircleOutlined,
-  PlusOutlined
+  PlusOutlined,
+  FundProjectionScreenOutlined,
+  CheckSquareOutlined,
+  ExperimentOutlined,
+  ScheduleOutlined
 } from '@ant-design/icons'
 import { useAuthStore } from '@/store/auth'
 import styles from './index.module.css'
@@ -57,7 +61,7 @@ const ConsoleLayout = () => {
     {
       key: 'ai-group',
       type: 'group',
-      label: collapsed ? '' : 'AI 智能',
+      label: collapsed ? '' : 'AI助理',
       children: [
         {
           key: '/ai/solution',
@@ -95,34 +99,73 @@ const ConsoleLayout = () => {
       label: collapsed ? '' : '项目协同',
       children: [
         {
-          key: '/projects',
+          key: 'project-management',
           icon: <ProjectOutlined />,
-          label: '项目列表',
+          label: '项目管理',
+          children: [
+            {
+              key: '/projects',
+              icon: <UnorderedListOutlined />,
+              label: '项目列表',
+            },
+            {
+              key: '/project-analytics',
+              icon: <BarChartOutlined />,
+              label: '项目分析',
+            },
+            {
+              key: '/project-kanban',
+              icon: <AppstoreOutlined />,
+              label: '项目看板',
+            },
+            {
+              key: '/project-gantt',
+              icon: <ScheduleOutlined />,
+              label: '项目甘特图',
+            },
+          ],
         },
         {
-          key: '/issues',
-          icon: <BugOutlined />,
+          key: 'task-management',
+          icon: <CheckSquareOutlined />,
           label: '任务管理',
+          children: [
+            {
+              key: '/issues',
+              icon: <UnorderedListOutlined />,
+              label: '任务列表',
+            },
+            {
+              key: '/task-analytics',
+              icon: <BarChartOutlined />,
+              label: '任务分析',
+            },
+            {
+              key: '/kanban',
+              icon: <AppstoreOutlined />,
+              label: '任务看板',
+            },
+            {
+              key: '/task-gantt',
+              icon: <ScheduleOutlined />,
+              label: '任务甘特图',
+            },
+          ],
         },
         {
-          key: '/kanban',
-          icon: <AppstoreOutlined />,
-          label: '项目看板',
+          key: '/requirements',
+          icon: <FileTextOutlined />,
+          label: '需求管理',
         },
         {
-          key: '/backlog',
-          icon: <UnorderedListOutlined />,
-          label: '需求池',
+          key: '/testing',
+          icon: <ExperimentOutlined />,
+          label: '测试管理',
         },
         {
           key: '/iterations',
           icon: <CalendarOutlined />,
           label: '迭代管理',
-        },
-        {
-          key: '/analytics',
-          icon: <BarChartOutlined />,
-          label: '项目分析',
         },
       ],
     },
@@ -132,7 +175,7 @@ const ConsoleLayout = () => {
     {
       key: 'knowledge-group',
       type: 'group',
-      label: collapsed ? '' : '知识管理',
+      label: collapsed ? '' : '知识库',
       children: [
         {
           key: '/wiki',
