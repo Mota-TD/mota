@@ -56,11 +56,18 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
             throw new BusinessException("项目标识已存在");
         }
         
+        // 设置默认值
+        project.setOrgId("default");  // 设置默认组织ID
         project.setStatus("active");
         project.setProgress(0);
         project.setMemberCount(1);
         project.setIssueCount(0);
         project.setStarred(0);
+        
+        // 设置负责人ID，暂时使用默认值1（后续应从当前登录用户获取）
+        if (project.getOwnerId() == null) {
+            project.setOwnerId(1L);
+        }
         
         save(project);
         return project;

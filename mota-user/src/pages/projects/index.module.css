@@ -569,6 +569,201 @@
   margin-top: 8px;
 }
 
+/* 抽屉标题样式 */
+.drawerTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.drawerTitleIcon {
+  color: #2b7de9;
+  font-size: 18px;
+}
+
+/* 抽屉样式 - 左右布局 */
+.drawerContent {
+  padding: 24px;
+  background: #f5f7fa;
+  min-height: calc(100vh - 110px);
+}
+
+.drawerFormCard {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.drawerSectionTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1f36;
+  margin-bottom: 16px;
+}
+
+/* 禁用的输入框样式 */
+.disabledInput {
+  background: #f5f7fa !important;
+  color: #1a1f36 !important;
+  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-weight: 600;
+}
+
+.disabledInput:disabled {
+  cursor: default;
+}
+
+/* 日期选择器包装 */
+.datePickerWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dateSeparator {
+  color: #999;
+  font-size: 14px;
+}
+
+.longTermInput {
+  background: #f5f7fa !important;
+  color: #2b7de9 !important;
+  font-weight: 500;
+  text-align: center;
+}
+
+.longTermCheckbox {
+  margin-top: 8px;
+  color: #666;
+  font-size: 13px;
+}
+
+.colorPicker {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.colorItem {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+}
+
+.colorItem:hover {
+  transform: scale(1.1);
+}
+
+.colorItemActive {
+  border-color: #1a1f36;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+/* 右侧预览卡片 */
+.drawerPreviewCard {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: 16px;
+}
+
+.drawerPreviewContent {
+  text-align: center;
+  padding: 24px 0;
+}
+
+.drawerPreviewName {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1f36;
+  margin: 16px 0 4px;
+}
+
+.drawerPreviewKey {
+  font-size: 12px;
+  color: #2b7de9;
+  margin: 0 0 12px;
+  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-weight: 600;
+  background: #e6f4ff;
+  padding: 4px 12px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.drawerPreviewDesc {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  padding: 0 16px;
+}
+
+/* 右侧提示卡片 */
+.drawerTipsCard {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.drawerTipsList {
+  margin: 0;
+  padding-left: 20px;
+  color: #666;
+  font-size: 14px;
+  line-height: 2;
+}
+
+.drawerTipsList li {
+  margin-bottom: 4px;
+}
+
+/* 新的提示项样式 */
+.tipItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.tipItem:last-child {
+  border-bottom: none;
+}
+
+.tipIcon {
+  font-size: 20px;
+  color: #2b7de9;
+  margin-top: 2px;
+}
+
+.tipContent {
+  flex: 1;
+}
+
+.tipTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1f36;
+  margin-bottom: 4px;
+}
+
+.tipDesc {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.5;
+}
+
+/* 抽屉底部按钮 */
+.drawerFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #e8e9eb;
+}
+
 /* 响应式 */
 @media (max-width: 992px) {
   .header {
@@ -621,5 +816,173 @@
 
   .ganttProjectName {
     max-width: 80px;
+  }
+}
+
+/* 项目设置抽屉样式 */
+.settingsDrawerContent {
+  padding: 0;
+}
+
+.settingsHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #2b7de9 0%, #667eea 100%);
+  color: #fff;
+}
+
+.settingsHeader :global(.ant-avatar) {
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 20px;
+}
+
+.settingsHeaderInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settingsHeaderInfo h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.settingsHeaderKey {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-weight: 500;
+}
+
+.settingsTabs {
+  padding: 0 24px;
+}
+
+.settingsTabs :global(.ant-tabs-nav) {
+  margin-bottom: 0;
+}
+
+.settingsTabs :global(.ant-tabs-tab) {
+  padding: 12px 16px;
+  font-weight: 500;
+}
+
+.settingsTabs :global(.ant-tabs-tab-active) {
+  color: #2b7de9;
+}
+
+.settingsTabs :global(.ant-tabs-ink-bar) {
+  background: #2b7de9;
+}
+
+.settingsTabContent {
+  padding: 24px 0;
+}
+
+.settingsSectionTitle {
+  margin-bottom: 20px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1f36;
+}
+
+.settingsTabContent :global(.ant-form-item-label > label) {
+  font-weight: 500;
+  color: #1a1f36;
+}
+
+.settingsTabContent :global(.ant-input),
+.settingsTabContent :global(.ant-select-selector),
+.settingsTabContent :global(.ant-input-password) {
+  border-radius: 10px !important;
+}
+
+.settingsTabContent :global(.ant-input:hover),
+.settingsTabContent :global(.ant-select-selector:hover) {
+  border-color: #2b7de9 !important;
+}
+
+.settingsTabContent :global(.ant-input:focus),
+.settingsTabContent :global(.ant-input-focused),
+.settingsTabContent :global(.ant-select-focused .ant-select-selector) {
+  border-color: #2b7de9 !important;
+  box-shadow: 0 0 0 3px rgba(43, 125, 233, 0.1) !important;
+}
+
+/* 危险区域样式 */
+.dangerZone {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 1px solid #fecaca;
+  border-radius: 14px;
+  padding: 24px;
+}
+
+.dangerZone h3 {
+  color: #dc2626;
+  margin-bottom: 8px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.dangerZone > p {
+  color: #9ca3af;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.dangerItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #fff;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+
+.dangerItem:last-child {
+  margin-bottom: 0;
+}
+
+.dangerItem h4 {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1f36;
+}
+
+.dangerItem p {
+  margin: 0;
+  color: #9ca3af;
+  font-size: 13px;
+}
+
+.dangerItem :global(.ant-btn-dangerous) {
+  border-radius: 8px;
+}
+
+/* 响应式 - 设置抽屉 */
+@media (max-width: 576px) {
+  .settingsHeader {
+    padding: 16px;
+  }
+  
+  .settingsTabs {
+    padding: 0 16px;
+  }
+  
+  .dangerItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .dangerZone {
+    padding: 16px;
   }
 }

@@ -11,14 +11,15 @@ export interface Project {
   key: string
   description?: string
   status: string
-  owner: number
+  ownerId: number
   memberCount: number
   issueCount: number
   color?: string
-  starred?: boolean
+  starred?: number  // 0 or 1
   progress?: number
   createdAt?: string
   updatedAt?: string
+  orgId?: string
 }
 
 // 项目列表响应
@@ -98,8 +99,8 @@ export function deleteProject(id: number): Promise<void> {
 /**
  * 收藏/取消收藏项目
  */
-export function toggleProjectStar(id: number): Promise<{ starred: boolean }> {
-  return post<{ starred: boolean }>(`/api/v1/projects/${id}/star`)
+export function toggleProjectStar(id: number): Promise<void> {
+  return post<void>(`/api/v1/projects/${id}/star`)
 }
 
 /**

@@ -1,5 +1,6 @@
 package com.mota.project.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.mota.common.mybatis.base.BaseEntityDO;
@@ -17,6 +18,7 @@ public class Project extends BaseEntityDO {
     /**
      * 组织ID
      */
+    @TableField(value = "org_id", insertStrategy = FieldStrategy.NOT_NULL)
     private String orgId;
 
     /**
@@ -36,11 +38,6 @@ public class Project extends BaseEntityDO {
     private String description;
 
     /**
-     * 模板类型
-     */
-    private String templateType;
-
-    /**
      * 状态
      */
     private String status;
@@ -48,6 +45,7 @@ public class Project extends BaseEntityDO {
     /**
      * 负责人ID
      */
+    @TableField(value = "owner_id", insertStrategy = FieldStrategy.NOT_NULL)
     private Long ownerId;
 
     /**

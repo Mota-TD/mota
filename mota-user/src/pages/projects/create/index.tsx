@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { 
-  Card, 
-  Form, 
-  Input, 
-  Select, 
-  Button, 
-  Space, 
-  message, 
+import {
+  Card,
+  Form,
+  Input,
+  Select,
+  Button,
+  Space,
+  message,
   DatePicker,
   Upload,
   Avatar,
@@ -15,25 +15,17 @@ import {
   Row,
   Col
 } from 'antd'
-import { 
-  ArrowLeftOutlined, 
+import {
+  ArrowLeftOutlined,
   PlusOutlined,
   ProjectOutlined
 } from '@ant-design/icons'
 import type { UploadFile } from 'antd/es/upload/interface'
-import dayjs from 'dayjs'
+import * as projectApi from '@/services/api/project'
 import styles from './index.module.css'
 
 const { TextArea } = Input
 const { RangePicker } = DatePicker
-
-// 项目模板
-const projectTemplates = [
-  { value: 'scrum', label: 'Scrum 敏捷开发', desc: '适合迭代式开发的软件项目' },
-  { value: 'kanban', label: '看板项目', desc: '适合持续交付的运维项目' },
-  { value: 'waterfall', label: '瀑布流项目', desc: '适合需求明确的传统项目' },
-  { value: 'blank', label: '空白项目', desc: '从零开始自定义项目' },
-]
 
 // 项目颜色
 const projectColors = [
@@ -55,22 +47,20 @@ const CreateProject = () => {
   const handleSubmit = async (values: Record<string, unknown>) => {
     setLoading(true)
     try {
-      // 模拟创建项目
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      console.log('Create project:', {
-        ...values,
+      // 调用API创建项目
+      await projectApi.createProject({
+        name: values.name as string,
+        key: values.key as string,
+        description: values.description as string | undefined,
         color: selectedColor,
-        dateRange: values.dateRange ? [
-          (values.dateRange as [dayjs.Dayjs, dayjs.Dayjs])[0].format('YYYY-MM-DD'),
-          (values.dateRange as [dayjs.Dayjs, dayjs.Dayjs])[1].format('YYYY-MM-DD')
-        ] : null
       })
       
       message.success('项目创建成功')
       navigate('/projects')
-    } catch {
-      message.error('创建失败，请重试')
+    } catch (error: unknown) {
+      console.error('Create project error:', error)
+      const errorMessage = error instanceof Error ? error.message : '创建失败，请重试'
+      message.error(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -79,15 +69,21 @@ const CreateProject = () => {
   // 生成项目标识
   const generateKey = (name: string) => {
     if (!name) return ''
-    // 取首字母大写
-    const pinyin = name.split('').map(char => {
+    // 过滤出英文字母和数字，转为大写
+    const englishChars = name.split('').filter(char => {
       const code = char.charCodeAt(0)
-      if (code >= 0x4e00 && code <= 0x9fa5) {
-        return char
-      }
-      return char.toUpperCase()
-    }).join('').slice(0, 4)
-    return pinyin.toUpperCase()
+      // 只保留英文字母和数字
+      return (code >= 65 && code <= 90) || // A-Z
+             (code >= 97 && code <= 122) || // a-z
+             (code >= 48 && code <= 57) // 0-9
+    }).map(char => char.toUpperCase()).join('')
+    
+    // 如果没有英文字符，生成默认标识 PROJ + 随机数
+    if (!englishChars) {
+      return 'PROJ' + Math.floor(Math.random() * 1000)
+    }
+    
+    return englishChars.slice(0, 6).toUpperCase()
   }
 
   return (
@@ -113,30 +109,9 @@ const CreateProject = () => {
               layout="vertical"
               onFinish={handleSubmit}
               initialValues={{
-                template: 'scrum',
                 visibility: 'private'
               }}
             >
-              {/* 项目模板 */}
-              <Form.Item 
-                label="项目模板" 
-                name="template"
-                rules={[{ required: true, message: '请选择项目模板' }]}
-              >
-                <Select size="large">
-                  {projectTemplates.map(t => (
-                    <Select.Option key={t.value} value={t.value}>
-                      <div>
-                        <div style={{ fontWeight: 500 }}>{t.label}</div>
-                        <div style={{ fontSize: 12, color: '#999' }}>{t.desc}</div>
-                      </div>
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-
-              <Divider />
-
               {/* 基本信息 */}
               <div className={styles.sectionTitle}>基本信息</div>
               
@@ -287,7 +262,6 @@ const CreateProject = () => {
           <Card className={styles.tipsCard} title="创建提示">
             <ul className={styles.tipsList}>
               <li>项目标识创建后不可修改，请谨慎填写</li>
-              <li>选择合适的项目模板可以快速开始</li>
               <li>项目颜色用于在列表中快速识别</li>
               <li>创建后可以在设置中修改其他信息</li>
             </ul>

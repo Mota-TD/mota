@@ -19,7 +19,7 @@ import java.util.Map;
 @Component
 public class JwtUtils {
 
-    @Value("${jwt.secret:mota-secret-key-for-jwt-token-generation-must-be-at-least-256-bits}")
+    @Value("${jwt.secret:bW90YS1zZWNyZXQta2V5LWZvci1qd3QtdG9rZW4tZ2VuZXJhdGlvbi1tdXN0LWJlLWF0LWxlYXN0LTI1Ni1iaXRz}")
     private String secret;
 
     @Value("${jwt.expiration:86400000}")

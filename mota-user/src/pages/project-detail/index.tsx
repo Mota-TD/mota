@@ -10,7 +10,8 @@ import {
   Space,
   Spin,
   message,
-  Dropdown
+  Dropdown,
+  Modal
 } from 'antd'
 import {
   SettingOutlined,
@@ -38,11 +39,11 @@ interface Project {
   key: string
   description: string
   status: string
-  owner: number
+  ownerId: number
   memberCount: number
   issueCount: number
   color: string
-  starred: boolean
+  starred: number  // 0 or 1
   progress: number
   createdAt: string
   updatedAt: string
@@ -99,7 +100,7 @@ const ProjectDetail = () => {
         getRecentActivities(5).catch(() => [])
       ])
       setProject(projectRes as any)
-      setStarred((projectRes as any).starred)
+      setStarred((projectRes as any).starred === 1)
       setIssues((issuesRes as any).list || [])
       setSprints(sprintsRes as any || [])
       setUsers((usersRes as any).list || [])
@@ -112,9 +113,33 @@ const ProjectDetail = () => {
     }
   }
 
-  const handleToggleStar = () => {
-    setStarred(!starred)
-    message.success(starred ? '已取消收藏' : '已收藏')
+  const handleToggleStar = async () => {
+    try {
+      await projectApi.toggleProjectStar(parseInt(id!))
+      setStarred(!starred)
+      message.success(starred ? '已取消收藏' : '已收藏')
+    } catch {
+      message.error('操作失败')
+    }
+  }
+
+  const handleDeleteProject = () => {
+    Modal.confirm({
+      title: '确认删除',
+      content: '删除项目后，所有相关数据将被清除，此操作不可恢复。',
+      okText: '确认删除',
+      okType: 'danger',
+      cancelText: '取消',
+      onOk: async () => {
+        try {
+          await projectApi.deleteProject(parseInt(id!))
+          message.success('项目已删除')
+          navigate('/projects')
+        } catch {
+          message.error('删除失败')
+        }
+      }
+    })
   }
 
   const getStatusTag = (status: string) => {
@@ -298,7 +323,7 @@ const ProjectDetail = () => {
               items: [
                 { key: 'archive', label: '归档项目' },
                 { type: 'divider' },
-                { key: 'delete', label: '删除项目', danger: true }
+                { key: 'delete', label: '删除项目', danger: true, onClick: handleDeleteProject }
               ]
             }}
           >

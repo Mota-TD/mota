@@ -337,11 +337,6 @@ const ConsoleLayout = () => {
           </div>
           <div className={styles.headerRight}>
             <Space size={8}>
-              <Dropdown menu={{ items: quickCreateItems }} placement="bottomRight">
-                <Button type="primary" icon={<PlusOutlined />} className={styles.createBtn}>
-                  {!collapsed && '新建'}
-                </Button>
-              </Dropdown>
               <Tooltip title="通知">
                 <Badge count={5} size="small" offset={[-2, 2]}>
                   <Button
