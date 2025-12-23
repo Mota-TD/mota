@@ -25,8 +25,11 @@ import {
   UserOutlined,
   CalendarOutlined
 } from '@ant-design/icons'
-import { projectApi, issueApi, sprintApi } from '@/services/mock/api'
-import { mockUsers, mockActivities } from '@/services/mock/data'
+import * as projectApi from '@/services/api/project'
+import * as issueApi from '@/services/api/issue'
+import * as sprintApi from '@/services/api/sprint'
+import { getUsers } from '@/services/api/user'
+import { getRecentActivities } from '@/services/api/activity'
 import styles from './index.module.css'
 
 interface Project {
@@ -76,6 +79,8 @@ const ProjectDetail = () => {
   const [issues, setIssues] = useState<Issue[]>([])
   const [sprints, setSprints] = useState<Sprint[]>([])
   const [starred, setStarred] = useState(false)
+  const [users, setUsers] = useState<any[]>([])
+  const [activities, setActivities] = useState<any[]>([])
 
   useEffect(() => {
     if (id) {
@@ -86,15 +91,19 @@ const ProjectDetail = () => {
   const loadProjectData = async (projectId: number) => {
     setLoading(true)
     try {
-      const [projectRes, issuesRes, sprintsRes] = await Promise.all([
+      const [projectRes, issuesRes, sprintsRes, usersRes, activitiesRes] = await Promise.all([
         projectApi.getProjectById(projectId),
         issueApi.getIssues({ projectId }),
-        sprintApi.getSprints({ projectId })
+        sprintApi.getSprints({ projectId }),
+        getUsers().catch(() => ({ list: [] })),
+        getRecentActivities(5).catch(() => [])
       ])
-      setProject(projectRes.data)
-      setStarred(projectRes.data.starred)
-      setIssues(issuesRes.data.list || [])
-      setSprints(sprintsRes.data || [])
+      setProject(projectRes as any)
+      setStarred((projectRes as any).starred)
+      setIssues((issuesRes as any).list || [])
+      setSprints(sprintsRes as any || [])
+      setUsers((usersRes as any).list || [])
+      setActivities(activitiesRes as any || [])
     } catch (error) {
       console.error('Failed to load project:', error)
       message.error('加载项目失败')
@@ -206,10 +215,10 @@ const ProjectDetail = () => {
       width: 100,
       render: (assigneeId: number | null) => {
         if (!assigneeId) return '-'
-        const user = mockUsers.find(u => u.id === assigneeId)
+        const user = users.find(u => u.id === assigneeId)
         return user ? (
           <Space>
-            <Avatar size="small" src={user.avatar}>{user.name.charAt(0)}</Avatar>
+            <Avatar size="small" src={user.avatar}>{user.name?.charAt(0)}</Avatar>
             {user.name}
           </Space>
         ) : '-'
@@ -217,13 +226,13 @@ const ProjectDetail = () => {
     }
   ]
 
-  // 团队成员（模拟数据）
-  const teamMembers = mockUsers.slice(0, 5)
+  // 团队成员
+  const teamMembers = users.slice(0, 5)
 
   // 最近活动
-  const recentActivities = mockActivities.slice(0, 5).map(a => ({
+  const recentActivities = activities.slice(0, 5).map((a: any) => ({
     ...a,
-    user: mockUsers.find(u => u.id === a.userId)
+    user: users.find(u => u.id === a.userId)
   }))
 
   if (loading) {

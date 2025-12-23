@@ -9,13 +9,10 @@ import {
   Typography, 
   Divider, 
   Tag, 
-  Spin,
   message,
   Row,
   Col,
   Steps,
-  Result,
-  Avatar,
   Tooltip
 } from 'antd'
 import { 
@@ -28,24 +25,34 @@ import {
   HistoryOutlined,
   BulbOutlined,
   ThunderboltOutlined,
-  StarOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
   EditOutlined
 } from '@ant-design/icons'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { 
+  generateSolution, 
+  getSolutionTypes, 
+  getQuickTemplates,
+  type GeneratedSolution,
+  type GenerateSolutionRequest
+} from '@/services/api/ai'
 import styles from './index.module.css'
 
 const { TextArea } = Input
 const { Title, Paragraph, Text } = Typography
 const { Option } = Select
 
-interface GeneratedSolution {
-  id: string
-  title: string
-  content: string
-  type: string
-  createdAt: string
+interface SolutionType {
+  value: string
+  label: string
+  desc: string
+  icon: string
+}
+
+interface QuickTemplate {
+  label: string
+  value: string
 }
 
 /**
@@ -58,6 +65,13 @@ const AISolution = () => {
   const [loading, setLoading] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
   const [generatedSolution, setGeneratedSolution] = useState<GeneratedSolution | null>(null)
+  const [solutionTypes, setSolutionTypes] = useState<SolutionType[]>([])
+  const [quickTemplates, setQuickTemplates] = useState<QuickTemplate[]>([])
+
+  // 加载配置数据
+  useEffect(() => {
+    loadConfig()
+  }, [])
 
   // 从dashboard传入的查询
   useEffect(() => {
@@ -67,108 +81,63 @@ const AISolution = () => {
     }
   }, [location.state, form])
 
-  // 方案类型选项
-  const solutionTypes = [
-    { value: 'business', label: '商务方案', desc: '适用于商务合作、客户提案', icon: '💼' },
-    { value: 'technical', label: '技术方案', desc: '适用于技术架构、实施方案', icon: '⚙️' },
-    { value: 'marketing', label: '营销方案', desc: '适用于市场推广、品牌策划', icon: '📈' },
-    { value: 'consulting', label: '咨询报告', desc: '适用于行业分析、战略规划', icon: '📊' },
-    { value: 'product', label: '产品介绍', desc: '适用于产品说明、功能介绍', icon: '🎯' },
-    { value: 'training', label: '培训方案', desc: '适用于培训计划、课程设计', icon: '📚' },
-  ]
+  const loadConfig = async () => {
+    try {
+      const [typesRes, templatesRes] = await Promise.all([
+        getSolutionTypes().catch(() => []),
+        getQuickTemplates().catch(() => [])
+      ])
+      
+      // 如果 API 返回空，使用默认值
+      if (typesRes && typesRes.length > 0) {
+        setSolutionTypes(typesRes)
+      } else {
+        setSolutionTypes([
+          { value: 'business', label: '商务方案', desc: '适用于商务合作、客户提案', icon: '💼' },
+          { value: 'technical', label: '技术方案', desc: '适用于技术架构、实施方案', icon: '⚙️' },
+          { value: 'marketing', label: '营销方案', desc: '适用于市场推广、品牌策划', icon: '📈' },
+          { value: 'consulting', label: '咨询报告', desc: '适用于行业分析、战略规划', icon: '📊' },
+          { value: 'product', label: '产品介绍', desc: '适用于产品说明、功能介绍', icon: '🎯' },
+          { value: 'training', label: '培训方案', desc: '适用于培训计划、课程设计', icon: '📚' },
+        ])
+      }
+      
+      if (templatesRes && templatesRes.length > 0) {
+        setQuickTemplates(templatesRes)
+      } else {
+        setQuickTemplates([
+          { label: '电商平台方案', value: '帮我制定一个电商平台的技术架构方案' },
+          { label: '企业数字化转型', value: '帮我制定企业数字化转型的整体规划方案' },
+          { label: '产品上市推广', value: '帮我制定新产品上市的市场推广方案' },
+          { label: '团队培训计划', value: '帮我制定技术团队的年度培训计划' },
+        ])
+      }
+    } catch (error) {
+      console.error('Failed to load config:', error)
+    }
+  }
 
-  // 快捷模板
-  const quickTemplates = [
-    { label: '电商平台方案', value: '帮我制定一个电商平台的技术架构方案' },
-    { label: '企业数字化转型', value: '帮我制定企业数字化转型的整体规划方案' },
-    { label: '产品上市推广', value: '帮我制定新产品上市的市场推广方案' },
-    { label: '团队培训计划', value: '帮我制定技术团队的年度培训计划' },
-  ]
-
-  // 模拟AI生成方案
-  const handleGenerate = async (values: any) => {
+  // 生成方案
+  const handleGenerate = async (values: GenerateSolutionRequest) => {
     setLoading(true)
     setCurrentStep(1)
     
-    // 模拟AI生成过程
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    setCurrentStep(2)
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    setCurrentStep(3)
-    
-    // 生成模拟方案
-    const mockSolution: GeneratedSolution = {
-      id: `SOL-${Date.now()}`,
-      title: `${values.companyName || '企业'}${solutionTypes.find(t => t.value === values.solutionType)?.label || '方案'}`,
-      content: generateMockContent(values),
-      type: values.solutionType,
-      createdAt: new Date().toLocaleString(),
+    try {
+      // 模拟进度
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      setCurrentStep(2)
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      setCurrentStep(3)
+      
+      const result = await generateSolution(values)
+      setGeneratedSolution(result)
+      message.success('方案生成成功！')
+    } catch (error) {
+      console.error('Failed to generate solution:', error)
+      message.error('方案生成失败，请重试')
+    } finally {
+      setLoading(false)
     }
-    
-    setGeneratedSolution(mockSolution)
-    setLoading(false)
-    message.success('方案生成成功！')
-  }
-
-  // 生成模拟内容
-  const generateMockContent = (values: any) => {
-    const companyName = values.companyName || '贵公司'
-    const businessDesc = values.businessDesc || '业务介绍'
-    const requirements = values.requirements || '具体需求'
-    
-    return `# ${companyName}${solutionTypes.find(t => t.value === values.solutionType)?.label || '方案'}
-
-## 一、项目背景
-
-根据${companyName}的业务介绍：${businessDesc}
-
-我们深入分析了贵公司的业务特点和市场定位，结合行业最佳实践，为您量身定制了本方案。
-
-## 二、需求分析
-
-### 2.1 核心需求
-${requirements}
-
-### 2.2 需求拆解
-1. **业务目标**：提升业务效率，优化用户体验
-2. **技术目标**：构建稳定、可扩展的技术架构
-3. **运营目标**：实现数据驱动的精细化运营
-
-## 三、解决方案
-
-### 3.1 整体架构
-基于${companyName}的业务特点，我们建议采用以下架构：
-
-- **前端层**：现代化的用户界面，支持多端适配
-- **服务层**：微服务架构，确保系统的可扩展性
-- **数据层**：分布式数据存储，保障数据安全
-
-### 3.2 核心功能
-1. **智能分析模块**：基于AI技术的数据分析能力
-2. **自动化流程**：减少人工操作，提升效率
-3. **可视化报表**：直观展示业务数据
-
-### 3.3 实施计划
-| 阶段 | 时间 | 主要工作 |
-|------|------|----------|
-| 第一阶段 | 1-2周 | 需求确认、方案设计 |
-| 第二阶段 | 3-6周 | 核心功能开发 |
-| 第三阶段 | 7-8周 | 测试优化、上线部署 |
-
-## 四、预期效果
-
-1. **效率提升**：预计提升工作效率 40%+
-2. **成本降低**：预计降低运营成本 30%+
-3. **体验优化**：用户满意度提升至 95%+
-
-## 五、投资回报
-
-基于以上方案，预计投资回报周期为 6-12 个月，长期收益显著。
-
----
-
-*本方案由摩塔AI智能生成，仅供参考。如需进一步定制，请联系我们的专业顾问。*
-`
   }
 
   // 复制内容

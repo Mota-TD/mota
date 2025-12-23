@@ -52,16 +52,6 @@
             <artifactId>mota-common-log</artifactId>
         </dependency>
 
-        <!-- API Modules -->
-        <dependency>
-            <groupId>com.mota</groupId>
-            <artifactId>mota-api-project</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.mota</groupId>
-            <artifactId>mota-api-user</artifactId>
-        </dependency>
-
         <!-- Nacos Discovery -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>

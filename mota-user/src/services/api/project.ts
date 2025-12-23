@@ -63,6 +63,11 @@ export function getProjectById(id: number): Promise<Project> {
 }
 
 /**
+ * 获取项目详情 (别名)
+ */
+export const getProject = getProjectById
+
+/**
  * 创建项目
  */
 export function createProject(data: CreateProjectRequest): Promise<Project> {

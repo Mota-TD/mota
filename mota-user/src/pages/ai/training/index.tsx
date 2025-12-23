@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { 
   Card, 
   Form, 
@@ -19,7 +19,8 @@ import {
   Modal,
   Alert,
   Tooltip,
-  Badge
+  Badge,
+  Spin
 } from 'antd'
 import type { UploadFile } from 'antd'
 import { 
@@ -37,6 +38,18 @@ import {
   QuestionCircleOutlined,
   SyncOutlined
 } from '@ant-design/icons'
+import {
+  getTrainingStats,
+  getTrainingHistory,
+  getKnowledgeDocuments,
+  deleteKnowledgeDocument,
+  startTraining,
+  saveTrainingSettings,
+  saveBusinessConfig,
+  type TrainingStats,
+  type TrainingHistory,
+  type KnowledgeDocument
+} from '@/services/api/ai'
 import styles from './index.module.css'
 
 const { Title, Text } = Typography
@@ -51,31 +64,49 @@ const AITraining = () => {
   const [trainingStatus, setTrainingStatus] = useState<'idle' | 'training' | 'completed'>('idle')
   const [trainingProgress, setTrainingProgress] = useState(0)
   const [fileList, setFileList] = useState<UploadFile[]>([])
+  const [loading, setLoading] = useState(false)
+  const [trainingStats, setTrainingStats] = useState<TrainingStats | null>(null)
+  const [trainingHistory, setTrainingHistory] = useState<TrainingHistory[]>([])
+  const [knowledgeDocuments, setKnowledgeDocuments] = useState<KnowledgeDocument[]>([])
 
-  // 模拟训练数据
-  const trainingStats = {
-    totalDocuments: 156,
-    totalTokens: '2.3M',
-    lastTraining: '2024-01-15 14:30',
-    modelVersion: 'v1.2.0',
-    accuracy: 92.5,
+  // 加载数据
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  const loadData = async () => {
+    setLoading(true)
+    try {
+      const [statsRes, historyRes, docsRes] = await Promise.all([
+        getTrainingStats().catch(() => null),
+        getTrainingHistory().catch(() => []),
+        getKnowledgeDocuments().catch(() => [])
+      ])
+
+      if (statsRes) {
+        setTrainingStats(statsRes)
+        if (statsRes.lastTraining) {
+          setTrainingStatus('completed')
+        }
+      } else {
+        // 默认值
+        setTrainingStats({
+          totalDocuments: 0,
+          totalTokens: '0',
+          lastTraining: '',
+          modelVersion: 'v1.0.0',
+          accuracy: 0,
+        })
+      }
+
+      setTrainingHistory(historyRes || [])
+      setKnowledgeDocuments(docsRes || [])
+    } catch (error) {
+      console.error('Failed to load data:', error)
+    } finally {
+      setLoading(false)
+    }
   }
-
-  // 训练历史
-  const trainingHistory = [
-    { id: 1, version: 'v1.2.0', date: '2024-01-15 14:30', documents: 156, status: 'completed', accuracy: 92.5 },
-    { id: 2, version: 'v1.1.0', date: '2024-01-10 10:20', documents: 120, status: 'completed', accuracy: 89.2 },
-    { id: 3, version: 'v1.0.0', date: '2024-01-05 09:00', documents: 80, status: 'completed', accuracy: 85.0 },
-  ]
-
-  // 知识库文档
-  const knowledgeDocuments = [
-    { id: 1, name: '公司简介.pdf', size: '2.3 MB', uploadTime: '2024-01-15', status: 'indexed' },
-    { id: 2, name: '产品手册.docx', size: '5.1 MB', uploadTime: '2024-01-14', status: 'indexed' },
-    { id: 3, name: '服务说明.pdf', size: '1.8 MB', uploadTime: '2024-01-13', status: 'indexed' },
-    { id: 4, name: '案例集锦.pdf', size: '8.2 MB', uploadTime: '2024-01-12', status: 'indexed' },
-    { id: 5, name: '技术白皮书.pdf', size: '3.5 MB', uploadTime: '2024-01-10', status: 'pending' },
-  ]
 
   // 开始训练
   const handleStartTraining = () => {
@@ -84,22 +115,28 @@ const AITraining = () => {
       content: '确定要开始训练AI模型吗？训练过程可能需要几分钟到几小时，取决于数据量。',
       okText: '开始训练',
       cancelText: '取消',
-      onOk: () => {
-        setTrainingStatus('training')
-        setTrainingProgress(0)
-        
-        // 模拟训练进度
-        const interval = setInterval(() => {
-          setTrainingProgress(prev => {
-            if (prev >= 100) {
-              clearInterval(interval)
-              setTrainingStatus('completed')
-              message.success('模型训练完成！')
-              return 100
-            }
-            return prev + Math.random() * 10
-          })
-        }, 500)
+      onOk: async () => {
+        try {
+          await startTraining()
+          setTrainingStatus('training')
+          setTrainingProgress(0)
+          
+          // 模拟训练进度
+          const interval = setInterval(() => {
+            setTrainingProgress(prev => {
+              if (prev >= 100) {
+                clearInterval(interval)
+                setTrainingStatus('completed')
+                message.success('模型训练完成！')
+                loadData() // 重新加载数据
+                return 100
+              }
+              return prev + Math.random() * 10
+            })
+          }, 500)
+        } catch (error) {
+          message.error('启动训练失败')
+        }
       }
     })
   }
@@ -113,6 +150,7 @@ const AITraining = () => {
       setFileList(info.fileList)
       if (info.file.status === 'done') {
         message.success(`${info.file.name} 上传成功`)
+        loadData() // 重新加载文档列表
       } else if (info.file.status === 'error') {
         message.error(`${info.file.name} 上传失败`)
       }
@@ -121,142 +159,171 @@ const AITraining = () => {
   }
 
   // 删除文档
-  const handleDeleteDocument = (_id: number) => {
+  const handleDeleteDocument = (id: number) => {
     Modal.confirm({
       title: '删除文档',
       content: '确定要删除这个文档吗？删除后需要重新训练模型。',
       okText: '删除',
       okType: 'danger',
       cancelText: '取消',
-      onOk: () => {
-        message.success('文档已删除')
+      onOk: async () => {
+        try {
+          await deleteKnowledgeDocument(id)
+          message.success('文档已删除')
+          loadData()
+        } catch (error) {
+          message.error('删除失败')
+        }
       }
     })
+  }
+
+  // 保存训练设置
+  const handleSaveTrainingSettings = async (values: any) => {
+    try {
+      await saveTrainingSettings(values)
+      message.success('设置已保存')
+    } catch (error) {
+      message.error('保存失败')
+    }
+  }
+
+  // 保存业务配置
+  const handleSaveBusinessConfig = async (values: any) => {
+    try {
+      await saveBusinessConfig(values)
+      message.success('配置已保存')
+    } catch (error) {
+      message.error('保存失败')
+    }
   }
 
   // 概览标签页
   const OverviewTab = () => (
     <div className={styles.overviewTab}>
-      <Row gutter={[16, 16]}>
-        <Col xs={24} sm={12} md={6}>
-          <Card className={styles.statCard}>
-            <Statistic 
-              title="知识文档" 
-              value={trainingStats.totalDocuments} 
-              prefix={<FileTextOutlined />}
-              suffix="份"
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card className={styles.statCard}>
-            <Statistic 
-              title="训练Token" 
-              value={trainingStats.totalTokens} 
-              prefix={<DatabaseOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card className={styles.statCard}>
-            <Statistic 
-              title="模型准确率" 
-              value={trainingStats.accuracy} 
-              prefix={<ThunderboltOutlined />}
-              suffix="%"
-              precision={1}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card className={styles.statCard}>
-            <Statistic 
-              title="当前版本" 
-              value={trainingStats.modelVersion} 
-              prefix={<RobotOutlined />}
-            />
-          </Card>
-        </Col>
-      </Row>
-
-      <Card title="模型状态" className={styles.statusCard}>
-        {trainingStatus === 'training' ? (
-          <div className={styles.trainingProgress}>
-            <div className={styles.progressHeader}>
-              <Space>
-                <SyncOutlined spin style={{ color: '#1890ff' }} />
-                <Text strong>正在训练中...</Text>
-              </Space>
-              <Button size="small" icon={<PauseCircleOutlined />}>暂停</Button>
-            </div>
-            <Progress 
-              percent={Math.round(trainingProgress)} 
-              status="active"
-              strokeColor={{ from: '#108ee9', to: '#87d068' }}
-            />
-            <Text type="secondary">预计剩余时间: 约 {Math.round((100 - trainingProgress) / 10)} 分钟</Text>
-          </div>
-        ) : trainingStatus === 'completed' ? (
-          <div className={styles.completedStatus}>
-            <CheckCircleOutlined className={styles.completedIcon} />
-            <div>
-              <Title level={5} style={{ margin: 0 }}>模型已就绪</Title>
-              <Text type="secondary">上次训练: {trainingStats.lastTraining}</Text>
-            </div>
-            <Button type="primary" icon={<PlayCircleOutlined />} onClick={handleStartTraining}>
-              重新训练
-            </Button>
-          </div>
-        ) : (
-          <div className={styles.idleStatus}>
-            <Alert
-              message="模型未训练"
-              description="请上传知识文档并开始训练，让AI学习您的业务知识。"
-              type="info"
-              showIcon
-            />
-            <Button type="primary" icon={<PlayCircleOutlined />} onClick={handleStartTraining} style={{ marginTop: 16 }}>
-              开始训练
-            </Button>
-          </div>
-        )}
-      </Card>
-
-      <Card title="训练历史" className={styles.historyCard}>
-        <List
-          dataSource={trainingHistory}
-          renderItem={item => (
-            <List.Item
-              actions={[
-                <Button type="link" size="small">查看详情</Button>,
-                <Button type="link" size="small">回滚</Button>
-              ]}
-            >
-              <List.Item.Meta
-                avatar={
-                  <Avatar 
-                    icon={<RobotOutlined />} 
-                    style={{ background: item.status === 'completed' ? '#52c41a' : '#1890ff' }}
-                  />
-                }
-                title={
-                  <Space>
-                    <Text strong>{item.version}</Text>
-                    <Tag color="green">准确率 {item.accuracy}%</Tag>
-                  </Space>
-                }
-                description={
-                  <Space>
-                    <ClockCircleOutlined /> {item.date}
-                    <span>|</span>
-                    <FileTextOutlined /> {item.documents} 份文档
-                  </Space>
-                }
+      <Spin spinning={loading}>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} sm={12} md={6}>
+            <Card className={styles.statCard}>
+              <Statistic 
+                title="知识文档" 
+                value={trainingStats?.totalDocuments || 0} 
+                prefix={<FileTextOutlined />}
+                suffix="份"
               />
-            </List.Item>
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Card className={styles.statCard}>
+              <Statistic 
+                title="训练Token" 
+                value={trainingStats?.totalTokens || '0'} 
+                prefix={<DatabaseOutlined />}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Card className={styles.statCard}>
+              <Statistic 
+                title="模型准确率" 
+                value={trainingStats?.accuracy || 0} 
+                prefix={<ThunderboltOutlined />}
+                suffix="%"
+                precision={1}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Card className={styles.statCard}>
+              <Statistic 
+                title="当前版本" 
+                value={trainingStats?.modelVersion || 'v1.0.0'} 
+                prefix={<RobotOutlined />}
+              />
+            </Card>
+          </Col>
+        </Row>
+
+        <Card title="模型状态" className={styles.statusCard}>
+          {trainingStatus === 'training' ? (
+            <div className={styles.trainingProgress}>
+              <div className={styles.progressHeader}>
+                <Space>
+                  <SyncOutlined spin style={{ color: '#1890ff' }} />
+                  <Text strong>正在训练中...</Text>
+                </Space>
+                <Button size="small" icon={<PauseCircleOutlined />}>暂停</Button>
+              </div>
+              <Progress 
+                percent={Math.round(trainingProgress)} 
+                status="active"
+                strokeColor={{ from: '#108ee9', to: '#87d068' }}
+              />
+              <Text type="secondary">预计剩余时间: 约 {Math.round((100 - trainingProgress) / 10)} 分钟</Text>
+            </div>
+          ) : trainingStatus === 'completed' ? (
+            <div className={styles.completedStatus}>
+              <CheckCircleOutlined className={styles.completedIcon} />
+              <div>
+                <Title level={5} style={{ margin: 0 }}>模型已就绪</Title>
+                <Text type="secondary">上次训练: {trainingStats?.lastTraining || '未知'}</Text>
+              </div>
+              <Button type="primary" icon={<PlayCircleOutlined />} onClick={handleStartTraining}>
+                重新训练
+              </Button>
+            </div>
+          ) : (
+            <div className={styles.idleStatus}>
+              <Alert
+                message="模型未训练"
+                description="请上传知识文档并开始训练，让AI学习您的业务知识。"
+                type="info"
+                showIcon
+              />
+              <Button type="primary" icon={<PlayCircleOutlined />} onClick={handleStartTraining} style={{ marginTop: 16 }}>
+                开始训练
+              </Button>
+            </div>
           )}
-        />
-      </Card>
+        </Card>
+
+        <Card title="训练历史" className={styles.historyCard}>
+          <List
+            dataSource={trainingHistory}
+            locale={{ emptyText: '暂无训练历史' }}
+            renderItem={item => (
+              <List.Item
+                actions={[
+                  <Button type="link" size="small">查看详情</Button>,
+                  <Button type="link" size="small">回滚</Button>
+                ]}
+              >
+                <List.Item.Meta
+                  avatar={
+                    <Avatar 
+                      icon={<RobotOutlined />} 
+                      style={{ background: item.status === 'completed' ? '#52c41a' : '#1890ff' }}
+                    />
+                  }
+                  title={
+                    <Space>
+                      <Text strong>{item.version}</Text>
+                      <Tag color="green">准确率 {item.accuracy}%</Tag>
+                    </Space>
+                  }
+                  description={
+                    <Space>
+                      <ClockCircleOutlined /> {item.date}
+                      <span>|</span>
+                      <FileTextOutlined /> {item.documents} 份文档
+                    </Space>
+                  }
+                />
+              </List.Item>
+            )}
+          />
+        </Card>
+      </Spin>
     </div>
   )
 
@@ -287,49 +354,52 @@ const AITraining = () => {
         className={styles.documentsCard}
         extra={<Text type="secondary">共 {knowledgeDocuments.length} 份文档</Text>}
       >
-        <List
-          dataSource={knowledgeDocuments}
-          renderItem={item => (
-            <List.Item
-              actions={[
-                <Tooltip title="查看">
-                  <Button type="text" size="small" icon={<FileTextOutlined />} />
-                </Tooltip>,
-                <Tooltip title="删除">
-                  <Button 
-                    type="text" 
-                    size="small" 
-                    danger 
-                    icon={<DeleteOutlined />} 
-                    onClick={() => handleDeleteDocument(item.id)}
-                  />
-                </Tooltip>
-              ]}
-            >
-              <List.Item.Meta
-                avatar={
-                  <Avatar 
-                    icon={<FileTextOutlined />} 
-                    style={{ background: item.status === 'indexed' ? '#52c41a' : '#faad14' }}
-                  />
-                }
-                title={item.name}
-                description={
-                  <Space>
-                    <Text type="secondary">{item.size}</Text>
-                    <span>|</span>
-                    <Text type="secondary">{item.uploadTime}</Text>
-                    <span>|</span>
-                    <Badge 
-                      status={item.status === 'indexed' ? 'success' : 'processing'} 
-                      text={item.status === 'indexed' ? '已索引' : '待索引'} 
+        <Spin spinning={loading}>
+          <List
+            dataSource={knowledgeDocuments}
+            locale={{ emptyText: '暂无文档' }}
+            renderItem={item => (
+              <List.Item
+                actions={[
+                  <Tooltip title="查看">
+                    <Button type="text" size="small" icon={<FileTextOutlined />} />
+                  </Tooltip>,
+                  <Tooltip title="删除">
+                    <Button 
+                      type="text" 
+                      size="small" 
+                      danger 
+                      icon={<DeleteOutlined />} 
+                      onClick={() => handleDeleteDocument(item.id)}
                     />
-                  </Space>
-                }
-              />
-            </List.Item>
-          )}
-        />
+                  </Tooltip>
+                ]}
+              >
+                <List.Item.Meta
+                  avatar={
+                    <Avatar 
+                      icon={<FileTextOutlined />} 
+                      style={{ background: item.status === 'indexed' ? '#52c41a' : '#faad14' }}
+                    />
+                  }
+                  title={item.name}
+                  description={
+                    <Space>
+                      <Text type="secondary">{item.size}</Text>
+                      <span>|</span>
+                      <Text type="secondary">{item.uploadTime}</Text>
+                      <span>|</span>
+                      <Badge 
+                        status={item.status === 'indexed' ? 'success' : 'processing'} 
+                        text={item.status === 'indexed' ? '已索引' : '待索引'} 
+                      />
+                    </Space>
+                  }
+                />
+              </List.Item>
+            )}
+          />
+        </Spin>
       </Card>
     </div>
   )
@@ -338,7 +408,7 @@ const AITraining = () => {
   const SettingsTab = () => (
     <div className={styles.settingsTab}>
       <Card title="训练参数设置" className={styles.settingsCard}>
-        <Form layout="vertical">
+        <Form layout="vertical" onFinish={handleSaveTrainingSettings}>
           <Form.Item 
             label={
               <Space>
@@ -352,53 +422,64 @@ const AITraining = () => {
             <Input value="GPT-4 Turbo" disabled />
           </Form.Item>
           <Form.Item 
+            name="epochs"
             label="训练轮次 (Epochs)"
             extra="更多轮次可能提高准确率，但也可能导致过拟合"
+            initialValue={3}
           >
-            <Input type="number" defaultValue={3} />
+            <Input type="number" />
           </Form.Item>
           <Form.Item 
+            name="learningRate"
             label="学习率 (Learning Rate)"
             extra="较小的学习率训练更稳定，但速度较慢"
+            initialValue="0.0001"
           >
-            <Input defaultValue="0.0001" />
+            <Input />
           </Form.Item>
           <Form.Item 
+            name="batchSize"
             label="批次大小 (Batch Size)"
+            initialValue={32}
           >
-            <Input type="number" defaultValue={32} />
+            <Input type="number" />
           </Form.Item>
           <Form.Item>
-            <Button type="primary">保存设置</Button>
+            <Button type="primary" htmlType="submit">保存设置</Button>
           </Form.Item>
         </Form>
       </Card>
 
       <Card title="业务配置" className={styles.businessCard}>
-        <Form layout="vertical">
+        <Form layout="vertical" onFinish={handleSaveBusinessConfig}>
           <Form.Item 
+            name="companyName"
             label="公司名称"
             rules={[{ required: true }]}
+            initialValue="摩塔科技"
           >
-            <Input placeholder="请输入公司名称" defaultValue="摩塔科技" />
+            <Input placeholder="请输入公司名称" />
           </Form.Item>
           <Form.Item 
+            name="industry"
             label="行业领域"
+            initialValue="企业服务/SaaS"
           >
-            <Input placeholder="请输入行业领域" defaultValue="企业服务/SaaS" />
+            <Input placeholder="请输入行业领域" />
           </Form.Item>
           <Form.Item 
+            name="businessDesc"
             label="业务描述"
             extra="详细的业务描述有助于AI更好地理解您的业务"
+            initialValue="摩塔科技是一家专注于AI驱动的智能商业平台提供商，为企业提供一站式AI解决方案生成服务。"
           >
             <TextArea 
               rows={4} 
               placeholder="请描述您的核心业务..."
-              defaultValue="摩塔科技是一家专注于AI驱动的智能商业平台提供商，为企业提供一站式AI解决方案生成服务。"
             />
           </Form.Item>
           <Form.Item>
-            <Button type="primary">保存配置</Button>
+            <Button type="primary" htmlType="submit">保存配置</Button>
           </Form.Item>
         </Form>
       </Card>

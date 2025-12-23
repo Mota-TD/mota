@@ -23,7 +23,9 @@ import {
   UserOutlined,
   CalendarOutlined
 } from '@ant-design/icons'
-import { issueApi, projectApi, sprintApi } from '@/services/mock/api'
+import * as issueApi from '@/services/api/issue'
+import * as projectApi from '@/services/api/project'
+import * as sprintApi from '@/services/api/sprint'
 import styles from './index.module.css'
 
 interface Issue {
@@ -70,7 +72,7 @@ const Backlog = () => {
   const loadProjects = async () => {
     try {
       const res = await projectApi.getProjects()
-      const projectList = res.data.list || res.data
+      const projectList = (res as any).list || res || []
       setProjects(projectList)
       if (projectList.length > 0) {
         setSelectedProject(projectList[0].id)
@@ -92,14 +94,14 @@ const Backlog = () => {
     try {
       // 加载未规划的事项（没有分配到迭代的）
       const issuesRes = await issueApi.getIssues({ projectId: selectedProject })
-      const allIssues = issuesRes.data.list || []
+      const allIssues = (issuesRes as any).list || issuesRes || []
       // 过滤出未分配到迭代的事项
       const backlogIssues = allIssues.filter((i: any) => !i.sprintId)
       setIssues(backlogIssues as Issue[])
       
       // 加载迭代列表
       const sprintsRes = await sprintApi.getSprints({ projectId: selectedProject })
-      const sprintList = Array.isArray(sprintsRes.data) ? sprintsRes.data : (sprintsRes.data as any).list || []
+      const sprintList = (sprintsRes as any).list || sprintsRes || []
       setSprints(sprintList)
     } catch (error) {
       console.error('Failed to load data:', error)
@@ -131,9 +133,9 @@ const Backlog = () => {
     }
     
     try {
-      // 模拟批量更新
+      // 批量更新
       for (const issueId of selectedIssues) {
-        await issueApi.updateIssue(issueId, { sprintId: selectedSprint })
+        await issueApi.updateIssue(issueId, { sprintId: selectedSprint } as any)
       }
       message.success(`已将 ${selectedIssues.length} 个需求规划到迭代`)
       setPlanModalVisible(false)

@@ -38,7 +38,7 @@ public class AuthController {
 
     @Operation(summary = "用户登出")
     @PostMapping("/logout")
-    public Result<Void> logout(@RequestHeader("Authorization") String authorization) {
+    public Result<Void> logout(@RequestHeader(value = "Authorization") String authorization) {
         String token = authorization.replace("Bearer ", "");
         authService.logout(token);
         return Result.success();
@@ -46,7 +46,7 @@ public class AuthController {
 
     @Operation(summary = "刷新Token")
     @PostMapping("/refresh")
-    public Result<LoginResponse> refresh(@RequestParam String refreshToken) {
+    public Result<LoginResponse> refresh(@RequestParam(value = "refreshToken") String refreshToken) {
         LoginResponse response = authService.refreshToken(refreshToken);
         return Result.success(response);
     }
@@ -60,7 +60,7 @@ public class AuthController {
 
     @Operation(summary = "测试密码编码（仅开发环境）")
     @GetMapping("/test-password")
-    public Result<Map<String, Object>> testPassword(@RequestParam("password") String password) {
+    public Result<Map<String, Object>> testPassword(@RequestParam(value = "password") String password) {
         Map<String, Object> result = new HashMap<>();
         
         // 生成新的BCrypt哈希

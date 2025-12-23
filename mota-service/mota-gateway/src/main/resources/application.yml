@@ -51,6 +51,60 @@ spring:
             - StripPrefix=0
             - AuthFilter
 
+        # 活动服务（项目服务）
+        - id: mota-activity-service
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/activities/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # 通知服务（项目服务）
+        - id: mota-notification-service
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/notifications/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # Wiki服务（项目服务）
+        - id: mota-wiki-service
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/wiki/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # AI服务（项目服务）
+        - id: mota-ai-service
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/ai/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # 仪表盘服务（项目服务）
+        - id: mota-dashboard-service
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/dashboard/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # 效能指标服务（项目服务）
+        - id: mota-metrics-service
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/metrics/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
         # 任务服务
         - id: mota-issue-service
           uri: lb://mota-issue-service

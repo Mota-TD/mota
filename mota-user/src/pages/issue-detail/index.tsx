@@ -27,8 +27,11 @@ import {
   LinkOutlined,
   PaperClipOutlined
 } from '@ant-design/icons'
-import { issueApi, projectApi } from '@/services/mock/api'
-import { mockUsers, mockActivities } from '@/services/mock/data'
+import * as issueApi from '@/services/api/issue'
+import * as projectApi from '@/services/api/project'
+import { getUsers } from '@/services/api/user'
+import { getRecentActivities } from '@/services/api/activity'
+import type { IssueStatus } from '@/services/api/issue'
 import styles from './index.module.css'
 
 interface Issue {
@@ -36,7 +39,7 @@ interface Issue {
   key: string
   title: string
   type: string
-  status: string
+  status: IssueStatus
   priority: string
   assignee: number | null
   reporter: number
@@ -58,6 +61,8 @@ const IssueDetail = () => {
   const [issue, setIssue] = useState<Issue | null>(null)
   const [project, setProject] = useState<any>(null)
   const [commentText, setCommentText] = useState('')
+  const [users, setUsers] = useState<any[]>([])
+  const [activities, setActivities] = useState<any[]>([])
 
   useEffect(() => {
     if (id) {
@@ -68,12 +73,18 @@ const IssueDetail = () => {
   const loadIssueData = async (issueId: number) => {
     setLoading(true)
     try {
-      const issueRes = await issueApi.getIssueById(issueId)
-      setIssue(issueRes.data)
+      const [issueRes, usersRes, activitiesRes] = await Promise.all([
+        issueApi.getIssueById(issueId),
+        getUsers().catch(() => ({ list: [] })),
+        getRecentActivities(3).catch(() => [])
+      ])
+      setIssue(issueRes as any)
+      setUsers((usersRes as any).list || [])
+      setActivities(activitiesRes as any[] || [])
       
-      if (issueRes.data.projectId) {
-        const projectRes = await projectApi.getProjectById(issueRes.data.projectId)
-        setProject(projectRes.data)
+      if ((issueRes as any).projectId) {
+        const projectRes = await projectApi.getProjectById((issueRes as any).projectId)
+        setProject(projectRes)
       }
     } catch (error) {
       console.error('Failed to load issue:', error)
@@ -83,7 +94,7 @@ const IssueDetail = () => {
     }
   }
 
-  const handleStatusChange = async (newStatus: string) => {
+  const handleStatusChange = async (newStatus: IssueStatus) => {
     if (!issue) return
     try {
       await issueApi.updateIssue(issue.id, { status: newStatus })
@@ -169,13 +180,13 @@ const IssueDetail = () => {
 
   const getUser = (userId: number | null) => {
     if (!userId) return null
-    return mockUsers.find(u => u.id === userId)
+    return users.find(u => u.id === userId)
   }
 
-  // 模拟活动记录
-  const activities = mockActivities.slice(0, 3).map(a => ({
+  // 活动记录
+  const activityList = activities.map((a: any) => ({
     ...a,
-    user: mockUsers.find(u => u.id === a.userId)
+    user: users.find(u => u.id === a.userId)
   }))
 
   if (loading) {
@@ -278,7 +289,7 @@ const IssueDetail = () => {
           {/* 评论 */}
           <Card title="评论" className={styles.card}>
             <div className={styles.commentInput}>
-              <Avatar>{mockUsers[0].name.charAt(0)}</Avatar>
+              <Avatar>{users[0]?.name?.charAt(0) || 'U'}</Avatar>
               <Input.TextArea
                 placeholder="添加评论..."
                 value={commentText}
@@ -291,23 +302,25 @@ const IssueDetail = () => {
             </div>
             <Divider />
             <div className={styles.comments}>
-              <div className={styles.commentItem}>
-                <Avatar>{mockUsers[1].name.charAt(0)}</Avatar>
-                <div className={styles.commentContent}>
-                  <div className={styles.commentHeader}>
-                    <span className={styles.commentAuthor}>{mockUsers[1].name}</span>
-                    <span className={styles.commentTime}>2小时前</span>
+              {users[1] && (
+                <div className={styles.commentItem}>
+                  <Avatar>{users[1].name?.charAt(0) || 'U'}</Avatar>
+                  <div className={styles.commentContent}>
+                    <div className={styles.commentHeader}>
+                      <span className={styles.commentAuthor}>{users[1].name}</span>
+                      <span className={styles.commentTime}>2小时前</span>
+                    </div>
+                    <p>这个问题需要尽快处理，影响到用户体验。</p>
                   </div>
-                  <p>这个问题需要尽快处理，影响到用户体验。</p>
                 </div>
-              </div>
+              )}
             </div>
           </Card>
 
           {/* 活动记录 */}
           <Card title="活动记录" className={styles.card}>
             <Timeline
-              items={activities.map(activity => ({
+              items={activityList.map((activity: any) => ({
                 children: (
                   <div className={styles.activityItem}>
                     <span className={styles.activityUser}>{activity.user?.name}</span>

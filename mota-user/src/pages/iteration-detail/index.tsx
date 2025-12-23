@@ -29,8 +29,9 @@ import {
   CalendarOutlined
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
-import { sprintApi, issueApi, projectApi } from '@/services/mock/api'
-import { mockUsers } from '@/services/mock/data'
+import * as sprintApi from '@/services/api/sprint'
+import * as issueApi from '@/services/api/issue'
+import * as projectApi from '@/services/api/project'
 import styles from './index.module.css'
 
 interface Sprint {
@@ -76,16 +77,16 @@ const IterationDetail = () => {
   const loadSprintData = async (sprintId: number) => {
     setLoading(true)
     try {
-      const sprintRes = await sprintApi.getSprintById(sprintId)
-      setSprint(sprintRes.data)
+      const sprintRes = await sprintApi.getSprint(sprintId)
+      setSprint(sprintRes as any)
       
-      if (sprintRes.data.projectId) {
+      if ((sprintRes as any).projectId) {
         const [projectRes, issuesRes] = await Promise.all([
-          projectApi.getProjectById(sprintRes.data.projectId),
+          projectApi.getProject((sprintRes as any).projectId),
           issueApi.getIssues({ sprintId })
         ])
-        setProject(projectRes.data)
-        setIssues(issuesRes.data.list || [])
+        setProject(projectRes as any)
+        setIssues((issuesRes as any).list || issuesRes || [])
       }
     } catch (error) {
       console.error('Failed to load sprint:', error)
@@ -256,13 +257,12 @@ const IterationDetail = () => {
       dataIndex: 'assignee',
       key: 'assignee',
       width: 100,
-      render: (assigneeId: number | null) => {
+      render: (assigneeId: number | null, record: any) => {
         if (!assigneeId) return '-'
-        const user = mockUsers.find(u => u.id === assigneeId)
-        return user ? (
+        return record.assigneeName ? (
           <Space>
-            <Avatar size="small" src={user.avatar}>{user.name.charAt(0)}</Avatar>
-            {user.name}
+            <Avatar size="small">{record.assigneeName.charAt(0)}</Avatar>
+            {record.assigneeName}
           </Space>
         ) : '-'
       }

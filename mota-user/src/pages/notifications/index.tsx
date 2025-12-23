@@ -10,7 +10,7 @@ import {
   SettingOutlined,
   MergeCellsOutlined
 } from '@ant-design/icons'
-import { notificationApi } from '@/services/mock/api'
+import * as notificationApi from '@/services/api/notification'
 import styles from './index.module.css'
 
 const { Text } = Typography
@@ -37,7 +37,8 @@ const NotificationsPage = () => {
     setLoading(true)
     try {
       const res = await notificationApi.getNotifications()
-      setNotifications(res.data)
+      const notificationsList = (res as any).list || res || []
+      setNotifications(notificationsList)
     } catch (error) {
       console.error('Failed to load notifications:', error)
     } finally {
@@ -61,17 +62,25 @@ const NotificationsPage = () => {
   }
 
   const handleMarkAsRead = async (id: number) => {
-    await notificationApi.markAsRead(id)
-    setNotifications(notifications.map(n => 
-      n.id === id ? { ...n, read: true } : n
-    ))
-    message.success('已标记为已读')
+    try {
+      await notificationApi.markAsRead(id)
+      setNotifications(notifications.map(n =>
+        n.id === id ? { ...n, read: true } : n
+      ))
+      message.success('已标记为已读')
+    } catch (error) {
+      console.error('Failed to mark as read:', error)
+    }
   }
 
   const handleMarkAllAsRead = async () => {
-    await notificationApi.markAllAsRead()
-    setNotifications(notifications.map(n => ({ ...n, read: true })))
-    message.success('已全部标记为已读')
+    try {
+      await notificationApi.markAllAsRead()
+      setNotifications(notifications.map(n => ({ ...n, read: true })))
+      message.success('已全部标记为已读')
+    } catch (error) {
+      console.error('Failed to mark all as read:', error)
+    }
   }
 
   const handleDelete = (id: number) => {

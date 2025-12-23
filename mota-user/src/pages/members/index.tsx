@@ -9,7 +9,7 @@ import {
   DeleteOutlined,
   EditOutlined
 } from '@ant-design/icons'
-import { userApi } from '@/services/mock/api'
+import * as userApi from '@/services/api/user'
 import styles from './index.module.css'
 
 interface Member {
@@ -44,7 +44,8 @@ const MembersPage = () => {
     setLoading(true)
     try {
       const res = await userApi.getUsers()
-      setMembers(res.data)
+      const membersList = (res as any).list || res || []
+      setMembers(membersList)
     } catch (error) {
       console.error('Failed to load members:', error)
     } finally {

@@ -7,7 +7,9 @@ import {
   UserOutlined,
   ClockCircleOutlined
 } from '@ant-design/icons'
-import { issueApi, projectApi, sprintApi } from '@/services/mock/api'
+import * as issueApi from '@/services/api/issue'
+import * as projectApi from '@/services/api/project'
+import * as sprintApi from '@/services/api/sprint'
 import styles from './index.module.css'
 
 interface KanbanColumn {
@@ -53,7 +55,7 @@ const Kanban = () => {
   const loadProjects = async () => {
     try {
       const res = await projectApi.getProjects()
-      const projectList = res.data.list || res.data
+      const projectList = (res as any).list || res || []
       setProjects(projectList)
       if (projectList.length > 0) {
         setSelectedProject(projectList[0].id)
@@ -66,7 +68,7 @@ const Kanban = () => {
   const loadSprints = async () => {
     try {
       const res = await sprintApi.getSprints({ projectId: selectedProject! })
-      const sprintList = Array.isArray(res.data) ? res.data : (res.data as any).list || []
+      const sprintList = (res as any).list || res || []
       setSprints(sprintList)
       const activeSprint = sprintList.find((s: any) => s.status === 'active')
       if (activeSprint) {
@@ -86,7 +88,7 @@ const Kanban = () => {
         projectId: selectedProject,
         sprintId: selectedSprint
       })
-      const issues = res.data.list || []
+      const issues = (res as any).list || res || []
       
       // 按状态分组
       const newColumns = columns.map(col => ({
@@ -139,7 +141,7 @@ const Kanban = () => {
     
     // 调用 API 更新
     try {
-      await issueApi.updateIssue(draggedIssue.id, { status: targetColumn.status })
+      await issueApi.updateIssue(draggedIssue.id, { status: targetColumn.status } as any)
       message.success('状态已更新')
     } catch (error) {
       message.error('更新失败')

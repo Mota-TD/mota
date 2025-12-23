@@ -48,6 +48,10 @@ public class SecurityConfig {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(AbstractHttpConfigurer::disable)
+            // 禁用 HTTP Basic 认证，防止返回 WWW-Authenticate 头
+            .httpBasic(AbstractHttpConfigurer::disable)
+            // 禁用表单登录
+            .formLogin(AbstractHttpConfigurer::disable)
             .headers(headers -> headers
                 .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
             .sessionManagement(session -> session
@@ -63,6 +67,14 @@ public class SecurityConfig {
                 .requestMatchers("/favicon.ico").permitAll()
                 .requestMatchers("/error").permitAll()
                 .anyRequest().authenticated()
+            )
+            // 自定义异常处理，返回 JSON 而不是 WWW-Authenticate 头
+            .exceptionHandling(exception -> exception
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(401);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"code\":401,\"message\":\"未授权\",\"timestamp\":" + System.currentTimeMillis() + "}");
+                })
             );
         
         return http.build();

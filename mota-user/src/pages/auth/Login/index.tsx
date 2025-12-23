@@ -1,33 +1,61 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Form, Input, Button, Checkbox, message } from 'antd'
-import { UserOutlined, LockOutlined } from '@ant-design/icons'
+import { MobileOutlined, LockOutlined } from '@ant-design/icons'
 import { useAuthStore } from '@/store/auth'
 import { login as loginApi } from '@/services/api/auth'
 import { ApiError } from '@/services/request'
 import styles from './index.module.css'
 
 /**
- * 登录页面 - 简洁版
+ * 登录页面 - 手机号+密码登录
  */
 const Login = () => {
   const navigate = useNavigate()
   const { login } = useAuthStore()
   const [loading, setLoading] = useState(false)
 
-  // 默认登录账号
-  const defaultCredentials = {
-    username: 'admin',
-    password: 'password',
-    remember: true
+  // 手机号校验规则
+  const phoneValidator = (_: unknown, value: string) => {
+    if (!value) {
+      return Promise.reject(new Error('请输入手机号'))
+    }
+    const phoneRegex = /^1[3-9]\d{9}$/
+    if (!phoneRegex.test(value)) {
+      return Promise.reject(new Error('请输入正确的11位手机号'))
+    }
+    return Promise.resolve()
   }
 
-  // 账号密码登录
-  const handleAccountLogin = async (values: { username: string; password: string; remember: boolean }) => {
+  // 密码校验规则：8~18位，必须包含数字和大小写字母，特殊字符可选
+  const passwordValidator = (_: unknown, value: string) => {
+    if (!value) {
+      return Promise.reject(new Error('请输入密码'))
+    }
+    if (value.length < 8 || value.length > 18) {
+      return Promise.reject(new Error('密码长度为8~18位'))
+    }
+    // 必须包含数字
+    if (!/\d/.test(value)) {
+      return Promise.reject(new Error('密码必须包含数字'))
+    }
+    // 必须包含小写字母
+    if (!/[a-z]/.test(value)) {
+      return Promise.reject(new Error('密码必须包含小写字母'))
+    }
+    // 必须包含大写字母
+    if (!/[A-Z]/.test(value)) {
+      return Promise.reject(new Error('密码必须包含大写字母'))
+    }
+    return Promise.resolve()
+  }
+
+  // 手机号+密码登录
+  const handleAccountLogin = async (values: { phone: string; password: string; remember: boolean }) => {
     setLoading(true)
     try {
       const res = await loginApi({
-        username: values.username,
+        username: values.phone, // 使用手机号作为用户名
         password: values.password,
         rememberMe: values.remember,
       })
@@ -36,7 +64,7 @@ const Login = () => {
       const user = {
         id: res.userId,
         name: res.nickname || res.username,
-        email: res.username, // 后端返回的 username 可能是邮箱
+        email: res.username,
         avatar: res.avatar,
         role: 'admin', // 默认角色，后续可从后端获取
       }
@@ -64,27 +92,31 @@ const Login = () => {
 
       <Form
         name="accountLogin"
-        initialValues={defaultCredentials}
+        initialValues={{ remember: true }}
         onFinish={handleAccountLogin}
         size="large"
+        autoComplete="off"
       >
         <Form.Item
-          name="username"
-          rules={[{ required: true, message: '请输入用户名/邮箱/手机号' }]}
+          name="phone"
+          rules={[{ validator: phoneValidator }]}
         >
           <Input
-            prefix={<UserOutlined />}
-            placeholder="请输入用户名/邮箱/手机号"
+            prefix={<MobileOutlined />}
+            placeholder="请输入手机号"
+            maxLength={11}
+            autoComplete="new-password"
           />
         </Form.Item>
 
         <Form.Item
           name="password"
-          rules={[{ required: true, message: '请输入密码' }]}
+          rules={[{ validator: passwordValidator }]}
         >
           <Input.Password
             prefix={<LockOutlined />}
-            placeholder="请输入密码"
+            placeholder="请输入密码（8~18位，含数字和大小写字母）"
+            autoComplete="new-password"
           />
         </Form.Item>
 

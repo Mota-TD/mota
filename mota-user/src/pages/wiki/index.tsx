@@ -10,7 +10,8 @@ import {
   MoreOutlined,
   HomeOutlined
 } from '@ant-design/icons'
-import { wikiApi, userApi } from '@/services/mock/api'
+import * as wikiApi from '@/services/api/wiki'
+import * as userApi from '@/services/api/user'
 import styles from './index.module.css'
 
 const { Title, Paragraph, Text } = Typography
@@ -62,12 +63,14 @@ const WikiPage = () => {
         wikiApi.getWikiPages(),
         userApi.getUsers()
       ])
-      setPages(pagesRes.data)
-      setUsers(usersRes.data)
+      const pagesList = (pagesRes as any).list || pagesRes || []
+      const usersList = (usersRes as any).list || usersRes || []
+      setPages(pagesList)
+      setUsers(usersList)
       
       // 默认选中第一个页面
-      if (pagesRes.data.length > 0) {
-        setSelectedPage(pagesRes.data[0])
+      if (pagesList.length > 0) {
+        setSelectedPage(pagesList[0])
       }
     } catch (error) {
       console.error('Failed to load wiki pages:', error)

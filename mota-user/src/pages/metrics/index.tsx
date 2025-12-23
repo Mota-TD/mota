@@ -11,7 +11,7 @@ import {
   SyncOutlined,
   PauseCircleOutlined
 } from '@ant-design/icons'
-import { metricsApi } from '@/services/mock/api'
+import * as metricsApi from '@/services/api/metrics'
 import styles from './index.module.css'
 
 const { Title, Text } = Typography
@@ -61,7 +61,7 @@ const MetricsPage = () => {
     setLoading(true)
     try {
       const res = await metricsApi.getMetrics()
-      setMetrics(res.data)
+      setMetrics(res as any)
     } catch (error) {
       console.error('Failed to load metrics:', error)
     } finally {

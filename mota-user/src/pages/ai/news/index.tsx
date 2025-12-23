@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { 
   Card, 
   Row, 
@@ -32,23 +32,10 @@ import {
   BellOutlined,
   SettingOutlined
 } from '@ant-design/icons'
+import { getNews, toggleNewsStar, refreshNews, type NewsItem } from '@/services/api/ai'
 import styles from './index.module.css'
 
 const { Title, Text, Paragraph } = Typography
-
-interface NewsItem {
-  id: string
-  title: string
-  summary: string
-  source: string
-  sourceIcon?: string
-  publishTime: string
-  category: string
-  tags: string[]
-  url: string
-  isStarred?: boolean
-  relevance: number
-}
 
 /**
  * AI新闻追踪页面
@@ -57,104 +44,79 @@ const AINews = () => {
   const [activeTab, setActiveTab] = useState('all')
   const [loading, setLoading] = useState(false)
   const [searchText, setSearchText] = useState('')
+  const [newsData, setNewsData] = useState<NewsItem[]>([])
+  const [total, setTotal] = useState(0)
 
-  // 模拟新闻数据
-  const mockNews: NewsItem[] = [
-    {
-      id: '1',
-      title: 'OpenAI发布GPT-5，性能大幅提升',
-      summary: 'OpenAI今日正式发布GPT-5模型，在推理能力、多模态理解等方面取得重大突破，将为企业AI应用带来新的可能性...',
-      source: '36氪',
-      publishTime: '2小时前',
-      category: 'AI技术',
-      tags: ['GPT-5', 'OpenAI', '大模型'],
-      url: '#',
-      isStarred: true,
-      relevance: 95
-    },
-    {
-      id: '2',
-      title: '企业数字化转型报告：AI成为核心驱动力',
-      summary: '最新调研报告显示，超过80%的企业将AI视为数字化转型的核心驱动力，预计未来三年AI投资将增长300%...',
-      source: '亿欧网',
-      publishTime: '4小时前',
-      category: '行业动态',
-      tags: ['数字化转型', '企业服务', 'AI应用'],
-      url: '#',
-      isStarred: false,
-      relevance: 88
-    },
-    {
-      id: '3',
-      title: 'SaaS行业迎来AI革命，智能化成新趋势',
-      summary: '随着AI技术的成熟，SaaS行业正在经历一场深刻的变革，智能化、自动化成为产品升级的主要方向...',
-      source: '虎嗅',
-      publishTime: '6小时前',
-      category: '行业动态',
-      tags: ['SaaS', '智能化', '产品升级'],
-      url: '#',
-      isStarred: true,
-      relevance: 92
-    },
-    {
-      id: '4',
-      title: '国内AI大模型竞争加剧，百度、阿里、腾讯纷纷发力',
-      summary: '国内科技巨头在AI大模型领域的竞争日趋激烈，各家纷纷推出自研大模型，并在企业服务领域展开布局...',
-      source: '钛媒体',
-      publishTime: '8小时前',
-      category: 'AI技术',
-      tags: ['大模型', '百度', '阿里', '腾讯'],
-      url: '#',
-      isStarred: false,
-      relevance: 85
-    },
-    {
-      id: '5',
-      title: 'AI营销工具市场规模突破百亿，增长势头强劲',
-      summary: '据市场研究机构数据，AI营销工具市场规模已突破百亿元，预计未来五年将保持30%以上的年增长率...',
-      source: '艾瑞咨询',
-      publishTime: '1天前',
-      category: '市场分析',
-      tags: ['AI营销', '市场规模', '增长趋势'],
-      url: '#',
-      isStarred: false,
-      relevance: 90
-    },
-    {
-      id: '6',
-      title: '企业级AI应用落地加速，效率提升显著',
-      summary: '越来越多的企业开始将AI技术应用于实际业务场景，在客服、营销、运营等领域取得了显著的效率提升...',
-      source: '界面新闻',
-      publishTime: '1天前',
-      category: '案例分析',
-      tags: ['AI应用', '企业效率', '落地实践'],
-      url: '#',
-      isStarred: false,
-      relevance: 87
-    },
-  ]
+  // 加载新闻数据
+  useEffect(() => {
+    loadNews()
+  }, [activeTab])
+
+  const loadNews = async () => {
+    setLoading(true)
+    try {
+      const categoryMap: Record<string, string> = {
+        'all': '',
+        'ai': 'AI技术',
+        'industry': '行业动态',
+        'market': '市场分析',
+        'case': '案例分析'
+      }
+      const res = await getNews({
+        category: categoryMap[activeTab] || undefined,
+        search: searchText || undefined
+      })
+      setNewsData(res.list || [])
+      setTotal(res.total || 0)
+    } catch (error) {
+      console.error('Failed to load news:', error)
+      message.error('加载新闻失败')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 搜索
+  const handleSearch = () => {
+    loadNews()
+  }
 
   // 分类配置
   const categories = [
-    { key: 'all', label: '全部', count: mockNews.length },
-    { key: 'ai', label: 'AI技术', count: 2 },
-    { key: 'industry', label: '行业动态', count: 2 },
-    { key: 'market', label: '市场分析', count: 1 },
-    { key: 'case', label: '案例分析', count: 1 },
+    { key: 'all', label: '全部', count: total },
+    { key: 'ai', label: 'AI技术', count: newsData.filter(n => n.category === 'AI技术').length },
+    { key: 'industry', label: '行业动态', count: newsData.filter(n => n.category === '行业动态').length },
+    { key: 'market', label: '市场分析', count: newsData.filter(n => n.category === '市场分析').length },
+    { key: 'case', label: '案例分析', count: newsData.filter(n => n.category === '案例分析').length },
   ]
 
   // 刷新新闻
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
     setLoading(true)
-    setTimeout(() => {
-      setLoading(false)
+    try {
+      const res = await refreshNews()
+      setNewsData(res.list || [])
+      setTotal(res.total || 0)
       message.success('新闻已更新')
-    }, 1500)
+    } catch (error) {
+      message.error('刷新失败')
+    } finally {
+      setLoading(false)
+    }
   }
 
   // 收藏/取消收藏
-  const handleStar = (_id: string) => {
-    message.success('操作成功')
+  const handleStar = async (id: string) => {
+    try {
+      await toggleNewsStar(id)
+      // 更新本地状态
+      setNewsData(newsData.map(item => 
+        item.id === id ? { ...item, isStarred: !item.isStarred } : item
+      ))
+      message.success('操作成功')
+    } catch (error) {
+      message.error('操作失败')
+    }
   }
 
   // 分享
@@ -164,16 +126,11 @@ const AINews = () => {
   }
 
   // 过滤新闻
-  const filteredNews = mockNews.filter(item => {
+  const filteredNews = newsData.filter(item => {
     const matchSearch = !searchText || 
       item.title.toLowerCase().includes(searchText.toLowerCase()) ||
       item.summary.toLowerCase().includes(searchText.toLowerCase())
-    const matchCategory = activeTab === 'all' || 
-      (activeTab === 'ai' && item.category === 'AI技术') ||
-      (activeTab === 'industry' && item.category === '行业动态') ||
-      (activeTab === 'market' && item.category === '市场分析') ||
-      (activeTab === 'case' && item.category === '案例分析')
-    return matchSearch && matchCategory
+    return matchSearch
   })
 
   // 新闻卡片
@@ -260,6 +217,7 @@ const AINews = () => {
                 prefix={<SearchOutlined />}
                 value={searchText}
                 onChange={e => setSearchText(e.target.value)}
+                onPressEnter={handleSearch}
                 style={{ width: 300 }}
                 allowClear
               />

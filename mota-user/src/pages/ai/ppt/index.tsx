@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { 
   Card, 
   Form, 
@@ -12,11 +12,8 @@ import {
   Col,
   Steps,
   message,
-  Spin,
-  Empty,
   Tag,
   Divider,
-  Radio,
   Tooltip
 } from 'antd'
 import {
@@ -34,6 +31,16 @@ import {
   EditOutlined
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
+import {
+  getPPTTemplates,
+  getPPTColorSchemes,
+  getPPTQuickTemplates,
+  generatePPT,
+  downloadPPT,
+  type PPTTemplate,
+  type PPTColorScheme,
+  type GeneratedPPT
+} from '@/services/api/ai'
 import styles from './index.module.css'
 
 const { Title, Text, Paragraph } = Typography
@@ -47,74 +54,104 @@ const AIPPT = () => {
   const navigate = useNavigate()
   const [generating, setGenerating] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
-  const [generatedPPT, setGeneratedPPT] = useState<any>(null)
+  const [generatedPPT, setGeneratedPPT] = useState<GeneratedPPT | null>(null)
+  const [templates, setTemplates] = useState<PPTTemplate[]>([])
+  const [colorSchemes, setColorSchemes] = useState<PPTColorScheme[]>([])
+  const [quickTemplates, setQuickTemplates] = useState<Array<{ label: string; value: string }>>([])
 
-  // PPT模板
-  const templates = [
-    { value: 'business', label: '商务简约', color: '#2b7de9', icon: '💼' },
-    { value: 'tech', label: '科技风格', color: '#667eea', icon: '🚀' },
-    { value: 'creative', label: '创意设计', color: '#ec4899', icon: '🎨' },
-    { value: 'minimal', label: '极简风格', color: '#10b981', icon: '✨' },
-    { value: 'professional', label: '专业报告', color: '#f59e0b', icon: '📊' },
-  ]
+  // 加载配置数据
+  useEffect(() => {
+    loadConfig()
+  }, [])
 
-  // 配色方案
-  const colorSchemes = [
-    { value: 'blue', label: '商务蓝', colors: ['#2b7de9', '#69c0ff', '#e6f7ff'] },
-    { value: 'purple', label: '科技紫', colors: ['#667eea', '#b37feb', '#f9f0ff'] },
-    { value: 'green', label: '自然绿', colors: ['#10b981', '#6ee7b7', '#d1fae5'] },
-    { value: 'orange', label: '活力橙', colors: ['#f59e0b', '#fcd34d', '#fef3c7'] },
-    { value: 'dark', label: '暗黑风', colors: ['#1f1f1f', '#434343', '#262626'] },
-  ]
+  const loadConfig = async () => {
+    try {
+      const [templatesRes, colorSchemesRes, quickTemplatesRes] = await Promise.all([
+        getPPTTemplates().catch(() => []),
+        getPPTColorSchemes().catch(() => []),
+        getPPTQuickTemplates().catch(() => [])
+      ])
 
-  // 快捷模板
-  const quickTemplates = [
-    { label: '产品介绍', value: '公司产品介绍和核心功能展示' },
-    { label: '商业计划书', value: '创业项目商业计划书' },
-    { label: '年度总结', value: '年度工作总结与规划' },
-    { label: '培训课件', value: '员工培训课程内容' },
-  ]
+      // 如果 API 返回空，使用默认值
+      if (templatesRes && templatesRes.length > 0) {
+        setTemplates(templatesRes)
+      } else {
+        setTemplates([
+          { value: 'business', label: '商务简约', color: '#2b7de9', icon: '💼' },
+          { value: 'tech', label: '科技风格', color: '#667eea', icon: '🚀' },
+          { value: 'creative', label: '创意设计', color: '#ec4899', icon: '🎨' },
+          { value: 'minimal', label: '极简风格', color: '#10b981', icon: '✨' },
+          { value: 'professional', label: '专业报告', color: '#f59e0b', icon: '📊' },
+        ])
+      }
+
+      if (colorSchemesRes && colorSchemesRes.length > 0) {
+        setColorSchemes(colorSchemesRes)
+      } else {
+        setColorSchemes([
+          { value: 'blue', label: '商务蓝', colors: ['#2b7de9', '#69c0ff', '#e6f7ff'] },
+          { value: 'purple', label: '科技紫', colors: ['#667eea', '#b37feb', '#f9f0ff'] },
+          { value: 'green', label: '自然绿', colors: ['#10b981', '#6ee7b7', '#d1fae5'] },
+          { value: 'orange', label: '活力橙', colors: ['#f59e0b', '#fcd34d', '#fef3c7'] },
+          { value: 'dark', label: '暗黑风', colors: ['#1f1f1f', '#434343', '#262626'] },
+        ])
+      }
+
+      if (quickTemplatesRes && quickTemplatesRes.length > 0) {
+        setQuickTemplates(quickTemplatesRes)
+      } else {
+        setQuickTemplates([
+          { label: '产品介绍', value: '公司产品介绍和核心功能展示' },
+          { label: '商业计划书', value: '创业项目商业计划书' },
+          { label: '年度总结', value: '年度工作总结与规划' },
+          { label: '培训课件', value: '员工培训课程内容' },
+        ])
+      }
+    } catch (error) {
+      console.error('Failed to load config:', error)
+    }
+  }
 
   // 生成PPT
   const handleGenerate = async (values: any) => {
     setGenerating(true)
     setCurrentStep(1)
     
-    // 模拟生成过程
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    setCurrentStep(2)
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    setCurrentStep(3)
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // 模拟生成结果
-    setGeneratedPPT({
-      id: `PPT-${Date.now()}`,
-      title: values.title,
-      slides: values.slideCount || 10,
-      template: values.template,
-      createdAt: new Date().toLocaleString(),
-      pages: [
-        { id: 1, title: '封面', type: 'cover' },
-        { id: 2, title: '目录', type: 'toc' },
-        { id: 3, title: '公司简介', type: 'content' },
-        { id: 4, title: '核心业务', type: 'content' },
-        { id: 5, title: '产品服务', type: 'content' },
-        { id: 6, title: '成功案例', type: 'content' },
-        { id: 7, title: '团队介绍', type: 'content' },
-        { id: 8, title: '发展历程', type: 'timeline' },
-        { id: 9, title: '未来规划', type: 'content' },
-        { id: 10, title: '联系我们', type: 'contact' },
-      ]
-    })
-    
-    setGenerating(false)
-    message.success('PPT生成成功！')
+    try {
+      // 模拟进度
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      setCurrentStep(2)
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      setCurrentStep(3)
+      
+      const result = await generatePPT({
+        title: values.title,
+        content: values.content,
+        template: values.template,
+        colorScheme: values.colorScheme,
+        slideCount: values.slideCount || 10,
+        style: values.style
+      })
+      
+      setGeneratedPPT(result)
+      message.success('PPT生成成功！')
+    } catch (error) {
+      console.error('Failed to generate PPT:', error)
+      message.error('PPT生成失败，请重试')
+    } finally {
+      setGenerating(false)
+    }
   }
 
   // 下载PPT
-  const handleDownload = (format: string) => {
-    message.success(`正在下载 ${format.toUpperCase()} 格式...`)
+  const handleDownload = async (format: string) => {
+    if (!generatedPPT) return
+    try {
+      await downloadPPT(generatedPPT.id, format)
+      message.success(`正在下载 ${format.toUpperCase()} 格式...`)
+    } catch (error) {
+      message.error('下载失败')
+    }
   }
 
   // 预览PPT
@@ -354,7 +391,7 @@ const AIPPT = () => {
                 </div>
                 <Divider />
                 <div className={styles.slideList}>
-                  {generatedPPT.pages.map((page: any) => (
+                  {generatedPPT.pages.map((page) => (
                     <div key={page.id} className={styles.slideItem}>
                       <div className={styles.slideThumb}>
                         <span className={styles.slideNumber}>{page.id}</span>

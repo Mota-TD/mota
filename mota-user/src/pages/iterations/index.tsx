@@ -29,7 +29,8 @@ import {
   ClockCircleOutlined
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
-import { sprintApi, projectApi } from '@/services/mock/api'
+import * as sprintApi from '@/services/api/sprint'
+import * as projectApi from '@/services/api/project'
 import styles from './index.module.css'
 
 interface Sprint {
@@ -68,7 +69,7 @@ const Iterations = () => {
   const loadProjects = async () => {
     try {
       const res = await projectApi.getProjects()
-      const projectList = res.data.list || res.data
+      const projectList = (res as any).list || res || []
       setProjects(projectList)
       if (projectList.length > 0) {
         setSelectedProject(projectList[0].id)
@@ -92,7 +93,7 @@ const Iterations = () => {
         params.status = statusFilter
       }
       const res = await sprintApi.getSprints(params)
-      const sprintList = Array.isArray(res.data) ? res.data : (res.data as any).list || []
+      const sprintList = (res as any).list || res || []
       setSprints(sprintList)
     } catch (error) {
       console.error('Failed to load sprints:', error)
@@ -108,7 +109,7 @@ const Iterations = () => {
         projectId: selectedProject,
         startDate: values.dateRange[0].format('YYYY-MM-DD'),
         endDate: values.dateRange[1].format('YYYY-MM-DD')
-      })
+      } as any)
       message.success('迭代创建成功')
       setCreateModalVisible(false)
       form.resetFields()
