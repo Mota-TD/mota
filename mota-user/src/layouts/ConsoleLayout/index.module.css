@@ -68,11 +68,8 @@
   font-size: 18px;
   font-weight: 700;
   letter-spacing: -0.5px;
-  /* 使用项目协同5个模块的颜色渐变: 蓝(项目)→绿(任务)→紫(需求)→橙(测试)→青(迭代) */
-  background: linear-gradient(90deg, #2b7de9 0%, #52c41a 25%, #722ed1 50%, #fa8c16 75%, #13c2c2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #1a1f36;
+  transition: color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .siderContent {
@@ -180,6 +177,51 @@
 .themePink :global(.ant-menu-item-selected) {
   background: linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(244, 114, 182, 0.1) 100%) !important;
   color: #ec4899 !important;
+}
+
+/* 主题颜色 - 靛蓝色 (AI助理) */
+.themeIndigo :global(.ant-menu-item-selected) {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(129, 140, 248, 0.1) 100%) !important;
+  color: #6366f1 !important;
+}
+
+/* 主题颜色 - 灰色 (帮助中心) */
+.themeGray :global(.ant-menu-item-selected) {
+  background: linear-gradient(135deg, rgba(107, 114, 128, 0.1) 0%, rgba(156, 163, 175, 0.1) 100%) !important;
+  color: #6b7280 !important;
+}
+
+/* Logo文字主题颜色 */
+.logoBlue {
+  color: #2b7de9 !important;
+}
+
+.logoGreen {
+  color: #52c41a !important;
+}
+
+.logoPurple {
+  color: #722ed1 !important;
+}
+
+.logoOrange {
+  color: #fa8c16 !important;
+}
+
+.logoCyan {
+  color: #13c2c2 !important;
+}
+
+.logoPink {
+  color: #ec4899 !important;
+}
+
+.logoIndigo {
+  color: #6366f1 !important;
+}
+
+.logoGray {
+  color: #6b7280 !important;
 }
 
 .siderFooter {

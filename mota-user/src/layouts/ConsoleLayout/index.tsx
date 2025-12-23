@@ -199,23 +199,33 @@ const ConsoleLayout = () => {
     return [path]
   }
 
-  // 根据当前路由获取主题颜色类名
-  const getThemeClass = () => {
+  // 根据当前路由获取主题配置
+  const getThemeConfig = () => {
     const path = location.pathname
-    if (path.startsWith('/issues')) {
-      return styles.themeGreen
+    if (path.startsWith('/dashboard')) {
+      return { menuClass: styles.themeBlue, logoClass: styles.logoBlue }
+    } else if (path.startsWith('/ai/')) {
+      return { menuClass: styles.themeIndigo, logoClass: styles.logoIndigo }
+    } else if (path.startsWith('/projects')) {
+      return { menuClass: styles.themeBlue, logoClass: styles.logoBlue }
+    } else if (path.startsWith('/issues')) {
+      return { menuClass: styles.themeGreen, logoClass: styles.logoGreen }
     } else if (path.startsWith('/requirements')) {
-      return styles.themePurple
+      return { menuClass: styles.themePurple, logoClass: styles.logoPurple }
     } else if (path.startsWith('/testing')) {
-      return styles.themeOrange
+      return { menuClass: styles.themeOrange, logoClass: styles.logoOrange }
     } else if (path.startsWith('/iterations')) {
-      return styles.themeCyan
+      return { menuClass: styles.themeCyan, logoClass: styles.logoCyan }
     } else if (path.startsWith('/wiki')) {
-      return styles.themePink
+      return { menuClass: styles.themePink, logoClass: styles.logoPink }
+    } else if (path.startsWith('/help')) {
+      return { menuClass: styles.themeGray, logoClass: styles.logoGray }
     }
-    // 默认蓝色 (项目管理/工作台/AI助理)
-    return styles.themeBlue
+    // 默认蓝色
+    return { menuClass: styles.themeBlue, logoClass: '' }
   }
+
+  const themeConfig = getThemeConfig()
 
   return (
     <Layout className={styles.layout}>
@@ -230,7 +240,7 @@ const ConsoleLayout = () => {
         <div className={styles.siderHeader}>
           <div className={styles.logo} onClick={() => navigate('/dashboard')}>
             <img src="/logo.svg" alt="摩塔 Mota" className={styles.logoImage} />
-            {!collapsed && <span className={styles.logoText}>摩塔 Mota</span>}
+            {!collapsed && <span className={`${styles.logoText} ${themeConfig.logoClass}`}>摩塔 Mota</span>}
           </div>
         </div>
         <div className={styles.siderContent}>
@@ -238,7 +248,7 @@ const ConsoleLayout = () => {
             mode="inline"
             selectedKeys={getSelectedKeys()}
             items={menuItems}
-            className={`${styles.menu} ${getThemeClass()}`}
+            className={`${styles.menu} ${themeConfig.menuClass}`}
             onClick={({ key }) => {
               if (key.startsWith('/')) {
                 navigate(key)
