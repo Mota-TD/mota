@@ -66,7 +66,15 @@ const AINews = () => {
         category: categoryMap[activeTab] || undefined,
         search: searchText || undefined
       })
-      setNewsData(res.list || [])
+      // 处理后端返回的数据格式
+      const processedList = (res.list || []).map((item: NewsItem & { tags?: string | string[], isStarred?: number | boolean }) => ({
+        ...item,
+        // tags 可能是 JSON 字符串，需要解析
+        tags: typeof item.tags === 'string' ? JSON.parse(item.tags || '[]') : (item.tags || []),
+        // isStarred 可能是数字，需要转换为布尔值
+        isStarred: typeof item.isStarred === 'number' ? item.isStarred === 1 : Boolean(item.isStarred)
+      }))
+      setNewsData(processedList)
       setTotal(res.total || 0)
     } catch (error) {
       console.error('Failed to load news:', error)
@@ -95,7 +103,13 @@ const AINews = () => {
     setLoading(true)
     try {
       const res = await refreshNews()
-      setNewsData(res.list || [])
+      // 处理后端返回的数据格式
+      const processedList = (res.list || []).map((item: NewsItem & { tags?: string | string[], isStarred?: number | boolean }) => ({
+        ...item,
+        tags: typeof item.tags === 'string' ? JSON.parse(item.tags || '[]') : (item.tags || []),
+        isStarred: typeof item.isStarred === 'number' ? item.isStarred === 1 : Boolean(item.isStarred)
+      }))
+      setNewsData(processedList)
       setTotal(res.total || 0)
       message.success('新闻已更新')
     } catch (error) {

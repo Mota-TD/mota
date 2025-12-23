@@ -1,25 +1,29 @@
 .container {
-  padding: 24px;
-  background: #f5f7fa;
-  min-height: 100%;
+  padding: 0;
 }
 
+/* 橙色头部卡片 */
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 24px;
+  align-items: center;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #fa8c16 0%, #ffa940 100%);
+  border-radius: 16px;
+  color: #fff;
+  margin-bottom: 16px;
 }
 
-.headerLeft {
+.headerContent {
   display: flex;
   flex-direction: column;
-  gap: 4px;
 }
 
-.headerRight {
-  display: flex;
-  align-items: center;
+.headerTitle {
+  margin: 0 !important;
+  font-size: 22px;
+  font-weight: 600;
+  color: #fff !important;
 }
 
 .statCard {

@@ -223,16 +223,19 @@ const Requirements = () => {
 
   return (
     <div className={styles.container}>
+      {/* 蓝色头部卡片 */}
       <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <Title level={4} style={{ margin: 0 }}>需求管理</Title>
-          <Text type="secondary">管理和跟踪所有产品需求</Text>
+        <div className={styles.headerContent}>
+          <Title level={4} className={styles.headerTitle}>需求管理</Title>
         </div>
-        <div className={styles.headerRight}>
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateModalVisible(true)}>
-            新建需求
-          </Button>
-        </div>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => setCreateModalVisible(true)}
+          className={styles.createBtn}
+        >
+          新建需求
+        </Button>
       </div>
 
       <Card className={styles.tableCard}>

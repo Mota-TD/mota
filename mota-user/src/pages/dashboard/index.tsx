@@ -168,7 +168,15 @@ const Dashboard = () => {
       // 加载新闻
       try {
         const newsRes = await aiApi.getNews({ pageSize: 5 })
-        setNews(newsRes.list || [])
+        // 处理后端返回的数据格式
+        const processedNews = (newsRes.list || []).map((item: any) => ({
+          ...item,
+          // tags 可能是 JSON 字符串，需要解析
+          tags: typeof item.tags === 'string' ? JSON.parse(item.tags || '[]') : (item.tags || []),
+          // isStarred 可能是数字，需要转换为布尔值
+          isStarred: typeof item.isStarred === 'number' ? item.isStarred === 1 : Boolean(item.isStarred)
+        }))
+        setNews(processedNews)
       } catch (e) {
         console.error('Failed to load news:', e)
       }

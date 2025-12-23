@@ -313,9 +313,9 @@ const Home = () => {
               <div className={styles.featureCardIcon} style={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' }}>
                 <LineChartOutlined style={{ fontSize: 28, color: '#fff' }} />
               </div>
-              <h3 className={styles.featureCardTitle}>效能洞察</h3>
+              <h3 className={styles.featureCardTitle}>数据分析</h3>
               <p className={styles.featureCardDesc}>
-                全面的数据分析，团队效能报表，项目健康度监控，数据驱动决策
+                全面的数据分析，项目进度报表，任务完成率统计，数据驱动决策
               </p>
               <Link to="/register" className={styles.featureCardLink}>
                 了解更多 <RightOutlined />
@@ -597,7 +597,6 @@ const Home = () => {
                   <li><a href="#">团队协作</a></li>
                   <li><a href="#">AI智能</a></li>
                   <li><a href="#">知识管理</a></li>
-                  <li><a href="#">效能洞察</a></li>
                 </ul>
               </div>
               <div className={styles.footerColumn}>

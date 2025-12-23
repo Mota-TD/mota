@@ -408,10 +408,10 @@ const Testing = () => {
 
   return (
     <div className={styles.container}>
+      {/* 蓝色头部卡片 */}
       <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <Title level={4} style={{ margin: 0 }}>测试管理</Title>
-          <Text type="secondary">管理测试用例和测试计划</Text>
+        <div className={styles.headerContent}>
+          <Title level={4} className={styles.headerTitle}>测试管理</Title>
         </div>
       </div>
 

@@ -3,14 +3,14 @@
   padding: 0;
 }
 
-/* 蓝色头部卡片 */
+/* 绿色头部卡片 */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #2b7de9 0%, #667eea 100%);
-  border-radius: 16px;
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  border-radius: 16px 16px 0 0;
   color: #fff;
   margin-bottom: 0;
 }
@@ -40,29 +40,31 @@
 
 /* 标签页样式 */
 .tabs {
-  margin-top: -1px;
+  margin-top: 0;
 }
 
 .tabs :global(.ant-tabs-nav) {
   margin-bottom: 16px;
   padding: 0 24px;
   background: #fff;
-  border-radius: 0 0 12px 12px;
+  border-radius: 0 0 16px 16px;
+  border: 1px solid #e8e9eb;
+  border-top: none;
 }
 
 .tabs :global(.ant-tabs-tab) {
   padding: 12px 16px;
   font-size: 14px;
-  color: #2b7de9;
+  color: #52c41a;
 }
 
 .tabs :global(.ant-tabs-tab-active .ant-tabs-tab-btn) {
-  color: #2b7de9;
+  color: #52c41a;
   font-weight: 600;
 }
 
 .tabs :global(.ant-tabs-ink-bar) {
-  background: #2b7de9;
+  background: #52c41a;
 }
 
 /* 标签页内容区域 */
