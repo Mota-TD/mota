@@ -130,8 +130,6 @@
 }
 
 .menu :global(.ant-menu-item-selected) {
-  background: linear-gradient(135deg, rgba(43, 125, 233, 0.1) 0%, rgba(102, 126, 234, 0.1) 100%) !important;
-  color: #2b7de9 !important;
   font-weight: 500;
 }
 
@@ -146,6 +144,42 @@
 .menu :global(.ant-menu-item-divider) {
   margin: 8px 16px !important;
   background: #f0f0f0;
+}
+
+/* 主题颜色 - 蓝色 (项目管理/工作台/AI助理) */
+.themeBlue :global(.ant-menu-item-selected) {
+  background: linear-gradient(135deg, rgba(43, 125, 233, 0.1) 0%, rgba(102, 126, 234, 0.1) 100%) !important;
+  color: #2b7de9 !important;
+}
+
+/* 主题颜色 - 绿色 (任务管理) */
+.themeGreen :global(.ant-menu-item-selected) {
+  background: linear-gradient(135deg, rgba(82, 196, 26, 0.1) 0%, rgba(115, 209, 61, 0.1) 100%) !important;
+  color: #52c41a !important;
+}
+
+/* 主题颜色 - 紫色 (需求管理) */
+.themePurple :global(.ant-menu-item-selected) {
+  background: linear-gradient(135deg, rgba(114, 46, 209, 0.1) 0%, rgba(146, 84, 222, 0.1) 100%) !important;
+  color: #722ed1 !important;
+}
+
+/* 主题颜色 - 橙色 (测试管理) */
+.themeOrange :global(.ant-menu-item-selected) {
+  background: linear-gradient(135deg, rgba(250, 140, 22, 0.1) 0%, rgba(255, 169, 64, 0.1) 100%) !important;
+  color: #fa8c16 !important;
+}
+
+/* 主题颜色 - 青色 (迭代管理) */
+.themeCyan :global(.ant-menu-item-selected) {
+  background: linear-gradient(135deg, rgba(19, 194, 194, 0.1) 0%, rgba(54, 207, 201, 0.1) 100%) !important;
+  color: #13c2c2 !important;
+}
+
+/* 主题颜色 - 粉色 (知识库) */
+.themePink :global(.ant-menu-item-selected) {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(244, 114, 182, 0.1) 100%) !important;
+  color: #ec4899 !important;
 }
 
 .siderFooter {

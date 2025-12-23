@@ -199,6 +199,24 @@ const ConsoleLayout = () => {
     return [path]
   }
 
+  // 根据当前路由获取主题颜色类名
+  const getThemeClass = () => {
+    const path = location.pathname
+    if (path.startsWith('/issues')) {
+      return styles.themeGreen
+    } else if (path.startsWith('/requirements')) {
+      return styles.themePurple
+    } else if (path.startsWith('/testing')) {
+      return styles.themeOrange
+    } else if (path.startsWith('/iterations')) {
+      return styles.themeCyan
+    } else if (path.startsWith('/wiki')) {
+      return styles.themePink
+    }
+    // 默认蓝色 (项目管理/工作台/AI助理)
+    return styles.themeBlue
+  }
+
   return (
     <Layout className={styles.layout}>
       <Sider
@@ -220,7 +238,7 @@ const ConsoleLayout = () => {
             mode="inline"
             selectedKeys={getSelectedKeys()}
             items={menuItems}
-            className={styles.menu}
+            className={`${styles.menu} ${getThemeClass()}`}
             onClick={({ key }) => {
               if (key.startsWith('/')) {
                 navigate(key)
