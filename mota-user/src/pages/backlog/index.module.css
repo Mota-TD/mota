@@ -13,10 +13,10 @@
   justify-content: space-between;
   align-items: center;
   padding: 24px;
-  background: linear-gradient(135deg, #2b7de9 0%, #1890ff 100%);
+  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
   border-radius: 14px;
   color: #fff;
-  box-shadow: 0 4px 16px rgba(43, 125, 233, 0.2);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.25);
 }
 
 .header h2 {
@@ -71,7 +71,7 @@
 
 .filters :global(.ant-input-affix-wrapper:hover),
 .filters :global(.ant-select-selector:hover) {
-  border-color: #2b7de9 !important;
+  border-color: #6366f1 !important;
 }
 
 .stats {
@@ -88,7 +88,7 @@
 }
 
 .statItem strong {
-  color: #2b7de9;
+  color: #6366f1;
   font-weight: 600;
 }
 
@@ -98,10 +98,10 @@
   align-items: center;
   gap: 16px;
   padding: 14px 20px;
-  background: linear-gradient(135deg, rgba(43, 125, 233, 0.1) 0%, rgba(24, 144, 255, 0.1) 100%);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(129, 140, 248, 0.1) 100%);
   border-radius: 12px;
   font-size: 14px;
-  border: 1px solid rgba(43, 125, 233, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.2);
 }
 
 .batchActions :global(.ant-btn) {
@@ -186,11 +186,11 @@
 }
 
 .issueItem:hover {
-  background: #f8fbff;
+  background: rgba(99, 102, 241, 0.04);
 }
 
 .issueItem.selected {
-  background: linear-gradient(135deg, rgba(43, 125, 233, 0.08) 0%, rgba(24, 144, 255, 0.08) 100%);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(129, 140, 248, 0.08) 100%);
 }
 
 .issueTitle {
@@ -209,7 +209,7 @@
 }
 
 .dragHandle:hover {
-  color: #2b7de9;
+  color: #6366f1;
 }
 
 .issueKey {
@@ -229,7 +229,7 @@
 }
 
 .issueTitle a:hover {
-  color: #2b7de9;
+  color: #6366f1;
 }
 
 .issueType,
@@ -298,8 +298,8 @@
 }
 
 .sprintCard:hover {
-  border-color: #2b7de9;
-  box-shadow: 0 4px 12px rgba(43, 125, 233, 0.1);
+  border-color: #6366f1;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
 }
 
 .sprintHeader {

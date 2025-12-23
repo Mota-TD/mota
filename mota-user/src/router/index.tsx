@@ -12,14 +12,18 @@ const Home = lazy(() => import('@/pages/home'))
 // 认证页面
 const Login = lazy(() => import('@/pages/auth/Login'))
 const Register = lazy(() => import('@/pages/auth/Register'))
+const ForgotPassword = lazy(() => import('@/pages/auth/ForgotPassword'))
 
 // 控制台页面
 const Dashboard = lazy(() => import('@/pages/dashboard'))
 const Projects = lazy(() => import('@/pages/projects'))
+const CreateProject = lazy(() => import('@/pages/projects/create'))
 const Issues = lazy(() => import('@/pages/issues'))
+const CreateIssue = lazy(() => import('@/pages/issues/create'))
 const Requirements = lazy(() => import('@/pages/requirements'))
 const Testing = lazy(() => import('@/pages/testing'))
 const Iterations = lazy(() => import('@/pages/iterations'))
+const CreateIteration = lazy(() => import('@/pages/iterations/create'))
 const Wiki = lazy(() => import('@/pages/wiki'))
 const Members = lazy(() => import('@/pages/members'))
 const Settings = lazy(() => import('@/pages/settings'))
@@ -28,7 +32,10 @@ const Notifications = lazy(() => import('@/pages/notifications'))
 const ProjectDetail = lazy(() => import('@/pages/project-detail'))
 const IssueDetail = lazy(() => import('@/pages/issue-detail'))
 const IterationDetail = lazy(() => import('@/pages/iteration-detail'))
+const Backlog = lazy(() => import('@/pages/backlog'))
+const Kanban = lazy(() => import('@/pages/kanban'))
 const NotFound = lazy(() => import('@/pages/NotFound'))
+const Help = lazy(() => import('@/pages/help'))
 
 // AI模块页面
 const AISolution = lazy(() => import('@/pages/ai/solution'))
@@ -96,6 +103,15 @@ export const routes: RouteObject[] = [
         )
       }
     ]
+  },
+  // 忘记密码路由
+  {
+    path: '/forgot-password',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ForgotPassword />
+      </Suspense>
+    )
   },
   // 控制台路由
   {
@@ -185,6 +201,14 @@ export const routes: RouteObject[] = [
         )
       },
       {
+        path: 'create',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <CreateProject />
+          </Suspense>
+        )
+      },
+      {
         path: ':id',
         element: (
           <Suspense fallback={<Loading />}>
@@ -208,6 +232,14 @@ export const routes: RouteObject[] = [
         element: (
           <Suspense fallback={<Loading />}>
             <Issues />
+          </Suspense>
+        )
+      },
+      {
+        path: 'create',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <CreateIssue />
           </Suspense>
         )
       },
@@ -277,10 +309,56 @@ export const routes: RouteObject[] = [
         )
       },
       {
+        path: 'create',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <CreateIteration />
+          </Suspense>
+        )
+      },
+      {
         path: ':id',
         element: (
           <Suspense fallback={<Loading />}>
             <IterationDetail />
+          </Suspense>
+        )
+      },
+    ]
+  },
+  // 需求池路由
+  {
+    path: '/backlog',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <Backlog />
+          </Suspense>
+        )
+      },
+    ]
+  },
+  // 看板路由
+  {
+    path: '/kanban',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <Kanban />
           </Suspense>
         )
       },
@@ -394,7 +472,7 @@ export const routes: RouteObject[] = [
         index: true,
         element: (
           <Suspense fallback={<Loading />}>
-            <Dashboard />
+            <Help />
           </Suspense>
         )
       },

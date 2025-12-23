@@ -108,6 +108,47 @@ public class UserController {
     }
 
     /**
+     * 更新当前用户信息
+     */
+    @PutMapping("/me")
+    public ResponseEntity<Map<String, Object>> updateCurrentUser(@RequestBody User user) {
+        // 模拟当前用户ID（实际应从 SecurityContext 获取）
+        Long currentUserId = 1L;
+        
+        User existingUser = userMapper.selectById(currentUserId);
+        Map<String, Object> result = new HashMap<>();
+        
+        if (existingUser == null) {
+            result.put("code", 401);
+            result.put("message", "未登录");
+            return ResponseEntity.ok(result);
+        }
+        
+        // 更新允许修改的字段
+        if (user.getNickname() != null) {
+            existingUser.setNickname(user.getNickname());
+        }
+        if (user.getEmail() != null) {
+            existingUser.setEmail(user.getEmail());
+        }
+        if (user.getPhone() != null) {
+            existingUser.setPhone(user.getPhone());
+        }
+        if (user.getAvatar() != null) {
+            existingUser.setAvatar(user.getAvatar());
+        }
+        
+        userMapper.updateById(existingUser);
+        
+        existingUser.setPasswordHash(null);
+        result.put("code", 200);
+        result.put("message", "更新成功");
+        result.put("data", existingUser);
+        
+        return ResponseEntity.ok(result);
+    }
+
+    /**
      * 更新用户信息
      */
     @PutMapping("/{id}")

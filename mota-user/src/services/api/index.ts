@@ -11,6 +11,7 @@ export * from './sprint'
 export * from './wiki'
 export * from './notification'
 export * from './ai'
+export * from './dashboard'
 
 // 为了兼容性，也导出命名空间
 import * as projectApi from './project'
@@ -21,6 +22,7 @@ import * as sprintApi from './sprint'
 import * as wikiApi from './wiki'
 import * as notificationApi from './notification'
 import * as aiApi from './ai'
+import * as dashboardApi from './dashboard'
 
 export {
   projectApi,
@@ -30,5 +32,6 @@ export {
   sprintApi,
   wikiApi,
   notificationApi,
-  aiApi
+  aiApi,
+  dashboardApi
 }

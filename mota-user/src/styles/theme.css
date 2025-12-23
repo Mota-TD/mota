@@ -1,0 +1,413 @@
+/* 主题变量定义 */
+
+/* 亮色主题（默认） */
+:root {
+  /* 主色调 */
+  --color-primary: #2b7de9;
+  --color-primary-hover: #1a6dd8;
+  --color-primary-active: #0f5fc7;
+  --color-primary-light: rgba(43, 125, 233, 0.1);
+  
+  /* 背景色 */
+  --color-bg-base: #ffffff;
+  --color-bg-container: #ffffff;
+  --color-bg-elevated: #ffffff;
+  --color-bg-layout: #f5f7fa;
+  --color-bg-spotlight: #f0f2f5;
+  --color-bg-mask: rgba(0, 0, 0, 0.45);
+  
+  /* 文字颜色 */
+  --color-text-primary: #1a1f36;
+  --color-text-secondary: #4a5568;
+  --color-text-tertiary: #718096;
+  --color-text-quaternary: #9ca3af;
+  --color-text-placeholder: #bfbfbf;
+  --color-text-disabled: #c0c0c0;
+  --color-text-inverse: #ffffff;
+  
+  /* 边框颜色 */
+  --color-border: #e8e9eb;
+  --color-border-secondary: #f0f0f0;
+  --color-border-hover: #d1d5db;
+  
+  /* 分割线 */
+  --color-split: rgba(0, 0, 0, 0.06);
+  
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.12);
+  
+  /* 状态颜色 */
+  --color-success: #52c41a;
+  --color-success-bg: #f6ffed;
+  --color-success-border: #b7eb8f;
+  
+  --color-warning: #faad14;
+  --color-warning-bg: #fffbe6;
+  --color-warning-border: #ffe58f;
+  
+  --color-error: #f5222d;
+  --color-error-bg: #fff2f0;
+  --color-error-border: #ffccc7;
+  
+  --color-info: #1677ff;
+  --color-info-bg: #e6f4ff;
+  --color-info-border: #91caff;
+  
+  /* 侧边栏 */
+  --sider-bg: #ffffff;
+  --sider-border: #e8e9eb;
+  
+  /* 头部 */
+  --header-bg: #ffffff;
+  --header-border: #e8e9eb;
+  
+  /* 卡片 */
+  --card-bg: #ffffff;
+  --card-border: #e8e9eb;
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  
+  /* 表格 */
+  --table-header-bg: #fafafa;
+  --table-row-hover-bg: #f5f7fa;
+  --table-border: #f0f0f0;
+  
+  /* 输入框 */
+  --input-bg: #ffffff;
+  --input-border: #d9d9d9;
+  --input-hover-border: #4096ff;
+  --input-focus-border: #1677ff;
+  
+  /* 按钮 */
+  --btn-default-bg: #ffffff;
+  --btn-default-border: #d9d9d9;
+  --btn-default-hover-bg: #ffffff;
+  --btn-default-hover-border: #4096ff;
+}
+
+/* 暗色主题 */
+:root.dark,
+[data-theme='dark'] {
+  /* 主色调 */
+  --color-primary: #3b8ff6;
+  --color-primary-hover: #5aa0f7;
+  --color-primary-active: #2b7de9;
+  --color-primary-light: rgba(59, 143, 246, 0.15);
+  
+  /* 背景色 */
+  --color-bg-base: #0d1117;
+  --color-bg-container: #161b22;
+  --color-bg-elevated: #1c2128;
+  --color-bg-layout: #0d1117;
+  --color-bg-spotlight: #21262d;
+  --color-bg-mask: rgba(0, 0, 0, 0.65);
+  
+  /* 文字颜色 */
+  --color-text-primary: #e6edf3;
+  --color-text-secondary: #b1bac4;
+  --color-text-tertiary: #8b949e;
+  --color-text-quaternary: #6e7681;
+  --color-text-placeholder: #484f58;
+  --color-text-disabled: #484f58;
+  --color-text-inverse: #0d1117;
+  
+  /* 边框颜色 */
+  --color-border: #30363d;
+  --color-border-secondary: #21262d;
+  --color-border-hover: #484f58;
+  
+  /* 分割线 */
+  --color-split: rgba(255, 255, 255, 0.08);
+  
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.6);
+  
+  /* 状态颜色 */
+  --color-success: #3fb950;
+  --color-success-bg: rgba(63, 185, 80, 0.15);
+  --color-success-border: rgba(63, 185, 80, 0.4);
+  
+  --color-warning: #d29922;
+  --color-warning-bg: rgba(210, 153, 34, 0.15);
+  --color-warning-border: rgba(210, 153, 34, 0.4);
+  
+  --color-error: #f85149;
+  --color-error-bg: rgba(248, 81, 73, 0.15);
+  --color-error-border: rgba(248, 81, 73, 0.4);
+  
+  --color-info: #58a6ff;
+  --color-info-bg: rgba(88, 166, 255, 0.15);
+  --color-info-border: rgba(88, 166, 255, 0.4);
+  
+  /* 侧边栏 */
+  --sider-bg: #161b22;
+  --sider-border: #30363d;
+  
+  /* 头部 */
+  --header-bg: #161b22;
+  --header-border: #30363d;
+  
+  /* 卡片 */
+  --card-bg: #161b22;
+  --card-border: #30363d;
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  
+  /* 表格 */
+  --table-header-bg: #21262d;
+  --table-row-hover-bg: #1c2128;
+  --table-border: #30363d;
+  
+  /* 输入框 */
+  --input-bg: #0d1117;
+  --input-border: #30363d;
+  --input-hover-border: #58a6ff;
+  --input-focus-border: #58a6ff;
+  
+  /* 按钮 */
+  --btn-default-bg: #21262d;
+  --btn-default-border: #30363d;
+  --btn-default-hover-bg: #30363d;
+  --btn-default-hover-border: #8b949e;
+}
+
+/* 暗色主题下的 Ant Design 组件覆盖 */
+:root.dark,
+[data-theme='dark'] {
+  /* 覆盖 Ant Design 的 CSS 变量 */
+  --ant-color-primary: var(--color-primary);
+  --ant-color-bg-container: var(--color-bg-container);
+  --ant-color-bg-elevated: var(--color-bg-elevated);
+  --ant-color-bg-layout: var(--color-bg-layout);
+  --ant-color-text: var(--color-text-primary);
+  --ant-color-text-secondary: var(--color-text-secondary);
+  --ant-color-border: var(--color-border);
+  --ant-color-border-secondary: var(--color-border-secondary);
+}
+
+/* 暗色主题下的全局样式 */
+[data-theme='dark'] body {
+  background-color: var(--color-bg-layout);
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .ant-layout {
+  background: var(--color-bg-layout);
+}
+
+[data-theme='dark'] .ant-layout-sider {
+  background: var(--sider-bg) !important;
+  border-color: var(--sider-border);
+}
+
+[data-theme='dark'] .ant-layout-header {
+  background: var(--header-bg);
+  border-color: var(--header-border);
+}
+
+[data-theme='dark'] .ant-card {
+  background: var(--card-bg);
+  border-color: var(--card-border);
+}
+
+[data-theme='dark'] .ant-table {
+  background: var(--color-bg-container);
+}
+
+[data-theme='dark'] .ant-table-thead > tr > th {
+  background: var(--table-header-bg) !important;
+  border-color: var(--table-border);
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .ant-table-tbody > tr > td {
+  border-color: var(--table-border);
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .ant-table-tbody > tr:hover > td {
+  background: var(--table-row-hover-bg) !important;
+}
+
+[data-theme='dark'] .ant-input,
+[data-theme='dark'] .ant-input-affix-wrapper {
+  background: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .ant-select-selector {
+  background: var(--input-bg) !important;
+  border-color: var(--input-border) !important;
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme='dark'] .ant-btn-default {
+  background: var(--btn-default-bg);
+  border-color: var(--btn-default-border);
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .ant-modal-content {
+  background: var(--color-bg-container);
+}
+
+[data-theme='dark'] .ant-modal-header {
+  background: var(--color-bg-container);
+  border-color: var(--color-border);
+}
+
+[data-theme='dark'] .ant-modal-title {
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .ant-dropdown-menu {
+  background: var(--color-bg-elevated);
+}
+
+[data-theme='dark'] .ant-dropdown-menu-item {
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .ant-dropdown-menu-item:hover {
+  background: var(--color-bg-spotlight);
+}
+
+[data-theme='dark'] .ant-menu {
+  background: transparent !important;
+  color: var(--color-text-secondary);
+}
+
+[data-theme='dark'] .ant-menu-item {
+  color: var(--color-text-secondary) !important;
+}
+
+[data-theme='dark'] .ant-menu-item:hover {
+  background: var(--color-bg-spotlight) !important;
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme='dark'] .ant-menu-item-selected {
+  color: var(--color-primary) !important;
+}
+
+[data-theme='dark'] .ant-menu-item-group-title {
+  color: var(--color-text-quaternary) !important;
+}
+
+[data-theme='dark'] .ant-divider {
+  border-color: var(--color-border);
+}
+
+[data-theme='dark'] .ant-tag {
+  background: var(--color-bg-spotlight);
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .ant-badge-count {
+  background: var(--color-error);
+}
+
+[data-theme='dark'] .ant-steps-item-title {
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme='dark'] .ant-steps-item-description {
+  color: var(--color-text-tertiary) !important;
+}
+
+[data-theme='dark'] .ant-form-item-label > label {
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .ant-statistic-title {
+  color: var(--color-text-secondary);
+}
+
+[data-theme='dark'] .ant-statistic-content {
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .ant-empty-description {
+  color: var(--color-text-tertiary);
+}
+
+[data-theme='dark'] .ant-pagination-item {
+  background: var(--color-bg-container);
+  border-color: var(--color-border);
+}
+
+[data-theme='dark'] .ant-pagination-item a {
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .ant-pagination-item-active {
+  border-color: var(--color-primary);
+}
+
+[data-theme='dark'] .ant-pagination-item-active a {
+  color: var(--color-primary);
+}
+
+[data-theme='dark'] .ant-tabs-tab {
+  color: var(--color-text-secondary);
+}
+
+[data-theme='dark'] .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: var(--color-primary) !important;
+}
+
+[data-theme='dark'] .ant-tabs-ink-bar {
+  background: var(--color-primary);
+}
+
+[data-theme='dark'] .ant-alert {
+  background: var(--color-bg-spotlight);
+  border-color: var(--color-border);
+}
+
+[data-theme='dark'] .ant-alert-message {
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .ant-tooltip-inner {
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .ant-popover-inner {
+  background: var(--color-bg-elevated);
+}
+
+[data-theme='dark'] .ant-popover-title {
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+}
+
+[data-theme='dark'] .ant-popover-inner-content {
+  color: var(--color-text-primary);
+}
+
+/* 滚动条样式 */
+[data-theme='dark'] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-track {
+  background: var(--color-bg-container);
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-hover);
+}

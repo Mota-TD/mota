@@ -1,0 +1,125 @@
+/* 创建项目页面样式 */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 32px;
+}
+
+.backBtn {
+  color: #666;
+  padding: 0;
+  margin-bottom: 16px;
+}
+
+.backBtn:hover {
+  color: #2b7de9;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1f36;
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.formCard {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1f36;
+  margin-bottom: 16px;
+}
+
+.colorPicker {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.colorItem {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+}
+
+.colorItem:hover {
+  transform: scale(1.1);
+}
+
+.colorItemActive {
+  border-color: #1a1f36;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+.previewCard {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: 16px;
+}
+
+.previewContent {
+  text-align: center;
+  padding: 24px 0;
+}
+
+.previewName {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1f36;
+  margin: 16px 0 4px;
+}
+
+.previewKey {
+  font-size: 12px;
+  color: #999;
+  margin: 0 0 12px;
+  font-family: monospace;
+}
+
+.previewDesc {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  padding: 0 16px;
+}
+
+.tipsCard {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.tipsList {
+  margin: 0;
+  padding-left: 20px;
+  color: #666;
+  font-size: 14px;
+  line-height: 2;
+}
+
+.tipsList li {
+  margin-bottom: 4px;
+}
+
+/* 响应式设计 */
+@media (max-width: 992px) {
+  .previewCard,
+  .tipsCard {
+    margin-top: 24px;
+  }
+}

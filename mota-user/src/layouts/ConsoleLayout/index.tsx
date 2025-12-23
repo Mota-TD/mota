@@ -116,6 +116,16 @@ const ConsoleLayout = () => {
           icon: <CalendarOutlined />,
           label: '迭代管理',
         },
+        {
+          key: '/backlog',
+          icon: <BugOutlined />,
+          label: '需求池',
+        },
+        {
+          key: '/kanban',
+          icon: <ProjectOutlined />,
+          label: '看板',
+        },
       ],
     },
     {
@@ -229,14 +239,18 @@ const ConsoleLayout = () => {
       return { menuClass: styles.themeOrange, logoClass: styles.logoOrange, logoColor: '#fa8c16' }
     } else if (path.startsWith('/iterations')) {
       return { menuClass: styles.themeCyan, logoClass: styles.logoCyan, logoColor: '#13c2c2' }
+    } else if (path.startsWith('/backlog')) {
+      return { menuClass: styles.themeIndigo, logoClass: styles.logoIndigo, logoColor: '#6366f1' }
+    } else if (path.startsWith('/kanban')) {
+      return { menuClass: styles.themeMagenta, logoClass: styles.logoMagenta, logoColor: '#eb2f96' }
     }
     // 知识库
     else if (path.startsWith('/wiki')) {
-      return { menuClass: styles.themePink, logoClass: styles.logoPink, logoColor: '#ec4899' }
+      return { menuClass: styles.themeRose, logoClass: styles.logoRose, logoColor: '#f43f5e' }
     }
     // 帮助中心
     else if (path.startsWith('/help')) {
-      return { menuClass: styles.themeGray, logoClass: styles.logoGray, logoColor: '#6b7280' }
+      return { menuClass: styles.themeSky, logoClass: styles.logoSky, logoColor: '#0ea5e9' }
     }
     // 默认蓝色
     return { menuClass: styles.themeBlue, logoClass: '', logoColor: '#2b7de9' }
@@ -249,6 +263,8 @@ const ConsoleLayout = () => {
     '--theme-color': themeConfig.logoColor,
     '--theme-color-light': `${themeConfig.logoColor}15`,
     '--theme-color-hover': `${themeConfig.logoColor}dd`,
+    '--theme-color-shadow': `${themeConfig.logoColor}25`,
+    '--theme-color-glow': `${themeConfig.logoColor}40`,
   } as React.CSSProperties
 
   return (

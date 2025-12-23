@@ -1,0 +1,25 @@
+/* 主题切换组件样式 */
+.switchBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-secondary, #718096);
+  transition: all 0.2s;
+}
+
+.switchBtn:hover {
+  color: var(--color-text-primary, #1a1f36);
+  background: var(--color-bg-spotlight, #f5f7fa);
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 120px;
+}
+
+.checkIcon {
+  color: var(--color-primary, #2b7de9);
+  font-size: 12px;
+}

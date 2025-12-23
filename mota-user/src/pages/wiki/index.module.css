@@ -5,16 +5,17 @@
   background: var(--bg-secondary, #f5f7fa);
 }
 
-/* 粉色头部卡片 - 知识库主题色 */
+/* 玫瑰红头部卡片 - 知识库主题色 */
 .pageHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);
+  background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);
   border-radius: 16px;
   color: #fff;
   margin-bottom: 16px;
+  box-shadow: 0 4px 16px rgba(244, 63, 94, 0.25);
 }
 
 .pageHeader h4 {
@@ -71,13 +72,13 @@
 }
 
 .sidebarHeader :global(.ant-btn) {
-  background: #ec4899;
+  background: #f43f5e;
   border: none;
   color: #fff;
 }
 
 .sidebarHeader :global(.ant-btn:hover) {
-  background: #db2777 !important;
+  background: #e11d48 !important;
   color: #fff !important;
 }
 
@@ -187,7 +188,7 @@
 }
 
 .docHeader :global(.ant-breadcrumb a) {
-  color: #ec4899;
+  color: #f43f5e;
 }
 
 .docHeader :global(.ant-btn) {
@@ -199,8 +200,8 @@
 }
 
 .docHeader :global(.ant-btn-default:hover) {
-  border-color: #ec4899;
-  color: #ec4899;
+  border-color: #f43f5e;
+  color: #f43f5e;
 }
 
 .pageMeta {

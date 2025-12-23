@@ -1,0 +1,134 @@
+/* 忘记密码页面样式 */
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 24px;
+}
+
+.card {
+  width: 100%;
+  max-width: 520px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  padding: 40px;
+}
+
+.header {
+  margin-bottom: 32px;
+}
+
+.backBtn {
+  color: #666;
+  padding: 0;
+  margin-bottom: 16px;
+}
+
+.backBtn:hover {
+  color: #2b7de9;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1f36;
+  margin: 0;
+}
+
+.steps {
+  margin-bottom: 40px;
+}
+
+.steps :global(.ant-steps-item-title) {
+  font-size: 13px;
+}
+
+.stepContent {
+  text-align: center;
+}
+
+.stepIcon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  color: #fff;
+}
+
+.stepTitle {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a1f36;
+  margin: 0 0 8px;
+}
+
+.stepDesc {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 32px;
+}
+
+.form {
+  max-width: 360px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.form :global(.ant-input-affix-wrapper) {
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+
+.form :global(.ant-input-affix-wrapper) input {
+  font-size: 15px;
+}
+
+.form :global(.ant-btn) {
+  height: 48px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.resendWrapper {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.countdown {
+  color: #999;
+  font-size: 14px;
+}
+
+/* 响应式设计 */
+@media (max-width: 576px) {
+  .card {
+    padding: 24px;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+
+  .stepIcon {
+    width: 64px;
+    height: 64px;
+    font-size: 28px;
+  }
+
+  .stepTitle {
+    font-size: 18px;
+  }
+
+  .steps :global(.ant-steps-item-title) {
+    font-size: 12px;
+  }
+}
