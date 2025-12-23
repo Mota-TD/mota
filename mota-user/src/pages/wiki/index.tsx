@@ -236,7 +236,7 @@ const WikiPage = () => {
 
     return (
       <div className={styles.pageContent}>
-        <div className={styles.pageHeader}>
+        <div className={styles.docHeader}>
           <Breadcrumb items={[
             { title: <><HomeOutlined /> 知识管理</> },
             { title: selectedPage.title }
@@ -289,43 +289,50 @@ const WikiPage = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.sidebar}>
-        <div className={styles.sidebarHeader}>
-          <Title level={4} style={{ margin: 0 }}>知识管理</Title>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            size="small"
-            onClick={handleCreatePage}
-          >
-            新建文档
-          </Button>
-        </div>
-        
-        <Input
-          placeholder="搜索页面..."
-          prefix={<SearchOutlined />}
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          className={styles.searchInput}
-          allowClear
-        />
-        
-        <div className={styles.treeContainer}>
-          <Tree
-            showIcon
-            defaultExpandAll
-            selectedKeys={selectedPage ? [String(selectedPage.id)] : []}
-            onSelect={handleSelect}
-            treeData={filteredTreeData()}
-          />
-        </div>
+      {/* 粉色头部卡片 */}
+      <div className={styles.pageHeader}>
+        <Title level={4} style={{ margin: 0 }}>知识管理</Title>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={handleCreatePage}
+        >
+          新建文档
+        </Button>
       </div>
-      
-      <div className={styles.content}>
-        <Card className={styles.contentCard}>
-          {renderContent()}
-        </Card>
+
+      {/* 主内容区域 */}
+      <div className={styles.mainContent}>
+        <div className={styles.sidebar}>
+          <div className={styles.sidebarHeader}>
+            <Title level={4} style={{ margin: 0 }}>文档目录</Title>
+          </div>
+          
+          <Input
+            placeholder="搜索页面..."
+            prefix={<SearchOutlined />}
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            className={styles.searchInput}
+            allowClear
+          />
+          
+          <div className={styles.treeContainer}>
+            <Tree
+              showIcon
+              defaultExpandAll
+              selectedKeys={selectedPage ? [String(selectedPage.id)] : []}
+              onSelect={handleSelect}
+              treeData={filteredTreeData()}
+            />
+          </div>
+        </div>
+        
+        <div className={styles.content}>
+          <Card className={styles.contentCard}>
+            {renderContent()}
+          </Card>
+        </div>
       </div>
 
       <Modal
