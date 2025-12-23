@@ -67,8 +67,12 @@
 .logoText {
   font-size: 18px;
   font-weight: 700;
-  color: #1a1f36;
   letter-spacing: -0.5px;
+  /* 使用项目协同5个模块的颜色渐变: 蓝(项目)→绿(任务)→紫(需求)→橙(测试)→青(迭代) */
+  background: linear-gradient(90deg, #2b7de9 0%, #52c41a 25%, #722ed1 50%, #fa8c16 75%, #13c2c2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .siderContent {
