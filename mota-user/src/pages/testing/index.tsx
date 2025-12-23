@@ -149,7 +149,7 @@ const Testing = () => {
       dataIndex: 'key',
       key: 'key',
       width: 100,
-      render: (text: string) => <Text strong style={{ color: '#1677ff' }}>{text}</Text>,
+      render: (text: string) => <Text strong style={{ color: '#fa8c16' }}>{text}</Text>,
     },
     {
       title: '用例标题',

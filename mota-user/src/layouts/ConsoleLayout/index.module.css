@@ -1,6 +1,204 @@
 /* 控制台布局样式 - 摩塔 Mota */
 .layout {
   min-height: 100vh;
+  --theme-color: #2b7de9;
+  --theme-color-light: rgba(43, 125, 233, 0.1);
+  --theme-color-hover: rgba(43, 125, 233, 0.85);
+}
+
+/* 全局主题色应用 - 主按钮 */
+.layout :global(.ant-btn-primary) {
+  background: var(--theme-color) !important;
+  border-color: var(--theme-color) !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.layout :global(.ant-btn-primary:hover) {
+  background: var(--theme-color-hover) !important;
+  border-color: var(--theme-color-hover) !important;
+}
+
+/* 全局主题色应用 - 链接 */
+.layout :global(a) {
+  transition: color 0.3s;
+}
+
+/* 全局主题色应用 - 输入框聚焦 */
+.layout :global(.ant-input:focus),
+.layout :global(.ant-input-focused),
+.layout :global(.ant-input-affix-wrapper:focus),
+.layout :global(.ant-input-affix-wrapper-focused) {
+  border-color: var(--theme-color) !important;
+  box-shadow: 0 0 0 2px var(--theme-color-light) !important;
+}
+
+/* 全局主题色应用 - 选择框聚焦 */
+.layout :global(.ant-select-focused .ant-select-selector) {
+  border-color: var(--theme-color) !important;
+  box-shadow: 0 0 0 2px var(--theme-color-light) !important;
+}
+
+/* 全局主题色应用 - 开关 */
+.layout :global(.ant-switch-checked) {
+  background: var(--theme-color) !important;
+}
+
+/* 全局主题色应用 - 复选框 */
+.layout :global(.ant-checkbox-checked .ant-checkbox-inner) {
+  background-color: var(--theme-color) !important;
+  border-color: var(--theme-color) !important;
+}
+
+/* 全局主题色应用 - 单选框 */
+.layout :global(.ant-radio-checked .ant-radio-inner) {
+  border-color: var(--theme-color) !important;
+}
+
+.layout :global(.ant-radio-checked .ant-radio-inner::after) {
+  background-color: var(--theme-color) !important;
+}
+
+/* 全局主题色应用 - 分页 */
+.layout :global(.ant-pagination-item-active) {
+  border-color: var(--theme-color) !important;
+}
+
+.layout :global(.ant-pagination-item-active a) {
+  color: var(--theme-color) !important;
+}
+
+/* 全局主题色应用 - 标签页 */
+.layout :global(.ant-tabs-tab-active .ant-tabs-tab-btn) {
+  color: var(--theme-color) !important;
+}
+
+.layout :global(.ant-tabs-ink-bar) {
+  background: var(--theme-color) !important;
+}
+
+/* 全局主题色应用 - 进度条 */
+.layout :global(.ant-progress-bg) {
+  background-color: var(--theme-color) !important;
+}
+
+/* 全局主题色应用 - 徽章 */
+.layout :global(.ant-badge-count) {
+  background: var(--theme-color) !important;
+}
+
+/* 全局主题色应用 - 表格链接 */
+.layout :global(.ant-table a) {
+  color: var(--theme-color) !important;
+  transition: color 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.layout :global(.ant-table a:hover) {
+  color: var(--theme-color-hover) !important;
+}
+
+/* 全局主题色应用 - 头像背景 */
+.layout :global(.ant-avatar) {
+  background-color: var(--theme-color) !important;
+  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 全局主题色应用 - 列表链接 */
+.layout :global(.ant-list a) {
+  color: var(--theme-color) !important;
+  transition: color 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 全局主题色应用 - 卡片链接 */
+.layout :global(.ant-card a) {
+  color: var(--theme-color) !important;
+  transition: color 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 全局主题色应用 - 描述列表链接 */
+.layout :global(.ant-descriptions a) {
+  color: var(--theme-color) !important;
+  transition: color 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 全局主题色应用 - 标签 */
+.layout :global(.ant-tag-blue) {
+  color: var(--theme-color) !important;
+  border-color: var(--theme-color) !important;
+  background: var(--theme-color-light) !important;
+}
+
+/* 全局主题色应用 - 步骤条 */
+.layout :global(.ant-steps-item-process .ant-steps-item-icon) {
+  background-color: var(--theme-color) !important;
+  border-color: var(--theme-color) !important;
+}
+
+.layout :global(.ant-steps-item-finish .ant-steps-item-icon) {
+  border-color: var(--theme-color) !important;
+}
+
+.layout :global(.ant-steps-item-finish .ant-steps-item-icon > .ant-steps-icon) {
+  color: var(--theme-color) !important;
+}
+
+/* 全局主题色应用 - 时间线 */
+.layout :global(.ant-timeline-item-head-blue) {
+  color: var(--theme-color) !important;
+  border-color: var(--theme-color) !important;
+}
+
+/* 全局主题色应用 - 树形控件 */
+.layout :global(.ant-tree-node-selected) {
+  background-color: var(--theme-color-light) !important;
+}
+
+/* 全局主题色应用 - 下拉菜单选中项 */
+.layout :global(.ant-dropdown-menu-item-selected) {
+  background-color: var(--theme-color-light) !important;
+  color: var(--theme-color) !important;
+}
+
+/* 全局主题色应用 - 菜单选中项 */
+.layout :global(.ant-menu-item-selected) {
+  color: var(--theme-color) !important;
+}
+
+/* 全局主题色应用 - 面包屑链接 */
+.layout :global(.ant-breadcrumb a) {
+  color: var(--theme-color) !important;
+}
+
+/* 全局主题色应用 - 警告框链接 */
+.layout :global(.ant-alert a) {
+  color: var(--theme-color) !important;
+}
+
+/* 全局主题色应用 - 消息提示 */
+.layout :global(.ant-message-info .anticon) {
+  color: var(--theme-color) !important;
+}
+
+/* 全局主题色应用 - 加载中 */
+.layout :global(.ant-spin-dot-item) {
+  background-color: var(--theme-color) !important;
+}
+
+/* 全局主题色应用 - 滑块 */
+.layout :global(.ant-slider-track) {
+  background-color: var(--theme-color) !important;
+}
+
+.layout :global(.ant-slider-handle) {
+  border-color: var(--theme-color) !important;
+}
+
+/* 全局主题色应用 - 日期选择器 */
+.layout :global(.ant-picker-cell-selected .ant-picker-cell-inner) {
+  background: var(--theme-color) !important;
+}
+
+.layout :global(.ant-picker-today-btn) {
+  color: var(--theme-color) !important;
 }
 
 /* 侧边栏 */
@@ -184,10 +382,10 @@
   color: #ec4899 !important;
 }
 
-/* 主题颜色 - AI方案生成 (科技蓝) */
-.themeAiBlue :global(.ant-menu-item-selected) {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(96, 165, 250, 0.1) 100%) !important;
-  color: #3b82f6 !important;
+/* 主题颜色 - AI方案生成 (靛蓝紫) */
+.themeAiIndigo :global(.ant-menu-item-selected) {
+  background: linear-gradient(135deg, rgba(97, 106, 229, 0.1) 0%, rgba(129, 140, 248, 0.1) 100%) !important;
+  color: #616AE5 !important;
 }
 
 /* 主题颜色 - AI PPT生成 (活力橙) */
@@ -208,7 +406,13 @@
   color: #10b981 !important;
 }
 
-/* 主题颜色 - 灰色 (帮助中心/历史记录) */
+/* 主题颜色 - AI历史记录 (浅黄色) */
+.themeAiYellow :global(.ant-menu-item-selected) {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(251, 191, 36, 0.1) 100%) !important;
+  color: #f59e0b !important;
+}
+
+/* 主题颜色 - 灰色 (帮助中心) */
 .themeGray :global(.ant-menu-item-selected) {
   background: linear-gradient(135deg, rgba(107, 114, 128, 0.1) 0%, rgba(156, 163, 175, 0.1) 100%) !important;
   color: #6b7280 !important;
@@ -244,8 +448,8 @@
 }
 
 /* AI子页面Logo颜色 */
-.logoAiBlue {
-  color: #3b82f6 !important;
+.logoAiIndigo {
+  color: #616AE5 !important;
 }
 
 .logoAiOrange {
@@ -258,6 +462,10 @@
 
 .logoAiGreen {
   color: #10b981 !important;
+}
+
+.logoAiYellow {
+  color: #f59e0b !important;
 }
 
 .siderFooter {

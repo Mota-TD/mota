@@ -208,7 +208,7 @@ const ConsoleLayout = () => {
     }
     // AI助理 - 每个子页面不同颜色
     else if (path.startsWith('/ai/solution')) {
-      return { menuClass: styles.themeAiBlue, logoClass: styles.logoAiBlue, logoColor: '#3b82f6' }
+      return { menuClass: styles.themeAiIndigo, logoClass: styles.logoAiIndigo, logoColor: '#616AE5' }
     } else if (path.startsWith('/ai/ppt')) {
       return { menuClass: styles.themeAiOrange, logoClass: styles.logoAiOrange, logoColor: '#f97316' }
     } else if (path.startsWith('/ai/training')) {
@@ -216,7 +216,7 @@ const ConsoleLayout = () => {
     } else if (path.startsWith('/ai/news')) {
       return { menuClass: styles.themeAiGreen, logoClass: styles.logoAiGreen, logoColor: '#10b981' }
     } else if (path.startsWith('/ai/history')) {
-      return { menuClass: styles.themeGray, logoClass: styles.logoGray, logoColor: '#6b7280' }
+      return { menuClass: styles.themeAiYellow, logoClass: styles.logoAiYellow, logoColor: '#f59e0b' }
     }
     // 项目协同
     else if (path.startsWith('/projects')) {
@@ -244,8 +244,15 @@ const ConsoleLayout = () => {
 
   const themeConfig = getThemeConfig()
 
+  // 设置全局主题色CSS变量
+  const themeStyle = {
+    '--theme-color': themeConfig.logoColor,
+    '--theme-color-light': `${themeConfig.logoColor}15`,
+    '--theme-color-hover': `${themeConfig.logoColor}dd`,
+  } as React.CSSProperties
+
   return (
-    <Layout className={styles.layout}>
+    <Layout className={styles.layout} style={themeStyle}>
       <Sider
         trigger={null}
         collapsible
