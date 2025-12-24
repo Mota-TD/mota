@@ -9,6 +9,9 @@ server:
 spring:
   application:
     name: mota-user-service
+  web:
+    resources:
+      add-mappings: false
   profiles:
     active: dev
   config:

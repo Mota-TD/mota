@@ -4,13 +4,13 @@
 import { get, put, del } from '../request'
 
 export interface Notification {
-  id: number
+  id: string
   type: string
   title: string
   content: string
-  userId: number
+  userId: string
   isRead: boolean
-  relatedId?: number
+  relatedId?: string
   relatedType?: string
   createdAt: string
 }
@@ -36,14 +36,14 @@ export function getNotifications(params?: {
 /**
  * 获取通知详情
  */
-export function getNotification(id: number): Promise<Notification> {
+export function getNotification(id: string | number): Promise<Notification> {
   return get(`/api/v1/notifications/${id}`)
 }
 
 /**
  * 标记通知为已读
  */
-export function markAsRead(id: number): Promise<void> {
+export function markAsRead(id: string | number): Promise<void> {
   return put(`/api/v1/notifications/${id}/read`)
 }
 
@@ -57,7 +57,7 @@ export function markAllAsRead(): Promise<void> {
 /**
  * 删除通知
  */
-export function deleteNotification(id: number): Promise<void> {
+export function deleteNotification(id: string | number): Promise<void> {
   return del(`/api/v1/notifications/${id}`)
 }
 

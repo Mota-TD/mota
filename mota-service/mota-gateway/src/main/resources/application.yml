@@ -74,15 +74,6 @@ spring:
             - StripPrefix=0
             - AuthFilter
 
-        # Wiki服务（项目服务）
-        - id: mota-wiki-service
-          uri: lb://mota-project-service
-          predicates:
-            - Path=/api/v1/wiki/**
-          filters:
-            - StripPrefix=0
-            - AuthFilter
-
         # AI服务（项目服务）
         - id: mota-ai-service
           uri: lb://mota-project-service
@@ -110,11 +101,20 @@ spring:
             - StripPrefix=0
             - AuthFilter
 
-        # 任务服务
-        - id: mota-issue-service
-          uri: lb://mota-issue-service
+        # 执行任务服务
+        - id: mota-task-service
+          uri: lb://mota-project-service
           predicates:
-            - Path=/api/v1/issues/**,/api/v1/sprints/**
+            - Path=/api/v1/tasks/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # 部门任务服务
+        - id: mota-department-task-service
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/department-tasks/**
           filters:
             - StripPrefix=0
             - AuthFilter
@@ -123,16 +123,19 @@ spring:
       globalcors:
         cors-configurations:
           '[/**]':
-            allowed-origins:
-              - "http://localhost:3000"
-              - "http://localhost:3001"
-              - "http://localhost:5173"
+            allowed-origin-patterns:
+              - "http://localhost:*"
+              - "http://127.0.0.1:*"
+              - "http://192.168.*.*:*"
+              - "http://172.*.*.*:*"
+              - "http://10.*.*.*:*"
             allowed-methods:
               - GET
               - POST
               - PUT
               - DELETE
               - OPTIONS
+              - PATCH
             allowed-headers: "*"
             allow-credentials: true
             max-age: 3600

@@ -1,12 +1,12 @@
 import { Dropdown, Button, Tooltip } from 'antd'
 import type { MenuProps } from 'antd'
-import { 
-  SunOutlined, 
-  MoonOutlined, 
+import {
+  SunOutlined,
+  MoonOutlined,
   DesktopOutlined,
   CheckOutlined
 } from '@ant-design/icons'
-import { useThemeStore, ThemeMode } from '@/store/theme'
+import { useThemeStore } from '@/store/theme'
 import styles from './index.module.css'
 
 interface ThemeSwitchProps {
@@ -18,11 +18,11 @@ interface ThemeSwitchProps {
  * 主题切换组件
  * 支持亮色、暗色、跟随系统三种模式
  */
-const ThemeSwitch: React.FC<ThemeSwitchProps> = ({ 
+const ThemeSwitch: React.FC<ThemeSwitchProps> = ({
   showLabel = false,
   size = 'middle'
 }) => {
-  const { mode, isDark, setMode, toggleTheme } = useThemeStore()
+  const { mode, isDark, setMode } = useThemeStore()
 
   // 获取当前图标
   const getCurrentIcon = () => {

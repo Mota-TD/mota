@@ -1,12 +1,12 @@
 /* 主题变量定义 */
 
-/* 亮色主题（默认） */
+/* 亮色主题（默认） - 克莱因蓝主题 */
 :root {
-  /* 主色调 */
-  --color-primary: #2b7de9;
-  --color-primary-hover: #1a6dd8;
-  --color-primary-active: #0f5fc7;
-  --color-primary-light: rgba(43, 125, 233, 0.1);
+  /* 主色调 - 克莱因蓝 (Klein Blue) #002FA7 */
+  --color-primary: #002FA7;
+  --color-primary-hover: #0038c7;
+  --color-primary-active: #001f7a;
+  --color-primary-light: rgba(0, 47, 167, 0.1);
   
   /* 背景色 */
   --color-bg-base: #ffffff;
@@ -52,9 +52,9 @@
   --color-error-bg: #fff2f0;
   --color-error-border: #ffccc7;
   
-  --color-info: #1677ff;
-  --color-info-bg: #e6f4ff;
-  --color-info-border: #91caff;
+  --color-info: #002FA7;
+  --color-info-bg: #e6eeff;
+  --color-info-border: #7a9eff;
   
   /* 侧边栏 */
   --sider-bg: #ffffff;
@@ -77,24 +77,24 @@
   /* 输入框 */
   --input-bg: #ffffff;
   --input-border: #d9d9d9;
-  --input-hover-border: #4096ff;
-  --input-focus-border: #1677ff;
+  --input-hover-border: #0038c7;
+  --input-focus-border: #002FA7;
   
   /* 按钮 */
   --btn-default-bg: #ffffff;
   --btn-default-border: #d9d9d9;
   --btn-default-hover-bg: #ffffff;
-  --btn-default-hover-border: #4096ff;
+  --btn-default-hover-border: #0038c7;
 }
 
-/* 暗色主题 */
+/* 暗色主题 - 克莱因蓝主题 */
 :root.dark,
 [data-theme='dark'] {
-  /* 主色调 */
-  --color-primary: #3b8ff6;
-  --color-primary-hover: #5aa0f7;
-  --color-primary-active: #2b7de9;
-  --color-primary-light: rgba(59, 143, 246, 0.15);
+  /* 主色调 - 克莱因蓝 (Klein Blue) 暗色模式调整 */
+  --color-primary: #4d7fff;
+  --color-primary-hover: #6690ff;
+  --color-primary-active: #3366e6;
+  --color-primary-light: rgba(77, 127, 255, 0.15);
   
   /* 背景色 */
   --color-bg-base: #0d1117;
@@ -140,9 +140,9 @@
   --color-error-bg: rgba(248, 81, 73, 0.15);
   --color-error-border: rgba(248, 81, 73, 0.4);
   
-  --color-info: #58a6ff;
-  --color-info-bg: rgba(88, 166, 255, 0.15);
-  --color-info-border: rgba(88, 166, 255, 0.4);
+  --color-info: #4d7fff;
+  --color-info-bg: rgba(77, 127, 255, 0.15);
+  --color-info-border: rgba(77, 127, 255, 0.4);
   
   /* 侧边栏 */
   --sider-bg: #161b22;
@@ -165,8 +165,8 @@
   /* 输入框 */
   --input-bg: #0d1117;
   --input-border: #30363d;
-  --input-hover-border: #58a6ff;
-  --input-focus-border: #58a6ff;
+  --input-hover-border: #4d7fff;
+  --input-focus-border: #4d7fff;
   
   /* 按钮 */
   --btn-default-bg: #21262d;

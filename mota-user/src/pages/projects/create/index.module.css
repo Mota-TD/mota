@@ -41,6 +41,8 @@
   font-weight: 600;
   color: #1a1f36;
   margin-bottom: 16px;
+  display: flex;
+  align-items: center;
 }
 
 .colorPicker {
@@ -116,10 +118,221 @@
   margin-bottom: 4px;
 }
 
+/* 部门选择样式 */
+.departmentList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.departmentItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.departmentItem:hover {
+  border-color: #2b7de9;
+  background-color: #f6f9ff;
+}
+
+.departmentItemSelected {
+  border-color: #2b7de9;
+  background-color: #f0f7ff;
+}
+
+.departmentInfo {
+  flex: 1;
+}
+
+.departmentName {
+  font-size: 15px;
+  font-weight: 500;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.departmentMeta {
+  font-size: 13px;
+  color: #666;
+  display: flex;
+  gap: 16px;
+}
+
+/* 成员选择样式 */
+.memberSelection {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.memberGroup {
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.memberGroupHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: #fafafa;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.memberCount {
+  font-size: 13px;
+  color: #666;
+}
+
+.memberList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+  padding: 12px;
+}
+
+.memberItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.memberItem:hover {
+  background-color: #f5f5f5;
+}
+
+.memberItemSelected {
+  background-color: #f0f7ff;
+  border-color: #2b7de9;
+}
+
+.memberInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.memberName {
+  font-size: 14px;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.memberRole {
+  font-size: 12px;
+  color: #999;
+}
+
+/* 里程碑样式 */
+.milestoneForm {
+  background-color: #fafafa;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.milestoneList {
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+}
+
+.milestoneIndex {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #2b7de9;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
 /* 响应式设计 */
 @media (max-width: 992px) {
   .previewCard,
   .tipsCard {
     margin-top: 24px;
   }
+  
+  .memberList {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 暗色主题 */
+:global(.dark) .formCard,
+:global(.dark) .previewCard,
+:global(.dark) .tipsCard {
+  background-color: #1f1f1f;
+  border-color: #303030;
+}
+
+:global(.dark) .title,
+:global(.dark) .sectionTitle,
+:global(.dark) .departmentName,
+:global(.dark) .memberName,
+:global(.dark) .previewName {
+  color: #e8e8e8;
+}
+
+:global(.dark) .subtitle,
+:global(.dark) .departmentMeta,
+:global(.dark) .memberRole,
+:global(.dark) .previewDesc,
+:global(.dark) .previewKey,
+:global(.dark) .tipsList,
+:global(.dark) .memberCount {
+  color: #999;
+}
+
+:global(.dark) .departmentItem,
+:global(.dark) .memberGroup,
+:global(.dark) .milestoneList {
+  border-color: #303030;
+}
+
+:global(.dark) .departmentItem:hover {
+  background-color: #2a2a2a;
+  border-color: #2b7de9;
+}
+
+:global(.dark) .departmentItemSelected {
+  background-color: #1a2a3a;
+  border-color: #2b7de9;
+}
+
+:global(.dark) .memberGroupHeader {
+  background-color: #2a2a2a;
+  border-color: #303030;
+}
+
+:global(.dark) .memberItem:hover {
+  background-color: #2a2a2a;
+}
+
+:global(.dark) .memberItemSelected {
+  background-color: #1a2a3a;
+  border-color: #2b7de9;
+}
+
+:global(.dark) .milestoneForm {
+  background-color: #2a2a2a;
+}
+
+:global(.dark) .colorItemActive {
+  border-color: #e8e8e8;
 }

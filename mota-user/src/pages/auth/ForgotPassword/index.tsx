@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Form, Input, Button, Steps, message, Result } from 'antd'
+import { Form, Input, Button, Steps, Result, App } from 'antd'
 import { MailOutlined, SafetyOutlined, LockOutlined, ArrowLeftOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import styles from './index.module.css'
@@ -13,6 +13,7 @@ import styles from './index.module.css'
  */
 const ForgotPassword = () => {
   const navigate = useNavigate()
+  const { message } = App.useApp()
   const [currentStep, setCurrentStep] = useState(0)
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState('')
@@ -132,6 +133,7 @@ const ForgotPassword = () => {
                   prefix={<MailOutlined />}
                   placeholder="请输入邮箱地址"
                   size="large"
+                  autoComplete="email"
                 />
               </Form.Item>
               <Form.Item>
@@ -220,6 +222,7 @@ const ForgotPassword = () => {
                   prefix={<LockOutlined />}
                   placeholder="请输入新密码"
                   size="large"
+                  autoComplete="new-password"
                 />
               </Form.Item>
               <Form.Item
@@ -241,6 +244,7 @@ const ForgotPassword = () => {
                   prefix={<LockOutlined />}
                   placeholder="请确认新密码"
                   size="large"
+                  autoComplete="new-password"
                 />
               </Form.Item>
               <Form.Item>

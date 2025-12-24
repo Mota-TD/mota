@@ -3,20 +3,20 @@
 /* 导入主题样式 */
 @import './theme.css';
 
-/* CSS 变量定义 */
+/* CSS 变量定义 - 克莱因蓝主题 */
 :root {
-  /* 主色调 */
-  --primary-color: #2b7de9;
-  --primary-hover: #1a6fd8;
-  --primary-active: #0d5fc7;
-  --primary-light: rgba(43, 125, 233, 0.1);
-  --primary-lighter: rgba(43, 125, 233, 0.05);
+  /* 主色调 - 克莱因蓝 (Klein Blue) #002FA7 */
+  --primary-color: #002FA7;
+  --primary-hover: #0038c7;
+  --primary-active: #001f7a;
+  --primary-light: rgba(0, 47, 167, 0.1);
+  --primary-lighter: rgba(0, 47, 167, 0.05);
   
   /* 渐变色 */
-  --gradient-primary: linear-gradient(135deg, #2b7de9 0%, #1890ff 100%);
-  --gradient-primary-hover: linear-gradient(135deg, #1a6fd8 0%, #0d7fe8 100%);
-  --gradient-header: linear-gradient(135deg, #2b7de9 0%, #1890ff 50%, #40a9ff 100%);
-  --gradient-card: linear-gradient(135deg, rgba(43, 125, 233, 0.05) 0%, rgba(24, 144, 255, 0.05) 100%);
+  --gradient-primary: linear-gradient(135deg, #002FA7 0%, #0052cc 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #0038c7 0%, #0066ff 100%);
+  --gradient-header: linear-gradient(135deg, #002FA7 0%, #0052cc 50%, #3385ff 100%);
+  --gradient-card: linear-gradient(135deg, rgba(0, 47, 167, 0.05) 0%, rgba(0, 82, 204, 0.05) 100%);
   
   /* 功能色 */
   --success-color: #52c41a;
@@ -25,8 +25,8 @@
   --warning-light: rgba(250, 173, 20, 0.1);
   --error-color: #ff4d4f;
   --error-light: rgba(255, 77, 79, 0.1);
-  --info-color: #1890ff;
-  --info-light: rgba(24, 144, 255, 0.1);
+  --info-color: #002FA7;
+  --info-light: rgba(0, 47, 167, 0.1);
   
   /* 文字颜色 */
   --text-primary: #1a1a1a;
@@ -61,8 +61,8 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
   --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.16);
-  --shadow-primary: 0 4px 16px rgba(43, 125, 233, 0.2);
-  --shadow-primary-lg: 0 8px 24px rgba(43, 125, 233, 0.3);
+  --shadow-primary: 0 4px 16px rgba(0, 47, 167, 0.2);
+  --shadow-primary-lg: 0 8px 24px rgba(0, 47, 167, 0.3);
   
   /* 过渡 */
   --transition-fast: 0.15s ease;

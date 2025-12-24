@@ -1,0 +1,99 @@
+/**
+ * 进度报告组件样式
+ */
+
+.container {
+  padding: 16px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100px;
+}
+
+/* 报告列表 */
+.reportList {
+  margin-top: 16px;
+}
+
+.reportItem {
+  padding: 16px;
+  margin-bottom: 12px;
+  background: var(--bg-secondary, #fafafa);
+  border-radius: 8px;
+  border: 1px solid var(--border-color-light, #f0f0f0);
+  transition: all 0.2s ease;
+}
+
+.reportItem:hover {
+  background: var(--bg-hover, #f5f5f5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.reportTitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary, #333);
+}
+
+.reportMeta {
+  font-size: 12px;
+  color: var(--text-tertiary, #999);
+}
+
+.reportMeta span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 报告详情 */
+.reportDetail {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.reportSections {
+  margin-top: 16px;
+}
+
+.sectionContent {
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.6;
+  color: var(--text-primary, #333);
+}
+
+/* Collapse 样式 */
+.reportSections :global(.ant-collapse-header) {
+  font-weight: 500;
+}
+
+.reportSections :global(.ant-collapse-content-box) {
+  padding: 12px 16px;
+}
+
+/* 暗色主题适配 */
+:global([data-theme='dark']) .reportItem {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+:global([data-theme='dark']) .reportItem:hover {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+:global([data-theme='dark']) .reportTitle {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+:global([data-theme='dark']) .reportMeta {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+:global([data-theme='dark']) .sectionContent {
+  color: rgba(255, 255, 255, 0.85);
+}

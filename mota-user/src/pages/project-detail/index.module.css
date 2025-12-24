@@ -4,6 +4,19 @@
   min-height: 100%;
 }
 
+/* Archived Banner */
+.archivedBanner {
+  background: linear-gradient(135deg, #fff7e6 0%, #fffbe6 100%);
+  border: 1px solid #ffd591;
+  border-radius: 8px;
+  padding: 12px 20px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  color: #d46b08;
+  font-weight: 500;
+}
+
 /* Page Header */
 .header {
   display: flex;
@@ -418,4 +431,329 @@
   .statsRow {
     grid-template-columns: 1fr;
   }
+}
+
+/* Status Badge */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.statusBadge.planning {
+  background: #fff7e6;
+  color: #d46b08;
+}
+
+.statusBadge.active {
+  background: #f6ffed;
+  color: #389e0d;
+}
+
+.statusBadge.completed {
+  background: #e6f7ff;
+  color: #096dd9;
+}
+
+.statusBadge.suspended {
+  background: #fffbe6;
+  color: #d4b106;
+}
+
+.statusBadge.cancelled {
+  background: #fff1f0;
+  color: #cf1322;
+}
+
+.statusBadge.archived {
+  background: #f5f5f5;
+  color: #8c8c8c;
+}
+
+/* Priority Badge */
+.priorityBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.priorityBadge.low {
+  background: #f6ffed;
+  color: #389e0d;
+}
+
+.priorityBadge.medium {
+  background: #e6f7ff;
+  color: #096dd9;
+}
+
+.priorityBadge.high {
+  background: #fff7e6;
+  color: #d46b08;
+}
+
+.priorityBadge.urgent {
+  background: #fff1f0;
+  color: #cf1322;
+}
+
+/* Settings Drawer */
+.settingsSection {
+  margin-bottom: 24px;
+}
+
+.settingsSectionTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dangerZone {
+  background: #fff1f0;
+  border: 1px solid #ffccc7;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.dangerZone h4 {
+  color: #cf1322;
+  margin: 0 0 4px 0;
+}
+
+.dangerZone p {
+  color: #8c8c8c;
+  margin: 0;
+  font-size: 13px;
+}
+
+/* Color Picker */
+.colorPicker {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.colorItem {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 3px solid transparent;
+}
+
+.colorItem:hover {
+  transform: scale(1.1);
+}
+
+.colorItemActive {
+  border-color: #1677ff;
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.2);
+}
+
+/* Member Selection */
+.memberSelectionGroup {
+  margin-bottom: 16px;
+}
+
+.memberSelectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #fafafa;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.memberSelectionList {
+  padding-left: 12px;
+}
+
+.memberSelectionItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.memberSelectionItem:hover {
+  background: #f5f5f5;
+}
+
+.memberSelectionItem.selected {
+  background: #e6f4ff;
+}
+
+/* Milestone List */
+.milestoneList {
+  margin-top: 16px;
+}
+
+.milestoneItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+}
+
+.milestoneItem:hover {
+  border-color: #d9d9d9;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.milestoneIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #722ed1 0%, #9254de 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 14px;
+}
+
+.milestoneContent {
+  flex: 1;
+}
+
+.milestoneName {
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.milestoneDate {
+  font-size: 13px;
+  color: #8c8c8c;
+}
+
+.milestoneStatus {
+  margin-left: auto;
+}
+
+/* Empty State */
+.emptyState {
+  text-align: center;
+  padding: 48px 24px;
+}
+
+.emptyStateIcon {
+  font-size: 48px;
+  color: #d9d9d9;
+  margin-bottom: 16px;
+}
+
+.emptyStateTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+}
+
+.emptyStateDesc {
+  font-size: 14px;
+  color: #8c8c8c;
+  margin-bottom: 16px;
+}
+
+/* Loading State */
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+/* Action Buttons */
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Tabs Enhancement */
+.tabs :global(.ant-tabs-tab-btn) {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Table Enhancements */
+.memberTable :global(.ant-table-row) {
+  transition: background 0.2s;
+}
+
+.memberTable :global(.ant-table-row:hover) {
+  background: #f8fbff;
+}
+
+/* Drawer Enhancements */
+.drawerSection {
+  margin-bottom: 24px;
+}
+
+.drawerSectionTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Form Enhancements */
+.formHint {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin-top: 4px;
+}
+
+/* Quick Actions */
+.quickActions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.quickActionBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quickActionBtn:hover {
+  border-color: #1677ff;
+  color: #1677ff;
+}
+
+.quickActionBtn.danger:hover {
+  border-color: #ff4d4f;
+  color: #ff4d4f;
 }

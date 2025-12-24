@@ -1,0 +1,206 @@
+/**
+ * 工作反馈组件样式
+ */
+
+.container {
+  padding: 16px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100px;
+}
+
+/* 反馈列表 */
+.feedbackList {
+  margin-top: 16px;
+}
+
+.feedbackItem {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  margin-bottom: 12px;
+  background: var(--bg-secondary, #fafafa);
+  border-radius: 8px;
+  border: 1px solid var(--border-color-light, #f0f0f0);
+  transition: all 0.2s ease;
+}
+
+.feedbackItem:hover {
+  background: var(--bg-hover, #f5f5f5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.feedbackHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.feedbackInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.senderName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary, #333);
+}
+
+.feedbackTime {
+  font-size: 12px;
+  color: var(--text-tertiary, #999);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.feedbackContent {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-primary, #333);
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.feedbackRating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-color-light, #e8e8e8);
+}
+
+.ratingText {
+  font-size: 13px;
+  color: var(--text-secondary, #666);
+}
+
+.feedbackReceiver {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--text-secondary, #666);
+}
+
+.feedbackReply {
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--bg-tertiary, #f5f5f5);
+  border-radius: 6px;
+  border-left: 3px solid var(--primary-color, #1677ff);
+}
+
+.replyHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: var(--text-secondary, #666);
+}
+
+.replyContent {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary, #333);
+}
+
+/* 操作按钮区域 */
+.feedbackActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-color-light, #e8e8e8);
+}
+
+/* 回复弹窗中的原始反馈上下文 */
+.replyContext {
+  margin-bottom: 16px;
+}
+
+.originalFeedback {
+  padding: 12px;
+  background: var(--bg-secondary, #f5f5f5);
+  border-radius: 8px;
+  border-left: 3px solid var(--primary-color, #1677ff);
+}
+
+.originalHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.originalSender {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary, #333);
+}
+
+.originalContent {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-secondary, #666);
+  white-space: pre-wrap;
+}
+
+/* Tabs 样式 */
+.container :global(.ant-tabs-nav) {
+  margin-bottom: 16px;
+}
+
+/* 暗色主题适配 */
+:global([data-theme='dark']) .feedbackItem {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+:global([data-theme='dark']) .feedbackItem:hover {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+:global([data-theme='dark']) .senderName {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+:global([data-theme='dark']) .feedbackTime {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+:global([data-theme='dark']) .feedbackContent {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+:global([data-theme='dark']) .feedbackRating {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+:global([data-theme='dark']) .ratingText {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+:global([data-theme='dark']) .feedbackReceiver {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+:global([data-theme='dark']) .feedbackReply {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+:global([data-theme='dark']) .replyHeader {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+:global([data-theme='dark']) .replyContent {
+  color: rgba(255, 255, 255, 0.85);
+}

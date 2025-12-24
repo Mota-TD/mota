@@ -1,12 +1,14 @@
 package com.mota.project.controller;
 
+import com.mota.common.core.result.Result;
 import com.mota.project.mapper.ActivityMapper;
 import com.mota.project.mapper.ProjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,11 +26,7 @@ public class DashboardController {
      * 获取仪表盘统计数据
      */
     @GetMapping("/stats")
-    public ResponseEntity<Map<String, Object>> getStats() {
-        Map<String, Object> result = new HashMap<>();
-        result.put("code", 200);
-        result.put("message", "success");
-        
+    public Result<Map<String, Object>> getStats() {
         Map<String, Object> data = new HashMap<>();
         
         // 项目统计
@@ -59,50 +57,35 @@ public class DashboardController {
         data.put("issueTrend", new int[]{5, 8, 12, 10, 15, 13, 16});
         data.put("completionTrend", new int[]{2, 3, 5, 4, 6, 5, 8});
         
-        result.put("data", data);
-        
-        return ResponseEntity.ok(result);
+        return Result.success(data);
     }
 
     /**
      * 获取项目概览
      */
     @GetMapping("/project-overview")
-    public ResponseEntity<Map<String, Object>> getProjectOverview() {
-        Map<String, Object> result = new HashMap<>();
-        result.put("code", 200);
-        result.put("message", "success");
-        
+    public Result<Map<String, Object>> getProjectOverview() {
         Map<String, Object> data = new HashMap<>();
         data.put("total", 4);
         data.put("active", 3);
         data.put("completed", 1);
         data.put("archived", 0);
         
-        result.put("data", data);
-        
-        return ResponseEntity.ok(result);
+        return Result.success(data);
     }
 
     /**
      * 获取团队工作量
      */
     @GetMapping("/workload")
-    public ResponseEntity<Map<String, Object>> getWorkload() {
-        Map<String, Object> result = new HashMap<>();
-        result.put("code", 200);
-        result.put("message", "success");
-        
+    public Result<List<Map<String, Object>>> getWorkload() {
         // 模拟团队成员工作量数据
-        Object[] workloadData = new Object[]{
-            Map.of("name", "张三", "assigned", 5, "completed", 3, "inProgress", 2),
-            Map.of("name", "李四", "assigned", 4, "completed", 2, "inProgress", 2),
-            Map.of("name", "王五", "assigned", 3, "completed", 1, "inProgress", 2),
-            Map.of("name", "赵六", "assigned", 4, "completed", 2, "inProgress", 1)
-        };
+        List<Map<String, Object>> workloadData = new ArrayList<>();
+        workloadData.add(Map.of("name", "张三", "assigned", 5, "completed", 3, "inProgress", 2));
+        workloadData.add(Map.of("name", "李四", "assigned", 4, "completed", 2, "inProgress", 2));
+        workloadData.add(Map.of("name", "王五", "assigned", 3, "completed", 1, "inProgress", 2));
+        workloadData.add(Map.of("name", "赵六", "assigned", 4, "completed", 2, "inProgress", 1));
         
-        result.put("data", workloadData);
-        
-        return ResponseEntity.ok(result);
+        return Result.success(workloadData);
     }
 }

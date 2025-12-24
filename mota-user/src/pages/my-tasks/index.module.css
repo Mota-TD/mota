@@ -1,0 +1,292 @@
+.container {
+  padding: 24px;
+  background: #f5f7fa;
+  min-height: 100%;
+}
+
+/* Page Header */
+.pageHeader {
+  margin-bottom: 24px;
+}
+
+.pageTitle {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+}
+
+.pageDesc {
+  font-size: 15px;
+  color: #666;
+  margin: 0;
+}
+
+/* Stats Row */
+.statsRow {
+  margin-bottom: 24px;
+}
+
+.statCard {
+  border-radius: 12px;
+  border: 1px solid #e8ecf0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.statCard :global(.ant-statistic-title) {
+  font-size: 14px;
+  color: #666;
+}
+
+.statCard :global(.ant-statistic-content) {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+/* Filter Bar */
+.filterBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 16px 20px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e8ecf0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.filterLeft {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Task Section */
+.taskSection {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid #e8ecf0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* Task List */
+.taskList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.taskCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: #fafbfc;
+  border-radius: 12px;
+  border: 1px solid #e8ecf0;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.taskCard:hover {
+  border-color: #2b7de9;
+  box-shadow: 0 4px 12px rgba(43, 125, 233, 0.1);
+  transform: translateY(-2px);
+}
+
+.overdueCard {
+  border-color: #ffccc7;
+  background: #fff2f0;
+}
+
+.overdueCard:hover {
+  border-color: #ff4d4f;
+  box-shadow: 0 4px 12px rgba(255, 77, 79, 0.1);
+}
+
+.taskCardLeft {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+}
+
+.taskStatus {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  background: #f0f5ff;
+}
+
+.taskContent {
+  flex: 1;
+}
+
+.taskHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.taskName {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.taskDesc {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 8px 0;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.taskMeta {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: #8c8c8c;
+}
+
+.taskDate {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.taskDeadline {
+  color: #52c41a;
+  font-weight: 500;
+}
+
+.taskDeadline.overdue {
+  color: #ff4d4f;
+}
+
+.taskCardRight {
+  display: flex;
+  align-items: center;
+}
+
+.progressWrapper {
+  padding: 0 16px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .filterLeft {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+  
+  .filterBar {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+  
+  .filterLeft {
+    flex-direction: column;
+  }
+  
+  .filterLeft > * {
+    width: 100% !important;
+  }
+  
+  .taskCard {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+  
+  .taskCardRight {
+    justify-content: center;
+  }
+  
+  .statsRow :global(.ant-col) {
+    margin-bottom: 12px;
+  }
+}
+
+/* Dark Theme */
+:global([data-theme='dark']) .container {
+  background: #0a0a0a;
+}
+
+:global([data-theme='dark']) .pageTitle {
+  color: #fff;
+}
+
+:global([data-theme='dark']) .pageDesc {
+  color: #a0a0a0;
+}
+
+:global([data-theme='dark']) .statCard {
+  background: #141414;
+  border-color: #303030;
+}
+
+:global([data-theme='dark']) .statCard :global(.ant-statistic-title) {
+  color: #a0a0a0;
+}
+
+:global([data-theme='dark']) .statCard :global(.ant-statistic-content-value) {
+  color: #fff;
+}
+
+:global([data-theme='dark']) .filterBar {
+  background: #141414;
+  border-color: #303030;
+}
+
+:global([data-theme='dark']) .taskSection {
+  background: #141414;
+  border-color: #303030;
+}
+
+:global([data-theme='dark']) .taskCard {
+  background: #1f1f1f;
+  border-color: #303030;
+}
+
+:global([data-theme='dark']) .taskCard:hover {
+  border-color: #2b7de9;
+}
+
+:global([data-theme='dark']) .overdueCard {
+  background: #2a1215;
+  border-color: #5c2223;
+}
+
+:global([data-theme='dark']) .taskName {
+  color: #fff;
+}
+
+:global([data-theme='dark']) .taskDesc {
+  color: #a0a0a0;
+}
+
+:global([data-theme='dark']) .taskMeta {
+  color: #8c8c8c;
+}
+
+:global([data-theme='dark']) .taskStatus {
+  background: #1f1f1f;
+}

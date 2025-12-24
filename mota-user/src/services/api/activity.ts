@@ -17,21 +17,21 @@ export type ActivityType =
 
 // 用户简要信息
 export interface ActivityUser {
-  id: number
+  id: string
   name: string
   avatar?: string
 }
 
 // 活动信息
 export interface Activity {
-  id: number
+  id: string
   type: ActivityType
   action: string
   target: string
-  targetId?: number
-  userId: number
+  targetId?: string
+  userId: string
   user?: ActivityUser
-  projectId?: number
+  projectId?: string
   time: string
   createdAt?: string
 }
@@ -46,8 +46,8 @@ export interface ActivityListResponse {
  * 获取活动动态列表
  */
 export function getActivities(params?: {
-  projectId?: number
-  userId?: number
+  projectId?: string
+  userId?: string
   type?: ActivityType
   page?: number
   pageSize?: number
@@ -65,7 +65,7 @@ export function getRecentActivities(limit?: number): Promise<Activity[]> {
 /**
  * 获取项目活动动态
  */
-export function getProjectActivities(projectId: number, params?: {
+export function getProjectActivities(projectId: string | number, params?: {
   page?: number
   pageSize?: number
 }): Promise<ActivityListResponse> {
@@ -75,7 +75,7 @@ export function getProjectActivities(projectId: number, params?: {
 /**
  * 获取用户活动动态
  */
-export function getUserActivities(userId: number, params?: {
+export function getUserActivities(userId: string | number, params?: {
   page?: number
   pageSize?: number
 }): Promise<ActivityListResponse> {

@@ -1,0 +1,73 @@
+/**
+ * 工作计划审批组件样式
+ */
+
+.container {
+  padding: 16px;
+}
+
+.detailContent {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.summaryText {
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.6;
+  color: var(--text-primary, #333);
+}
+
+.attachmentSection {
+  margin-top: 20px;
+  padding: 16px;
+  background: var(--bg-secondary, #fafafa);
+  border-radius: 8px;
+}
+
+.attachmentSection h4 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary, #333);
+}
+
+/* 表格行样式 */
+.container :global(.ant-table-row) {
+  cursor: pointer;
+}
+
+.container :global(.ant-table-row:hover) {
+  background: var(--bg-hover, #f5f5f5);
+}
+
+/* 待审批行高亮 */
+.container :global(.ant-table-row.pending-row) {
+  background: rgba(22, 119, 255, 0.04);
+}
+
+/* Badge 样式 */
+.container :global(.ant-badge-count) {
+  font-size: 11px;
+}
+
+/* 暗色主题适配 */
+:global([data-theme='dark']) .summaryText {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+:global([data-theme='dark']) .attachmentSection {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+:global([data-theme='dark']) .attachmentSection h4 {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+:global([data-theme='dark']) .container :global(.ant-table-row:hover) {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+:global([data-theme='dark']) .container :global(.ant-table-row.pending-row) {
+  background: rgba(22, 119, 255, 0.08);
+}

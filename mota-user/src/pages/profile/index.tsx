@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { Card, Form, Input, Button, Avatar, Upload, Tabs, Switch, Select, Divider, message } from 'antd'
-import { 
-  UserOutlined, 
-  MailOutlined, 
+import { Card, Form, Input, Button, Avatar, Upload, Tabs, Switch, Select, Divider, App } from 'antd'
+import {
+  UserOutlined,
+  MailOutlined,
   PhoneOutlined,
   SaveOutlined,
   UploadOutlined,
@@ -16,6 +16,7 @@ import styles from './index.module.css'
 const { Option } = Select
 
 const ProfilePage = () => {
+  const { message } = App.useApp()
   const [form] = Form.useForm()
   const [passwordForm] = Form.useForm()
   const [loading, setLoading] = useState(false)

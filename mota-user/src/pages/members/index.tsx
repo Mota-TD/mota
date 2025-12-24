@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Card, Table, Button, Input, Space, Tag, Avatar, Modal, Form, Select, message, Dropdown, Popconfirm } from 'antd'
-import { 
-  PlusOutlined, 
-  SearchOutlined, 
+import { Card, Table, Button, Input, Space, Tag, Avatar, Modal, Form, Select, Dropdown, Popconfirm, App } from 'antd'
+import {
+  PlusOutlined,
+  SearchOutlined,
   MoreOutlined,
   UserOutlined,
   MailOutlined,
@@ -32,6 +32,7 @@ const roleOptions = [
 ]
 
 const MembersPage = () => {
+  const { message } = App.useApp()
   const [loading, setLoading] = useState(true)
   const [members, setMembers] = useState<Member[]>([])
   const [searchText, setSearchText] = useState('')

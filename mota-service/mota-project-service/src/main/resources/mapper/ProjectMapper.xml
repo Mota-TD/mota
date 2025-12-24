@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mota.project.mapper.ProjectMapper">
+
+    <!-- 项目结果映射 -->
+    <resultMap id="ProjectResultMap" type="com.mota.project.entity.Project">
+        <id column="id" property="id"/>
+        <result column="org_id" property="orgId"/>
+        <result column="name" property="name"/>
+        <result column="key" property="key"/>
+        <result column="description" property="description"/>
+        <result column="status" property="status"/>
+        <result column="owner_id" property="ownerId"/>
+        <result column="color" property="color"/>
+        <result column="starred" property="starred"/>
+        <result column="progress" property="progress"/>
+        <result column="member_count" property="memberCount"/>
+        <result column="issue_count" property="issueCount"/>
+        <result column="start_date" property="startDate"/>
+        <result column="end_date" property="endDate"/>
+        <result column="priority" property="priority"/>
+        <result column="archived_at" property="archivedAt"/>
+        <result column="archived_by" property="archivedBy"/>
+        <result column="visibility" property="visibility"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
+        <result column="deleted" property="deleted"/>
+        <result column="version" property="version"/>
+    </resultMap>
+
+    <!-- 项目列表查询 -->
+    <select id="selectProjectList" resultMap="ProjectResultMap">
+        SELECT p.*
+        FROM project p
+        WHERE p.deleted = 0
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (p.name LIKE CONCAT('%', #{query.keyword}, '%') 
+                 OR p.`key` LIKE CONCAT('%', #{query.keyword}, '%'))
+        </if>
+        <if test="query.status != null and query.status != ''">
+            AND p.status = #{query.status}
+        </if>
+        <if test="query.priority != null and query.priority != ''">
+            AND p.priority = #{query.priority}
+        </if>
+        <if test="query.ownerId != null">
+            AND p.owner_id = #{query.ownerId}
+        </if>
+        <if test="query.starred != null and query.starred == true">
+            AND p.starred = 1
+        </if>
+        <if test="query.includeArchived == null or query.includeArchived == false">
+            AND p.status != 'archived'
+        </if>
+        <if test="query.departmentId != null">
+            AND EXISTS (
+                SELECT 1 FROM project_department pd 
+                WHERE pd.project_id = p.id AND pd.department_id = #{query.departmentId}
+            )
+        </if>
+        <choose>
+            <when test="query.sortBy == 'name'">
+                ORDER BY p.name
+            </when>
+            <when test="query.sortBy == 'status'">
+                ORDER BY p.status
+            </when>
+            <when test="query.sortBy == 'progress'">
+                ORDER BY p.progress
+            </when>
+            <when test="query.sortBy == 'startDate'">
+                ORDER BY p.start_date
+            </when>
+            <when test="query.sortBy == 'endDate'">
+                ORDER BY p.end_date
+            </when>
+            <otherwise>
+                ORDER BY p.created_at
+            </otherwise>
+        </choose>
+        <if test="query.sortOrder == 'asc'">
+            ASC
+        </if>
+        <if test="query.sortOrder != 'asc'">
+            DESC
+        </if>
+    </select>
+
+    <!-- 统计项目数量 -->
+    <select id="countProjects" resultType="long">
+        SELECT COUNT(*)
+        FROM project p
+        WHERE p.deleted = 0
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (p.name LIKE CONCAT('%', #{query.keyword}, '%') 
+                 OR p.`key` LIKE CONCAT('%', #{query.keyword}, '%'))
+        </if>
+        <if test="query.status != null and query.status != ''">
+            AND p.status = #{query.status}
+        </if>
+        <if test="query.priority != null and query.priority != ''">
+            AND p.priority = #{query.priority}
+        </if>
+        <if test="query.ownerId != null">
+            AND p.owner_id = #{query.ownerId}
+        </if>
+        <if test="query.starred != null and query.starred == true">
+            AND p.starred = 1
+        </if>
+        <if test="query.includeArchived == null or query.includeArchived == false">
+            AND p.status != 'archived'
+        </if>
+        <if test="query.departmentId != null">
+            AND EXISTS (
+                SELECT 1 FROM project_department pd 
+                WHERE pd.project_id = p.id AND pd.department_id = #{query.departmentId}
+            )
+        </if>
+    </select>
+
+    <!-- 根据用户ID查询参与的项目 -->
+    <select id="selectProjectsByUserId" resultMap="ProjectResultMap">
+        SELECT DISTINCT p.*
+        FROM project p
+        INNER JOIN project_member pm ON p.id = pm.project_id
+        WHERE p.deleted = 0 AND pm.deleted = 0 AND pm.user_id = #{userId}
+        <if test="includeArchived == null or includeArchived == false">
+            AND p.status != 'archived'
+        </if>
+        ORDER BY p.created_at DESC
+    </select>
+
+    <!-- 查询收藏的项目 -->
+    <select id="selectStarredProjects" resultMap="ProjectResultMap">
+        SELECT p.*
+        FROM project p
+        WHERE p.deleted = 0 AND p.starred = 1
+        <if test="userId != null">
+            AND (p.owner_id = #{userId} OR EXISTS (
+                SELECT 1 FROM project_member pm 
+                WHERE pm.project_id = p.id AND pm.user_id = #{userId} AND pm.deleted = 0
+            ))
+        </if>
+        ORDER BY p.updated_at DESC
+    </select>
+
+    <!-- 查询归档的项目 -->
+    <select id="selectArchivedProjects" resultMap="ProjectResultMap">
+        SELECT p.*
+        FROM project p
+        WHERE p.deleted = 0 AND p.status = 'archived'
+        <if test="orgId != null and orgId != ''">
+            AND p.org_id = #{orgId}
+        </if>
+        ORDER BY p.archived_at DESC
+    </select>
+
+    <!-- 查询最近访问的项目 -->
+    <select id="selectRecentProjects" resultMap="ProjectResultMap">
+        SELECT p.*
+        FROM project p
+        WHERE p.deleted = 0 AND p.status != 'archived'
+        <if test="userId != null">
+            AND (p.owner_id = #{userId} OR EXISTS (
+                SELECT 1 FROM project_member pm 
+                WHERE pm.project_id = p.id AND pm.user_id = #{userId} AND pm.deleted = 0
+            ))
+        </if>
+        ORDER BY p.updated_at DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 更新项目进度 -->
+    <update id="updateProjectProgress">
+        UPDATE project 
+        SET progress = #{progress}, updated_at = NOW()
+        WHERE id = #{projectId} AND deleted = 0
+    </update>
+
+    <!-- 更新项目成员数量 -->
+    <update id="updateMemberCount">
+        UPDATE project p
+        SET p.member_count = (
+            SELECT COUNT(*) FROM project_member pm 
+            WHERE pm.project_id = p.id AND pm.deleted = 0
+        ),
+        p.updated_at = NOW()
+        WHERE p.id = #{projectId} AND p.deleted = 0
+    </update>
+
+    <!-- 更新项目任务数量 -->
+    <update id="updateIssueCount">
+        UPDATE project p
+        SET p.issue_count = (
+            SELECT COUNT(*) FROM task t 
+            WHERE t.project_id = p.id AND t.deleted = 0
+        ),
+        p.updated_at = NOW()
+        WHERE p.id = #{projectId} AND p.deleted = 0
+    </update>
+
+    <!-- 归档项目 -->
+    <update id="archiveProject">
+        UPDATE project 
+        SET status = 'archived', 
+            archived_at = NOW(), 
+            archived_by = #{archivedBy},
+            updated_at = NOW()
+        WHERE id = #{projectId} AND deleted = 0
+    </update>
+
+    <!-- 恢复归档项目 -->
+    <update id="restoreProject">
+        UPDATE project 
+        SET status = 'active', 
+            archived_at = NULL, 
+            archived_by = NULL,
+            updated_at = NOW()
+        WHERE id = #{projectId} AND deleted = 0 AND status = 'archived'
+    </update>
+
+    <!-- 获取项目统计信息 -->
+    <select id="getProjectStatistics" resultType="map">
+        SELECT 
+            (SELECT COUNT(*) FROM task t WHERE t.project_id = #{projectId} AND t.deleted = 0) as totalTasks,
+            (SELECT COUNT(*) FROM task t WHERE t.project_id = #{projectId} AND t.deleted = 0 AND t.status = 'completed') as completedTasks,
+            (SELECT COUNT(*) FROM task t WHERE t.project_id = #{projectId} AND t.deleted = 0 AND t.status = 'in_progress') as inProgressTasks,
+            (SELECT COUNT(*) FROM task t WHERE t.project_id = #{projectId} AND t.deleted = 0 AND t.status = 'pending') as pendingTasks,
+            (SELECT COUNT(*) FROM task t WHERE t.project_id = #{projectId} AND t.deleted = 0 AND t.end_date &lt; CURDATE() AND t.status != 'completed') as overdueTasks,
+            (SELECT COUNT(*) FROM department_task dt WHERE dt.project_id = #{projectId} AND dt.deleted = 0) as departmentTaskCount,
+            (SELECT COUNT(*) FROM milestone m WHERE m.project_id = #{projectId} AND m.deleted = 0) as totalMilestones,
+            (SELECT COUNT(*) FROM milestone m WHERE m.project_id = #{projectId} AND m.deleted = 0 AND m.status = 'completed') as completedMilestones
+    </select>
+
+</mapper>

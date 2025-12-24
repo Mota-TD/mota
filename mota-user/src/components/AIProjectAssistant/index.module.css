@@ -1,0 +1,247 @@
+.container {
+  margin-top: 24px;
+}
+
+.featureButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.featureButtons button {
+  border-radius: 8px;
+}
+
+.resultSection {
+  min-height: 200px;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.resultCard {
+  background: #fafbfc;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.resultHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e8ecf0;
+}
+
+/* 任务分解建议 */
+.suggestionItem {
+  padding: 16px !important;
+  background: #fff;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  border: 1px solid #e8ecf0;
+}
+
+.suggestionItem:last-child {
+  margin-bottom: 0;
+}
+
+.suggestionContent {
+  flex: 1;
+}
+
+.suggestionHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.suggestionDesc {
+  margin-bottom: 8px !important;
+  font-size: 14px;
+}
+
+.suggestionMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* 进度预测 */
+.predictionContent {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.predictionProgress {
+  margin-bottom: 20px;
+}
+
+.progressItem {
+  margin-bottom: 16px;
+}
+
+.progressItem:last-child {
+  margin-bottom: 0;
+}
+
+.predictionInfo {
+  display: flex;
+  gap: 40px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #f5f7fa;
+  border-radius: 8px;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.factors {
+  padding-top: 16px;
+  border-top: 1px solid #e8ecf0;
+}
+
+.factors ul {
+  margin: 8px 0 0 0;
+  padding-left: 20px;
+}
+
+.factors li {
+  margin-bottom: 4px;
+  color: #666;
+}
+
+/* 风险预警 */
+.riskContent {
+  padding: 8px 0;
+}
+
+.riskSection {
+  margin-top: 16px;
+}
+
+.riskSection ul {
+  margin: 8px 0 0 0;
+  padding-left: 20px;
+}
+
+.riskSection li {
+  margin-bottom: 4px;
+  color: #666;
+}
+
+/* 项目报告 */
+.reportContent {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.reportSummary {
+  margin-bottom: 20px;
+}
+
+.reportStats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f5f7fa;
+  border-radius: 8px;
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.statItem > span {
+  font-size: 24px;
+}
+
+.statValue {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.2;
+}
+
+.statLabel {
+  font-size: 13px;
+  color: #8c8c8c;
+}
+
+.reportSection {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.reportSection:last-of-type {
+  border-bottom: none;
+}
+
+.reportSection ul {
+  margin: 12px 0 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reportSection li {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.reportActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e8ecf0;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .featureButtons {
+    flex-direction: column;
+  }
+  
+  .featureButtons button {
+    width: 100%;
+  }
+  
+  .reportStats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .predictionInfo {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .reportStats {
+    grid-template-columns: 1fr;
+  }
+}

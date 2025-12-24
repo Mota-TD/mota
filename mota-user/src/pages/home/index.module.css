@@ -1,7 +1,9 @@
 /* 首页样式 - 摩塔 Mota */
 .homePage {
   min-height: 100vh;
+  min-width: 600px;
   background: #fff;
+  overflow-x: auto;
 }
 
 /* 容器 */
@@ -1330,58 +1332,11 @@
   }
 }
 
+/* 最小宽度600px，不再需要768px以下的响应式设计 */
+/* 保留导航菜单隐藏和浮动卡片隐藏在小屏幕上 */
 @media (max-width: 768px) {
   .navbarMenu {
     display: none;
-  }
-  
-  .heroTitle {
-    font-size: 36px;
-  }
-  
-  .sectionTitle {
-    font-size: 28px;
-  }
-  
-  .featuresGrid {
-    grid-template-columns: 1fr;
-  }
-  
-  .featureCardLarge {
-    grid-column: span 1;
-    flex-direction: column;
-  }
-  
-  .pillarsGrid {
-    grid-template-columns: 1fr;
-  }
-  
-  .valueGrid {
-    grid-template-columns: 1fr;
-  }
-  
-  .rolesGrid {
-    grid-template-columns: 1fr;
-  }
-  
-  .techGrid {
-    grid-template-columns: 1fr;
-  }
-  
-  .footerMain {
-    flex-direction: column;
-    gap: 40px;
-  }
-  
-  .footerLinks {
-    flex-wrap: wrap;
-    gap: 32px;
-  }
-  
-  .footerBottom {
-    flex-direction: column;
-    gap: 16px;
-    text-align: center;
   }
   
   .floatingCard1,

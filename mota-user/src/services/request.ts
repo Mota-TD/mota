@@ -3,10 +3,28 @@
  * 基于 fetch API，支持拦截器、错误处理等
  */
 
+import { message } from 'antd'
 import { useAuthStore } from '@/store/auth'
 
 // API 基础配置 - 使用 ?? 运算符，只有 undefined/null 时才使用默认值
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
+
+// 错误消息映射
+const ERROR_MESSAGES: Record<number, string> = {
+  400: '请求参数错误',
+  401: '登录已过期，请重新登录',
+  403: '没有权限访问该资源',
+  404: '请求的资源不存在',
+  405: '请求方法不支持',
+  408: '请求超时',
+  500: '服务器错误，请稍后重试',
+  502: '网关错误',
+  503: '服务暂时不可用',
+  504: '网关超时',
+}
+
+// 是否正在显示401错误（防止重复提示）
+let isShowingAuthError = false
 
 // 响应结果类型
 export interface ApiResult<T = unknown> {
@@ -91,30 +109,54 @@ async function request<T>(url: string, config: RequestConfig = {}): Promise<T> {
     // 检查 HTTP 状态码
     if (!response.ok) {
       // 尝试解析错误响应
-      let errorMessage = `HTTP ${response.status}: ${response.statusText}`
+      let errorMessage = ERROR_MESSAGES[response.status] || `HTTP ${response.status}: ${response.statusText}`
+      let errorData: unknown
+      
       try {
-        const errorData = await response.json()
-        if (errorData.message) {
-          errorMessage = errorData.message
+        errorData = await response.json()
+        if (errorData && typeof errorData === 'object' && 'message' in errorData) {
+          errorMessage = (errorData as { message: string }).message || errorMessage
         }
       } catch {
         // 响应不是 JSON，使用默认错误消息
       }
       
-      // 401 错误不再自动重定向，让调用方处理（可能回退到 mock 数据）
-      // 只有在明确是认证失败（非后端服务问题）时才重定向
-      if (response.status === 401 && errorMessage.includes('token')) {
-        useAuthStore.getState().logout()
-        window.location.href = '/login'
+      // 处理不同的 HTTP 状态码
+      switch (response.status) {
+        case 401:
+          // 未授权，清除登录状态并跳转登录页
+          if (!isShowingAuthError) {
+            isShowingAuthError = true
+            message.error('登录已过期，请重新登录')
+            useAuthStore.getState().logout()
+            setTimeout(() => {
+              window.location.href = '/login'
+              isShowingAuthError = false
+            }, 1500)
+          }
+          break
+        case 403:
+          message.error('没有权限访问该资源')
+          break
+        case 404:
+          message.error('请求的资源不存在')
+          break
+        case 500:
+          message.error(errorMessage || '服务器错误，请稍后重试')
+          break
+        default:
+          message.error(errorMessage || '请求失败')
       }
       
-      throw new ApiError(response.status, errorMessage)
+      throw new ApiError(response.status, errorMessage, errorData)
     }
     
     // 检查响应内容类型
     const contentType = response.headers.get('content-type')
     if (!contentType || !contentType.includes('application/json')) {
-      throw new ApiError(-1, '服务器返回了非 JSON 响应')
+      const errorMsg = '服务器返回了非 JSON 响应'
+      message.error(errorMsg)
+      throw new ApiError(-1, errorMsg)
     }
     
     // 解析响应
@@ -125,11 +167,26 @@ async function request<T>(url: string, config: RequestConfig = {}): Promise<T> {
       return result.data
     }
     
-    // 处理特定错误码
-    if (result.code === 401) {
-      // 未授权，清除登录状态
-      useAuthStore.getState().logout()
-      window.location.href = '/login'
+    // 处理业务错误码
+    switch (result.code) {
+      case 401:
+        // 未授权，清除登录状态
+        if (!isShowingAuthError) {
+          isShowingAuthError = true
+          message.error('登录已过期，请重新登录')
+          useAuthStore.getState().logout()
+          setTimeout(() => {
+            window.location.href = '/login'
+            isShowingAuthError = false
+          }, 1500)
+        }
+        break
+      case 403:
+        message.error(result.message || '没有权限执行此操作')
+        break
+      default:
+        // 其他业务错误，显示服务器返回的消息
+        message.error(result.message || '操作失败')
     }
     
     throw new ApiError(result.code, result.message, result.data)
@@ -142,14 +199,21 @@ async function request<T>(url: string, config: RequestConfig = {}): Promise<T> {
     
     if (error instanceof Error) {
       if (error.name === 'AbortError') {
-        throw new ApiError(-1, '请求超时')
+        const errorMsg = '请求超时，请检查网络连接'
+        message.error(errorMsg)
+        throw new ApiError(-1, errorMsg)
       }
-      // 更详细的错误信息
+      
+      // 网络错误
       console.error('Request error:', error)
-      throw new ApiError(-1, error.message || '网络错误，请检查后端服务是否启动')
+      const errorMsg = '网络错误，请检查网络连接'
+      message.error(errorMsg)
+      throw new ApiError(-1, errorMsg)
     }
     
-    throw new ApiError(-1, '未知错误')
+    const errorMsg = '未知错误'
+    message.error(errorMsg)
+    throw new ApiError(-1, errorMsg)
   }
 }
 

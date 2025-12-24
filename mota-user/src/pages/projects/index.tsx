@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Card,
@@ -12,7 +12,6 @@ import {
   Progress,
   Dropdown,
   Modal,
-  message,
   Empty,
   Spin,
   Typography,
@@ -24,12 +23,14 @@ import {
   Drawer,
   Form,
   DatePicker,
-  Upload,
   Checkbox,
   Switch,
   Divider,
   Popconfirm,
-  ColorPicker
+  ColorPicker,
+  Steps,
+  List,
+  App
 } from 'antd'
 import type { Color } from 'antd/es/color-picker'
 import {
@@ -54,13 +55,21 @@ import {
   ThunderboltOutlined,
   BellOutlined,
   SafetyOutlined,
-  SaveOutlined
+  SaveOutlined,
+  ApartmentOutlined,
+  FlagOutlined,
+  UserOutlined,
+  CalendarOutlined,
+  RobotOutlined,
+  UndoOutlined,
+  InboxOutlined
 } from '@ant-design/icons'
-import type { UploadFile } from 'antd/es/upload/interface'
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-cn'
-import locale from 'antd/es/date-picker/locale/zh_CN'
 import * as projectApi from '@/services/api/project'
+import { departmentApi } from '@/services/api'
+import { getUsers } from '@/services/api/user'
+import type { Department } from '@/services/api/department'
 import styles from './index.module.css'
 
 // 设置 dayjs 中文
@@ -68,6 +77,7 @@ dayjs.locale('zh-cn')
 
 const { Title, Text } = Typography
 const { TextArea } = Input
+const { RangePicker } = DatePicker
 
 // 项目颜色
 const projectColors = [
@@ -76,7 +86,7 @@ const projectColors = [
 ]
 
 interface Project {
-  id: number
+  id: string
   name: string
   key: string
   description?: string
@@ -90,12 +100,21 @@ interface Project {
   endDate?: string
 }
 
+// 里程碑接口
+interface MilestoneItem {
+  id: string
+  name: string
+  targetDate: string
+  description?: string
+}
+
 /**
  * 项目管理页面
  * 包含项目列表、项目分析、项目看板、项目甘特图四个视图
  */
 const Projects = () => {
   const navigate = useNavigate()
+  const { message } = App.useApp()
   const [searchParams, setSearchParams] = useSearchParams()
   const [loading, setLoading] = useState(true)
   const [projects, setProjects] = useState<Project[]>([])
@@ -108,14 +127,22 @@ const Projects = () => {
   const [drawerVisible, setDrawerVisible] = useState(false)
   const [createLoading, setCreateLoading] = useState(false)
   const [selectedColor, setSelectedColor] = useState(projectColors[0])
-  const [fileList, setFileList] = useState<UploadFile[]>([])
   const [form] = Form.useForm()
-  const [projectKey, setProjectKey] = useState('')
-  const [isLongTerm, setIsLongTerm] = useState(false)
   
   // 实时预览状态
   const [previewName, setPreviewName] = useState('')
   const [previewDesc, setPreviewDesc] = useState('')
+  
+  // 4步向导相关状态
+  const [currentStep, setCurrentStep] = useState(0)
+  const [departments, setDepartments] = useState<Department[]>([])
+  const [users, setUsers] = useState<any[]>([])
+  const [loadingData, setLoadingData] = useState(false)
+  const [selectedDepartments, setSelectedDepartments] = useState<string[]>([])
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([])
+  const [milestones, setMilestones] = useState<MilestoneItem[]>([])
+  const [newMilestone, setNewMilestone] = useState({ name: '', targetDate: '', description: '' })
+  const [formData, setFormData] = useState<any>({})
   
   // 编辑项目抽屉相关状态
   const [editDrawerVisible, setEditDrawerVisible] = useState(false)
@@ -138,7 +165,47 @@ const Projects = () => {
 
   useEffect(() => {
     loadProjects()
+    loadDepartmentsAndUsers()
   }, [])
+  
+  // 加载部门和用户数据
+  const loadDepartmentsAndUsers = async () => {
+    setLoadingData(true)
+    try {
+      const [deptsRes, usersRes] = await Promise.all([
+        departmentApi.getDepartmentsByOrgId(1).catch((err) => {
+          console.warn('Failed to load departments from API:', err)
+          message.error('加载部门数据失败')
+          return null
+        }),
+        getUsers().catch((err) => {
+          console.warn('Failed to load users from API:', err)
+          message.error('加载用户数据失败')
+          return null
+        })
+      ])
+      
+      // 如果API返回了有效数据则使用，否则设置为空数组
+      if (deptsRes && Array.isArray(deptsRes) && deptsRes.length > 0) {
+        setDepartments(deptsRes)
+      } else {
+        setDepartments([])
+      }
+      
+      if (usersRes && (usersRes as any).list && (usersRes as any).list.length > 0) {
+        setUsers((usersRes as any).list)
+      } else {
+        setUsers([])
+      }
+    } catch (error) {
+      console.error('Failed to load data:', error)
+      message.error('加载数据失败，请稍后重试')
+      setDepartments([])
+      setUsers([])
+    } finally {
+      setLoadingData(false)
+    }
+  }
 
   useEffect(() => {
     filterProjects()
@@ -179,45 +246,69 @@ const Projects = () => {
     setFilteredProjects(filtered)
   }
 
-  // 生成项目标识 - AF-0001 格式
-  const generateProjectKey = useCallback(() => {
-    const nextNumber = projects.length + 1
-    const paddedNumber = String(nextNumber).padStart(4, '0')
-    return `AF-${paddedNumber}`
-  }, [projects.length])
+  // 根据名称生成项目标识
+  const generateKeyFromName = (name: string) => {
+    if (!name) return ''
+    const englishChars = name.split('').filter(char => {
+      const code = char.charCodeAt(0)
+      return (code >= 65 && code <= 90) || (code >= 97 && code <= 122) || (code >= 48 && code <= 57)
+    }).map(char => char.toUpperCase()).join('')
+    
+    if (!englishChars) {
+      return 'PROJ' + Math.floor(Math.random() * 1000)
+    }
+    
+    return englishChars.slice(0, 6).toUpperCase()
+  }
 
   // 打开创建项目抽屉
   const openCreateDrawer = () => {
-    const newKey = generateProjectKey()
-    setProjectKey(newKey)
     setDrawerVisible(true)
+    setCurrentStep(0)
     setSelectedColor(projectColors[0])
-    setFileList([])
     setPreviewName('')
     setPreviewDesc('')
-    setIsLongTerm(false)
+    setSelectedDepartments([])
+    setSelectedMembers([])
+    setMilestones([])
+    setNewMilestone({ name: '', targetDate: '', description: '' })
+    setFormData({})
     form.resetFields()
-    form.setFieldValue('key', newKey)
   }
 
   // 关闭创建项目抽屉
   const closeCreateDrawer = () => {
     setDrawerVisible(false)
+    setCurrentStep(0)
     form.resetFields()
     setPreviewName('')
     setPreviewDesc('')
-    setIsLongTerm(false)
+    setSelectedDepartments([])
+    setSelectedMembers([])
+    setMilestones([])
+    setFormData({})
   }
 
   // 提交创建项目
-  const handleCreateProject = async (values: Record<string, unknown>) => {
+  const handleCreateProject = async () => {
     setCreateLoading(true)
     try {
+      const dateRange = formData.dateRange
       await projectApi.createProject({
-        name: values.name as string,
-        key: projectKey,
-        description: values.description as string | undefined,
+        name: formData.name,
+        key: formData.key,
+        description: formData.description,
         color: selectedColor,
+        startDate: dateRange?.[0]?.format('YYYY-MM-DD'),
+        endDate: dateRange?.[1]?.format('YYYY-MM-DD'),
+        ownerId: formData.ownerId,
+        departmentIds: selectedDepartments,
+        memberIds: selectedMembers,
+        milestones: milestones.map(m => ({
+          name: m.name,
+          targetDate: m.targetDate,
+          description: m.description
+        }))
       })
       
       message.success('项目创建成功')
@@ -231,15 +322,156 @@ const Projects = () => {
       setCreateLoading(false)
     }
   }
+  
+  // 下一步
+  const handleNext = async () => {
+    if (currentStep === 0) {
+      try {
+        const values = await form.validateFields()
+        setFormData({ ...formData, ...values })
+        setPreviewName(values.name || '')
+        setPreviewDesc(values.description || '')
+        setCurrentStep(1)
+      } catch {
+        // 验证失败
+      }
+    } else if (currentStep === 1) {
+      if (selectedDepartments.length === 0) {
+        message.warning('请至少选择一个参与部门')
+        return
+      }
+      setCurrentStep(2)
+    } else if (currentStep === 2) {
+      setCurrentStep(3)
+    }
+  }
 
-  // 处理表单值变化，实时更新预览
-  const handleFormValuesChange = (changedValues: Record<string, unknown>) => {
-    if ('name' in changedValues) {
-      setPreviewName(changedValues.name as string || '')
+  // 上一步
+  const handlePrev = () => {
+    setCurrentStep(currentStep - 1)
+  }
+  
+  // 切换部门选择
+  const handleDepartmentToggle = (deptId: string) => {
+    if (selectedDepartments.includes(deptId)) {
+      setSelectedDepartments(selectedDepartments.filter(id => id !== deptId))
+      // 同时移除该部门的成员
+      const deptMembers = users.filter(u => u.departmentId === deptId).map(u => u.id)
+      setSelectedMembers(selectedMembers.filter(id => !deptMembers.includes(id)))
+    } else {
+      setSelectedDepartments([...selectedDepartments, deptId])
     }
-    if ('description' in changedValues) {
-      setPreviewDesc(changedValues.description as string || '')
+  }
+
+  // 切换成员选择
+  const handleMemberToggle = (memberId: string) => {
+    if (selectedMembers.includes(memberId)) {
+      setSelectedMembers(selectedMembers.filter(id => id !== memberId))
+    } else {
+      setSelectedMembers([...selectedMembers, memberId])
     }
+  }
+
+  // 全选部门成员
+  const handleSelectAllDeptMembers = (deptId: string) => {
+    const deptMembers = users.filter(u => u.departmentId === deptId).map(u => u.id)
+    const allSelected = deptMembers.every(id => selectedMembers.includes(id))
+    
+    if (allSelected) {
+      setSelectedMembers(selectedMembers.filter(id => !deptMembers.includes(id)))
+    } else {
+      const newMembers = [...selectedMembers]
+      deptMembers.forEach(id => {
+        if (!newMembers.includes(id)) {
+          newMembers.push(id)
+        }
+      })
+      setSelectedMembers(newMembers)
+    }
+  }
+
+  // 添加里程碑
+  const handleAddMilestone = () => {
+    if (!newMilestone.name || !newMilestone.targetDate) {
+      message.warning('请填写里程碑名称和目标日期')
+      return
+    }
+    
+    setMilestones([
+      ...milestones,
+      {
+        id: Date.now().toString(),
+        name: newMilestone.name,
+        targetDate: newMilestone.targetDate,
+        description: newMilestone.description
+      }
+    ])
+    setNewMilestone({ name: '', targetDate: '', description: '' })
+  }
+
+  // 删除里程碑
+  const handleDeleteMilestone = (id: string) => {
+    setMilestones(milestones.filter(m => m.id !== id))
+  }
+
+  // AI生成里程碑建议
+  const handleAIGenerateMilestones = () => {
+    const dateRange = formData.dateRange
+    if (!dateRange || !dateRange[0] || !dateRange[1]) {
+      message.warning('请先设置项目周期')
+      return
+    }
+    
+    const startDate = dateRange[0]
+    const endDate = dateRange[1]
+    const duration = endDate.diff(startDate, 'day')
+    
+    // 根据项目周期生成建议里程碑
+    const suggestedMilestones: MilestoneItem[] = []
+    
+    if (duration >= 30) {
+      suggestedMilestones.push({
+        id: Date.now().toString() + '_1',
+        name: '需求确认',
+        targetDate: startDate.add(Math.floor(duration * 0.15), 'day').format('YYYY-MM-DD'),
+        description: '完成需求分析和确认'
+      })
+    }
+    
+    if (duration >= 60) {
+      suggestedMilestones.push({
+        id: Date.now().toString() + '_2',
+        name: '方案设计完成',
+        targetDate: startDate.add(Math.floor(duration * 0.3), 'day').format('YYYY-MM-DD'),
+        description: '完成整体方案设计'
+      })
+    }
+    
+    suggestedMilestones.push({
+      id: Date.now().toString() + '_3',
+      name: '中期检查',
+      targetDate: startDate.add(Math.floor(duration * 0.5), 'day').format('YYYY-MM-DD'),
+      description: '项目中期进度检查'
+    })
+    
+    if (duration >= 45) {
+      suggestedMilestones.push({
+        id: Date.now().toString() + '_4',
+        name: '测试验收',
+        targetDate: startDate.add(Math.floor(duration * 0.85), 'day').format('YYYY-MM-DD'),
+        description: '完成测试和验收'
+      })
+    }
+    
+    suggestedMilestones.push({
+      id: Date.now().toString() + '_5',
+      name: '项目完成',
+      targetDate: endDate.format('YYYY-MM-DD'),
+      description: '项目交付和总结'
+    })
+    
+    setMilestones(suggestedMilestones)
+    message.success('已生成里程碑建议')
   }
 
   // 打开编辑项目抽屉
@@ -308,11 +540,8 @@ const Projects = () => {
       key: project.key,
       description: project.description,
       visibility: 'private',
-      enableIssues: true,
-      enableWiki: true,
-      enableIterations: true,
-      notifyOnIssueCreate: true,
-      notifyOnIssueUpdate: true,
+      notifyOnTaskCreate: true,
+      notifyOnTaskUpdate: true,
       notifyOnComment: true,
       notifyOnMention: true,
     })
@@ -361,9 +590,25 @@ const Projects = () => {
   // 归档项目
   const handleArchiveProject = async () => {
     if (!settingsProject) return
-    message.success('项目已归档')
-    closeSettingsDrawer()
-    loadProjects()
+    try {
+      await projectApi.archiveProject(settingsProject.id)
+      message.success('项目已归档')
+      closeSettingsDrawer()
+      loadProjects()
+    } catch {
+      message.error('归档失败')
+    }
+  }
+
+  // 恢复归档项目
+  const handleRestoreProject = async (projectId: string) => {
+    try {
+      await projectApi.restoreProject(projectId)
+      message.success('项目已恢复')
+      loadProjects()
+    } catch {
+      message.error('恢复失败')
+    }
   }
 
   // 删除项目（从设置抽屉）
@@ -379,7 +624,7 @@ const Projects = () => {
     }
   }
 
-  const handleToggleStar = async (projectId: number, starred: number) => {
+  const handleToggleStar = async (projectId: string, starred: number) => {
     try {
       await projectApi.toggleProjectStar(projectId)
       setProjects(projects.map(p =>
@@ -391,7 +636,7 @@ const Projects = () => {
     }
   }
 
-  const handleDeleteProject = async (projectId: number) => {
+  const handleDeleteProject = async (projectId: string) => {
     Modal.confirm({
       title: '确认删除',
       content: '删除项目后，所有相关数据将被清除，此操作不可恢复。',
@@ -459,6 +704,319 @@ const Projects = () => {
     }
   ]
 
+  // ==================== 步骤内容渲染 ====================
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 0:
+        return (
+          <Form
+            form={form}
+            layout="vertical"
+            initialValues={{
+              visibility: 'private',
+              ...formData
+            }}
+          >
+            <div className={styles.drawerSectionTitle}>基本信息</div>
+            
+            <Row gutter={16}>
+              <Col span={16}>
+                <Form.Item
+                  label="项目名称"
+                  name="name"
+                  rules={[{ required: true, message: '请输入项目名称' }]}
+                >
+                  <Input
+                    size="large"
+                    placeholder="请输入项目名称"
+                    onChange={(e) => {
+                      const key = generateKeyFromName(e.target.value)
+                      form.setFieldValue('key', key)
+                      setPreviewName(e.target.value)
+                    }}
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={8}>
+                <Form.Item
+                  label="项目标识"
+                  name="key"
+                  rules={[
+                    { required: true, message: '请输入项目标识' },
+                    { pattern: /^[A-Z0-9]+$/, message: '只能包含大写字母和数字' }
+                  ]}
+                >
+                  <Input size="large" placeholder="如: PROJ" maxLength={10} />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Form.Item
+              label="项目描述"
+              name="description"
+            >
+              <TextArea
+                rows={4}
+                placeholder="请输入项目描述，帮助团队成员了解项目目标和范围"
+                maxLength={500}
+                showCount
+                onChange={(e) => setPreviewDesc(e.target.value)}
+              />
+            </Form.Item>
+
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item
+                  label="项目周期"
+                  name="dateRange"
+                  rules={[{ required: true, message: '请选择项目周期' }]}
+                >
+                  <RangePicker
+                    size="large"
+                    style={{ width: '100%' }}
+                    placeholder={['开始日期', '结束日期']}
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  label="项目负责人"
+                  name="ownerId"
+                  rules={[{ required: true, message: '请选择项目负责人' }]}
+                >
+                  <Select size="large" placeholder="请选择项目负责人">
+                    {users.map(user => (
+                      <Select.Option key={user.id} value={user.id}>
+                        <Space>
+                          <Avatar size="small" src={user.avatar}>{user.name?.charAt(0)}</Avatar>
+                          {user.name}
+                        </Space>
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Form.Item label="项目颜色">
+              <div className={styles.colorPicker}>
+                {projectColors.map(color => (
+                  <div
+                    key={color}
+                    className={`${styles.colorItem} ${selectedColor === color ? styles.colorItemActive : ''}`}
+                    style={{ backgroundColor: color }}
+                    onClick={() => setSelectedColor(color)}
+                  />
+                ))}
+              </div>
+            </Form.Item>
+          </Form>
+        )
+      
+      case 1:
+        return (
+          <div>
+            <div className={styles.drawerSectionTitle}>
+              <ApartmentOutlined style={{ marginRight: 8 }} />
+              选择参与部门
+            </div>
+            <p style={{ color: '#666', marginBottom: 16 }}>
+              选择需要参与此项目的部门，后续可以为每个部门分配任务
+            </p>
+            
+            {loadingData ? (
+              <div className={styles.loading}>
+                <Spin tip="加载部门数据中..." />
+              </div>
+            ) : departments.length === 0 ? (
+              <Empty description="暂无可选部门" />
+            ) : (
+              <div className={styles.departmentList}>
+                {departments.map(dept => (
+                  <div
+                    key={dept.id}
+                    className={`${styles.departmentItem} ${selectedDepartments.includes(dept.id) ? styles.departmentItemSelected : ''}`}
+                    onClick={() => handleDepartmentToggle(dept.id)}
+                  >
+                    <Checkbox checked={selectedDepartments.includes(dept.id)} />
+                    <div className={styles.departmentInfo}>
+                      <div className={styles.departmentName}>{dept.name}</div>
+                      <div className={styles.departmentMeta}>
+                        <span><UserOutlined /> {dept.memberCount || 0} 人</span>
+                        {dept.managerName && <span>负责人: {dept.managerName}</span>}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            <div style={{ marginTop: 16, color: '#666' }}>
+              已选择 <strong>{selectedDepartments.length}</strong> 个部门
+            </div>
+          </div>
+        )
+      
+      case 2:
+        return (
+          <div>
+            <div className={styles.drawerSectionTitle}>
+              <TeamOutlined style={{ marginRight: 8 }} />
+              添加项目成员
+            </div>
+            <p style={{ color: '#666', marginBottom: 16 }}>
+              从已选部门中选择参与项目的成员
+            </p>
+            
+            {selectedDepartments.length === 0 ? (
+              <Empty description="请先选择参与部门" />
+            ) : (
+              <div className={styles.memberSelection}>
+                {selectedDepartments.map(deptId => {
+                  const dept = departments.find(d => d.id === deptId)
+                  const deptMembers = users.filter(u => u.departmentId === deptId)
+                  const selectedCount = deptMembers.filter(m => selectedMembers.includes(m.id)).length
+                  const allSelected = deptMembers.length > 0 && deptMembers.every(m => selectedMembers.includes(m.id))
+                  
+                  return (
+                    <div key={deptId} className={styles.memberGroup}>
+                      <div className={styles.memberGroupHeader}>
+                        <Checkbox
+                          checked={allSelected}
+                          indeterminate={selectedCount > 0 && !allSelected}
+                          onChange={() => handleSelectAllDeptMembers(deptId)}
+                        >
+                          <strong>{dept?.name}</strong>
+                        </Checkbox>
+                        <span className={styles.memberCount}>
+                          已选 {selectedCount}/{deptMembers.length} 人
+                        </span>
+                      </div>
+                      <div className={styles.memberList}>
+                        {deptMembers.map(member => (
+                          <div
+                            key={member.id}
+                            className={`${styles.memberItem} ${selectedMembers.includes(member.id) ? styles.memberItemSelected : ''}`}
+                            onClick={() => handleMemberToggle(member.id)}
+                          >
+                            <Checkbox checked={selectedMembers.includes(member.id)} />
+                            <Avatar size="small" src={member.avatar}>{member.name?.charAt(0)}</Avatar>
+                            <div className={styles.memberInfo}>
+                              <div className={styles.memberName}>{member.name}</div>
+                              <div className={styles.memberRole}>{member.role}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+            
+            <div style={{ marginTop: 16, color: '#666' }}>
+              已选择 <strong>{selectedMembers.length}</strong> 名成员
+            </div>
+          </div>
+        )
+      
+      case 3:
+        return (
+          <div>
+            <div className={styles.drawerSectionTitle}>
+              <FlagOutlined style={{ marginRight: 8 }} />
+              设置项目里程碑
+              <span style={{ fontSize: 12, color: '#999', marginLeft: 8 }}>(可选)</span>
+            </div>
+            <p style={{ color: '#666', marginBottom: 16 }}>
+              设置项目的关键节点，帮助跟踪项目进度
+            </p>
+            
+            <div className={styles.milestoneForm}>
+              <Row gutter={12}>
+                <Col span={8}>
+                  <Input
+                    placeholder="里程碑名称"
+                    value={newMilestone.name}
+                    onChange={(e) => setNewMilestone({ ...newMilestone, name: e.target.value })}
+                  />
+                </Col>
+                <Col span={6}>
+                  <DatePicker
+                    placeholder="目标日期"
+                    style={{ width: '100%' }}
+                    value={newMilestone.targetDate ? dayjs(newMilestone.targetDate) : null}
+                    onChange={(date) => setNewMilestone({ ...newMilestone, targetDate: date?.format('YYYY-MM-DD') || '' })}
+                  />
+                </Col>
+                <Col span={7}>
+                  <Input
+                    placeholder="描述（可选）"
+                    value={newMilestone.description}
+                    onChange={(e) => setNewMilestone({ ...newMilestone, description: e.target.value })}
+                  />
+                </Col>
+                <Col span={3}>
+                  <Button type="primary" icon={<PlusOutlined />} onClick={handleAddMilestone}>
+                    添加
+                  </Button>
+                </Col>
+              </Row>
+            </div>
+            
+            <div style={{ marginTop: 16, marginBottom: 16 }}>
+              <Button
+                icon={<RobotOutlined />}
+                onClick={handleAIGenerateMilestones}
+              >
+                AI智能生成里程碑建议
+              </Button>
+            </div>
+            
+            {milestones.length === 0 ? (
+              <Empty description="暂未设置里程碑" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+            ) : (
+              <List
+                className={styles.milestoneList}
+                dataSource={milestones.sort((a, b) => dayjs(a.targetDate).diff(dayjs(b.targetDate)))}
+                renderItem={(item) => (
+                  <List.Item
+                    actions={[
+                      <Button
+                        type="text"
+                        danger
+                        icon={<DeleteOutlined />}
+                        onClick={() => handleDeleteMilestone(item.id)}
+                      />
+                    ]}
+                  >
+                    <List.Item.Meta
+                      avatar={
+                        <div className={styles.milestoneIndex}>
+                          <FlagOutlined />
+                        </div>
+                      }
+                      title={item.name}
+                      description={
+                        <Space>
+                          <CalendarOutlined />
+                          {item.targetDate}
+                          {item.description && <span>· {item.description}</span>}
+                        </Space>
+                      }
+                    />
+                  </List.Item>
+                )}
+              />
+            )}
+          </div>
+        )
+      
+      default:
+        return null
+    }
+  }
+
   // ==================== 创建项目抽屉内容 ====================
   const renderCreateDrawer = () => (
     <Drawer
@@ -475,10 +1033,25 @@ const Projects = () => {
       styles={{ body: { padding: 0 } }}
       footer={
         <div className={styles.drawerFooter}>
-          <Button onClick={closeCreateDrawer}>取消</Button>
-          <Button type="primary" loading={createLoading} onClick={() => form.submit()}>
-            创建项目
-          </Button>
+          <div>
+            {currentStep > 0 && (
+              <Button onClick={handlePrev}>
+                上一步
+              </Button>
+            )}
+          </div>
+          <Space>
+            <Button onClick={closeCreateDrawer}>取消</Button>
+            {currentStep < 3 ? (
+              <Button type="primary" onClick={handleNext}>
+                下一步
+              </Button>
+            ) : (
+              <Button type="primary" loading={createLoading} onClick={handleCreateProject}>
+                完成创建
+              </Button>
+            )}
+          </Space>
         </div>
       }
     >
@@ -487,153 +1060,18 @@ const Projects = () => {
           {/* 左侧表单区域 */}
           <Col xs={24} lg={16}>
             <Card className={styles.drawerFormCard}>
-              <Form
-                form={form}
-                layout="vertical"
-                onFinish={handleCreateProject}
-                onValuesChange={handleFormValuesChange}
-                initialValues={{
-                  visibility: 'private'
-                }}
-              >
-                {/* 基本信息 */}
-                <div className={styles.drawerSectionTitle}>基本信息</div>
-                
-                <Row gutter={16}>
-                  <Col span={16}>
-                    <Form.Item
-                      label="项目名称"
-                      name="name"
-                      rules={[{ required: true, message: '请输入项目名称' }]}
-                    >
-                      <Input
-                        size="large"
-                        placeholder="请输入项目名称"
-                      />
-                    </Form.Item>
-                  </Col>
-                  <Col span={8}>
-                    <Form.Item
-                      label="项目标识"
-                      name="key"
-                      tooltip="项目标识由系统自动生成，创建后不可修改"
-                    >
-                      <Input
-                        size="large"
-                        value={projectKey}
-                        disabled
-                        className={styles.disabledInput}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
-
-                <Form.Item
-                  label="项目描述"
-                  name="description"
-                >
-                  <TextArea
-                    rows={4}
-                    placeholder="请输入项目描述，帮助团队成员了解项目目标和范围"
-                    maxLength={500}
-                    showCount
-                  />
-                </Form.Item>
-
-                <Row gutter={16}>
-                  <Col span={12}>
-                    <Form.Item label="项目周期">
-                      <div className={styles.datePickerWrapper}>
-                        <Form.Item name="startDate" noStyle>
-                          <DatePicker
-                            size="large"
-                            style={{ width: '100%' }}
-                            placeholder="开始日期"
-                            locale={locale}
-                            format="YYYY年MM月DD日"
-                          />
-                        </Form.Item>
-                        <span className={styles.dateSeparator}>至</span>
-                        {isLongTerm ? (
-                          <Input
-                            size="large"
-                            value="长期"
-                            disabled
-                            className={styles.longTermInput}
-                          />
-                        ) : (
-                          <Form.Item name="endDate" noStyle>
-                            <DatePicker
-                              size="large"
-                              style={{ width: '100%' }}
-                              placeholder="结束日期"
-                              locale={locale}
-                              format="YYYY年MM月DD日"
-                            />
-                          </Form.Item>
-                        )}
-                      </div>
-                      <Checkbox
-                        checked={isLongTerm}
-                        onChange={(e) => {
-                          setIsLongTerm(e.target.checked)
-                          if (e.target.checked) {
-                            form.setFieldValue('endDate', null)
-                          }
-                        }}
-                        className={styles.longTermCheckbox}
-                      >
-                        长期项目（无固定结束日期）
-                      </Checkbox>
-                    </Form.Item>
-                  </Col>
-                  <Col span={12}>
-                    <Form.Item
-                      label="可见性"
-                      name="visibility"
-                      rules={[{ required: true }]}
-                    >
-                      <Select size="large">
-                        <Select.Option value="private">私有 - 仅项目成员可见</Select.Option>
-                        <Select.Option value="internal">内部 - 团队成员可见</Select.Option>
-                        <Select.Option value="public">公开 - 所有人可见</Select.Option>
-                      </Select>
-                    </Form.Item>
-                  </Col>
-                </Row>
-
-                {/* 项目颜色 */}
-                <Form.Item label="项目颜色">
-                  <div className={styles.colorPicker}>
-                    {projectColors.map(color => (
-                      <div
-                        key={color}
-                        className={`${styles.colorItem} ${selectedColor === color ? styles.colorItemActive : ''}`}
-                        style={{ backgroundColor: color }}
-                        onClick={() => setSelectedColor(color)}
-                      />
-                    ))}
-                  </div>
-                </Form.Item>
-
-                {/* 项目封面 */}
-                <Form.Item label="项目封面">
-                  <Upload
-                    listType="picture-card"
-                    fileList={fileList}
-                    onChange={({ fileList }) => setFileList(fileList)}
-                    maxCount={1}
-                    beforeUpload={() => false}
-                  >
-                    {fileList.length === 0 && (
-                      <div>
-                        <PlusOutlined />
-                        <div style={{ marginTop: 8 }}>上传封面</div>
-                      </div>
-                    )}
-                  </Upload>
-                </Form.Item>
-              </Form>
+              <Steps
+                current={currentStep}
+                items={[
+                  { title: '基本信息', icon: <ProjectOutlined /> },
+                  { title: '选择部门', icon: <ApartmentOutlined /> },
+                  { title: '添加成员', icon: <TeamOutlined /> },
+                  { title: '设置里程碑', icon: <FlagOutlined /> },
+                ]}
+                style={{ marginBottom: 32 }}
+              />
+              
+              {renderStepContent()}
             </Card>
           </Col>
 
@@ -648,14 +1086,49 @@ const Projects = () => {
                   icon={<ProjectOutlined />}
                 />
                 <h3 className={styles.drawerPreviewName}>
-                  {previewName || '项目名称'}
+                  {previewName || formData.name || '项目名称'}
                 </h3>
                 <p className={styles.drawerPreviewKey}>
-                  {projectKey || 'AF-0001'}
+                  {formData.key || form.getFieldValue('key') || 'KEY'}
                 </p>
                 <p className={styles.drawerPreviewDesc}>
-                  {previewDesc || '项目描述将显示在这里'}
+                  {previewDesc || formData.description || '项目描述将显示在这里'}
                 </p>
+                
+                {selectedDepartments.length > 0 && (
+                  <div style={{ marginTop: 16 }}>
+                    <div style={{ color: '#666', fontSize: 12, marginBottom: 8 }}>参与部门</div>
+                    <Space wrap>
+                      {selectedDepartments.map(deptId => {
+                        const dept = departments.find(d => d.id === deptId)
+                        return <Tag key={deptId}>{dept?.name}</Tag>
+                      })}
+                    </Space>
+                  </div>
+                )}
+                
+                {selectedMembers.length > 0 && (
+                  <div style={{ marginTop: 12 }}>
+                    <div style={{ color: '#666', fontSize: 12, marginBottom: 8 }}>项目成员</div>
+                    <Avatar.Group maxCount={5}>
+                      {selectedMembers.map(memberId => {
+                        const member = users.find(u => u.id === memberId)
+                        return (
+                          <Tooltip key={memberId} title={member?.name}>
+                            <Avatar src={member?.avatar}>{member?.name?.charAt(0)}</Avatar>
+                          </Tooltip>
+                        )
+                      })}
+                    </Avatar.Group>
+                  </div>
+                )}
+                
+                {milestones.length > 0 && (
+                  <div style={{ marginTop: 12 }}>
+                    <div style={{ color: '#666', fontSize: 12, marginBottom: 8 }}>里程碑</div>
+                    <div style={{ fontSize: 14, color: '#1a1a1a' }}>{milestones.length} 个</div>
+                  </div>
+                )}
               </div>
             </Card>
 
@@ -672,22 +1145,22 @@ const Projects = () => {
               <div className={styles.tipItem}>
                 <RocketOutlined className={styles.tipIcon} />
                 <div className={styles.tipContent}>
-                  <div className={styles.tipTitle}>快速启动</div>
-                  <div className={styles.tipDesc}>填写项目名称即可快速创建，其他信息可稍后完善</div>
+                  <div className={styles.tipTitle}>步骤引导</div>
+                  <div className={styles.tipDesc}>按照步骤完成项目创建，确保信息完整</div>
                 </div>
               </div>
               <div className={styles.tipItem}>
                 <SafetyCertificateOutlined className={styles.tipIcon} />
                 <div className={styles.tipContent}>
-                  <div className={styles.tipTitle}>唯一标识</div>
-                  <div className={styles.tipDesc}>项目标识由系统自动生成，确保全局唯一性</div>
+                  <div className={styles.tipTitle}>部门协作</div>
+                  <div className={styles.tipDesc}>选择参与部门后可以为每个部门分配任务</div>
                 </div>
               </div>
               <div className={styles.tipItem}>
                 <ThunderboltOutlined className={styles.tipIcon} />
                 <div className={styles.tipContent}>
-                  <div className={styles.tipTitle}>灵活配置</div>
-                  <div className={styles.tipDesc}>创建后可随时在项目设置中调整配置信息</div>
+                  <div className={styles.tipTitle}>里程碑管理</div>
+                  <div className={styles.tipDesc}>设置里程碑帮助跟踪项目关键节点</div>
                 </div>
               </div>
             </Card>
@@ -843,7 +1316,7 @@ const Projects = () => {
               name="key"
               label="项目标识"
               rules={[{ required: true, message: '请输入项目标识' }]}
-              extra="项目标识用于事项编号前缀，如 FE-1001"
+              extra="项目标识用于任务编号前缀，如 FE-1001"
             >
               <Input placeholder="请输入项目标识" style={{ width: 200 }} disabled />
             </Form.Item>
@@ -872,33 +1345,6 @@ const Projects = () => {
               </Select>
             </Form.Item>
 
-            <Divider />
-
-            <h3 className={styles.settingsSectionTitle}>功能开关</h3>
-
-            <Form.Item
-              name="enableIssues"
-              label="启用事项管理"
-              valuePropName="checked"
-            >
-              <Switch />
-            </Form.Item>
-
-            <Form.Item
-              name="enableWiki"
-              label="启用知识库"
-              valuePropName="checked"
-            >
-              <Switch />
-            </Form.Item>
-
-            <Form.Item
-              name="enableIterations"
-              label="启用迭代管理"
-              valuePropName="checked"
-            >
-              <Switch />
-            </Form.Item>
           </div>
         )
       },
@@ -912,19 +1358,19 @@ const Projects = () => {
         ),
         children: (
           <div className={styles.settingsTabContent}>
-            <h3 className={styles.settingsSectionTitle}>事项通知</h3>
+            <h3 className={styles.settingsSectionTitle}>任务通知</h3>
             
             <Form.Item
-              name="notifyOnIssueCreate"
-              label="创建事项时通知"
+              name="notifyOnTaskCreate"
+              label="创建任务时通知"
               valuePropName="checked"
             >
               <Switch />
             </Form.Item>
 
             <Form.Item
-              name="notifyOnIssueUpdate"
-              label="更新事项时通知"
+              name="notifyOnTaskUpdate"
+              label="更新任务时通知"
               valuePropName="checked"
             >
               <Switch />
@@ -972,7 +1418,7 @@ const Projects = () => {
             </Form.Item>
 
             <Form.Item
-              label="谁可以创建事项"
+              label="谁可以创建任务"
             >
               <Select defaultValue="all" style={{ width: 200 }}>
                 <Select.Option value="all">所有成员</Select.Option>
@@ -981,7 +1427,7 @@ const Projects = () => {
             </Form.Item>
 
             <Form.Item
-              label="谁可以删除事项"
+              label="谁可以删除任务"
             >
               <Select defaultValue="admin" style={{ width: 200 }}>
                 <Select.Option value="all">所有成员</Select.Option>
@@ -1097,6 +1543,7 @@ const Projects = () => {
           <Form
             form={settingsForm}
             layout="vertical"
+            name="settingsForm"
           >
             <Tabs items={settingsTabItems} className={styles.settingsTabs} />
           </Form>
@@ -1404,224 +1851,109 @@ const Projects = () => {
     )
   }
 
-  // ==================== 项目看板视图 ====================
-  const renderKanbanTab = () => {
-    const groupedProjects = {
-      planning: filteredProjects.filter(p => p.status === 'planning'),
-      active: filteredProjects.filter(p => p.status === 'active'),
-      completed: filteredProjects.filter(p => p.status === 'completed'),
-      archived: filteredProjects.filter(p => p.status === 'archived'),
-    }
-
-    const statusConfig = {
-      planning: { title: '规划中', color: '#faad14' },
-      active: { title: '进行中', color: '#1677ff' },
-      completed: { title: '已完成', color: '#52c41a' },
-      archived: { title: '已归档', color: '#8c8c8c' },
-    }
-
-    const renderKanbanCard = (project: Project) => (
-      <Card key={project.id} className={styles.kanbanCard} hoverable onClick={() => navigate(`/projects/${project.id}`)}>
-        <div className={styles.kanbanCardHeader}>
-          <Avatar
-            shape="square"
-            size={36}
-            style={{ backgroundColor: project.color || '#1677ff' }}
-          >
-            {project.name.charAt(0)}
-          </Avatar>
-          <div className={styles.kanbanCardTitle}>
-            <Text strong>{project.name}</Text>
-            <Text type="secondary" className={styles.projectKey}>{project.key}</Text>
-          </div>
-        </div>
-        <div className={styles.kanbanCardBody}>
-          <Text type="secondary" className={styles.description}>
-            {project.description || '暂无描述'}
-          </Text>
-        </div>
-        <div className={styles.kanbanCardFooter}>
-          <div className={styles.stats}>
-            <span><TeamOutlined /> {project.memberCount || 0}</span>
-          </div>
-          <Progress 
-            percent={project.progress || 0} 
-            size="small" 
-            showInfo={false}
-            strokeColor={project.color || '#1677ff'}
+  // ==================== 归档项目视图 ====================
+  const renderArchivedTab = () => {
+    const archivedProjects = projects.filter(p => p.status === 'archived')
+    
+    return (
+      <div className={styles.tabContent}>
+        {archivedProjects.length === 0 ? (
+          <Empty
+            description="暂无归档项目"
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
           />
-        </div>
-      </Card>
-    )
-
-    const renderColumn = (status: keyof typeof statusConfig) => {
-      const config = statusConfig[status]
-      const columnProjects = groupedProjects[status]
-      
-      return (
-        <div className={styles.kanbanColumn}>
-          <div className={styles.kanbanColumnHeader}>
-            <span className={styles.statusDot} style={{ backgroundColor: config.color }} />
-            <Text strong>{config.title}</Text>
-            <Tag>{columnProjects.length}</Tag>
-          </div>
-          <div className={styles.kanbanColumnContent}>
-            {columnProjects.length === 0 ? (
-              <Empty description="暂无项目" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-            ) : (
-              columnProjects.map(renderKanbanCard)
-            )}
-          </div>
-        </div>
-      )
-    }
-
-    return (
-      <div className={styles.tabContent}>
-        <div className={styles.kanbanBoard}>
-          {renderColumn('planning')}
-          {renderColumn('active')}
-          {renderColumn('completed')}
-          {renderColumn('archived')}
-        </div>
-      </div>
-    )
-  }
-
-  // ==================== 项目甘特图视图 ====================
-  const renderGanttTab = () => {
-    const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
-
-    const getStatusColor = (status: string) => {
-      const colors: Record<string, string> = {
-        planning: '#faad14',
-        active: '#1677ff',
-        completed: '#52c41a',
-        archived: '#8c8c8c',
-      }
-      return colors[status] || '#1677ff'
-    }
-
-    const getStatusText = (status: string) => {
-      const texts: Record<string, string> = {
-        planning: '规划中',
-        active: '进行中',
-        completed: '已完成',
-        archived: '已归档',
-      }
-      return texts[status] || status
-    }
-
-    const calculateBarStyle = (project: Project) => {
-      const startMonth = project.startDate ? parseInt(project.startDate.split('-')[1]) : 1
-      const endMonth = project.endDate ? parseInt(project.endDate.split('-')[1]) : 12
-      const left = ((startMonth - 1) / 12) * 100
-      const width = ((endMonth - startMonth + 1) / 12) * 100
-      return { left: `${left}%`, width: `${width}%` }
-    }
-
-    return (
-      <div className={styles.tabContent}>
-        <Card className={styles.ganttCard}>
-          {filteredProjects.length === 0 ? (
-            <Empty description="暂无项目" />
-          ) : (
-            <div className={styles.ganttContainer}>
-              <div className={styles.ganttHeader}>
-                <div className={styles.ganttProjectColumn}>
-                  <Text strong>项目名称</Text>
-                </div>
-                <div className={styles.ganttTimelineHeader}>
-                  {months.map((month) => (
-                    <div key={month} className={styles.ganttMonthCell}>
-                      {month}
+        ) : (
+          <div className={styles.listView}>
+            {archivedProjects.map(project => (
+              <Card
+                key={project.id}
+                className={styles.listItem}
+                hoverable
+                onClick={() => navigate(`/projects/${project.id}`)}
+              >
+                <div className={styles.listItemContent}>
+                  <Avatar
+                    shape="square"
+                    size={40}
+                    style={{ backgroundColor: project.color || '#8c8c8c', opacity: 0.7 }}
+                  >
+                    {project.name.charAt(0)}
+                  </Avatar>
+                  <div className={styles.listItemInfo}>
+                    <div className={styles.listItemHeader}>
+                      <h3 style={{ color: '#8c8c8c' }}>{project.name}</h3>
+                      <span className={styles.projectKey}>{project.key}</span>
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className={styles.ganttBody}>
-                {filteredProjects.map((project) => (
-                  <div key={project.id} className={styles.ganttRow}>
-                    <div className={styles.ganttProjectColumn}>
-                      <div className={styles.ganttProjectInfo}>
-                        <Avatar size="small" style={{ backgroundColor: project.color || '#1677ff' }}>
-                          {project.name.charAt(0)}
-                        </Avatar>
-                        <div className={styles.ganttProjectMeta}>
-                          <Text strong className={styles.ganttProjectName}>{project.name}</Text>
-                          <Text type="secondary" className={styles.projectKey}>{project.key}</Text>
-                        </div>
-                      </div>
-                    </div>
-                    <div className={styles.ganttTimelineCell}>
-                      <div className={styles.ganttGridLines}>
-                        {months.map((_, index) => (
-                          <div key={index} className={styles.ganttGridLine} />
-                        ))}
-                      </div>
-                      <Tooltip
-                        title={
-                          <div>
-                            <div>{project.name}</div>
-                            <div>进度: {project.progress || 0}%</div>
-                            <div>状态: {getStatusText(project.status)}</div>
-                          </div>
-                        }
-                      >
-                        <div
-                          className={styles.ganttBar}
-                          style={{
-                            ...calculateBarStyle(project),
-                            backgroundColor: project.color || getStatusColor(project.status),
-                          }}
-                        >
-                          <div 
-                            className={styles.ganttProgressFill}
-                            style={{ width: `${project.progress || 0}%` }}
-                          />
-                          <span className={styles.ganttBarLabel}>{project.progress || 0}%</span>
-                        </div>
-                      </Tooltip>
-                    </div>
+                    <p className={styles.projectDesc}>
+                      {project.description || '暂无描述'}
+                    </p>
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </Card>
-
-        <div className={styles.ganttLegend}>
-          <Text type="secondary">图例：</Text>
-          <Space>
-            <span className={styles.legendItem}>
-              <span className={styles.legendDot} style={{ backgroundColor: '#faad14' }} />
-              规划中
-            </span>
-            <span className={styles.legendItem}>
-              <span className={styles.legendDot} style={{ backgroundColor: '#1677ff' }} />
-              进行中
-            </span>
-            <span className={styles.legendItem}>
-              <span className={styles.legendDot} style={{ backgroundColor: '#52c41a' }} />
-              已完成
-            </span>
-            <span className={styles.legendItem}>
-              <span className={styles.legendDot} style={{ backgroundColor: '#8c8c8c' }} />
-              已归档
-            </span>
-          </Space>
-        </div>
+                  <div className={styles.listItemMeta}>
+                    <Tag color="default">已归档</Tag>
+                    <span>{project.memberCount} 成员</span>
+                  </div>
+                  <div className={styles.listItemActions}>
+                    <Tooltip title="恢复项目">
+                      <Button
+                        type="primary"
+                        ghost
+                        icon={<UndoOutlined />}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleRestoreProject(project.id)
+                        }}
+                      >
+                        恢复
+                      </Button>
+                    </Tooltip>
+                    <Dropdown
+                      menu={{
+                        items: [
+                          {
+                            key: 'delete',
+                            icon: <DeleteOutlined />,
+                            label: '永久删除',
+                            danger: true,
+                            onClick: (info) => {
+                              info.domEvent.stopPropagation()
+                              handleDeleteProject(project.id)
+                            }
+                          }
+                        ]
+                      }}
+                      trigger={['click']}
+                      placement="bottomRight"
+                    >
+                      <Button
+                        type="text"
+                        icon={<MoreOutlined />}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </Dropdown>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     )
   }
 
-  // Tab items configuration
+  // Tab items configuration - V2.0 design includes list, analytics, and archived
+  const archivedCount = projects.filter(p => p.status === 'archived').length
   const tabItems = [
     { key: 'list', label: '项目列表', children: renderListTab() },
     { key: 'analytics', label: '项目分析', children: renderAnalyticsTab() },
-    { key: 'kanban', label: '项目看板', children: renderKanbanTab() },
-    { key: 'gantt', label: '项目甘特图', children: renderGanttTab() },
+    {
+      key: 'archived',
+      label: (
+        <span>
+          归档项目 {archivedCount > 0 && <Tag style={{ marginLeft: 4 }}>{archivedCount}</Tag>}
+        </span>
+      ),
+      children: renderArchivedTab()
+    },
   ]
 
   return (

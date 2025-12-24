@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Form, Input, Button, Checkbox, message } from 'antd'
+import { Form, Input, Button, Checkbox, App, Alert } from 'antd'
 import { MobileOutlined, LockOutlined } from '@ant-design/icons'
 import { useAuthStore } from '@/store/auth'
 import { login as loginApi } from '@/services/api/auth'
@@ -13,7 +13,10 @@ import styles from './index.module.css'
 const Login = () => {
   const navigate = useNavigate()
   const { login } = useAuthStore()
+  const { message } = App.useApp()
+  const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
+  const [loginError, setLoginError] = useState<string | null>(null)
 
   // 手机号校验规则
   const phoneValidator = (_: unknown, value: string) => {
@@ -41,6 +44,7 @@ const Login = () => {
   // 手机号+密码登录
   const handleAccountLogin = async (values: { phone: string; password: string; remember: boolean }) => {
     setLoading(true)
+    setLoginError(null)
     try {
       const res = await loginApi({
         username: values.phone, // 使用手机号作为用户名
@@ -59,13 +63,17 @@ const Login = () => {
       
       login(user, res.accessToken)
       message.success('登录成功')
-      navigate('/dashboard')
+      // Use replace to prevent going back to login page
+      navigate('/dashboard', { replace: true })
     } catch (error) {
+      let errorMsg = '登录失败，请重试'
       if (error instanceof ApiError) {
-        message.error(error.message || '登录失败')
-      } else {
-        message.error('网络错误，请稍后重试')
+        errorMsg = error.message || '用户名或密码错误'
+      } else if (error instanceof Error) {
+        errorMsg = '网络错误，请检查网络连接后重试'
       }
+      setLoginError(errorMsg)
+      message.error(errorMsg)
     } finally {
       setLoading(false)
     }
@@ -78,12 +86,23 @@ const Login = () => {
         <p>登录您的摩塔账户，开启智能协作之旅</p>
       </div>
 
+      {loginError && (
+        <Alert
+          message={loginError}
+          type="error"
+          showIcon
+          closable
+          onClose={() => setLoginError(null)}
+          style={{ marginBottom: 16 }}
+        />
+      )}
+
       <Form
+        form={form}
         name="accountLogin"
         initialValues={{ remember: true }}
         onFinish={handleAccountLogin}
         size="large"
-        autoComplete="off"
       >
         <Form.Item
           name="phone"
@@ -93,7 +112,7 @@ const Login = () => {
             prefix={<MobileOutlined />}
             placeholder="请输入手机号"
             maxLength={11}
-            autoComplete="new-password"
+            autoComplete="username"
           />
         </Form.Item>
 
@@ -104,7 +123,7 @@ const Login = () => {
           <Input.Password
             prefix={<LockOutlined />}
             placeholder="请输入密码（6~18位）"
-            autoComplete="new-password"
+            autoComplete="current-password"
           />
         </Form.Item>
 

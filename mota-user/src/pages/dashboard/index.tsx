@@ -1,8 +1,8 @@
 import { useEffect, useState, useMemo } from 'react'
-import { Card, Row, Col, List, Avatar, Tag, Progress, Typography, Spin, Button, Input, message } from 'antd'
+import { Card, Row, Col, List, Avatar, Tag, Progress, Typography, Spin, Button, Input } from 'antd'
 import {
   ProjectOutlined,
-  BugOutlined,
+  UnorderedListOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
   TeamOutlined,
@@ -20,12 +20,12 @@ import {
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import * as projectApi from '@/services/api/project'
-import * as issueApi from '@/services/api/issue'
+import * as taskApi from '@/services/api/task'
 import * as activityApi from '@/services/api/activity'
 import * as aiApi from '@/services/api/ai'
 import styles from './index.module.css'
 
-const { Title, Text, Paragraph } = Typography
+const { Title, Text } = Typography
 
 // 问候语库 - 根据时间段分类
 const greetingMessages = {
@@ -120,14 +120,14 @@ const Dashboard = () => {
   const [aiInput, setAiInput] = useState('')
   const [stats, setStats] = useState({
     totalProjects: 0,
-    totalIssues: 0,
-    completedIssues: 0,
-    inProgressIssues: 0,
+    totalTasks: 0,
+    completedTasks: 0,
+    inProgressTasks: 0,
     aiSolutions: 12,
     pptGenerated: 8
   })
   const [recentProjects, setRecentProjects] = useState<any[]>([])
-  const [myIssues, setMyIssues] = useState<any[]>([])
+  const [myTasks, setMyTasks] = useState<any[]>([])
   const [activities, setActivities] = useState<any[]>([])
   const [news, setNews] = useState<any[]>([])
 
@@ -140,52 +140,66 @@ const Dashboard = () => {
 
   const loadDashboardData = async () => {
     setLoading(true)
+    
+    let projects: any[] = []
+    let tasks: any[] = []
+    
+    // 加载项目列表
     try {
-      // 加载项目列表
       const projectsRes = await projectApi.getProjects()
-      const projects = projectsRes.list || []
+      projects = projectsRes.list || []
       setRecentProjects(projects.slice(0, 4))
-      
-      // 加载我的事项
-      const issuesRes = await issueApi.getIssues()
-      const issues = issuesRes.list || []
-      setMyIssues(issues.slice(0, 5))
-      
-      // 计算统计数据
-      setStats({
-        totalProjects: projects.length,
-        totalIssues: issues.length,
-        completedIssues: issues.filter((i: any) => i.status === 'done').length,
-        inProgressIssues: issues.filter((i: any) => i.status === 'in_progress').length,
-        aiSolutions: 12,
-        pptGenerated: 8
-      })
-      
-      // 加载活动记录
+    } catch (e) {
+      console.warn('Failed to load projects:', e)
+    }
+    
+    // 加载我的任务（API可能未实现，静默处理错误）
+    try {
+      const tasksRes = await taskApi.getTasks()
+      tasks = tasksRes.list || []
+      setMyTasks(tasks.slice(0, 5))
+    } catch (e) {
+      console.warn('Failed to load tasks:', e)
+      // 任务API未实现时使用空数组
+      tasks = []
+      setMyTasks([])
+    }
+    
+    // 计算统计数据
+    setStats({
+      totalProjects: projects.length,
+      totalTasks: tasks.length,
+      completedTasks: tasks.filter((t: any) => t.status === 'completed').length,
+      inProgressTasks: tasks.filter((t: any) => t.status === 'in_progress').length,
+      aiSolutions: 12,
+      pptGenerated: 8
+    })
+    
+    // 加载活动记录
+    try {
       const activitiesRes = await activityApi.getRecentActivities(6)
       setActivities(activitiesRes || [])
-      
-      // 加载新闻
-      try {
-        const newsRes = await aiApi.getNews({ pageSize: 5 })
-        // 处理后端返回的数据格式
-        const processedNews = (newsRes.list || []).map((item: any) => ({
-          ...item,
-          // tags 可能是 JSON 字符串，需要解析
-          tags: typeof item.tags === 'string' ? JSON.parse(item.tags || '[]') : (item.tags || []),
-          // isStarred 可能是数字，需要转换为布尔值
-          isStarred: typeof item.isStarred === 'number' ? item.isStarred === 1 : Boolean(item.isStarred)
-        }))
-        setNews(processedNews)
-      } catch (e) {
-        console.error('Failed to load news:', e)
-      }
-    } catch (error) {
-      console.error('Failed to load dashboard data:', error)
-      message.error('加载数据失败，请检查后端服务是否启动')
-    } finally {
-      setLoading(false)
+    } catch (e) {
+      console.warn('Failed to load activities:', e)
     }
+    
+    // 加载新闻
+    try {
+      const newsRes = await aiApi.getNews({ pageSize: 5 })
+      // 处理后端返回的数据格式
+      const processedNews = (newsRes.list || []).map((item: any) => ({
+        ...item,
+        // tags 可能是 JSON 字符串，需要解析
+        tags: typeof item.tags === 'string' ? JSON.parse(item.tags || '[]') : (item.tags || []),
+        // isStarred 可能是数字，需要转换为布尔值
+        isStarred: typeof item.isStarred === 'number' ? item.isStarred === 1 : Boolean(item.isStarred)
+      }))
+      setNews(processedNews)
+    } catch (e) {
+      console.warn('Failed to load news:', e)
+    }
+    
+    setLoading(false)
   }
 
   const getStatusColor = (status: string) => {
@@ -221,9 +235,9 @@ const Dashboard = () => {
 
   const getActivityIcon = (type: string) => {
     const icons: Record<string, React.ReactNode> = {
-      issue_created: <BugOutlined />,
-      issue_updated: <BugOutlined />,
-      issue_completed: <CheckCircleOutlined />,
+      task_created: <UnorderedListOutlined />,
+      task_updated: <UnorderedListOutlined />,
+      task_completed: <CheckCircleOutlined />,
       comment_added: <FileTextOutlined />,
       member_joined: <TeamOutlined />
     }
@@ -243,14 +257,14 @@ const Dashboard = () => {
       title: '方案生成',
       desc: '智能生成项目方案',
       path: '/ai/solution',
-      color: '#2b7de9'
+      color: '#002FA7'
     },
     {
       icon: <FilePptOutlined />,
       title: 'PPT生成',
       desc: '一键生成演示文稿',
       path: '/ai/ppt',
-      color: '#667eea'
+      color: '#0052cc'
     },
     {
       icon: <BookOutlined />,
@@ -291,7 +305,7 @@ const Dashboard = () => {
               </Text>
             </div>
             <Text type="secondary" className={styles.welcomeDesc}>
-              今天有 {stats.inProgressIssues} 个任务进行中，{stats.completedIssues} 个任务已完成
+              今天有 {stats.inProgressTasks} 个任务进行中，{stats.completedTasks} 个任务已完成
             </Text>
           </div>
           <div className={styles.welcomeStats}>
@@ -305,7 +319,7 @@ const Dashboard = () => {
             <div className={styles.welcomeStat}>
               <TrophyOutlined className={styles.welcomeStatIcon} />
               <div>
-                <div className={styles.welcomeStatValue}>{stats.completedIssues}</div>
+                <div className={styles.welcomeStatValue}>{stats.completedTasks}</div>
                 <div className={styles.welcomeStatLabel}>已完成</div>
               </div>
             </div>
@@ -378,34 +392,34 @@ const Dashboard = () => {
           </Card>
         </Col>
         <Col xs={12} sm={6}>
-          <Card className={styles.statCard} onClick={() => navigate('/issues')}>
+          <Card className={styles.statCard} onClick={() => navigate('/my-tasks')}>
             <div className={`${styles.statIcon} ${styles.purple}`}>
-              <BugOutlined />
+              <UnorderedListOutlined />
             </div>
             <div className={styles.statInfo}>
-              <div className={styles.statValue}>{stats.totalIssues}</div>
-              <div className={styles.statLabel}>事项总数</div>
+              <div className={styles.statValue}>{stats.totalTasks}</div>
+              <div className={styles.statLabel}>任务总数</div>
             </div>
           </Card>
         </Col>
         <Col xs={12} sm={6}>
-          <Card className={styles.statCard} onClick={() => navigate('/issues?status=in_progress')}>
+          <Card className={styles.statCard} onClick={() => navigate('/my-tasks?status=in_progress')}>
             <div className={`${styles.statIcon} ${styles.orange}`}>
               <ClockCircleOutlined />
             </div>
             <div className={styles.statInfo}>
-              <div className={styles.statValue}>{stats.inProgressIssues}</div>
+              <div className={styles.statValue}>{stats.inProgressTasks}</div>
               <div className={styles.statLabel}>进行中</div>
             </div>
           </Card>
         </Col>
         <Col xs={12} sm={6}>
-          <Card className={styles.statCard} onClick={() => navigate('/issues?status=done')}>
+          <Card className={styles.statCard} onClick={() => navigate('/my-tasks?status=completed')}>
             <div className={`${styles.statIcon} ${styles.green}`}>
               <CheckCircleOutlined />
             </div>
             <div className={styles.statInfo}>
-              <div className={styles.statValue}>{stats.completedIssues}</div>
+              <div className={styles.statValue}>{stats.completedTasks}</div>
               <div className={styles.statLabel}>已完成</div>
             </div>
           </Card>
@@ -418,19 +432,19 @@ const Dashboard = () => {
           <Card
             title={
               <div className={styles.cardTitle}>
-                <BugOutlined className={styles.cardTitleIcon} />
+                <UnorderedListOutlined className={styles.cardTitleIcon} />
                 <span>我的任务</span>
               </div>
             }
-            extra={<a onClick={() => navigate('/issues')}>查看全部 <ArrowRightOutlined /></a>}
+            extra={<a onClick={() => navigate('/my-tasks')}>查看全部 <ArrowRightOutlined /></a>}
             className={styles.listCard}
           >
             <List
-              dataSource={myIssues}
+              dataSource={myTasks}
               renderItem={(item: any) => (
                 <List.Item
                   className={styles.issueItem}
-                  onClick={() => navigate(`/issues/${item.id}`)}
+                  onClick={() => navigate(`/tasks/${item.id}`)}
                 >
                   <div className={styles.issueContent}>
                     <div className={styles.issueHeader}>
@@ -442,7 +456,7 @@ const Dashboard = () => {
                     </div>
                     <div className={styles.issueMeta}>
                       <Tag color={getStatusColor(item.status)}>{getStatusText(item.status)}</Tag>
-                      <Text type="secondary" style={{ fontSize: 12 }}>{item.key}</Text>
+                      <Text type="secondary" style={{ fontSize: 12 }}>{item.taskNo}</Text>
                     </div>
                   </div>
                 </List.Item>
@@ -488,7 +502,7 @@ const Dashboard = () => {
                       <Progress
                         percent={item.progress || 0}
                         size="small"
-                        strokeColor="#2b7de9"
+                        strokeColor="#002FA7"
                         showInfo={true}
                       />
                     </div>
@@ -549,7 +563,7 @@ const Dashboard = () => {
                 <List.Item className={styles.activityItem}>
                   <List.Item.Meta
                     avatar={
-                      <Avatar style={{ backgroundColor: '#2b7de9' }}>
+                      <Avatar style={{ backgroundColor: '#002FA7' }}>
                         {getActivityIcon(item.type)}
                       </Avatar>
                     }

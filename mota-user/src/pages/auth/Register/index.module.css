@@ -23,72 +23,23 @@
   margin: 0;
 }
 
-/* Steps Styles */
-.steps {
-  margin-bottom: 36px;
-}
-
-.steps :global(.ant-steps-item-process .ant-steps-item-icon) {
-  background: linear-gradient(135deg, #2b7de9 0%, #1890ff 100%);
-  border-color: #2b7de9;
-}
-
-.steps :global(.ant-steps-item-finish .ant-steps-item-icon) {
-  background: #fff;
-  border-color: #2b7de9;
-}
-
-.steps :global(.ant-steps-item-finish .ant-steps-item-icon .ant-steps-icon) {
-  color: #2b7de9;
-}
-
-.steps :global(.ant-steps-item-finish > .ant-steps-item-container > .ant-steps-item-tail::after) {
-  background-color: #2b7de9;
-}
-
-.steps :global(.ant-steps-item-title) {
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.85) !important;
-}
-
-.steps :global(.ant-steps-item-wait .ant-steps-item-title) {
-  color: rgba(255, 255, 255, 0.45) !important;
-}
-
-.steps :global(.ant-steps-item-wait .ant-steps-item-icon) {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-.steps :global(.ant-steps-item-wait .ant-steps-item-icon .ant-steps-icon) {
-  color: rgba(255, 255, 255, 0.45);
-}
-
-.steps :global(.ant-steps-item-tail::after) {
-  background-color: rgba(255, 255, 255, 0.2) !important;
-}
-
-.stepContent {
-  min-height: 320px;
-}
-
 /* Form Styles */
-.stepContent :global(.ant-form-item) {
+.registerForm :global(.ant-form-item) {
   margin-bottom: 20px;
 }
 
-.stepContent :global(.ant-form-item-label > label) {
+.registerForm :global(.ant-form-item-label > label) {
   font-weight: 500;
   color: rgba(255, 255, 255, 0.85) !important;
   font-size: 14px;
 }
 
-.stepContent :global(.ant-form-item-label > label.ant-form-item-required::before) {
+.registerForm :global(.ant-form-item-label > label.ant-form-item-required::before) {
   color: #ff6b6b !important;
 }
 
-.stepContent :global(.ant-input-affix-wrapper),
-.stepContent :global(.ant-input) {
+.registerForm :global(.ant-input-affix-wrapper),
+.registerForm :global(.ant-input) {
   height: 48px;
   border-radius: 10px;
   border: 1px solid #e2e8f0;
@@ -98,31 +49,31 @@
   align-items: center;
 }
 
-.stepContent :global(.ant-input-affix-wrapper .ant-input) {
+.registerForm :global(.ant-input-affix-wrapper .ant-input) {
   height: auto;
   line-height: 1.5;
 }
 
-.stepContent :global(.ant-input-affix-wrapper:hover),
-.stepContent :global(.ant-input:hover) {
+.registerForm :global(.ant-input-affix-wrapper:hover),
+.registerForm :global(.ant-input:hover) {
   border-color: #2b7de9;
 }
 
-.stepContent :global(.ant-input-affix-wrapper:focus),
-.stepContent :global(.ant-input-affix-wrapper-focused),
-.stepContent :global(.ant-input:focus) {
+.registerForm :global(.ant-input-affix-wrapper:focus),
+.registerForm :global(.ant-input-affix-wrapper-focused),
+.registerForm :global(.ant-input:focus) {
   border-color: #2b7de9;
   box-shadow: 0 0 0 3px rgba(43, 125, 233, 0.1);
 }
 
-.stepContent :global(.ant-input-prefix) {
+.registerForm :global(.ant-input-prefix) {
   color: #a0aec0;
   margin-right: 10px;
   display: flex;
   align-items: center;
 }
 
-.stepContent :global(.ant-btn-primary) {
+.registerForm :global(.ant-btn-primary) {
   height: 48px;
   border-radius: 10px;
   font-size: 16px;
@@ -133,153 +84,33 @@
   transition: all 0.3s ease;
 }
 
-.stepContent :global(.ant-btn-primary:hover) {
+.registerForm :global(.ant-btn-primary:hover) {
   background: linear-gradient(135deg, #1a6fd8 0%, #0d7fe8 100%);
   box-shadow: 0 6px 16px rgba(43, 125, 233, 0.4);
   transform: translateY(-1px);
 }
 
-.stepContent :global(.ant-btn-default) {
-  height: 48px;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 500;
-  border: 1px solid #e2e8f0;
-  transition: all 0.3s ease;
-}
-
-.stepContent :global(.ant-btn-default:hover) {
-  border-color: #2b7de9;
-  color: #2b7de9;
-}
-
-.stepContent :global(.ant-checkbox-wrapper) {
+.registerForm :global(.ant-checkbox-wrapper) {
   font-size: 14px;
   color: rgba(255, 255, 255, 0.85);
 }
 
-.stepContent :global(.ant-checkbox-wrapper span:not(.ant-checkbox)) {
+.registerForm :global(.ant-checkbox-wrapper span:not(.ant-checkbox)) {
   color: rgba(255, 255, 255, 0.85);
 }
 
-.stepContent :global(.ant-checkbox-checked .ant-checkbox-inner) {
+.registerForm :global(.ant-checkbox-checked .ant-checkbox-inner) {
   background-color: #2b7de9;
   border-color: #2b7de9;
 }
 
-.stepContent :global(.ant-checkbox-wrapper a) {
+.registerForm :global(.ant-checkbox-wrapper a) {
   color: #2b7de9;
   font-weight: 500;
 }
 
-.stepContent :global(.ant-checkbox-wrapper a:hover) {
+.registerForm :global(.ant-checkbox-wrapper a:hover) {
   color: #1a6fd8;
-}
-
-/* Code Input */
-.codeInput {
-  display: flex;
-  gap: 12px;
-}
-
-.codeInput :global(.ant-input-affix-wrapper) {
-  flex: 1;
-}
-
-.codeInput :global(.ant-btn) {
-  flex-shrink: 0;
-  width: 130px;
-  height: 48px;
-  border-radius: 10px;
-  font-weight: 500;
-  border: 1px solid #2b7de9;
-  color: #2b7de9;
-  transition: all 0.3s ease;
-}
-
-.codeInput :global(.ant-btn:hover) {
-  background: #f0f7ff;
-  border-color: #1a6fd8;
-  color: #1a6fd8;
-}
-
-/* Step Buttons */
-.stepButtons {
-  display: flex;
-  gap: 16px;
-  justify-content: space-between;
-}
-
-.stepButtons button {
-  flex: 1;
-}
-
-/* Team Options */
-.teamOptions {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.teamOption {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  padding: 20px;
-  border: 2px solid #e2e8f0;
-  border-radius: 14px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background: #fff;
-}
-
-.teamOption:hover {
-  border-color: #2b7de9;
-  background: #f8fbff;
-}
-
-.teamOption.active {
-  border-color: #2b7de9;
-  background: linear-gradient(135deg, rgba(43, 125, 233, 0.05) 0%, rgba(24, 144, 255, 0.05) 100%);
-  box-shadow: 0 4px 12px rgba(43, 125, 233, 0.1);
-}
-
-.teamIcon {
-  font-size: 36px;
-  color: #2b7de9;
-  width: 56px;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, rgba(43, 125, 233, 0.1) 0%, rgba(24, 144, 255, 0.1) 100%);
-  border-radius: 12px;
-}
-
-.teamInfo h4 {
-  font-size: 17px;
-  font-weight: 600;
-  color: #1a1f36;
-  margin: 0 0 6px 0;
-}
-
-.teamInfo p {
-  font-size: 14px;
-  color: #718096;
-  margin: 0;
-}
-
-/* Dark theme adjustments for team options */
-.teamOption {
-  background: rgba(255, 255, 255, 0.95);
-}
-
-.teamOption:hover {
-  background: #fff;
-}
-
-.teamOption.active {
-  background: #fff;
 }
 
 /* Register Footer */
@@ -306,42 +137,6 @@
   color: #1a6fd8;
 }
 
-/* Password Strength Indicator */
-.passwordStrength {
-  margin-top: 8px;
-}
-
-.strengthBar {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 6px;
-}
-
-.strengthBar span {
-  flex: 1;
-  height: 4px;
-  background: #e2e8f0;
-  border-radius: 2px;
-  transition: background 0.3s ease;
-}
-
-.strengthBar.weak span:first-child {
-  background: #ff4d4f;
-}
-
-.strengthBar.medium span:nth-child(-n+2) {
-  background: #faad14;
-}
-
-.strengthBar.strong span {
-  background: #52c41a;
-}
-
-.strengthText {
-  font-size: 12px;
-  color: #a0aec0;
-}
-
 /* Responsive */
 @media (max-width: 576px) {
   .registerContainer {
@@ -352,27 +147,9 @@
     font-size: 26px;
   }
   
-  .stepContent :global(.ant-input-affix-wrapper),
-  .stepContent :global(.ant-input),
-  .stepContent :global(.ant-btn) {
+  .registerForm :global(.ant-input-affix-wrapper),
+  .registerForm :global(.ant-input),
+  .registerForm :global(.ant-btn) {
     height: 44px;
-  }
-  
-  .codeInput {
-    flex-direction: column;
-  }
-  
-  .codeInput :global(.ant-btn) {
-    width: 100%;
-  }
-  
-  .teamOption {
-    padding: 16px;
-  }
-  
-  .teamIcon {
-    width: 48px;
-    height: 48px;
-    font-size: 28px;
   }
 }

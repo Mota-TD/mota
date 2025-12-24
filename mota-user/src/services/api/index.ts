@@ -1,37 +1,49 @@
 /**
  * API 服务统一导出
+ * 根据项目协同模块功能设计稿 V2.0 优化
  */
 
 export * from './auth'
 export * from './project'
-export * from './issue'
 export * from './activity'
 export * from './user'
-export * from './sprint'
-export * from './wiki'
 export * from './notification'
 export * from './ai'
 export * from './dashboard'
 
-// 为了兼容性，也导出命名空间
+// 项目协同模块 API - 通过命名空间导出避免命名冲突
 import * as projectApi from './project'
-import * as issueApi from './issue'
 import * as activityApi from './activity'
 import * as userApi from './user'
-import * as sprintApi from './sprint'
-import * as wikiApi from './wiki'
 import * as notificationApi from './notification'
 import * as aiApi from './ai'
 import * as dashboardApi from './dashboard'
+import * as departmentApi from './department'
+import * as departmentTaskApi from './departmentTask'
+import * as taskApi from './task'
+// 项目协同模块 API (V2.0)
+import * as workPlanApi from './workPlan'
+import * as milestoneApi from './milestone'
+import * as taskCommentApi from './taskComment'
+import * as deliverableApi from './deliverable'
+import * as workFeedbackApi from './workFeedback'
+import * as progressReportApi from './progressReport'
 
 export {
   projectApi,
-  issueApi,
   activityApi,
   userApi,
-  sprintApi,
-  wikiApi,
   notificationApi,
   aiApi,
-  dashboardApi
+  dashboardApi,
+  departmentApi,
+  departmentTaskApi,
+  taskApi,
+  // 项目协同模块 API (V2.0)
+  workPlanApi,
+  milestoneApi,
+  taskCommentApi,
+  deliverableApi,
+  workFeedbackApi,
+  progressReportApi
 }

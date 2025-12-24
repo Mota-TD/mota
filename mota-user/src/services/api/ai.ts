@@ -332,3 +332,143 @@ export function saveBusinessConfig(config: {
 }): Promise<void> {
   return post('/api/v1/ai/training/business-config', config)
 }
+
+// ============ 项目协同 AI 功能 ============
+
+// AI 任务分解建议
+export interface TaskDecompositionSuggestion {
+  id: string
+  name: string
+  description: string
+  suggestedDepartment?: string
+  suggestedPriority: string
+  estimatedDays: number
+  dependencies?: string[]
+}
+
+// AI 任务分解请求
+export interface TaskDecompositionRequest {
+  projectName: string
+  projectDescription: string
+  departments: string[]
+  startDate?: string
+  endDate?: string
+}
+
+// AI 任务分解响应
+export interface TaskDecompositionResponse {
+  suggestions: TaskDecompositionSuggestion[]
+  totalEstimatedDays: number
+  riskAssessment: string
+}
+
+// AI 进度预测
+export interface ProgressPrediction {
+  projectId: number | string
+  currentProgress: number
+  predictedProgress: number
+  predictedCompletionDate: string
+  confidence: number
+  factors: string[]
+}
+
+// AI 风险预警
+export interface RiskWarning {
+  id: string
+  type: 'delay' | 'resource' | 'dependency' | 'quality'
+  severity: 'low' | 'medium' | 'high' | 'critical'
+  title: string
+  description: string
+  affectedTasks: string[]
+  suggestions: string[]
+  createdAt: string
+}
+
+// AI 项目报告
+export interface ProjectReport {
+  id: string
+  projectId: number | string
+  projectName: string
+  reportType: 'daily' | 'weekly' | 'monthly'
+  summary: string
+  highlights: string[]
+  issues: string[]
+  nextSteps: string[]
+  statistics: {
+    totalTasks: number
+    completedTasks: number
+    inProgressTasks: number
+    overdueTasks: number
+    progressChange: number
+  }
+  generatedAt: string
+}
+
+/**
+ * AI 任务分解 - 根据项目描述自动建议任务拆解
+ */
+export function generateTaskDecomposition(data: TaskDecompositionRequest): Promise<TaskDecompositionResponse> {
+  return post<TaskDecompositionResponse>('/api/v1/ai/project/decompose', data)
+}
+
+/**
+ * AI 进度预测 - 基于历史数据预测项目完成时间
+ */
+export function predictProjectProgress(projectId: number | string): Promise<ProgressPrediction> {
+  return get<ProgressPrediction>(`/api/v1/ai/project/${projectId}/predict`)
+}
+
+/**
+ * AI 风险预警 - 自动识别可能延期的任务
+ */
+export function getProjectRiskWarnings(projectId: number | string): Promise<RiskWarning[]> {
+  return get<RiskWarning[]>(`/api/v1/ai/project/${projectId}/risks`)
+}
+
+/**
+ * AI 智能报告 - 自动生成项目进度报告
+ */
+export function generateProjectReport(projectId: number | string, reportType: 'daily' | 'weekly' | 'monthly'): Promise<ProjectReport> {
+  return post<ProjectReport>(`/api/v1/ai/project/${projectId}/report`, { reportType })
+}
+
+/**
+ * 获取 AI 建议的任务优先级
+ */
+export function suggestTaskPriority(taskDescription: string, deadline?: string): Promise<{
+  suggestedPriority: string
+  reason: string
+}> {
+  return post('/api/v1/ai/project/suggest-priority', { taskDescription, deadline })
+}
+
+/**
+ * AI 智能分配 - 根据成员能力和工作负载建议任务分配
+ */
+export function suggestTaskAssignment(taskId: number): Promise<{
+  suggestedAssignees: Array<{
+    userId: number
+    userName: string
+    matchScore: number
+    currentWorkload: number
+    reason: string
+  }>
+}> {
+  return get(`/api/v1/ai/project/task/${taskId}/suggest-assignee`)
+}
+
+/**
+ * AI 工作计划生成 - 根据部门任务自动生成工作计划建议
+ */
+export function generateWorkPlanSuggestion(departmentTaskId: number): Promise<{
+  summary: string
+  milestones: Array<{
+    name: string
+    targetDate: string
+    deliverables: string[]
+  }>
+  resourceRequirements: string
+  risks: string[]
+}> {
+  return get(`/api/v1/ai/project/department-task/${departmentTaskId}/work-plan-suggestion`)
+}

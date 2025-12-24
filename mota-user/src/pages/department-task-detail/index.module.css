@@ -1,0 +1,180 @@
+/**
+ * 部门任务详情页面样式
+ */
+
+.container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.notFound {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  color: var(--text-secondary, #666);
+}
+
+.notFound p {
+  margin-bottom: 16px;
+  font-size: 16px;
+}
+
+/* 面包屑 */
+.breadcrumb {
+  margin-bottom: 16px;
+}
+
+/* 页面头部 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  padding: 16px 24px;
+  background: var(--bg-primary, #fff);
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.headerLeft {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.backBtn {
+  margin-top: 4px;
+}
+
+.titleArea {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary, #333);
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+}
+
+.leaderName {
+  font-size: 14px;
+  color: var(--text-secondary, #666);
+}
+
+/* 主卡片 */
+.mainCard {
+  border-radius: 8px;
+}
+
+.mainCard :global(.ant-card-body) {
+  padding: 0;
+}
+
+.mainCard :global(.ant-tabs-nav) {
+  padding: 0 24px;
+  margin-bottom: 0;
+}
+
+.mainCard :global(.ant-tabs-content) {
+  padding: 24px;
+}
+
+/* 概览标签页 */
+.overviewTab {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.detailCard {
+  margin-top: 8px;
+}
+
+.description {
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.6;
+  color: var(--text-primary, #333);
+}
+
+/* 统计卡片 */
+.overviewTab :global(.ant-statistic-title) {
+  font-size: 13px;
+  color: var(--text-secondary, #666);
+}
+
+.overviewTab :global(.ant-statistic-content) {
+  font-size: 24px;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .headerRight {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .title {
+    font-size: 18px;
+  }
+
+  .mainCard :global(.ant-tabs-nav) {
+    padding: 0 16px;
+  }
+
+  .mainCard :global(.ant-tabs-content) {
+    padding: 16px;
+  }
+}
+
+/* 暗色主题适配 */
+:global([data-theme='dark']) .header {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+:global([data-theme='dark']) .title {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+:global([data-theme='dark']) .leaderName {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+:global([data-theme='dark']) .description {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+:global([data-theme='dark']) .notFound {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+:global([data-theme='dark']) .overviewTab :global(.ant-statistic-title) {
+  color: rgba(255, 255, 255, 0.65);
+}

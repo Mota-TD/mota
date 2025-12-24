@@ -19,7 +19,6 @@
         <module>mota-auth-service</module>
         <module>mota-user-service</module>
         <module>mota-project-service</module>
-        <module>mota-issue-service</module>
     </modules>
 
     <properties>

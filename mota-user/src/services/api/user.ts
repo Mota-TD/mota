@@ -4,7 +4,7 @@
 import { get, post, put, del } from '../request'
 
 export interface User {
-  id: number
+  id: string
   username: string
   nickname: string
   email: string
@@ -35,7 +35,7 @@ export function getUsers(params?: {
 /**
  * 获取用户详情
  */
-export function getUser(id: number): Promise<User> {
+export function getUser(id: string | number): Promise<User> {
   return get(`/api/v1/users/${id}`)
 }
 
@@ -49,14 +49,14 @@ export function createUser(data: Partial<User>): Promise<User> {
 /**
  * 更新用户
  */
-export function updateUser(id: number, data: Partial<User>): Promise<User> {
+export function updateUser(id: string | number, data: Partial<User>): Promise<User> {
   return put(`/api/v1/users/${id}`, data)
 }
 
 /**
  * 删除用户
  */
-export function deleteUser(id: number): Promise<void> {
+export function deleteUser(id: string | number): Promise<void> {
   return del(`/api/v1/users/${id}`)
 }
 

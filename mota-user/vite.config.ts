@@ -11,23 +11,41 @@ export default defineConfig({
     },
   },
   server: {
+    host: true, // 允许局域网访问
     port: 3000,
     open: true,
     proxy: {
-      // 代理 API 请求到网关服务
-      '/api': {
-        target: 'http://localhost:8080',
+      // 代理认证 API 请求到认证服务 (8081)
+      '/api/v1/auth': {
+        target: 'http://localhost:8081',
         changeOrigin: true,
         secure: false,
         configure: (proxy, _options) => {
           proxy.on('error', (err, _req, _res) => {
-            console.log('proxy error', err);
+            console.log('auth proxy error', err);
           });
           proxy.on('proxyReq', (proxyReq, req, _res) => {
-            console.log('Sending Request:', req.method, req.url, '-> target:', proxyReq.path);
+            console.log('Auth Request:', req.method, req.url, '-> target:', proxyReq.path);
           });
           proxy.on('proxyRes', (proxyRes, req, _res) => {
-            console.log('Received Response:', proxyRes.statusCode, req.url);
+            console.log('Auth Response:', proxyRes.statusCode, req.url);
+          });
+        },
+      },
+      // 代理项目 API 请求到项目服务 (8083)
+      '/api': {
+        target: 'http://localhost:8083',
+        changeOrigin: true,
+        secure: false,
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('project proxy error', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log('Project Request:', req.method, req.url, '-> target:', proxyReq.path);
+          });
+          proxy.on('proxyRes', (proxyRes, req, _res) => {
+            console.log('Project Response:', proxyRes.statusCode, req.url);
             // 移除 WWW-Authenticate 头，防止浏览器弹出基本认证对话框
             const headers = proxyRes.headers;
             const keysToDelete: string[] = [];

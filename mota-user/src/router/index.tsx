@@ -18,22 +18,14 @@ const ForgotPassword = lazy(() => import('@/pages/auth/ForgotPassword'))
 const Dashboard = lazy(() => import('@/pages/dashboard'))
 const Projects = lazy(() => import('@/pages/projects'))
 const CreateProject = lazy(() => import('@/pages/projects/create'))
-const Issues = lazy(() => import('@/pages/issues'))
-const CreateIssue = lazy(() => import('@/pages/issues/create'))
-const Requirements = lazy(() => import('@/pages/requirements'))
-const Testing = lazy(() => import('@/pages/testing'))
-const Iterations = lazy(() => import('@/pages/iterations'))
-const CreateIteration = lazy(() => import('@/pages/iterations/create'))
-const Wiki = lazy(() => import('@/pages/wiki'))
 const Members = lazy(() => import('@/pages/members'))
 const Settings = lazy(() => import('@/pages/settings'))
 const Profile = lazy(() => import('@/pages/profile'))
 const Notifications = lazy(() => import('@/pages/notifications'))
 const ProjectDetail = lazy(() => import('@/pages/project-detail'))
-const IssueDetail = lazy(() => import('@/pages/issue-detail'))
-const IterationDetail = lazy(() => import('@/pages/iteration-detail'))
-const Backlog = lazy(() => import('@/pages/backlog'))
-const Kanban = lazy(() => import('@/pages/kanban'))
+const DepartmentTaskDetail = lazy(() => import('@/pages/department-task-detail'))
+const TaskDetail = lazy(() => import('@/pages/task-detail'))
+const MyTasks = lazy(() => import('@/pages/my-tasks'))
 const NotFound = lazy(() => import('@/pages/NotFound'))
 const Help = lazy(() => import('@/pages/help'))
 
@@ -183,7 +175,7 @@ export const routes: RouteObject[] = [
       }
     ]
   },
-  // 项目管理路由 - 包含项目列表、项目分析、项目看板、项目甘特图（通过tab切换）
+  // 项目管理路由
   {
     path: '/projects',
     element: (
@@ -218,9 +210,28 @@ export const routes: RouteObject[] = [
       },
     ]
   },
-  // 任务管理路由 - 包含任务列表、任务分析、任务看板、任务甘特图（通过tab切换）
+  // 部门任务详情路由
   {
-    path: '/issues',
+    path: '/department-tasks',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        path: ':id',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <DepartmentTaskDetail />
+          </Suspense>
+        )
+      },
+    ]
+  },
+  // 执行任务路由
+  {
+    path: '/tasks',
     element: (
       <Suspense fallback={<Loading />}>
         <ConsoleLayout />
@@ -231,15 +242,7 @@ export const routes: RouteObject[] = [
         index: true,
         element: (
           <Suspense fallback={<Loading />}>
-            <Issues />
-          </Suspense>
-        )
-      },
-      {
-        path: 'create',
-        element: (
-          <Suspense fallback={<Loading />}>
-            <CreateIssue />
+            <MyTasks />
           </Suspense>
         )
       },
@@ -247,15 +250,15 @@ export const routes: RouteObject[] = [
         path: ':id',
         element: (
           <Suspense fallback={<Loading />}>
-            <IssueDetail />
+            <TaskDetail />
           </Suspense>
         )
-      }
+      },
     ]
   },
-  // 需求管理路由
+  // 我的任务路由（别名）
   {
-    path: '/requirements',
+    path: '/my-tasks',
     element: (
       <Suspense fallback={<Loading />}>
         <ConsoleLayout />
@@ -266,124 +269,13 @@ export const routes: RouteObject[] = [
         index: true,
         element: (
           <Suspense fallback={<Loading />}>
-            <Requirements />
+            <MyTasks />
           </Suspense>
         )
       },
     ]
   },
-  // 测试管理路由
-  {
-    path: '/testing',
-    element: (
-      <Suspense fallback={<Loading />}>
-        <ConsoleLayout />
-      </Suspense>
-    ),
-    children: [
-      {
-        index: true,
-        element: (
-          <Suspense fallback={<Loading />}>
-            <Testing />
-          </Suspense>
-        )
-      },
-    ]
-  },
-  // 迭代路由
-  {
-    path: '/iterations',
-    element: (
-      <Suspense fallback={<Loading />}>
-        <ConsoleLayout />
-      </Suspense>
-    ),
-    children: [
-      {
-        index: true,
-        element: (
-          <Suspense fallback={<Loading />}>
-            <Iterations />
-          </Suspense>
-        )
-      },
-      {
-        path: 'create',
-        element: (
-          <Suspense fallback={<Loading />}>
-            <CreateIteration />
-          </Suspense>
-        )
-      },
-      {
-        path: ':id',
-        element: (
-          <Suspense fallback={<Loading />}>
-            <IterationDetail />
-          </Suspense>
-        )
-      },
-    ]
-  },
-  // 需求池路由
-  {
-    path: '/backlog',
-    element: (
-      <Suspense fallback={<Loading />}>
-        <ConsoleLayout />
-      </Suspense>
-    ),
-    children: [
-      {
-        index: true,
-        element: (
-          <Suspense fallback={<Loading />}>
-            <Backlog />
-          </Suspense>
-        )
-      },
-    ]
-  },
-  // 看板路由
-  {
-    path: '/kanban',
-    element: (
-      <Suspense fallback={<Loading />}>
-        <ConsoleLayout />
-      </Suspense>
-    ),
-    children: [
-      {
-        index: true,
-        element: (
-          <Suspense fallback={<Loading />}>
-            <Kanban />
-          </Suspense>
-        )
-      },
-    ]
-  },
-  // Wiki路由
-  {
-    path: '/wiki',
-    element: (
-      <Suspense fallback={<Loading />}>
-        <ConsoleLayout />
-      </Suspense>
-    ),
-    children: [
-      {
-        index: true,
-        element: (
-          <Suspense fallback={<Loading />}>
-            <Wiki />
-          </Suspense>
-        )
-      },
-    ]
-  },
-  // 成员管理路由（已移除，设置分组不再显示）
+  // 成员管理路由
   {
     path: '/members',
     element: (
@@ -402,7 +294,7 @@ export const routes: RouteObject[] = [
       },
     ]
   },
-  // 设置路由（已移除，设置分组不再显示）
+  // 设置路由
   {
     path: '/settings',
     element: (

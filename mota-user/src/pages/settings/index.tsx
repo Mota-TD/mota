@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Card, Form, Input, Button, Select, Switch, Divider, message, Tabs, Popconfirm, ColorPicker } from 'antd'
-import { 
-  SaveOutlined, 
+import { Card, Form, Input, Button, Select, Switch, Divider, Tabs, Popconfirm, ColorPicker, App } from 'antd'
+import {
+  SaveOutlined,
   DeleteOutlined,
   SettingOutlined,
   BellOutlined,
@@ -15,6 +15,7 @@ const { TextArea } = Input
 const { Option } = Select
 
 const SettingsPage = () => {
+  const { message } = App.useApp()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [projectColor, setProjectColor] = useState<string>('#2b7de9')

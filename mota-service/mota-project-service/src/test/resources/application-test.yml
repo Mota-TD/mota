@@ -1,0 +1,47 @@
+spring:
+  application:
+    name: mota-project-service-test
+  
+  # Disable cloud config for testing
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+      config:
+        enabled: false
+  
+  # H2 Database configuration for testing
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  
+  # H2 Console
+  h2:
+    console:
+      enabled: true
+  
+  # Redis disabled for testing
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+# MyBatis-Plus configuration
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.mota.project.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# Logging
+logging:
+  level:
+    com.mota: DEBUG
+    org.springframework.web: DEBUG
+
+# Server configuration
+server:
+  port: 0

@@ -1,0 +1,115 @@
+/**
+ * 工作计划上传组件样式
+ */
+
+.container {
+  padding: 16px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.statusBar {
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  background: var(--bg-secondary, #f5f5f5);
+  border-radius: 8px;
+}
+
+.attachmentSection {
+  margin-top: 24px;
+  padding: 16px;
+  background: var(--bg-secondary, #fafafa);
+  border-radius: 8px;
+  border: 1px dashed var(--border-color, #d9d9d9);
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.sectionHeader h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary, #333);
+}
+
+.attachmentList {
+  background: var(--bg-primary, #fff);
+  border-radius: 6px;
+}
+
+.attachmentList :global(.ant-list-item) {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color-light, #f0f0f0);
+}
+
+.attachmentList :global(.ant-list-item:last-child) {
+  border-bottom: none;
+}
+
+.attachmentList :global(.ant-list-item-meta-title) a {
+  color: var(--primary-color, #1677ff);
+  text-decoration: none;
+}
+
+.attachmentList :global(.ant-list-item-meta-title) a:hover {
+  text-decoration: underline;
+}
+
+.attachmentList :global(.ant-list-item-meta-description) {
+  font-size: 12px;
+  color: var(--text-secondary, #999);
+}
+
+.emptyAttachment {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  color: var(--text-tertiary, #bbb);
+}
+
+.emptyAttachment p {
+  margin: 8px 0 0;
+  font-size: 13px;
+}
+
+.actions {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color, #e8e8e8);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* 暗色主题适配 */
+:global([data-theme='dark']) .statusBar {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+:global([data-theme='dark']) .attachmentSection {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+:global([data-theme='dark']) .attachmentList {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+:global([data-theme='dark']) .attachmentList :global(.ant-list-item) {
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+:global([data-theme='dark']) .actions {
+  border-color: rgba(255, 255, 255, 0.1);
+}

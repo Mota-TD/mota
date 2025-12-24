@@ -11,7 +11,6 @@ import {
   SafetyCertificateOutlined,
   CloudOutlined,
   ApiOutlined,
-  FilePptOutlined,
   BookOutlined,
   BarChartOutlined,
   BulbOutlined,
@@ -19,7 +18,6 @@ import {
   PlayCircleOutlined,
   ProjectOutlined,
   AppstoreOutlined,
-  FundProjectionScreenOutlined,
   SyncOutlined,
   NotificationOutlined,
   LineChartOutlined

@@ -1,0 +1,141 @@
+/**
+ * 里程碑时间线组件样式
+ */
+
+.container {
+  padding: 16px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.milestoneItem {
+  padding: 12px 16px;
+  background: var(--bg-secondary, #fafafa);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+}
+
+.milestoneItem:hover {
+  background: var(--bg-hover, #f0f0f0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.milestoneHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.milestoneName {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary, #333);
+}
+
+.milestoneDesc {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--text-secondary, #666);
+  line-height: 1.5;
+}
+
+.milestoneMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--text-tertiary, #999);
+}
+
+.milestoneMeta span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dueDate {
+  color: var(--text-secondary, #666);
+}
+
+.daysRemaining {
+  margin-left: 4px;
+  color: var(--warning-color, #faad14);
+}
+
+.completedAt {
+  color: var(--success-color, #52c41a);
+}
+
+.milestoneActions {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border-color-light, #e8e8e8);
+}
+
+/* Timeline 样式覆盖 */
+.container :global(.ant-timeline) {
+  padding-top: 8px;
+}
+
+.container :global(.ant-timeline-item-content) {
+  min-height: auto;
+}
+
+.container :global(.ant-timeline-item-tail) {
+  border-left-style: dashed;
+}
+
+/* Card 样式 */
+.container :global(.ant-card-head) {
+  border-bottom: 1px solid var(--border-color-light, #f0f0f0);
+}
+
+.container :global(.ant-card-body) {
+  padding: 16px;
+}
+
+/* Progress 样式 */
+.container :global(.ant-progress-text) {
+  font-size: 11px;
+}
+
+/* 暗色主题适配 */
+:global([data-theme='dark']) .milestoneItem {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+:global([data-theme='dark']) .milestoneItem:hover {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+:global([data-theme='dark']) .milestoneName {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+:global([data-theme='dark']) .milestoneDesc {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+:global([data-theme='dark']) .milestoneMeta {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+:global([data-theme='dark']) .dueDate {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+:global([data-theme='dark']) .milestoneActions {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+:global([data-theme='dark']) .container :global(.ant-card-head) {
+  border-color: rgba(255, 255, 255, 0.1);
+}

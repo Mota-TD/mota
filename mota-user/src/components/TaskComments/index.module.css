@@ -1,0 +1,195 @@
+/**
+ * 任务评论组件样式
+ */
+
+.container {
+  padding: 16px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100px;
+}
+
+/* 输入区域 */
+.inputArea {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color-light, #f0f0f0);
+}
+
+.replyHint {
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  background: var(--bg-secondary, #f5f5f5);
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--text-secondary, #666);
+}
+
+.inputWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inputActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 待上传附件预览 */
+.pendingAttachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  background: var(--bg-secondary, #f5f5f5);
+  border-radius: 6px;
+}
+
+.pendingAttachments :global(.ant-tag) {
+  margin: 0;
+}
+
+/* 评论列表 */
+.commentList {
+  min-height: 100px;
+}
+
+.commentItem {
+  padding: 16px;
+  margin-bottom: 12px;
+  background: var(--bg-secondary, #fafafa);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.commentItem:hover {
+  background: var(--bg-hover, #f0f0f0);
+}
+
+.replyItem {
+  margin-left: 44px;
+  padding: 12px;
+  background: var(--bg-tertiary, #f5f5f5);
+}
+
+.commentHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.commentInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.authorName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary, #333);
+}
+
+.commentTime {
+  font-size: 12px;
+  color: var(--text-tertiary, #999);
+}
+
+.commentContent {
+  margin-left: 48px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-primary, #333);
+  word-break: break-word;
+}
+
+.replyItem .commentContent {
+  margin-left: 40px;
+}
+
+.attachments {
+  margin: 8px 0 0 48px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.attachments a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: var(--bg-primary, #fff);
+  border: 1px solid var(--border-color, #d9d9d9);
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--primary-color, #1677ff);
+  text-decoration: none;
+}
+
+.attachments a:hover {
+  background: var(--primary-color-light, #e6f4ff);
+}
+
+.commentActions {
+  margin: 8px 0 0 48px;
+}
+
+.replyItem .commentActions {
+  margin-left: 40px;
+}
+
+/* 嵌套回复 */
+.replies {
+  margin-top: 12px;
+}
+
+/* 暗色主题适配 */
+:global([data-theme='dark']) .inputArea {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+:global([data-theme='dark']) .replyHint {
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.65);
+}
+
+:global([data-theme='dark']) .commentItem {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+:global([data-theme='dark']) .commentItem:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+:global([data-theme='dark']) .replyItem {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+:global([data-theme='dark']) .authorName {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+:global([data-theme='dark']) .commentTime {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+:global([data-theme='dark']) .commentContent {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+:global([data-theme='dark']) .attachments a {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+:global([data-theme='dark']) .attachments a:hover {
+  background: rgba(22, 119, 255, 0.2);
+}

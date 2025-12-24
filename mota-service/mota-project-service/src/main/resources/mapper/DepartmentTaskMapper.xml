@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mota.project.mapper.DepartmentTaskMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.mota.project.entity.DepartmentTask">
+        <id column="id" property="id"/>
+        <result column="project_id" property="projectId"/>
+        <result column="department_id" property="departmentId"/>
+        <result column="manager_id" property="managerId"/>
+        <result column="name" property="name"/>
+        <result column="description" property="description"/>
+        <result column="status" property="status"/>
+        <result column="priority" property="priority"/>
+        <result column="start_date" property="startDate"/>
+        <result column="end_date" property="endDate"/>
+        <result column="progress" property="progress"/>
+        <result column="require_plan" property="requirePlan"/>
+        <result column="require_approval" property="requireApproval"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, project_id, department_id, manager_id, name, description, status, priority,
+        start_date, end_date, progress, require_plan, require_approval, created_at, updated_at, deleted
+    </sql>
+
+    <!-- 根据项目ID查询部门任务列表 -->
+    <select id="selectByProjectId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM department_task
+        WHERE project_id = #{projectId}
+        AND deleted = 0
+        ORDER BY created_at ASC
+    </select>
+
+    <!-- 根据部门ID查询部门任务列表 -->
+    <select id="selectByDepartmentId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM department_task
+        WHERE department_id = #{departmentId}
+        AND deleted = 0
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 根据负责人ID查询部门任务列表 -->
+    <select id="selectByManagerId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM department_task
+        WHERE manager_id = #{managerId}
+        AND deleted = 0
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 分页查询部门任务 -->
+    <select id="selectPageByCondition" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM department_task
+        WHERE deleted = 0
+        <if test="projectId != null">
+            AND project_id = #{projectId}
+        </if>
+        <if test="departmentId != null">
+            AND department_id = #{departmentId}
+        </if>
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        <if test="priority != null and priority != ''">
+            AND priority = #{priority}
+        </if>
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 统计项目下各状态的部门任务数量 -->
+    <select id="countByProjectIdGroupByStatus" resultType="java.util.Map">
+        SELECT status, COUNT(*) as count
+        FROM department_task
+        WHERE project_id = #{projectId}
+        AND deleted = 0
+        GROUP BY status
+    </select>
+
+    <!-- 更新部门任务进度 -->
+    <update id="updateProgress">
+        UPDATE department_task
+        SET progress = #{progress}, updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+</mapper>

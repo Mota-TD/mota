@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Card, Input, Collapse, Typography, Space, Tag, Button, Row, Col, List, Avatar } from 'antd'
+import { Card, Input, Collapse, Typography, Space, Tag, Button, Row, Col } from 'antd'
 import {
   SearchOutlined,
   QuestionCircleOutlined,
@@ -18,7 +18,6 @@ import {
 import styles from './index.module.css'
 
 const { Title, Text, Paragraph } = Typography
-const { Panel } = Collapse
 
 /**
  * 帮助中心页面
@@ -87,22 +86,22 @@ const Help = () => {
     {
       title: '摩塔入门教程',
       duration: '5:30',
-      thumbnail: 'https://via.placeholder.com/160x90/6366f1/ffffff?text=Tutorial'
+      icon: <RocketOutlined />
     },
     {
       title: '项目管理最佳实践',
       duration: '8:45',
-      thumbnail: 'https://via.placeholder.com/160x90/6366f1/ffffff?text=Tutorial'
+      icon: <SettingOutlined />
     },
     {
       title: 'AI 功能详解',
       duration: '6:20',
-      thumbnail: 'https://via.placeholder.com/160x90/6366f1/ffffff?text=Tutorial'
+      icon: <BulbOutlined />
     },
     {
       title: '团队协作技巧',
       duration: '7:15',
-      thumbnail: 'https://via.placeholder.com/160x90/6366f1/ffffff?text=Tutorial'
+      icon: <TeamOutlined />
     }
   ]
 
@@ -191,16 +190,12 @@ const Help = () => {
             bordered={false}
             expandIconPosition="end"
             className={styles.faqCollapse}
-          >
-            {faqs.map((faq, index) => (
-              <Panel
-                header={<span className={styles.faqQuestion}>{faq.question}</span>}
-                key={index}
-              >
-                <Paragraph className={styles.faqAnswer}>{faq.answer}</Paragraph>
-              </Panel>
-            ))}
-          </Collapse>
+            items={faqs.map((faq, index) => ({
+              key: index.toString(),
+              label: <span className={styles.faqQuestion}>{faq.question}</span>,
+              children: <Paragraph className={styles.faqAnswer}>{faq.answer}</Paragraph>
+            }))}
+          />
         </Card>
       </div>
 
@@ -214,7 +209,9 @@ const Help = () => {
             <Col xs={24} sm={12} md={6} key={index}>
               <Card className={styles.videoCard} hoverable>
                 <div className={styles.videoThumbnail}>
-                  <img src={video.thumbnail} alt={video.title} />
+                  <div className={styles.videoPlaceholder}>
+                    {video.icon}
+                  </div>
                   <div className={styles.playButton}>
                     <PlayCircleOutlined />
                   </div>

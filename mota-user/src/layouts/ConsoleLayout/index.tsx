@@ -5,10 +5,6 @@ import type { MenuProps } from 'antd'
 import {
   DashboardOutlined,
   ProjectOutlined,
-  BugOutlined,
-  CalendarOutlined,
-  FileTextOutlined,
-  BookOutlined,
   BellOutlined,
   SearchOutlined,
   MenuFoldOutlined,
@@ -21,9 +17,7 @@ import {
   HistoryOutlined,
   ThunderboltOutlined,
   QuestionCircleOutlined,
-  PlusOutlined,
-  CheckSquareOutlined,
-  ExperimentOutlined
+  CheckSquareOutlined
 } from '@ant-design/icons'
 import { useAuthStore } from '@/store/auth'
 import styles from './index.module.css'
@@ -41,7 +35,7 @@ const ConsoleLayout = () => {
   const { user, logout } = useAuthStore()
   const [collapsed, setCollapsed] = useState(false)
 
-  // 菜单项配置 - 只显示一级菜单，二级菜单在工作区切换
+  // 菜单项配置 - 根据V2.0设计稿优化
   const menuItems: MenuItem[] = [
     {
       key: '/dashboard',
@@ -97,49 +91,9 @@ const ConsoleLayout = () => {
           label: '项目管理',
         },
         {
-          key: '/issues',
+          key: '/my-tasks',
           icon: <CheckSquareOutlined />,
-          label: '任务管理',
-        },
-        {
-          key: '/requirements',
-          icon: <FileTextOutlined />,
-          label: '需求管理',
-        },
-        {
-          key: '/testing',
-          icon: <ExperimentOutlined />,
-          label: '测试管理',
-        },
-        {
-          key: '/iterations',
-          icon: <CalendarOutlined />,
-          label: '迭代管理',
-        },
-        {
-          key: '/backlog',
-          icon: <BugOutlined />,
-          label: '需求池',
-        },
-        {
-          key: '/kanban',
-          icon: <ProjectOutlined />,
-          label: '看板',
-        },
-      ],
-    },
-    {
-      type: 'divider',
-    },
-    {
-      key: 'knowledge-group',
-      type: 'group',
-      label: collapsed ? '' : '知识库',
-      children: [
-        {
-          key: '/wiki',
-          icon: <BookOutlined />,
-          label: '知识库',
+          label: '我的任务',
         },
       ],
     },
@@ -175,46 +129,25 @@ const ConsoleLayout = () => {
     },
   ]
 
-  // 快速创建菜单
-  const quickCreateItems: MenuProps['items'] = [
-    {
-      key: 'create-solution',
-      icon: <RobotOutlined />,
-      label: '生成方案',
-      onClick: () => navigate('/ai/solution'),
-    },
-    {
-      key: 'create-project',
-      icon: <ProjectOutlined />,
-      label: '新建项目',
-      onClick: () => navigate('/projects'),
-    },
-    {
-      key: 'create-issue',
-      icon: <BugOutlined />,
-      label: '创建任务',
-      onClick: () => navigate('/issues'),
-    },
-    {
-      key: 'create-doc',
-      icon: <FileTextOutlined />,
-      label: '新建文档',
-      onClick: () => navigate('/wiki'),
-    },
-  ]
-
   // 获取当前选中的菜单项
   const getSelectedKeys = () => {
     const path = location.pathname
+    // 处理任务相关路由的选中状态
+    if (path.startsWith('/tasks') || path.startsWith('/my-tasks')) {
+      return ['/my-tasks']
+    }
+    if (path.startsWith('/department-tasks')) {
+      return ['/projects']
+    }
     return [path]
   }
 
-  // 根据当前路由获取主题配置
+  // 根据当前路由获取主题配置 - 使用克莱因蓝作为主色
   const getThemeConfig = () => {
     const path = location.pathname
-    // 工作台
+    // 工作台 - 克莱因蓝
     if (path.startsWith('/dashboard')) {
-      return { menuClass: styles.themeBlue, logoClass: styles.logoBlue, logoColor: '#2b7de9' }
+      return { menuClass: styles.themeBlue, logoClass: styles.logoBlue, logoColor: '#002FA7' }
     }
     // AI助理 - 每个子页面不同颜色
     else if (path.startsWith('/ai/solution')) {
@@ -228,32 +161,18 @@ const ConsoleLayout = () => {
     } else if (path.startsWith('/ai/history')) {
       return { menuClass: styles.themeAiYellow, logoClass: styles.logoAiYellow, logoColor: '#f59e0b' }
     }
-    // 项目协同
-    else if (path.startsWith('/projects')) {
-      return { menuClass: styles.themeBlue, logoClass: styles.logoBlue, logoColor: '#2b7de9' }
-    } else if (path.startsWith('/issues')) {
+    // 项目协同 - 克莱因蓝
+    else if (path.startsWith('/projects') || path.startsWith('/department-tasks')) {
+      return { menuClass: styles.themeBlue, logoClass: styles.logoBlue, logoColor: '#002FA7' }
+    } else if (path.startsWith('/tasks') || path.startsWith('/my-tasks')) {
       return { menuClass: styles.themeGreen, logoClass: styles.logoGreen, logoColor: '#52c41a' }
-    } else if (path.startsWith('/requirements')) {
-      return { menuClass: styles.themePurple, logoClass: styles.logoPurple, logoColor: '#722ed1' }
-    } else if (path.startsWith('/testing')) {
-      return { menuClass: styles.themeOrange, logoClass: styles.logoOrange, logoColor: '#fa8c16' }
-    } else if (path.startsWith('/iterations')) {
-      return { menuClass: styles.themeCyan, logoClass: styles.logoCyan, logoColor: '#13c2c2' }
-    } else if (path.startsWith('/backlog')) {
-      return { menuClass: styles.themeIndigo, logoClass: styles.logoIndigo, logoColor: '#6366f1' }
-    } else if (path.startsWith('/kanban')) {
-      return { menuClass: styles.themeMagenta, logoClass: styles.logoMagenta, logoColor: '#eb2f96' }
-    }
-    // 知识库
-    else if (path.startsWith('/wiki')) {
-      return { menuClass: styles.themeRose, logoClass: styles.logoRose, logoColor: '#f43f5e' }
     }
     // 帮助中心
     else if (path.startsWith('/help')) {
       return { menuClass: styles.themeSky, logoClass: styles.logoSky, logoColor: '#0ea5e9' }
     }
-    // 默认蓝色
-    return { menuClass: styles.themeBlue, logoClass: '', logoColor: '#2b7de9' }
+    // 默认克莱因蓝
+    return { menuClass: styles.themeBlue, logoClass: '', logoColor: '#002FA7' }
   }
 
   const themeConfig = getThemeConfig()
@@ -356,10 +275,10 @@ const ConsoleLayout = () => {
               </Tooltip>
               <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
                 <div className={styles.userInfo}>
-                  <Avatar 
-                    size={32} 
+                  <Avatar
+                    size={32}
                     className={styles.userAvatar}
-                    style={{ backgroundColor: '#2b7de9' }}
+                    style={{ backgroundColor: '#002FA7' }}
                   >
                     {user?.name?.charAt(0) || 'U'}
                   </Avatar>
