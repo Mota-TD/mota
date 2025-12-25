@@ -6,10 +6,10 @@ import zhCN from 'antd/locale/zh_CN'
 import App from './App'
 import './styles/index.css'
 
-// Ant Design 主题配置 - 使用克莱因蓝作为主色
+// Ant Design 主题配置 - 使用科技蓝作为主色
 const theme = {
   token: {
-    colorPrimary: '#002FA7', // 克莱因蓝 (Klein Blue)
+    colorPrimary: '#1890ff', // 科技蓝 (Tech Blue)
     borderRadius: 6,
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
   },

@@ -17,6 +17,7 @@ import {
   Empty,
   Tooltip,
   Badge,
+  Typography,
   message
 } from 'antd'
 import {
@@ -30,7 +31,9 @@ import {
   RiseOutlined,
   FireOutlined,
   ThunderboltOutlined,
-  PauseCircleOutlined
+  PauseCircleOutlined,
+  PlusOutlined,
+  UnorderedListOutlined
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { taskApi } from '@/services/api'
@@ -38,6 +41,7 @@ import type { Task, TaskStatus } from '@/services/api/task'
 import styles from './index.module.css'
 
 const { RangePicker } = DatePicker
+const { Title, Text } = Typography
 
 /**
  * 我的任务页面
@@ -184,10 +188,24 @@ const MyTasks = () => {
 
   return (
     <div className={styles.container}>
-      {/* 页面标题 */}
+      {/* 页面头部 - 紫色渐变 */}
       <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>我的任务</h1>
-        <p className={styles.pageDesc}>查看和管理分配给您的所有任务</p>
+        <div className={styles.headerContent}>
+          <div className={styles.headerIcon}>
+            <UnorderedListOutlined />
+          </div>
+          <div className={styles.headerInfo}>
+            <Title level={4} className={styles.headerTitle}>我的任务</Title>
+            <Text type="secondary">查看和管理您负责的所有任务</Text>
+          </div>
+        </div>
+        <Button
+          icon={<PlusOutlined />}
+          className={styles.createBtn}
+          onClick={() => navigate('/projects')}
+        >
+          新建任务
+        </Button>
       </div>
 
       {/* 统计卡片 */}

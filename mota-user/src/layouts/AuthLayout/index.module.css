@@ -2,6 +2,7 @@
 .authContainer {
   display: flex;
   min-height: 100vh;
+  min-width: 600px;
   background: #0a0e17;
 }
 
@@ -279,8 +280,9 @@
   }
 }
 
-@media (max-width: 576px) {
+@media (max-width: 600px) {
   .authFormWrapper {
     padding: 24px;
+    min-width: 600px;
   }
 }

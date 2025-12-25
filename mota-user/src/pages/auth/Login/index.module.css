@@ -204,10 +204,11 @@
   color: #90caf9;
 }
 
-/* 响应式 */
-@media (max-width: 576px) {
+/* 响应式 - 最小宽度600px，低于此宽度显示水平滚动条 */
+@media (max-width: 600px) {
   .loginContainer {
     max-width: 100%;
+    min-width: 320px;
   }
   
   .loginHeader h2 {

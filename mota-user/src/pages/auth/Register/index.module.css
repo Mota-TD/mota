@@ -137,10 +137,11 @@
   color: #1a6fd8;
 }
 
-/* Responsive */
-@media (max-width: 576px) {
+/* Responsive - 最小宽度600px，低于此宽度显示水平滚动条 */
+@media (max-width: 600px) {
   .registerContainer {
     max-width: 100%;
+    min-width: 320px;
   }
   
   .registerHeader h2 {

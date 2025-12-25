@@ -62,15 +62,28 @@ import {
   CalendarOutlined,
   RobotOutlined,
   UndoOutlined,
-  InboxOutlined
+  InboxOutlined,
+  ClockCircleOutlined,
+  PlayCircleOutlined,
+  PauseCircleOutlined,
+  StopOutlined,
+  CloseOutlined,
+  EyeOutlined
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-cn'
 import * as projectApi from '@/services/api/project'
-import { departmentApi } from '@/services/api'
+import type { Project as ProjectType, ProjectMember, ProjectStatistics, Milestone } from '@/services/api/project'
+import { departmentApi, departmentTaskApi, taskApi } from '@/services/api'
+import type { DepartmentTask, DepartmentTaskStatus } from '@/services/api/departmentTask'
+import type { Task, TaskStatus } from '@/services/api/task'
 import { getUsers } from '@/services/api/user'
+import { getRecentActivities } from '@/services/api/activity'
 import type { Department } from '@/services/api/department'
+import AIProjectAssistant from '@/components/AIProjectAssistant'
+import MilestoneTimeline from '@/components/MilestoneTimeline'
 import styles from './index.module.css'
+import detailStyles from '../project-detail/index.module.css'
 
 // 设置 dayjs 中文
 dayjs.locale('zh-cn')
@@ -98,6 +111,27 @@ interface Project {
   starred?: number  // 0 or 1
   startDate?: string
   endDate?: string
+  priority?: string
+  visibility?: string
+  ownerId?: string
+}
+
+// 项目状态配置
+const PROJECT_STATUS_CONFIG: Record<string, { color: string; text: string; icon: React.ReactNode }> = {
+  planning: { color: 'orange', text: '规划中', icon: <ClockCircleOutlined /> },
+  active: { color: 'green', text: '进行中', icon: <PlayCircleOutlined /> },
+  completed: { color: 'blue', text: '已完成', icon: <CheckCircleOutlined /> },
+  suspended: { color: 'gold', text: '已暂停', icon: <PauseCircleOutlined /> },
+  cancelled: { color: 'red', text: '已取消', icon: <StopOutlined /> },
+  archived: { color: 'default', text: '已归档', icon: <InboxOutlined /> }
+}
+
+// 优先级配置
+const PRIORITY_CONFIG: Record<string, { color: string; text: string }> = {
+  low: { color: 'green', text: '低' },
+  medium: { color: 'blue', text: '中' },
+  high: { color: 'orange', text: '高' },
+  urgent: { color: 'red', text: '紧急' }
 }
 
 // 里程碑接口
@@ -159,6 +193,17 @@ const Projects = () => {
   const [settingsProject, setSettingsProject] = useState<Project | null>(null)
   const [settingsForm] = Form.useForm()
   const [settingsProjectColor, setSettingsProjectColor] = useState<string>('#2b7de9')
+  
+  // 项目详情抽屉相关状态
+  const [detailDrawerVisible, setDetailDrawerVisible] = useState(false)
+  const [detailLoading, setDetailLoading] = useState(false)
+  const [selectedProject, setSelectedProject] = useState<ProjectType | null>(null)
+  const [projectMembers, setProjectMembers] = useState<ProjectMember[]>([])
+  const [projectMilestones, setProjectMilestones] = useState<Milestone[]>([])
+  const [projectStats, setProjectStats] = useState<ProjectStatistics | null>(null)
+  const [departmentTasks, setDepartmentTasks] = useState<DepartmentTask[]>([])
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [activities, setActivities] = useState<any[]>([])
   
   // 当前激活的标签页
   const activeTab = searchParams.get('tab') || 'list'
@@ -634,6 +679,120 @@ const Projects = () => {
     } catch {
       message.error('操作失败')
     }
+  }
+
+  // 打开项目详情抽屉
+  const openDetailDrawer = async (project: Project) => {
+    setSelectedProject(project as ProjectType)
+    setDetailDrawerVisible(true)
+    setDetailLoading(true)
+    
+    try {
+      // 尝试加载完整项目详情
+      let projectRes: ProjectType
+      let hasFullDetails = false
+      try {
+        const fullRes = await projectApi.getProjectDetailFull(project.id)
+        projectRes = fullRes
+        hasFullDetails = true
+        if (fullRes.members) setProjectMembers(fullRes.members)
+        if (fullRes.milestones) setProjectMilestones(fullRes.milestones)
+        if (fullRes.statistics) setProjectStats(fullRes.statistics)
+      } catch {
+        // 回退到简单查询
+        projectRes = await projectApi.getProjectById(project.id)
+      }
+      
+      const [deptTasksRes, tasksRes, activitiesRes] = await Promise.all([
+        departmentTaskApi.getDepartmentTasksByProjectId(project.id).catch(() => []),
+        taskApi.getTasksByProjectId(project.id).catch(() => []),
+        getRecentActivities(5).catch(() => [])
+      ])
+      
+      setSelectedProject(projectRes)
+      setDepartmentTasks(deptTasksRes || [])
+      setTasks(tasksRes || [])
+      setActivities(activitiesRes as any || [])
+      
+      // 如果没有从完整详情获取成员和里程碑，单独加载
+      if (!hasFullDetails) {
+        try {
+          const members = await projectApi.getProjectMembers(project.id)
+          setProjectMembers(members || [])
+        } catch {
+          setProjectMembers([])
+        }
+        
+        try {
+          const milestones = await projectApi.getProjectMilestones(project.id)
+          setProjectMilestones(milestones || [])
+        } catch {
+          setProjectMilestones([])
+        }
+        
+        try {
+          const stats = await projectApi.getProjectStatistics(project.id)
+          setProjectStats(stats)
+        } catch {
+          setProjectStats(null)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load project details:', error)
+      message.error('加载项目详情失败')
+    } finally {
+      setDetailLoading(false)
+    }
+  }
+
+  // 关闭项目详情抽屉
+  const closeDetailDrawer = () => {
+    setDetailDrawerVisible(false)
+    setSelectedProject(null)
+    setProjectMembers([])
+    setProjectMilestones([])
+    setProjectStats(null)
+    setDepartmentTasks([])
+    setTasks([])
+    setActivities([])
+  }
+
+  // 刷新项目详情数据
+  const refreshProjectDetail = async () => {
+    if (!selectedProject) return
+    await openDetailDrawer(selectedProject as Project)
+  }
+
+  // 获取项目状态标签（详情抽屉用）
+  const getDetailStatusTag = (status: string) => {
+    const config = PROJECT_STATUS_CONFIG[status] || { color: 'default', text: status, icon: null }
+    return (
+      <Tag color={config.color} icon={config.icon}>
+        {config.text}
+      </Tag>
+    )
+  }
+
+  // 获取优先级标签
+  const getPriorityTag = (priority: string) => {
+    const config = PRIORITY_CONFIG[priority] || { color: 'default', text: priority }
+    return <Tag color={config.color}>{config.text}</Tag>
+  }
+
+  // 获取部门任务状态标签
+  const getDeptTaskStatusTag = (status: DepartmentTaskStatus) => {
+    return <Tag color={departmentTaskApi.getStatusColor(status)}>{departmentTaskApi.getStatusText(status)}</Tag>
+  }
+
+  // 获取任务状态标签
+  const getTaskStatusTag = (status: TaskStatus) => {
+    return <Tag color={taskApi.getStatusColor(status)}>{taskApi.getStatusText(status)}</Tag>
+  }
+
+  // 获取任务优先级标签
+  const getTaskPriorityTag = (priority: string) => {
+    const config = PRIORITY_CONFIG[priority] || { color: 'default', text: priority }
+    return <Tag color={config.color}>{config.text}</Tag>
   }
 
   const handleDeleteProject = async (projectId: string) => {
@@ -1617,7 +1776,7 @@ const Projects = () => {
           <Card
             className={styles.projectCard}
             hoverable
-            onClick={() => navigate(`/projects/${project.id}`)}
+            onClick={() => openDetailDrawer(project)}
           >
             <div className={styles.cardHeader}>
               <Avatar
@@ -1685,7 +1844,7 @@ const Projects = () => {
           key={project.id}
           className={styles.listItem}
           hoverable
-          onClick={() => navigate(`/projects/${project.id}`)}
+          onClick={() => openDetailDrawer(project)}
         >
           <div className={styles.listItemContent}>
             <Avatar
@@ -1869,7 +2028,7 @@ const Projects = () => {
                 key={project.id}
                 className={styles.listItem}
                 hoverable
-                onClick={() => navigate(`/projects/${project.id}`)}
+                onClick={() => openDetailDrawer(project)}
               >
                 <div className={styles.listItemContent}>
                   <Avatar
@@ -1989,6 +2148,591 @@ const Projects = () => {
       
       {/* 项目设置抽屉 */}
       {renderSettingsDrawer()}
+      
+      {/* 项目详情抽屉 */}
+      <Drawer
+        title={null}
+        placement="right"
+        width="85%"
+        onClose={closeDetailDrawer}
+        open={detailDrawerVisible}
+        styles={{
+          body: { padding: 0, background: '#f5f7fa' },
+          header: { display: 'none' }
+        }}
+        closable={false}
+      >
+        {detailLoading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+            <Spin size="large" />
+          </div>
+        ) : selectedProject ? (
+          <div className={detailStyles.container} style={{ padding: '24px' }}>
+            {/* 归档提示横幅 */}
+            {selectedProject.status === 'archived' && (
+              <div className={detailStyles.archivedBanner}>
+                <InboxOutlined style={{ marginRight: 8 }} />
+                此项目已归档，处于只读状态
+              </div>
+            )}
+
+            {/* 项目头部 */}
+            <div className={detailStyles.header}>
+              <div className={detailStyles.headerLeft}>
+                <Button
+                  type="text"
+                  icon={<CloseOutlined />}
+                  onClick={closeDetailDrawer}
+                  style={{ marginRight: 8 }}
+                />
+                <div
+                  className={detailStyles.projectAvatar}
+                  style={{ backgroundColor: selectedProject.color || '#2b7de9' }}
+                >
+                  {selectedProject.name.charAt(0)}
+                </div>
+                <div className={detailStyles.projectInfo}>
+                  <div className={detailStyles.projectTitle}>
+                    <h1 className={detailStyles.projectName}>{selectedProject.name}</h1>
+                    <span className={detailStyles.projectKey}>{selectedProject.key}</span>
+                    {getDetailStatusTag(selectedProject.status)}
+                    {selectedProject.priority && getPriorityTag(selectedProject.priority)}
+                  </div>
+                  <p className={detailStyles.projectDesc}>{selectedProject.description || '暂无描述'}</p>
+                  <div className={detailStyles.projectMeta}>
+                    <span><UserOutlined /> {projectMembers.length || selectedProject.memberCount || 0} 成员</span>
+                    <span><ApartmentOutlined /> {departmentTasks.length} 部门任务</span>
+                    <span><FlagOutlined /> {projectMilestones.length} 里程碑</span>
+                    {selectedProject.startDate && selectedProject.endDate && (
+                      <span>
+                        <CalendarOutlined /> {dayjs(selectedProject.startDate).format('YYYY-MM-DD')} ~ {dayjs(selectedProject.endDate).format('YYYY-MM-DD')}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <Space>
+                <Button
+                  type="text"
+                  icon={selectedProject.starred === 1 ? <StarFilled style={{ color: '#faad14' }} /> : <StarOutlined />}
+                  onClick={async () => {
+                    await handleToggleStar(selectedProject.id, selectedProject.starred || 0)
+                    setSelectedProject({ ...selectedProject, starred: selectedProject.starred === 1 ? 0 : 1 })
+                  }}
+                />
+                <Button icon={<EditOutlined />} onClick={() => {
+                  openEditDrawer(selectedProject as Project)
+                }} disabled={selectedProject.status === 'archived'}>
+                  编辑
+                </Button>
+                <Button icon={<SettingOutlined />} onClick={() => {
+                  openSettingsDrawer(selectedProject as Project)
+                }}>
+                  设置
+                </Button>
+                <Button onClick={() => navigate(`/projects/${selectedProject.id}`)}>
+                  <EyeOutlined /> 查看完整页面
+                </Button>
+              </Space>
+            </div>
+
+            {/* 统计卡片 */}
+            <div className={detailStyles.statsRow}>
+              <div className={detailStyles.statCard}>
+                <Statistic
+                  title="部门任务"
+                  value={departmentTasks.length}
+                  prefix={<ApartmentOutlined style={{ color: '#2b7de9' }} />}
+                  suffix="个"
+                />
+              </div>
+              <div className={detailStyles.statCard}>
+                <Statistic
+                  title="待分配"
+                  value={departmentTasks.filter(t => t.status === 'pending').length}
+                  valueStyle={{ color: '#faad14' }}
+                  prefix={<ClockCircleOutlined />}
+                  suffix="个"
+                />
+              </div>
+              <div className={detailStyles.statCard}>
+                <Statistic
+                  title="进行中"
+                  value={departmentTasks.filter(t => t.status === 'in_progress').length}
+                  valueStyle={{ color: '#1677ff' }}
+                  prefix={<RiseOutlined />}
+                  suffix="个"
+                />
+              </div>
+              <div className={detailStyles.statCard}>
+                <Statistic
+                  title="已完成"
+                  value={departmentTasks.filter(t => t.status === 'completed').length}
+                  valueStyle={{ color: '#52c41a' }}
+                  prefix={<CheckCircleOutlined />}
+                  suffix="个"
+                />
+              </div>
+            </div>
+
+            {/* 主内容区 */}
+            <Tabs
+              defaultActiveKey="overview"
+              className={detailStyles.tabs}
+              items={[
+                {
+                  key: 'overview',
+                  label: '概览',
+                  children: (
+                    <div className={detailStyles.contentGrid}>
+                      <div className={detailStyles.mainContent}>
+                        {/* 项目进度 */}
+                        <div className={detailStyles.card}>
+                          <div className={detailStyles.cardHeader}>
+                            <h3 className={detailStyles.cardTitle}>项目进度</h3>
+                          </div>
+                          <div className={detailStyles.progressSection}>
+                            <div className={detailStyles.progressLabel}>
+                              <span>整体进度</span>
+                              <span>{projectStats?.completionRate || (departmentTasks.length > 0
+                                ? Math.round(departmentTasks.reduce((sum, t) => sum + t.progress, 0) / departmentTasks.length)
+                                : 0)}%</span>
+                            </div>
+                            <Progress
+                              percent={projectStats?.completionRate || (departmentTasks.length > 0
+                                ? Math.round(departmentTasks.reduce((sum, t) => sum + t.progress, 0) / departmentTasks.length)
+                                : 0)}
+                              showInfo={false}
+                              strokeColor="#1677ff"
+                            />
+                          </div>
+                          <Row gutter={16} style={{ marginTop: 24 }}>
+                            <Col span={6}>
+                              <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: 24, fontWeight: 600, color: '#1a1a1a' }}>{departmentTasks.length}</div>
+                                <div style={{ color: '#8c8c8c', fontSize: 13 }}>部门任务</div>
+                              </div>
+                            </Col>
+                            <Col span={6}>
+                              <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: 24, fontWeight: 600, color: '#1a1a1a' }}>{tasks.length}</div>
+                                <div style={{ color: '#8c8c8c', fontSize: 13 }}>执行任务</div>
+                              </div>
+                            </Col>
+                            <Col span={6}>
+                              <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: 24, fontWeight: 600, color: '#52c41a' }}>{tasks.filter(t => t.status === 'completed').length}</div>
+                                <div style={{ color: '#8c8c8c', fontSize: 13 }}>已完成</div>
+                              </div>
+                            </Col>
+                            <Col span={6}>
+                              <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: 24, fontWeight: 600, color: '#722ed1' }}>{projectMilestones.length}</div>
+                                <div style={{ color: '#8c8c8c', fontSize: 13 }}>里程碑</div>
+                              </div>
+                            </Col>
+                          </Row>
+                        </div>
+
+                        {/* 部门任务概览 */}
+                        <div className={detailStyles.card}>
+                          <div className={detailStyles.cardHeader}>
+                            <h3 className={detailStyles.cardTitle}>部门任务</h3>
+                            <Button
+                              type="primary"
+                              size="small"
+                              icon={<PlusOutlined />}
+                              disabled={selectedProject.status === 'archived'}
+                            >
+                              分配任务
+                            </Button>
+                          </div>
+                          {departmentTasks.length === 0 ? (
+                            <Empty
+                              description="暂无部门任务"
+                              image={Empty.PRESENTED_IMAGE_SIMPLE}
+                            />
+                          ) : (
+                            departmentTasks.slice(0, 5).map(task => (
+                              <div key={task.id} className={detailStyles.issueItem}>
+                                <ApartmentOutlined style={{ color: '#2b7de9' }} />
+                                <span className={detailStyles.issueKey}>
+                                  {departments.find(d => d.id === task.departmentId)?.name || '未分配'}
+                                </span>
+                                <span className={detailStyles.issueTitle}>{task.name}</span>
+                                <Progress percent={task.progress} size="small" style={{ width: 100 }} />
+                                {getDeptTaskStatusTag(task.status)}
+                              </div>
+                            ))
+                          )}
+                          {departmentTasks.length > 5 && (
+                            <div style={{ textAlign: 'center', marginTop: 16 }}>
+                              <Button type="link">查看全部 {departmentTasks.length} 个任务</Button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className={detailStyles.sideContent}>
+                        {/* 团队成员 */}
+                        <div className={detailStyles.card}>
+                          <div className={detailStyles.cardHeader}>
+                            <h3 className={detailStyles.cardTitle}>团队成员</h3>
+                          </div>
+                          {projectMembers.length === 0 ? (
+                            <Empty description="暂无成员" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                          ) : (
+                            <>
+                              {projectMembers.slice(0, 5).map(member => (
+                                <div key={member.id} className={detailStyles.memberItem}>
+                                  <Avatar src={member.userAvatar}>{member.userName?.charAt(0)}</Avatar>
+                                  <div className={detailStyles.memberInfo}>
+                                    <div className={detailStyles.memberName}>{member.userName}</div>
+                                    <div className={detailStyles.memberRole}>
+                                      {member.role || '成员'}
+                                      {member.departmentName && ` · ${member.departmentName}`}
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                              {projectMembers.length > 5 && (
+                                <div style={{ textAlign: 'center', marginTop: 12 }}>
+                                  <Button type="link" size="small">
+                                    查看全部 {projectMembers.length} 名成员
+                                  </Button>
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+
+                        {/* 最近活动 */}
+                        <div className={detailStyles.card}>
+                          <div className={detailStyles.cardHeader}>
+                            <h3 className={detailStyles.cardTitle}>最近活动</h3>
+                          </div>
+                          {activities.length === 0 ? (
+                            <Empty description="暂无活动" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                          ) : (
+                            activities.slice(0, 5).map((activity: any) => {
+                              const user = users.find(u => u.id === activity.userId)
+                              return (
+                                <div key={activity.id} className={detailStyles.activityItem}>
+                                  <Avatar size="small" src={user?.avatar}>
+                                    {user?.name?.charAt(0)}
+                                  </Avatar>
+                                  <div className={detailStyles.activityContent}>
+                                    <div className={detailStyles.activityText}>
+                                      <strong>{user?.name}</strong> {activity.action} {activity.target}
+                                    </div>
+                                    <div className={detailStyles.activityTime}>{activity.time}</div>
+                                  </div>
+                                </div>
+                              )
+                            })
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                },
+                {
+                  key: 'department-tasks',
+                  label: '部门任务',
+                  children: (
+                    <div style={{ padding: '16px 0' }}>
+                      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between' }}>
+                        <Space>
+                          <Button
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            disabled={selectedProject.status === 'archived'}
+                          >
+                            分配任务
+                          </Button>
+                        </Space>
+                      </div>
+                      <Table
+                        columns={[
+                          {
+                            title: '任务名称',
+                            dataIndex: 'name',
+                            key: 'name',
+                            render: (text: string, record: DepartmentTask) => (
+                              <a onClick={() => navigate(`/department-tasks/${record.id}`)}>{text}</a>
+                            )
+                          },
+                          {
+                            title: '负责部门',
+                            dataIndex: 'departmentName',
+                            key: 'departmentName',
+                            width: 120,
+                            render: (text: string, record: DepartmentTask) => {
+                              const dept = departments.find(d => d.id === record.departmentId)
+                              return (
+                                <Space>
+                                  <ApartmentOutlined />
+                                  {dept?.name || text || '未分配'}
+                                </Space>
+                              )
+                            }
+                          },
+                          {
+                            title: '负责人',
+                            dataIndex: 'managerName',
+                            key: 'managerName',
+                            width: 120,
+                            render: (text: string, record: DepartmentTask) => {
+                              const user = users.find(u => u.id === record.managerId)
+                              return user ? (
+                                <Space>
+                                  <Avatar size="small" src={user.avatar}>{user.name?.charAt(0)}</Avatar>
+                                  {user.name}
+                                </Space>
+                              ) : text || '-'
+                            }
+                          },
+                          {
+                            title: '优先级',
+                            dataIndex: 'priority',
+                            key: 'priority',
+                            width: 80,
+                            render: (priority: string) => getTaskPriorityTag(priority)
+                          },
+                          {
+                            title: '进度',
+                            dataIndex: 'progress',
+                            key: 'progress',
+                            width: 150,
+                            render: (progress: number) => (
+                              <Progress percent={progress} size="small" />
+                            )
+                          },
+                          {
+                            title: '状态',
+                            dataIndex: 'status',
+                            key: 'status',
+                            width: 100,
+                            render: (status: DepartmentTaskStatus) => getDeptTaskStatusTag(status)
+                          },
+                          {
+                            title: '截止日期',
+                            dataIndex: 'endDate',
+                            key: 'endDate',
+                            width: 110,
+                            render: (date: string) => date ? dayjs(date).format('YYYY-MM-DD') : '-'
+                          }
+                        ]}
+                        dataSource={departmentTasks}
+                        rowKey="id"
+                        pagination={{
+                          total: departmentTasks.length,
+                          pageSize: 10,
+                          showSizeChanger: true,
+                          showTotal: (total) => `共 ${total} 条`
+                        }}
+                      />
+                    </div>
+                  )
+                },
+                {
+                  key: 'tasks',
+                  label: '执行任务',
+                  children: (
+                    <div style={{ padding: '16px 0' }}>
+                      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between' }}>
+                        <Space>
+                          <Button type="primary" icon={<PlusOutlined />} disabled={selectedProject.status === 'archived'}>
+                            新建任务
+                          </Button>
+                        </Space>
+                      </div>
+                      <Table
+                        columns={[
+                          {
+                            title: '任务名称',
+                            dataIndex: 'name',
+                            key: 'name',
+                            render: (text: string, record: Task) => (
+                              <a onClick={() => navigate(`/tasks/${record.id}`)}>{text}</a>
+                            )
+                          },
+                          {
+                            title: '所属部门任务',
+                            dataIndex: 'departmentTaskName',
+                            key: 'departmentTaskName',
+                            width: 150,
+                            render: (text: string, record: Task) => {
+                              const deptTask = departmentTasks.find(t => t.id === record.departmentTaskId)
+                              return deptTask?.name || text || '-'
+                            }
+                          },
+                          {
+                            title: '执行人',
+                            dataIndex: 'assigneeName',
+                            key: 'assigneeName',
+                            width: 120,
+                            render: (text: string, record: Task) => {
+                              const user = users.find(u => u.id === record.assigneeId)
+                              return user ? (
+                                <Space>
+                                  <Avatar size="small" src={user.avatar}>{user.name?.charAt(0)}</Avatar>
+                                  {user.name}
+                                </Space>
+                              ) : text || '未分配'
+                            }
+                          },
+                          {
+                            title: '优先级',
+                            dataIndex: 'priority',
+                            key: 'priority',
+                            width: 80,
+                            render: (priority: string) => getTaskPriorityTag(priority)
+                          },
+                          {
+                            title: '进度',
+                            dataIndex: 'progress',
+                            key: 'progress',
+                            width: 150,
+                            render: (progress: number) => (
+                              <Progress percent={progress} size="small" />
+                            )
+                          },
+                          {
+                            title: '状态',
+                            dataIndex: 'status',
+                            key: 'status',
+                            width: 100,
+                            render: (status: TaskStatus) => getTaskStatusTag(status)
+                          },
+                          {
+                            title: '截止日期',
+                            dataIndex: 'endDate',
+                            key: 'endDate',
+                            width: 110,
+                            render: (date: string) => date ? dayjs(date).format('YYYY-MM-DD') : '-'
+                          }
+                        ]}
+                        dataSource={tasks}
+                        rowKey="id"
+                        pagination={{
+                          total: tasks.length,
+                          pageSize: 10,
+                          showSizeChanger: true,
+                          showTotal: (total) => `共 ${total} 条`
+                        }}
+                      />
+                    </div>
+                  )
+                },
+                {
+                  key: 'milestones',
+                  label: (
+                    <span>
+                      <FlagOutlined /> 里程碑 ({projectMilestones.length})
+                    </span>
+                  ),
+                  children: (
+                    <div style={{ padding: '16px 0' }}>
+                      <MilestoneTimeline
+                        projectId={selectedProject.id}
+                        editable={selectedProject.status !== 'archived'}
+                        onMilestoneChange={refreshProjectDetail}
+                      />
+                    </div>
+                  )
+                },
+                {
+                  key: 'members',
+                  label: (
+                    <span>
+                      <TeamOutlined /> 成员 ({projectMembers.length})
+                    </span>
+                  ),
+                  children: (
+                    <div style={{ padding: '16px 0' }}>
+                      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between' }}>
+                        <Space>
+                          <Button
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            disabled={selectedProject.status === 'archived'}
+                          >
+                            添加成员
+                          </Button>
+                        </Space>
+                      </div>
+                      <Table
+                        columns={[
+                          {
+                            title: '成员',
+                            dataIndex: 'userName',
+                            key: 'userName',
+                            render: (text: string, record: ProjectMember) => (
+                              <Space>
+                                <Avatar src={record.userAvatar}>{text?.charAt(0)}</Avatar>
+                                {text}
+                              </Space>
+                            )
+                          },
+                          {
+                            title: '部门',
+                            dataIndex: 'departmentName',
+                            key: 'departmentName',
+                            render: (text: string) => text || '-'
+                          },
+                          {
+                            title: '角色',
+                            dataIndex: 'role',
+                            key: 'role',
+                            width: 150,
+                            render: (role: string) => (
+                              <Tag>{role || '成员'}</Tag>
+                            )
+                          },
+                          {
+                            title: '加入时间',
+                            dataIndex: 'joinedAt',
+                            key: 'joinedAt',
+                            width: 120,
+                            render: (date: string) => date ? dayjs(date).format('YYYY-MM-DD') : '-'
+                          }
+                        ]}
+                        dataSource={projectMembers}
+                        rowKey="id"
+                        pagination={{
+                          total: projectMembers.length,
+                          pageSize: 10,
+                          showSizeChanger: true,
+                          showTotal: (total) => `共 ${total} 名成员`
+                        }}
+                      />
+                    </div>
+                  )
+                },
+                {
+                  key: 'ai-assistant',
+                  label: (
+                    <span>
+                      <RobotOutlined /> AI 助手
+                    </span>
+                  ),
+                  children: (
+                    <AIProjectAssistant
+                      projectId={selectedProject.id}
+                      projectName={selectedProject.name}
+                      projectDescription={selectedProject.description}
+                      departments={departments.map(d => ({ id: Number(d.id), name: d.name }))}
+                      departmentTasks={departmentTasks}
+                      tasks={tasks}
+                    />
+                  )
+                }
+              ]}
+            />
+          </div>
+        ) : null}
+      </Drawer>
     </div>
   )
 }

@@ -1,9 +1,9 @@
-/* 控制台布局样式 - 摩塔 Mota - 克莱因蓝主题 */
+/* 控制台布局样式 - 摩塔 Mota - 科技蓝主题 */
 .layout {
   min-height: 100vh;
-  --theme-color: #002FA7;
-  --theme-color-light: rgba(0, 47, 167, 0.1);
-  --theme-color-hover: rgba(0, 47, 167, 0.85);
+  --theme-color: #1890ff;
+  --theme-color-light: rgba(24, 144, 255, 0.1);
+  --theme-color-hover: rgba(24, 144, 255, 0.85);
 }
 
 /* 全局主题色应用 - 主按钮 */
@@ -287,7 +287,7 @@
 .logoIcon {
   width: 36px;
   height: 36px;
-  background: linear-gradient(135deg, #002FA7 0%, #0052cc 100%);
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -295,7 +295,7 @@
   color: #fff;
   font-size: 18px;
   font-weight: 700;
-  box-shadow: 0 4px 12px rgba(0, 47, 167, 0.25);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.25);
 }
 
 .logoImage {
@@ -388,10 +388,10 @@
   background: #f0f0f0;
 }
 
-/* 主题颜色 - 克莱因蓝 (项目管理/工作台/AI助理) */
+/* 主题颜色 - 科技蓝 (项目管理/工作台/AI助理) */
 .themeBlue :global(.ant-menu-item-selected) {
-  background: linear-gradient(135deg, rgba(0, 47, 167, 0.1) 0%, rgba(0, 82, 204, 0.1) 100%) !important;
-  color: #002FA7 !important;
+  background: linear-gradient(135deg, rgba(24, 144, 255, 0.1) 0%, rgba(9, 109, 217, 0.1) 100%) !important;
+  color: #1890ff !important;
 }
 
 /* 主题颜色 - 绿色 (任务管理) */
@@ -481,14 +481,14 @@
 /* 菜单项 Hover 效果 - 根据目标菜单项显示对应颜色 */
 /* 工作台 */
 .menu :global(.ant-menu-item[data-menu-id$="/dashboard"]:hover:not(.ant-menu-item-selected)) {
-  background: rgba(0, 47, 167, 0.08) !important;
-  color: #002FA7 !important;
+  background: rgba(24, 144, 255, 0.08) !important;
+  color: #1890ff !important;
 }
 
 /* 项目管理 */
 .menu :global(.ant-menu-item[data-menu-id$="/projects"]:hover:not(.ant-menu-item-selected)) {
-  background: rgba(0, 47, 167, 0.08) !important;
-  color: #002FA7 !important;
+  background: rgba(24, 144, 255, 0.08) !important;
+  color: #1890ff !important;
 }
 
 /* 任务管理 */
@@ -569,9 +569,9 @@
   color: #f59e0b !important;
 }
 
-/* Logo文字主题颜色 - 克莱因蓝 */
+/* Logo文字主题颜色 - 科技蓝 */
 .logoBlue {
-  color: #002FA7 !important;
+  color: #1890ff !important;
 }
 
 .logoGreen {
@@ -652,7 +652,7 @@
 
 .helpLink:hover {
   background: #f5f7fa;
-  color: #002FA7;
+  color: #1890ff;
 }
 
 /* 主布局 */
@@ -721,8 +721,8 @@
 .searchInput:focus,
 .searchInput:global(.ant-input-affix-wrapper-focused) {
   background: #fff;
-  border-color: #002FA7;
-  box-shadow: 0 0 0 3px rgba(0, 47, 167, 0.1);
+  border-color: #1890ff;
+  box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1);
 }
 
 .searchIcon {
@@ -749,7 +749,7 @@
   height: 36px;
   border-radius: 8px;
   font-weight: 500;
-  box-shadow: 0 2px 8px rgba(0, 47, 167, 0.2);
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
 }
 
 .headerBtn {
