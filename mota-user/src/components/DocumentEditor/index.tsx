@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Card,
   Input,
@@ -123,6 +123,30 @@ const DocumentEditor: React.FC<DocumentEditorProps> = ({
     const interval = setInterval(loadCollaborators, 30000);
     return () => clearInterval(interval);
   }, [loadDocument]);
+
+  // 离开页面确认
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasChanges) {
+        e.preventDefault();
+        e.returnValue = '您有未保存的更改，确定要离开吗？';
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [hasChanges]);
+
+  // 提供给父组件检查是否有未保存更改的方法
+  const checkUnsavedChanges = useCallback(() => {
+    if (hasChanges) {
+      return window.confirm('您有未保存的更改，确定要离开吗？');
+    }
+    return true;
+  }, [hasChanges]);
 
   // 保存文档
   const handleSave = async () => {

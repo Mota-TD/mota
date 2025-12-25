@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Card, Form, Input, Button, Avatar, Upload, Tabs, Switch, Select, Divider, App } from 'antd'
+import { useState, useEffect } from 'react'
+import { Card, Form, Input, Button, Avatar, Upload, Tabs, Switch, Select, Divider, App, Spin } from 'antd'
 import {
   UserOutlined,
   MailOutlined,
@@ -8,9 +8,12 @@ import {
   UploadOutlined,
   LockOutlined,
   BellOutlined,
-  SettingOutlined
+  SettingOutlined,
+  ReloadOutlined
 } from '@ant-design/icons'
 import type { UploadProps } from 'antd'
+import * as userApi from '@/services/api/user'
+import * as notificationApi from '@/services/api/notification'
 import styles from './index.module.css'
 
 const { Option } = Select
@@ -20,33 +23,105 @@ const ProfilePage = () => {
   const [form] = Form.useForm()
   const [passwordForm] = Form.useForm()
   const [loading, setLoading] = useState(false)
+  const [pageLoading, setPageLoading] = useState(true)
   const [avatarUrl, setAvatarUrl] = useState('https://api.dicebear.com/7.x/avataaars/svg?seed=admin')
 
-  // 模拟用户数据
-  const initialValues = {
-    name: '管理员',
-    email: 'admin@mota.com',
-    phone: '13800138000',
-    department: '技术部',
-    position: '高级工程师',
-    bio: '热爱技术，专注于前端开发',
-    language: 'zh-CN',
-    timezone: 'Asia/Shanghai',
-    emailNotify: true,
-    browserNotify: true,
-    issueNotify: true,
-    mentionNotify: true,
-    weeklyReport: false,
+  // 加载用户数据
+  const loadUserProfile = async () => {
+    setPageLoading(true)
+    try {
+      // 调用真实API获取用户信息
+      const userData = await userApi.getUserProfile()
+      
+      form.setFieldsValue({
+        name: userData.nickname || userData.username,
+        email: userData.email,
+        phone: userData.phone || '',
+        department: '技术部', // TODO: 从用户数据获取
+        position: '高级工程师', // TODO: 从用户数据获取
+        bio: '热爱技术，专注于前端开发', // TODO: 从用户数据获取
+        language: 'zh-CN',
+        timezone: 'Asia/Shanghai',
+        emailNotify: true,
+        browserNotify: true,
+        issueNotify: true,
+        mentionNotify: true,
+        weeklyReport: false,
+      })
+      
+      if (userData.avatar) {
+        setAvatarUrl(userData.avatar)
+      }
+      
+      // 尝试加载通知偏好设置
+      try {
+        const userId = Number(userData.id) || 1
+        const prefs = await notificationApi.getNotificationPreferences(userId)
+        form.setFieldsValue({
+          emailNotify: prefs.enableAggregation ?? true,
+          browserNotify: prefs.enableAIClassification ?? true,
+          issueNotify: prefs.autoPinUrgent ?? true,
+          mentionNotify: prefs.autoPinMentions ?? true,
+        })
+      } catch (e) {
+        console.warn('Failed to load notification preferences')
+      }
+    } catch (error) {
+      console.error('Failed to load user profile:', error)
+      // 使用默认值
+      form.setFieldsValue({
+        name: '管理员',
+        email: 'admin@mota.com',
+        phone: '13800138000',
+        department: '技术部',
+        position: '高级工程师',
+        bio: '热爱技术，专注于前端开发',
+        language: 'zh-CN',
+        timezone: 'Asia/Shanghai',
+        emailNotify: true,
+        browserNotify: true,
+        issueNotify: true,
+        mentionNotify: true,
+        weeklyReport: false,
+      })
+    } finally {
+      setPageLoading(false)
+    }
   }
+
+  useEffect(() => {
+    loadUserProfile()
+  }, [])
 
   const handleSave = async () => {
     try {
       setLoading(true)
-      await form.validateFields()
-      await new Promise(resolve => setTimeout(resolve, 500))
+      const values = await form.validateFields()
+      
+      // 调用真实API更新用户信息
+      await userApi.updateUserProfile({
+        nickname: values.name,
+        email: values.email,
+        phone: values.phone,
+      })
+      
+      // 保存通知设置
+      try {
+        const userId = 1 // TODO: 从用户状态获取
+        await notificationApi.updateNotificationPreferences(userId, {
+          enableAggregation: values.emailNotify,
+          enableAIClassification: values.browserNotify,
+          autoPinUrgent: values.issueNotify,
+          autoPinMentions: values.mentionNotify,
+        })
+      } catch (e) {
+        console.warn('Failed to save notification preferences')
+      }
+      
       message.success('个人信息已保存')
-    } catch (error) {
-      console.error('Validation failed:', error)
+    } catch (error: any) {
+      console.error('Save failed:', error)
+      message.error(error?.message || '保存失败')
     } finally {
       setLoading(false)
     }
@@ -59,11 +134,20 @@ const ProfilePage = () => {
         message.error('两次输入的密码不一致')
         return
       }
+      
+      // TODO: 调用真实API修改密码
+      // await authApi.changePassword({
+      //   currentPassword: values.currentPassword,
+      //   newPassword: values.newPassword,
+      // })
+      
+      // 模拟API调用
       await new Promise(resolve => setTimeout(resolve, 500))
       message.success('密码修改成功')
       passwordForm.resetFields()
-    } catch (error) {
-      console.error('Validation failed:', error)
+    } catch (error: any) {
+      console.error('Password change failed:', error)
+      message.error(error?.message || '密码修改失败')
     }
   }
 
@@ -314,25 +398,47 @@ const ProfilePage = () => {
     }
   ]
 
+  if (pageLoading) {
+    return (
+      <div className={styles.container}>
+        <Card>
+          <div style={{ textAlign: 'center', padding: '50px 0' }}>
+            <Spin size="large" />
+            <p style={{ marginTop: 16, color: '#666' }}>加载个人信息中...</p>
+          </div>
+        </Card>
+      </div>
+    )
+  }
+
   return (
     <div className={styles.container}>
       <Card>
         <div className={styles.header}>
           <h2>个人设置</h2>
-          <Button 
-            type="primary" 
-            icon={<SaveOutlined />} 
-            onClick={handleSave}
-            loading={loading}
-          >
-            保存设置
-          </Button>
+          <div>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={loadUserProfile}
+              style={{ marginRight: 8 }}
+              disabled={loading}
+            >
+              刷新
+            </Button>
+            <Button
+              type="primary"
+              icon={<SaveOutlined />}
+              onClick={handleSave}
+              loading={loading}
+            >
+              保存设置
+            </Button>
+          </div>
         </div>
 
         <Form
           form={form}
           layout="vertical"
-          initialValues={initialValues}
         >
           <Tabs items={items} />
         </Form>

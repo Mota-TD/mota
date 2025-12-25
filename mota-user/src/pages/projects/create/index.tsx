@@ -186,6 +186,39 @@ const CreateProject = () => {
     setCurrentStep(currentStep - 1)
   }
 
+  // 点击步骤导航
+  const handleStepClick = async (step: number) => {
+    // 只允许点击已完成的步骤或当前步骤
+    if (step > currentStep) {
+      // 如果点击的是后面的步骤，需要先验证当前步骤
+      if (currentStep === 0) {
+        try {
+          const values = await form.validateFields()
+          setFormData({ ...formData, ...values })
+        } catch {
+          message.warning('请先完成当前步骤的必填项')
+          return
+        }
+      } else if (currentStep === 1 && selectedDepartments.length === 0) {
+        message.warning('请至少选择一个参与部门')
+        return
+      }
+    }
+    
+    // 如果是第一步，保存表单数据
+    if (currentStep === 0 && step !== 0) {
+      try {
+        const values = await form.validateFields()
+        setFormData({ ...formData, ...values })
+      } catch {
+        message.warning('请先完成基本信息')
+        return
+      }
+    }
+    
+    setCurrentStep(step)
+  }
+
   // 提交表单
   const handleSubmit = async () => {
     setLoading(true)
@@ -680,6 +713,8 @@ const CreateProject = () => {
                 { title: '设置里程碑', icon: <FlagOutlined /> },
               ]}
               style={{ marginBottom: 32 }}
+              onChange={(step) => handleStepClick(step)}
+              className={styles.clickableSteps}
             />
             
             {renderStepContent()}

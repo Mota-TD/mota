@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Card, Table, Button, Input, Space, Tag, Avatar, Modal, Form, Select, Dropdown, Popconfirm, App } from 'antd'
+import { Card, Table, Button, Input, Space, Tag, Avatar, Modal, Form, Select, Dropdown, Popconfirm, App, Spin } from 'antd'
 import {
   PlusOutlined,
   SearchOutlined,
@@ -7,7 +7,8 @@ import {
   UserOutlined,
   MailOutlined,
   DeleteOutlined,
-  EditOutlined
+  EditOutlined,
+  ReloadOutlined
 } from '@ant-design/icons'
 import * as userApi from '@/services/api/user'
 import styles from './index.module.css'
@@ -87,9 +88,17 @@ const MembersPage = () => {
     setIsModalOpen(true)
   }
 
-  const handleDelete = (member: Member) => {
-    setMembers(members.filter(m => m.id !== member.id))
-    message.success('成员已移除')
+  const handleDelete = async (member: Member) => {
+    try {
+      // 调用真实API删除用户
+      await userApi.deleteUser(member.id)
+      // 更新本地状态
+      setMembers(members.filter(m => m.id !== member.id))
+      message.success('成员已移除')
+    } catch (error: any) {
+      console.error('Delete failed:', error)
+      message.error(error?.message || '移除成员失败')
+    }
   }
 
   const handleModalOk = async () => {
@@ -97,16 +106,34 @@ const MembersPage = () => {
       const values = await form.validateFields()
       
       if (editingMember) {
-        // 编辑成员
-        setMembers(members.map(m => 
-          m.id === editingMember.id ? { ...m, ...values } : m
+        // 调用真实API更新用户
+        const updatedUser = await userApi.updateUser(editingMember.id, {
+          nickname: values.name,
+          email: values.email,
+        })
+        // 更新本地状态
+        setMembers(members.map(m =>
+          m.id === editingMember.id ? {
+            ...m,
+            name: values.name,
+            nickname: values.name,
+            email: values.email,
+            role: values.role
+          } : m
         ))
         message.success('成员信息已更新')
       } else {
-        // 添加成员
+        // 调用真实API创建用户
+        const newUser = await userApi.createUser({
+          username: values.email.split('@')[0], // 使用邮箱前缀作为用户名
+          nickname: values.name,
+          email: values.email,
+        })
+        // 添加到本地状态
         const newMember: Member = {
-          id: members.length + 1,
+          id: Number(newUser.id),
           name: values.name,
+          nickname: values.name,
           email: values.email,
           avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${Date.now()}`,
           role: values.role
@@ -117,8 +144,9 @@ const MembersPage = () => {
       
       setIsModalOpen(false)
       form.resetFields()
-    } catch (error) {
-      console.error('Validation failed:', error)
+    } catch (error: any) {
+      console.error('Save failed:', error)
+      message.error(error?.message || '保存失败')
     }
   }
 
@@ -200,6 +228,13 @@ const MembersPage = () => {
               style={{ width: 200 }}
               allowClear
             />
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={loadMembers}
+              disabled={loading}
+            >
+              刷新
+            </Button>
             <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
               添加成员
             </Button>

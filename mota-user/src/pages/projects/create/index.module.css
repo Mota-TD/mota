@@ -1,4 +1,21 @@
 /* 创建项目页面样式 */
+/* 可点击的步骤导航 */
+.clickableSteps :global(.ant-steps-item) {
+  cursor: pointer;
+}
+
+.clickableSteps :global(.ant-steps-item:hover .ant-steps-item-title) {
+  color: #10B981 !important;
+}
+
+.clickableSteps :global(.ant-steps-item-finish:hover .ant-steps-item-icon) {
+  border-color: #10B981 !important;
+}
+
+.clickableSteps :global(.ant-steps-item-finish:hover .ant-steps-item-icon .ant-steps-icon) {
+  color: #10B981 !important;
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;

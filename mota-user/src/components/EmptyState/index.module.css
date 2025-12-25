@@ -1,0 +1,174 @@
+/* 空状态组件样式 */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+/* 尺寸变体 */
+.small {
+  padding: 24px 16px;
+}
+
+.small .iconWrapper {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
+}
+
+.small .emptyIcon {
+  font-size: 24px;
+}
+
+.small .title {
+  margin-bottom: 4px !important;
+}
+
+.small .description {
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+.default {
+  padding: 48px 24px;
+}
+
+.large {
+  padding: 80px 32px;
+}
+
+.large .iconWrapper {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 32px;
+}
+
+.large .emptyIcon {
+  font-size: 56px;
+}
+
+.large .title {
+  font-size: 24px !important;
+  margin-bottom: 12px !important;
+}
+
+.large .description {
+  font-size: 16px;
+  margin-bottom: 32px;
+}
+
+/* 图标容器 */
+.iconWrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+/* 图标样式 */
+.emptyIcon {
+  font-size: 36px;
+  color: #10B981;
+}
+
+/* 标题 */
+.title {
+  color: #1E293B !important;
+  margin-bottom: 8px !important;
+  font-weight: 600 !important;
+}
+
+/* 描述文字 */
+.description {
+  max-width: 360px;
+  line-height: 1.6;
+  margin-bottom: 24px;
+  color: #64748B;
+}
+
+/* 操作按钮区域 */
+.actions {
+  margin-top: 8px;
+}
+
+/* 悬浮动画效果 */
+.container:hover .iconWrapper {
+  animation: bounce 0.6s ease;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* 不同类型的图标颜色 */
+.container[data-type="project"] .emptyIcon {
+  color: #3B82F6;
+}
+
+.container[data-type="project"] .iconWrapper {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);
+}
+
+.container[data-type="task"] .emptyIcon {
+  color: #8B5CF6;
+}
+
+.container[data-type="task"] .iconWrapper {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.05) 100%);
+}
+
+.container[data-type="notification"] .emptyIcon {
+  color: #F59E0B;
+}
+
+.container[data-type="notification"] .iconWrapper {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.05) 100%);
+}
+
+.container[data-type="search"] .emptyIcon {
+  color: #6366F1;
+}
+
+.container[data-type="search"] .iconWrapper {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(79, 70, 229, 0.05) 100%);
+}
+
+.container[data-type="favorite"] .emptyIcon {
+  color: #EC4899;
+}
+
+.container[data-type="favorite"] .iconWrapper {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(219, 39, 119, 0.05) 100%);
+}
+
+.container[data-type="ai"] .emptyIcon {
+  color: #06B6D4;
+}
+
+.container[data-type="ai"] .iconWrapper {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(8, 145, 178, 0.05) 100%);
+}

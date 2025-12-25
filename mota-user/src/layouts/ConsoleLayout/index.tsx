@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { Layout, Menu, Avatar, Dropdown, Input, Badge, Button, Space, Tooltip } from 'antd'
+import { Layout, Menu, Avatar, Dropdown, Input, Badge, Button, Space, Tooltip, Breadcrumb } from 'antd'
 import type { MenuProps } from 'antd'
 import {
   DashboardOutlined,
@@ -31,9 +31,11 @@ import {
   PieChartOutlined,
   AppstoreOutlined,
   SettingOutlined,
-  ApiOutlined
+  ApiOutlined,
+  HomeOutlined
 } from '@ant-design/icons'
 import { useAuthStore } from '@/store/auth'
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import styles from './index.module.css'
 
 const { Header, Sider, Content } = Layout
@@ -46,11 +48,134 @@ const THEME_COLOR = '#10B981'
 /**
  * 控制台布局组件
  */
+// 路由到面包屑的映射
+const routeBreadcrumbMap: Record<string, { title: string; icon?: React.ReactNode }[]> = {
+  '/dashboard': [{ title: '工作台', icon: <DashboardOutlined /> }],
+  '/projects': [{ title: '项目管理', icon: <ProjectOutlined /> }],
+  '/projects/create': [
+    { title: '项目管理', icon: <ProjectOutlined /> },
+    { title: '创建项目' }
+  ],
+  '/my-tasks': [{ title: '我的任务', icon: <CheckSquareOutlined /> }],
+  '/calendar': [{ title: '日程管理', icon: <CalendarOutlined /> }],
+  '/progress-tracking': [{ title: '进度跟踪', icon: <LineChartOutlined /> }],
+  '/resource-management': [{ title: '资源管理', icon: <TeamOutlined /> }],
+  '/report-analytics': [{ title: '报表分析', icon: <BarChartOutlined /> }],
+  '/knowledge': [{ title: '知识图谱', icon: <ApartmentOutlined /> }],
+  '/documents': [{ title: '文档管理', icon: <FileTextOutlined /> }],
+  '/templates': [{ title: '模板库', icon: <AppstoreOutlined /> }],
+  '/knowledge-statistics': [{ title: '知识统计', icon: <PieChartOutlined /> }],
+  '/favorites': [{ title: '我的收藏', icon: <StarOutlined /> }],
+  '/notifications': [{ title: '通知中心', icon: <BellOutlined /> }],
+  '/system': [{ title: '系统管理', icon: <SettingOutlined /> }],
+  '/settings': [{ title: '系统设置', icon: <SettingOutlined /> }],
+  '/profile': [{ title: '个人设置', icon: <UserOutlined /> }],
+  '/members': [{ title: '成员管理', icon: <TeamOutlined /> }],
+  '/help': [{ title: '帮助中心', icon: <QuestionCircleOutlined /> }],
+  '/ai/assistant': [
+    { title: 'AI助理', icon: <RobotOutlined /> },
+    { title: 'AI助手', icon: <MessageOutlined /> }
+  ],
+  '/ai/solution': [
+    { title: 'AI助理', icon: <RobotOutlined /> },
+    { title: '方案生成' }
+  ],
+  '/ai/ppt': [
+    { title: 'AI助理', icon: <RobotOutlined /> },
+    { title: 'PPT生成', icon: <FilePptOutlined /> }
+  ],
+  '/ai/knowledge-base': [
+    { title: 'AI助理', icon: <RobotOutlined /> },
+    { title: 'AI知识库', icon: <DatabaseOutlined /> }
+  ],
+  '/ai/search': [
+    { title: 'AI助理', icon: <RobotOutlined /> },
+    { title: '智能搜索', icon: <FileSearchOutlined /> }
+  ],
+  '/ai/news': [
+    { title: 'AI助理', icon: <RobotOutlined /> },
+    { title: '新闻追踪', icon: <GlobalOutlined /> }
+  ],
+  '/ai/training': [
+    { title: 'AI助理', icon: <RobotOutlined /> },
+    { title: '模型训练', icon: <ThunderboltOutlined /> }
+  ],
+  '/ai/history': [
+    { title: 'AI助理', icon: <RobotOutlined /> },
+    { title: '历史记录', icon: <HistoryOutlined /> }
+  ],
+  '/ai/model-management': [
+    { title: 'AI助理', icon: <RobotOutlined /> },
+    { title: '模型管理', icon: <ApiOutlined /> }
+  ],
+}
+
 const ConsoleLayout = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, logout } = useAuthStore()
   const [collapsed, setCollapsed] = useState(false)
+
+  // 启用键盘快捷键
+  useKeyboardShortcuts()
+
+  // 生成面包屑
+  const breadcrumbItems = useMemo(() => {
+    const path = location.pathname
+    
+    // 处理动态路由
+    let breadcrumbs = routeBreadcrumbMap[path]
+    
+    if (!breadcrumbs) {
+      // 处理项目详情页
+      if (path.match(/^\/project\/\d+$/)) {
+        breadcrumbs = [
+          { title: '项目管理', icon: <ProjectOutlined /> },
+          { title: '项目详情' }
+        ]
+      }
+      // 处理任务详情页
+      else if (path.match(/^\/task\/\d+$/)) {
+        breadcrumbs = [
+          { title: '我的任务', icon: <CheckSquareOutlined /> },
+          { title: '任务详情' }
+        ]
+      }
+      // 处理部门任务详情页
+      else if (path.match(/^\/department-task\/\d+$/)) {
+        breadcrumbs = [
+          { title: '项目管理', icon: <ProjectOutlined /> },
+          { title: '部门任务详情' }
+        ]
+      }
+      // 默认
+      else {
+        breadcrumbs = []
+      }
+    }
+    
+    // 添加首页
+    const items = [
+      {
+        key: 'home',
+        title: (
+          <span onClick={() => navigate('/dashboard')} style={{ cursor: 'pointer' }}>
+            <HomeOutlined /> 首页
+          </span>
+        )
+      },
+      ...breadcrumbs.map((item, index) => ({
+        key: `breadcrumb-${index}`,
+        title: (
+          <span>
+            {item.icon} {item.title}
+          </span>
+        )
+      }))
+    ]
+    
+    return items
+  }, [location.pathname, navigate])
 
   // 菜单项配置 - 根据V2.0设计稿优化
   const menuItems: MenuItem[] = [
@@ -327,9 +452,15 @@ const ConsoleLayout = () => {
               onClick={() => setCollapsed(!collapsed)}
               className={styles.collapseBtn}
             />
+            <Breadcrumb
+              items={breadcrumbItems}
+              className={styles.breadcrumb}
+            />
+          </div>
+          <div className={styles.headerCenter}>
             <div className={styles.searchWrapper}>
               <Input
-                placeholder="搜索项目、任务、文档..."
+                placeholder="搜索项目、任务、文档... (Ctrl+K)"
                 prefix={<SearchOutlined className={styles.searchIcon} />}
                 className={styles.searchInput}
                 suffix={<span className={styles.searchShortcut}>⌘K</span>}

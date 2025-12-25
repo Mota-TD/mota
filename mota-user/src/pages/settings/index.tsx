@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Card, Form, Input, Button, Select, Switch, Divider, Tabs, Popconfirm, ColorPicker, App } from 'antd'
+import { useState, useEffect } from 'react'
+import { Card, Form, Input, Button, Select, Switch, Divider, Tabs, Popconfirm, ColorPicker, App, Spin } from 'antd'
 import {
   SaveOutlined,
   DeleteOutlined,
@@ -8,54 +8,220 @@ import {
   SafetyOutlined,
   TeamOutlined,
   BgColorsOutlined,
-  ApartmentOutlined
+  ApartmentOutlined,
+  ReloadOutlined
 } from '@ant-design/icons'
 import type { Color } from 'antd/es/color-picker'
 import ThemeSwitch from '@/components/ThemeSwitch'
 import WorkflowEditor from '@/components/WorkflowEditor'
+import * as projectApi from '@/services/api/project'
+import * as notificationApi from '@/services/api/notification'
 import styles from './index.module.css'
 
 const { TextArea } = Input
 const { Option } = Select
 
+// 项目设置接口
+interface ProjectSettings {
+  id?: number
+  name: string
+  key: string
+  description?: string
+  visibility: string
+  enableIssues: boolean
+  enableWiki: boolean
+  enableIterations: boolean
+  color?: string
+}
+
+// 通知设置接口
+interface NotificationSettings {
+  notifyOnIssueCreate: boolean
+  notifyOnIssueUpdate: boolean
+  notifyOnComment: boolean
+  notifyOnMention: boolean
+}
+
 const SettingsPage = () => {
   const { message } = App.useApp()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
+  const [pageLoading, setPageLoading] = useState(true)
   const [projectColor, setProjectColor] = useState<string>('#2b7de9')
+  const [projectId, setProjectId] = useState<number | null>(null)
 
-  // 模拟项目数据
-  const initialValues = {
-    name: '前端项目',
-    key: 'FE',
-    description: 'Web 前端应用开发，包括用户界面、交互逻辑等',
-    visibility: 'private',
-    defaultBranch: 'main',
-    enableIssues: true,
-    enableWiki: true,
-    enableIterations: true,
-    notifyOnIssueCreate: true,
-    notifyOnIssueUpdate: true,
-    notifyOnComment: true,
-    notifyOnMention: true,
+  // 加载项目设置
+  const loadSettings = async () => {
+    setPageLoading(true)
+    try {
+      // 获取当前项目ID（从URL或默认项目）
+      const urlParams = new URLSearchParams(window.location.search)
+      const pid = urlParams.get('projectId')
+      
+      if (pid) {
+        setProjectId(Number(pid))
+        // 调用真实API获取项目详情
+        const projectData = await projectApi.getProject(Number(pid))
+        
+        // 获取通知偏好设置
+        let notificationPrefs = {
+          notifyOnIssueCreate: true,
+          notifyOnIssueUpdate: true,
+          notifyOnComment: true,
+          notifyOnMention: true,
+        }
+        
+        try {
+          // 使用当前用户ID获取通知偏好
+          const userId = 1 // TODO: 从用户状态获取
+          const prefs = await notificationApi.getNotificationPreferences(userId)
+          notificationPrefs = {
+            notifyOnIssueCreate: prefs.autoPinUrgent ?? true,
+            notifyOnIssueUpdate: prefs.enableAggregation ?? true,
+            notifyOnComment: prefs.enableAIClassification ?? true,
+            notifyOnMention: prefs.autoPinMentions ?? true,
+          }
+        } catch (e) {
+          console.warn('Failed to load notification preferences, using defaults')
+        }
+        
+        form.setFieldsValue({
+          name: projectData.name,
+          key: projectData.key || projectData.name?.substring(0, 3).toUpperCase(),
+          description: projectData.description,
+          visibility: projectData.visibility || 'private',
+          enableIssues: true,
+          enableWiki: true,
+          enableIterations: true,
+          ...notificationPrefs
+        })
+        
+        if (projectData.color) {
+          setProjectColor(projectData.color)
+        }
+      } else {
+        // 没有项目ID时使用默认值
+        form.setFieldsValue({
+          name: '前端项目',
+          key: 'FE',
+          description: 'Web 前端应用开发，包括用户界面、交互逻辑等',
+          visibility: 'private',
+          enableIssues: true,
+          enableWiki: true,
+          enableIterations: true,
+          notifyOnIssueCreate: true,
+          notifyOnIssueUpdate: true,
+          notifyOnComment: true,
+          notifyOnMention: true,
+        })
+      }
+    } catch (error) {
+      console.error('Failed to load settings:', error)
+      message.error('加载设置失败，使用默认值')
+      // 使用默认值
+      form.setFieldsValue({
+        name: '前端项目',
+        key: 'FE',
+        description: 'Web 前端应用开发，包括用户界面、交互逻辑等',
+        visibility: 'private',
+        enableIssues: true,
+        enableWiki: true,
+        enableIterations: true,
+        notifyOnIssueCreate: true,
+        notifyOnIssueUpdate: true,
+        notifyOnComment: true,
+        notifyOnMention: true,
+      })
+    } finally {
+      setPageLoading(false)
+    }
   }
+
+  useEffect(() => {
+    loadSettings()
+  }, [])
 
   const handleSave = async () => {
     try {
       setLoading(true)
-      await form.validateFields()
-      // 模拟保存
-      await new Promise(resolve => setTimeout(resolve, 500))
+      const values = await form.validateFields()
+      
+      // 保存项目设置
+      const projectSettings: Partial<ProjectSettings> = {
+        name: values.name,
+        key: values.key,
+        description: values.description,
+        visibility: values.visibility,
+        color: projectColor,
+      }
+      
+      if (projectId) {
+        // 调用真实API更新项目
+        await projectApi.updateProject(projectId, projectSettings as any)
+      } else {
+        // 创建新项目
+        const newProject = await projectApi.createProject(projectSettings as any)
+        setProjectId(Number(newProject.id))
+      }
+      
+      // 保存通知设置
+      try {
+        const userId = 1 // TODO: 从用户状态获取
+        await notificationApi.updateNotificationPreferences(userId, {
+          autoPinUrgent: values.notifyOnIssueCreate,
+          enableAggregation: values.notifyOnIssueUpdate,
+          enableAIClassification: values.notifyOnComment,
+          autoPinMentions: values.notifyOnMention,
+        })
+      } catch (e) {
+        console.warn('Failed to save notification preferences')
+      }
+      
       message.success('设置已保存')
-    } catch (error) {
-      console.error('Validation failed:', error)
+    } catch (error: any) {
+      console.error('Save failed:', error)
+      message.error(error?.message || '保存设置失败')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleDelete = () => {
-    message.success('项目已删除')
+  const handleDelete = async () => {
+    if (!projectId) {
+      message.warning('没有可删除的项目')
+      return
+    }
+    
+    try {
+      setLoading(true)
+      await projectApi.deleteProject(projectId)
+      message.success('项目已删除')
+      // 跳转到项目列表
+      window.location.href = '/projects'
+    } catch (error: any) {
+      console.error('Delete failed:', error)
+      message.error(error?.message || '删除项目失败')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleArchive = async () => {
+    if (!projectId) {
+      message.warning('没有可归档的项目')
+      return
+    }
+    
+    try {
+      setLoading(true)
+      await projectApi.archiveProject(projectId)
+      message.success('项目已归档')
+    } catch (error: any) {
+      console.error('Archive failed:', error)
+      message.error(error?.message || '归档项目失败')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleColorChange = (color: Color) => {
@@ -327,7 +493,15 @@ const SettingsPage = () => {
                 <h4>归档项目</h4>
                 <p>归档后项目将变为只读状态，可以随时恢复</p>
               </div>
-              <Button danger>归档项目</Button>
+              <Popconfirm
+                title="确定要归档项目吗？"
+                description="归档后项目将变为只读状态"
+                onConfirm={handleArchive}
+                okText="确定归档"
+                cancelText="取消"
+              >
+                <Button danger loading={loading}>归档项目</Button>
+              </Popconfirm>
             </div>
             
             <Divider />
@@ -345,7 +519,7 @@ const SettingsPage = () => {
                 cancelText="取消"
                 okButtonProps={{ danger: true }}
               >
-                <Button danger type="primary">删除项目</Button>
+                <Button danger type="primary" loading={loading}>删除项目</Button>
               </Popconfirm>
             </div>
           </div>
@@ -354,25 +528,47 @@ const SettingsPage = () => {
     }
   ]
 
+  if (pageLoading) {
+    return (
+      <div className={styles.container}>
+        <Card>
+          <div style={{ textAlign: 'center', padding: '50px 0' }}>
+            <Spin size="large" />
+            <p style={{ marginTop: 16, color: '#666' }}>加载设置中...</p>
+          </div>
+        </Card>
+      </div>
+    )
+  }
+
   return (
     <div className={styles.container}>
       <Card>
         <div className={styles.header}>
           <h2>项目设置</h2>
-          <Button 
-            type="primary" 
-            icon={<SaveOutlined />} 
-            onClick={handleSave}
-            loading={loading}
-          >
-            保存设置
-          </Button>
+          <div>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={loadSettings}
+              style={{ marginRight: 8 }}
+              disabled={loading}
+            >
+              刷新
+            </Button>
+            <Button
+              type="primary"
+              icon={<SaveOutlined />}
+              onClick={handleSave}
+              loading={loading}
+            >
+              保存设置
+            </Button>
+          </div>
         </div>
 
         <Form
           form={form}
           layout="vertical"
-          initialValues={initialValues}
         >
           <Tabs items={items} />
         </Form>
