@@ -15,7 +15,7 @@
 }
 
 .backBtn:hover {
-  color: #2b7de9;
+  color: #10B981;
 }
 
 .title {
@@ -137,13 +137,13 @@
 }
 
 .departmentItem:hover {
-  border-color: #2b7de9;
-  background-color: #f6f9ff;
+  border-color: #10B981;
+  background-color: #f0fdf4;
 }
 
 .departmentItemSelected {
-  border-color: #2b7de9;
-  background-color: #f0f7ff;
+  border-color: #10B981;
+  background-color: #ecfdf5;
 }
 
 .departmentInfo {
@@ -214,8 +214,8 @@
 }
 
 .memberItemSelected {
-  background-color: #f0f7ff;
-  border-color: #2b7de9;
+  background-color: #ecfdf5;
+  border-color: #10B981;
 }
 
 .memberInfo {
@@ -253,7 +253,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background-color: #2b7de9;
+  background-color: #10B981;
   color: white;
   display: flex;
   align-items: center;
@@ -307,12 +307,12 @@
 
 :global(.dark) .departmentItem:hover {
   background-color: #2a2a2a;
-  border-color: #2b7de9;
+  border-color: #10B981;
 }
 
 :global(.dark) .departmentItemSelected {
-  background-color: #1a2a3a;
-  border-color: #2b7de9;
+  background-color: #0d3d2e;
+  border-color: #10B981;
 }
 
 :global(.dark) .memberGroupHeader {
@@ -325,8 +325,8 @@
 }
 
 :global(.dark) .memberItemSelected {
-  background-color: #1a2a3a;
-  border-color: #2b7de9;
+  background-color: #0d3d2e;
+  border-color: #10B981;
 }
 
 :global(.dark) .milestoneForm {

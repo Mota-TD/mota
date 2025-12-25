@@ -1,0 +1,252 @@
+/* 代码编辑器容器 */
+.container {
+  border: 1px solid var(--border-color, #d9d9d9);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-color, #1e1e1e);
+}
+
+.container.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  border-radius: 0;
+}
+
+/* 主题样式 */
+.container.light {
+  --bg-color: #ffffff;
+  --text-color: #333333;
+  --line-number-bg: #f5f5f5;
+  --line-number-color: #999999;
+  --toolbar-bg: #fafafa;
+  --status-bg: #f0f0f0;
+  --border-color: #e8e8e8;
+  --keyword-color: #0000ff;
+  --string-color: #a31515;
+  --comment-color: #008000;
+  --number-color: #098658;
+  --type-color: #267f99;
+  --builtin-color: #795e26;
+  --function-color: #795e26;
+}
+
+.container.dark {
+  --bg-color: #1e1e1e;
+  --text-color: #d4d4d4;
+  --line-number-bg: #252526;
+  --line-number-color: #858585;
+  --toolbar-bg: #252526;
+  --status-bg: #007acc;
+  --border-color: #3c3c3c;
+  --keyword-color: #569cd6;
+  --string-color: #ce9178;
+  --comment-color: #6a9955;
+  --number-color: #b5cea8;
+  --type-color: #4ec9b0;
+  --builtin-color: #dcdcaa;
+  --function-color: #dcdcaa;
+}
+
+.container.monokai {
+  --bg-color: #272822;
+  --text-color: #f8f8f2;
+  --line-number-bg: #2f3129;
+  --line-number-color: #90908a;
+  --toolbar-bg: #2f3129;
+  --status-bg: #414339;
+  --border-color: #49483e;
+  --keyword-color: #f92672;
+  --string-color: #e6db74;
+  --comment-color: #75715e;
+  --number-color: #ae81ff;
+  --type-color: #66d9ef;
+  --builtin-color: #a6e22e;
+  --function-color: #a6e22e;
+}
+
+.container.github {
+  --bg-color: #ffffff;
+  --text-color: #24292e;
+  --line-number-bg: #f6f8fa;
+  --line-number-color: #959da5;
+  --toolbar-bg: #f6f8fa;
+  --status-bg: #0366d6;
+  --border-color: #e1e4e8;
+  --keyword-color: #d73a49;
+  --string-color: #032f62;
+  --comment-color: #6a737d;
+  --number-color: #005cc5;
+  --type-color: #6f42c1;
+  --builtin-color: #6f42c1;
+  --function-color: #6f42c1;
+}
+
+.container.dracula {
+  --bg-color: #282a36;
+  --text-color: #f8f8f2;
+  --line-number-bg: #21222c;
+  --line-number-color: #6272a4;
+  --toolbar-bg: #21222c;
+  --status-bg: #44475a;
+  --border-color: #44475a;
+  --keyword-color: #ff79c6;
+  --string-color: #f1fa8c;
+  --comment-color: #6272a4;
+  --number-color: #bd93f9;
+  --type-color: #8be9fd;
+  --builtin-color: #50fa7b;
+  --function-color: #50fa7b;
+}
+
+/* 工具栏 */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--toolbar-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* 编辑器包装器 */
+.editorWrapper {
+  display: flex;
+  flex: 1;
+  overflow: auto;
+  position: relative;
+}
+
+/* 行号 */
+.lineNumbers {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 0;
+  background: var(--line-number-bg);
+  border-right: 1px solid var(--border-color);
+  user-select: none;
+  min-width: 50px;
+  text-align: right;
+}
+
+.lineNumber {
+  padding: 0 12px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--line-number-color);
+}
+
+/* 编辑器容器 */
+.editorContainer {
+  flex: 1;
+  position: relative;
+  overflow: auto;
+}
+
+/* 语法高亮层 */
+.highlightLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  padding: 12px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-color);
+  background: transparent;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* 语法高亮样式 */
+.highlightLayer :global(.keyword) {
+  color: var(--keyword-color);
+  font-weight: 500;
+}
+
+.highlightLayer :global(.string) {
+  color: var(--string-color);
+}
+
+.highlightLayer :global(.comment) {
+  color: var(--comment-color);
+  font-style: italic;
+}
+
+.highlightLayer :global(.number) {
+  color: var(--number-color);
+}
+
+.highlightLayer :global(.type) {
+  color: var(--type-color);
+}
+
+.highlightLayer :global(.builtin) {
+  color: var(--builtin-color);
+}
+
+.highlightLayer :global(.function) {
+  color: var(--function-color);
+}
+
+/* 输入层 */
+.textarea {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 12px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  color: transparent;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  caret-color: var(--text-color);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.textarea::placeholder {
+  color: var(--line-number-color);
+}
+
+/* 状态栏 */
+.statusBar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 4px 12px;
+  background: var(--status-bg);
+  color: #ffffff;
+  font-size: 12px;
+}
+
+.separator {
+  margin: 0 4px;
+  opacity: 0.5;
+}
+
+/* 暗色模式适配 */
+:global(.dark) .container.light {
+  --bg-color: #1e1e1e;
+  --text-color: #d4d4d4;
+  --line-number-bg: #252526;
+  --line-number-color: #858585;
+  --toolbar-bg: #252526;
+  --status-bg: #007acc;
+  --border-color: #3c3c3c;
+}

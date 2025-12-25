@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mota.project.mapper.WorkflowTemplateMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.mota.project.entity.WorkflowTemplate">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="description" property="description"/>
+        <result column="project_id" property="projectId"/>
+        <result column="is_default" property="isDefault"/>
+        <result column="is_system" property="isSystem"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+
+    <!-- 包含状态和流转规则的结果映射 -->
+    <resultMap id="DetailResultMap" type="com.mota.project.entity.WorkflowTemplate" extends="BaseResultMap">
+        <collection property="statuses" ofType="com.mota.project.entity.WorkflowStatus">
+            <id column="status_id" property="id"/>
+            <result column="status_workflow_id" property="workflowId"/>
+            <result column="status_name" property="name"/>
+            <result column="status_description" property="description"/>
+            <result column="status_color" property="color"/>
+            <result column="status_icon" property="icon"/>
+            <result column="status_sort_order" property="sortOrder"/>
+            <result column="status_is_initial" property="isInitial"/>
+            <result column="status_is_final" property="isFinal"/>
+            <result column="status_type" property="statusType"/>
+        </collection>
+        <collection property="transitions" ofType="com.mota.project.entity.WorkflowTransition">
+            <id column="transition_id" property="id"/>
+            <result column="transition_workflow_id" property="workflowId"/>
+            <result column="transition_from_status_id" property="fromStatusId"/>
+            <result column="transition_to_status_id" property="toStatusId"/>
+            <result column="transition_name" property="name"/>
+            <result column="transition_description" property="description"/>
+        </collection>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, name, description, project_id, is_default, is_system, created_by, created_at, updated_at, deleted
+    </sql>
+
+    <!-- 获取系统预设工作流 -->
+    <select id="selectSystemTemplates" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM workflow_template
+        WHERE is_system = 1
+        AND deleted = 0
+        ORDER BY id ASC
+    </select>
+
+    <!-- 获取项目工作流 -->
+    <select id="selectByProjectId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM workflow_template
+        WHERE (project_id = #{projectId} OR project_id IS NULL)
+        AND deleted = 0
+        ORDER BY is_default DESC, id ASC
+    </select>
+
+    <!-- 获取默认工作流 -->
+    <select id="selectDefaultTemplate" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM workflow_template
+        WHERE is_default = 1
+        AND deleted = 0
+        <if test="projectId != null">
+            AND (project_id = #{projectId} OR project_id IS NULL)
+        </if>
+        ORDER BY project_id DESC
+        LIMIT 1
+    </select>
+
+    <!-- 获取工作流详情（包含状态和流转规则） -->
+    <select id="selectWithDetails" resultMap="DetailResultMap">
+        SELECT 
+            wt.id, wt.name, wt.description, wt.project_id, wt.is_default, wt.is_system, 
+            wt.created_by, wt.created_at, wt.updated_at, wt.deleted,
+            ws.id as status_id, ws.workflow_id as status_workflow_id, ws.name as status_name,
+            ws.description as status_description, ws.color as status_color, ws.icon as status_icon,
+            ws.sort_order as status_sort_order, ws.is_initial as status_is_initial, 
+            ws.is_final as status_is_final, ws.status_type as status_type,
+            wtr.id as transition_id, wtr.workflow_id as transition_workflow_id,
+            wtr.from_status_id as transition_from_status_id, wtr.to_status_id as transition_to_status_id,
+            wtr.name as transition_name, wtr.description as transition_description
+        FROM workflow_template wt
+        LEFT JOIN workflow_status ws ON wt.id = ws.workflow_id
+        LEFT JOIN workflow_transition wtr ON wt.id = wtr.workflow_id
+        WHERE wt.id = #{id}
+        AND wt.deleted = 0
+        ORDER BY ws.sort_order ASC
+    </select>
+
+    <!-- 获取用户创建的工作流 -->
+    <select id="selectByCreatedBy" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM workflow_template
+        WHERE created_by = #{createdBy}
+        AND deleted = 0
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 设置默认工作流 -->
+    <update id="setDefaultTemplate">
+        UPDATE workflow_template
+        SET is_default = 1, updated_at = NOW()
+        WHERE id = #{id}
+        <if test="projectId != null">
+            AND (project_id = #{projectId} OR project_id IS NULL)
+        </if>
+    </update>
+
+    <!-- 取消默认工作流 -->
+    <update id="unsetDefaultTemplate">
+        UPDATE workflow_template
+        SET is_default = 0, updated_at = NOW()
+        WHERE is_default = 1
+        AND deleted = 0
+        <if test="projectId != null">
+            AND (project_id = #{projectId} OR project_id IS NULL)
+        </if>
+    </update>
+
+</mapper>

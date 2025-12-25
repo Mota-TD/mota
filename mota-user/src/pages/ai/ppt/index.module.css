@@ -4,14 +4,14 @@
   min-height: 100%;
 }
 
-/* 页面头部 - 活力橙 */
+/* 页面头部 - 主题绿 */
 .pageHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
   border-radius: 16px;
   color: #fff;
 }
@@ -81,7 +81,7 @@
 
 .cardIcon {
   font-size: 20px;
-  color: #f97316;
+  color: #10B981;
 }
 
 .cardTitle {
@@ -120,9 +120,9 @@
 }
 
 .templateTag:hover {
-  border-color: #f97316;
-  color: #f97316;
-  background: rgba(249, 115, 22, 0.05);
+  border-color: #10B981;
+  color: #10B981;
+  background: rgba(16, 185, 129, 0.05);
 }
 
 /* 表单样式 */
@@ -138,14 +138,14 @@
 
 .form :global(.ant-input:hover),
 .form :global(.ant-select-selector:hover) {
-  border-color: #f97316 !important;
+  border-color: #10B981 !important;
 }
 
 .form :global(.ant-input:focus),
 .form :global(.ant-input-focused),
 .form :global(.ant-select-focused .ant-select-selector) {
-  border-color: #f97316 !important;
-  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1) !important;
+  border-color: #10B981 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
 }
 
 .inputIcon {
@@ -176,13 +176,13 @@
 }
 
 .templateItem:hover {
-  border-color: #f97316;
+  border-color: #10B981;
   transform: translateY(-2px);
 }
 
 .templateActive {
-  border-color: #f97316;
-  background: rgba(249, 115, 22, 0.05);
+  border-color: #10B981;
+  background: rgba(16, 185, 129, 0.05);
 }
 
 .templatePreview {
@@ -224,12 +224,12 @@
 }
 
 .colorItem:hover {
-  border-color: #f97316;
+  border-color: #10B981;
 }
 
 .colorActive {
-  border-color: #f97316;
-  background: rgba(249, 115, 22, 0.05);
+  border-color: #10B981;
+  background: rgba(16, 185, 129, 0.05);
 }
 
 .colorPreview {
@@ -251,11 +251,11 @@
 
 /* 滑块 */
 .slider :global(.ant-slider-track) {
-  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
 }
 
 .slider :global(.ant-slider-handle::after) {
-  box-shadow: 0 0 0 2px #f97316;
+  box-shadow: 0 0 0 2px #10B981;
 }
 
 /* 表单操作 */
@@ -269,13 +269,13 @@
   border-radius: 12px;
   font-weight: 500;
   font-size: 16px;
-  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
   border: none;
-  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.35);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
 }
 
 .submitBtn:hover {
-  background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
 }
 
 /* 预览卡片 */
@@ -303,7 +303,7 @@
 
 .previewIcon {
   font-size: 18px;
-  color: #f97316;
+  color: #10B981;
 }
 
 /* 生成状态 */
@@ -319,7 +319,7 @@
 .loadingAnimation {
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(251, 146, 60, 0.1) 100%);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
   border-radius: 20px;
   display: flex;
   align-items: center;
@@ -340,7 +340,7 @@
 
 .loadingIcon {
   font-size: 36px;
-  color: #f97316;
+  color: #10B981;
   animation: bounce 1s ease-in-out infinite;
 }
 
@@ -421,7 +421,7 @@
 .slideThumb {
   width: 40px;
   height: 30px;
-  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
   border-radius: 4px;
   display: flex;
   align-items: center;

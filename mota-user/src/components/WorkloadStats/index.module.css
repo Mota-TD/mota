@@ -1,0 +1,151 @@
+.container {
+  padding: 16px 0;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.userCard {
+  height: 100%;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.userCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+:global(.dark) .userCard {
+  background: var(--bg-secondary, #1f1f1f);
+  border-color: var(--border-color, #303030);
+}
+
+.userHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.userInfo {
+  flex: 1;
+}
+
+.userName {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary, #262626);
+  margin-bottom: 4px;
+}
+
+:global(.dark) .userName {
+  color: var(--text-primary, #ffffff);
+}
+
+.workloadProgress {
+  margin-bottom: 16px;
+}
+
+.progressLabel {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 12px;
+  color: var(--text-secondary, #8c8c8c);
+}
+
+.statsRow {
+  margin-bottom: 16px;
+}
+
+.statsRow :global(.ant-statistic-content) {
+  font-size: 14px !important;
+}
+
+.statsRow :global(.ant-statistic-content-prefix) {
+  font-size: 12px;
+  margin-right: 2px;
+}
+
+.hoursInfo {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  background: var(--bg-tertiary, #fafafa);
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+:global(.dark) .hoursInfo {
+  background: var(--bg-tertiary, #141414);
+}
+
+.hoursItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hoursLabel {
+  font-size: 12px;
+  color: var(--text-secondary, #8c8c8c);
+  margin-bottom: 4px;
+}
+
+.hoursValue {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary, #262626);
+}
+
+:global(.dark) .hoursValue {
+  color: var(--text-primary, #ffffff);
+}
+
+.chartContainer {
+  margin-bottom: 12px;
+}
+
+.projectList {
+  border-top: 1px solid var(--border-color, #f0f0f0);
+  padding-top: 12px;
+}
+
+:global(.dark) .projectList {
+  border-color: var(--border-color, #303030);
+}
+
+.projectTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary, #8c8c8c);
+  margin-bottom: 8px;
+}
+
+.projectItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  font-size: 12px;
+}
+
+.projectName {
+  color: var(--text-primary, #262626);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60%;
+}
+
+:global(.dark) .projectName {
+  color: var(--text-primary, #ffffff);
+}
+
+.projectHours {
+  color: var(--text-secondary, #8c8c8c);
+}

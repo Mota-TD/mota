@@ -1,4 +1,32 @@
 <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="48" height="48" rx="12" fill="#2b7de9"/>
-  <path d="M14 24L22 32L34 16" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <defs>
+    <!-- Background gradient - Klein Blue -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#002FA7"/>
+      <stop offset="100%" style="stop-color:#0052cc"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background rounded square - Klein Blue -->
+  <rect width="48" height="48" rx="10" fill="url(#bgGradient)"/>
+  
+  <!-- 4-layer tower with semi-transparent white rectangles (background) -->
+  <!-- 从底部到顶部: 项目管理, 团队协作, 知识管理, AI智能 -->
+  
+  <!-- Layer 1 (Bottom/Base): 项目管理 - widest, y=36 to y=44 -->
+  <rect x="4" y="36" width="40" height="8" rx="2" fill="white" opacity="0.35"/>
+  
+  <!-- Layer 2: 团队协作, y=26 to y=34 -->
+  <rect x="8" y="26" width="32" height="8" rx="2" fill="white" opacity="0.35"/>
+  
+  <!-- Layer 3: 知识管理, y=16 to y=24 -->
+  <rect x="12" y="16" width="24" height="8" rx="2" fill="white" opacity="0.35"/>
+  
+  <!-- Layer 4 (Top): AI智能 - narrowest, y=6 to y=14 -->
+  <rect x="16" y="6" width="16" height="8" rx="2" fill="white" opacity="0.35"/>
+  
+  <!-- M letter - large, bold, thicker middle strokes -->
+  <!-- Top at y=6 (aligned with tower top), bottom at y=36 (top of base) -->
+  <!-- Middle diagonal strokes made thicker to match side width -->
+  <path d="M5 36 L5 6 L15 6 L24 18 L33 6 L43 6 L43 36 L35 36 L35 18 L24 34 L13 18 L13 36 Z" fill="white"/>
 </svg>

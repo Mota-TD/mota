@@ -1,51 +1,63 @@
-/* 摩塔 Mota - 全局样式 */
+/* 摩塔 Mota - 全局样式 - 清爽愉悦主题 */
 
 /* 导入主题样式 */
 @import './theme.css';
 
-/* CSS 变量定义 - 科技蓝主题 */
+/* CSS 变量定义 - 薄荷绿主题 */
 :root {
-  /* 主色调 - 科技蓝 (Tech Blue) #1890ff */
-  --primary-color: #1890ff;
-  --primary-hover: #40a9ff;
-  --primary-active: #096dd9;
-  --primary-light: rgba(24, 144, 255, 0.1);
-  --primary-lighter: rgba(24, 144, 255, 0.05);
+  /* 主色调 - 薄荷绿 (Mint Green) #10B981 */
+  --primary-color: #10B981;
+  --primary-hover: #34D399;
+  --primary-active: #059669;
+  --primary-light: rgba(16, 185, 129, 0.1);
+  --primary-lighter: rgba(16, 185, 129, 0.05);
+  
+  /* 辅助色 - 天空蓝 (Sky Blue) #0EA5E9 */
+  --secondary-color: #0EA5E9;
+  --secondary-hover: #38BDF8;
+  --secondary-active: #0284C7;
+  --secondary-light: rgba(14, 165, 233, 0.1);
+  
+  /* 强调色 - 珊瑚橙 (Coral Orange) #F97316 */
+  --accent-color: #F97316;
+  --accent-hover: #FB923C;
+  --accent-active: #EA580C;
+  --accent-light: rgba(249, 115, 22, 0.1);
   
   /* 渐变色 */
-  --gradient-primary: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
-  --gradient-primary-hover: linear-gradient(135deg, #40a9ff 0%, #1890ff 100%);
-  --gradient-header: linear-gradient(135deg, #1890ff 0%, #096dd9 50%, #40a9ff 100%);
-  --gradient-card: linear-gradient(135deg, rgba(24, 144, 255, 0.05) 0%, rgba(9, 109, 217, 0.05) 100%);
+  --gradient-primary: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #34D399 0%, #10B981 100%);
+  --gradient-header: linear-gradient(135deg, #10B981 0%, #059669 50%, #34D399 100%);
+  --gradient-card: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%);
   
   /* 功能色 */
-  --success-color: #52c41a;
-  --success-light: rgba(82, 196, 26, 0.1);
-  --warning-color: #faad14;
-  --warning-light: rgba(250, 173, 20, 0.1);
-  --error-color: #ff4d4f;
-  --error-light: rgba(255, 77, 79, 0.1);
-  --info-color: #1890ff;
-  --info-light: rgba(24, 144, 255, 0.1);
+  --success-color: #22C55E;
+  --success-light: rgba(34, 197, 94, 0.1);
+  --warning-color: #F59E0B;
+  --warning-light: rgba(245, 158, 11, 0.1);
+  --error-color: #EF4444;
+  --error-light: rgba(239, 68, 68, 0.1);
+  --info-color: #0EA5E9;
+  --info-light: rgba(14, 165, 233, 0.1);
   
   /* 文字颜色 */
-  --text-primary: #1a1a1a;
-  --text-secondary: #666666;
-  --text-tertiary: #8c8c8c;
-  --text-placeholder: #bfbfbf;
-  --text-disabled: #d9d9d9;
+  --text-primary: #1E293B;
+  --text-secondary: #475569;
+  --text-tertiary: #64748B;
+  --text-placeholder: #CBD5E1;
+  --text-disabled: #CBD5E1;
   
   /* 背景色 */
-  --bg-primary: #f5f7fa;
-  --bg-secondary: #fafbfc;
-  --bg-hover: #f0f7ff;
+  --bg-primary: #F8FAFC;
+  --bg-secondary: #F1F5F9;
+  --bg-hover: rgba(16, 185, 129, 0.08);
   --bg-white: #ffffff;
-  --bg-dark: #1a1a2e;
+  --bg-dark: #0F172A;
   
   /* 边框色 */
-  --border-light: #f0f0f0;
-  --border-color: #e8ecf0;
-  --border-dark: #d9d9d9;
+  --border-light: #F1F5F9;
+  --border-color: #E2E8F0;
+  --border-dark: #CBD5E1;
   
   /* 圆角 */
   --radius-xs: 4px;
@@ -61,8 +73,8 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
   --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.16);
-  --shadow-primary: 0 4px 16px rgba(24, 144, 255, 0.2);
-  --shadow-primary-lg: 0 8px 24px rgba(24, 144, 255, 0.3);
+  --shadow-primary: 0 4px 16px rgba(16, 185, 129, 0.2);
+  --shadow-primary-lg: 0 8px 24px rgba(16, 185, 129, 0.3);
   
   /* 过渡 */
   --transition-fast: 0.15s ease;
@@ -134,12 +146,12 @@ select {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d9d9d9;
+  background: #CBD5E1;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #bfbfbf;
+  background: #94A3B8;
 }
 
 /* 选中文本样式 */

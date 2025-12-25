@@ -1,0 +1,984 @@
+/* 日历组件样式 */
+.calendarContainer {
+  background: var(--bg-primary);
+  border-radius: 8px;
+  padding: 16px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 日历头部 */
+.calendarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.currentDate {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 200px;
+}
+
+.navButtons {
+  display: flex;
+  gap: 4px;
+}
+
+.navButton {
+  padding: 4px 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+}
+
+.navButton:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.todayButton {
+  padding: 4px 12px;
+  border: 1px solid var(--primary-color);
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--primary-color);
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.todayButton:hover {
+  background: var(--primary-color);
+  color: white;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 视图切换 */
+.viewSwitch {
+  display: flex;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.viewButton {
+  padding: 6px 12px;
+  border: none;
+  background: var(--bg-secondary);
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.viewButton:not(:last-child) {
+  border-right: 1px solid var(--border-color);
+}
+
+.viewButton:hover {
+  background: var(--bg-hover);
+}
+
+.viewButton.active {
+  background: var(--primary-color);
+  color: white;
+}
+
+/* 添加事件按钮 */
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: none;
+  background: var(--primary-color);
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.addButton:hover {
+  background: var(--primary-color-hover);
+}
+
+/* 日历主体 */
+.calendarBody {
+  flex: 1;
+  overflow: auto;
+}
+
+/* 月视图 */
+.monthView {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.weekHeader {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.weekDay {
+  padding: 8px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.weekDay.weekend {
+  color: var(--error-color);
+}
+
+.monthGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  flex: 1;
+  border-left: 1px solid var(--border-color);
+}
+
+.dayCell {
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  padding: 4px;
+  min-height: 100px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.dayCell:hover {
+  background: var(--bg-hover);
+}
+
+.dayCell.otherMonth {
+  background: var(--bg-secondary);
+}
+
+.dayCell.otherMonth .dayNumber {
+  color: var(--text-disabled);
+}
+
+.dayCell.today {
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.dayCell.today .dayNumber {
+  background: var(--primary-color);
+  color: white;
+}
+
+.dayCell.selected {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.dayNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  border-radius: 50%;
+  margin-bottom: 4px;
+}
+
+.dayCell.weekend .dayNumber {
+  color: var(--error-color);
+}
+
+.dayEvents {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: calc(100% - 28px);
+  overflow: hidden;
+}
+
+.eventItem {
+  padding: 2px 6px;
+  font-size: 11px;
+  border-radius: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.eventItem:hover {
+  opacity: 0.8;
+}
+
+.eventItem.meeting {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10B981;
+  border-left: 2px solid #10B981;
+}
+
+.eventItem.task {
+  background: rgba(82, 196, 26, 0.2);
+  color: #52c41a;
+  border-left: 2px solid #52c41a;
+}
+
+.eventItem.milestone {
+  background: rgba(114, 46, 209, 0.2);
+  color: #722ed1;
+  border-left: 2px solid #722ed1;
+}
+
+.eventItem.reminder {
+  background: rgba(250, 173, 20, 0.2);
+  color: #faad14;
+  border-left: 2px solid #faad14;
+}
+
+.eventItem.other {
+  background: rgba(140, 140, 140, 0.2);
+  color: #8c8c8c;
+  border-left: 2px solid #8c8c8c;
+}
+
+.moreEvents {
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding: 2px 6px;
+  cursor: pointer;
+}
+
+.moreEvents:hover {
+  color: var(--primary-color);
+}
+
+/* 周视图 */
+.weekView {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.weekViewHeader {
+  display: grid;
+  grid-template-columns: 60px repeat(7, 1fr);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.timeGutter {
+  /* 时间列 */
+}
+
+.weekDayHeader {
+  padding: 8px;
+  text-align: center;
+  border-left: 1px solid var(--border-color);
+}
+
+.weekDayName {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.weekDayNumber {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 4px;
+}
+
+.weekDayHeader.today .weekDayNumber {
+  background: var(--primary-color);
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.weekViewBody {
+  display: grid;
+  grid-template-columns: 60px repeat(7, 1fr);
+  flex: 1;
+  overflow-y: auto;
+}
+
+.timeColumn {
+  border-right: 1px solid var(--border-color);
+}
+
+.timeSlot {
+  height: 48px;
+  padding: 0 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-align: right;
+  position: relative;
+}
+
+.timeSlot::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 8px;
+  border-top: 1px solid var(--border-color);
+}
+
+.dayColumn {
+  border-right: 1px solid var(--border-color);
+  position: relative;
+}
+
+.hourSlot {
+  height: 48px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.hourSlot:hover {
+  background: var(--bg-hover);
+}
+
+.weekEventItem {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  padding: 4px 6px;
+  font-size: 11px;
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.weekEventItem .eventTitle {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.weekEventItem .eventTime {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+/* 日视图 */
+.dayView {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.dayViewHeader {
+  padding: 16px;
+  text-align: center;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.dayViewDate {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.dayViewNumber {
+  font-size: 48px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.dayViewHeader.today .dayViewNumber {
+  color: var(--primary-color);
+}
+
+.dayViewBody {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* 事件详情弹窗 */
+.eventModal {
+  /* 使用 Ant Design Modal */
+}
+
+.eventForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.formRow {
+  display: flex;
+  gap: 16px;
+}
+
+.formRow > * {
+  flex: 1;
+}
+
+/* 加载状态 */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-secondary);
+}
+
+/* 空状态 */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-secondary);
+}
+
+.emptyIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.emptyText {
+  font-size: 14px;
+}
+
+/* 当前时间线 */
+.currentTimeLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--error-color);
+  z-index: 2;
+}
+
+.currentTimeLine::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  background: var(--error-color);
+  border-radius: 50%;
+}
+
+/* 全天事件区域 */
+.allDaySection {
+  border-bottom: 1px solid var(--border-color);
+  padding: 8px;
+  background: var(--bg-secondary);
+}
+
+.allDayLabel {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.allDayEvents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.allDayEvent {
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* 迷你日历 */
+.miniCalendar {
+  background: var(--bg-primary);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.miniCalendarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.miniCalendarTitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.miniCalendarNav {
+  display: flex;
+  gap: 4px;
+}
+
+.miniNavButton {
+  padding: 2px 6px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-secondary);
+  border-radius: 4px;
+}
+
+.miniNavButton:hover {
+  background: var(--bg-hover);
+}
+
+.miniWeekHeader {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 4px;
+}
+
+.miniWeekDay {
+  text-align: center;
+  font-size: 10px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.miniMonthGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.miniDayCell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--text-primary);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.miniDayCell:hover {
+  background: var(--bg-hover);
+}
+
+.miniDayCell.otherMonth {
+  color: var(--text-disabled);
+}
+
+.miniDayCell.today {
+  background: var(--primary-color);
+  color: white;
+}
+
+.miniDayCell.selected {
+  border: 1px solid var(--primary-color);
+}
+
+.miniDayCell.hasEvents::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  width: 4px;
+  height: 4px;
+  background: var(--primary-color);
+  border-radius: 50%;
+}
+
+/* 日历类型过滤器 */
+.calendarTypeFilter {
+  padding: 8px 0;
+  min-width: 200px;
+}
+
+.filterTitle {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+
+.filterItem {
+  padding: 6px 4px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.filterItem:hover {
+  background: var(--bg-hover);
+}
+
+.filterColor {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.filterButton {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.filterButton:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* 议程视图 */
+.agendaView {
+  padding: 16px;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.agendaDateGroup {
+  margin-bottom: 24px;
+}
+
+.agendaDateHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.agendaDateHeader.today {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(52, 211, 153, 0.1) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.agendaDateNumber {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 40px;
+}
+
+.agendaDateHeader.today .agendaDateNumber {
+  color: var(--primary-color);
+}
+
+.agendaDateInfo {
+  flex: 1;
+}
+
+.agendaWeekDay {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.agendaMonth {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.agendaEventList {
+  background: transparent;
+}
+
+.agendaEventList :global(.ant-list-item) {
+  padding: 0;
+  border: none;
+}
+
+.agendaEventItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.agendaEventItem:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.agendaEventColor {
+  width: 4px;
+  height: 100%;
+  min-height: 60px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.agendaEventContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.agendaEventTitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.agendaEventMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.agendaEventMeta span {
+  display: flex;
+  align-items: center;
+}
+
+.agendaEventTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.agendaEventTags :global(.ant-tag) {
+  margin: 0;
+  font-size: 11px;
+}
+
+/* 日历订阅管理 */
+.subscriptionList {
+  padding: 16px;
+}
+
+.subscriptionItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.subscriptionColor {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.subscriptionInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.subscriptionName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.subscriptionUrl {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.subscriptionStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.subscriptionActions {
+  display: flex;
+  gap: 4px;
+}
+
+/* 提醒弹窗 */
+.reminderPopup {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 320px;
+  background: var(--bg-primary);
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.reminderHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--primary-color);
+  color: white;
+}
+
+.reminderContent {
+  padding: 16px;
+}
+
+.reminderTitle {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.reminderTime {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.reminderActions {
+  display: flex;
+  gap: 8px;
+}
+
+/* 颜色选择器 */
+.colorPicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+}
+
+.colorOption {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.colorOption:hover {
+  transform: scale(1.1);
+}
+
+.colorOption.selected {
+  border-color: var(--text-primary);
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .calendarHeader {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .headerLeft,
+  .headerRight {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .dayCell {
+    min-height: 60px;
+  }
+  
+  .eventItem {
+    font-size: 10px;
+    padding: 1px 4px;
+  }
+  
+  .weekViewHeader,
+  .weekViewBody {
+    grid-template-columns: 40px repeat(7, 1fr);
+  }
+  
+  .timeSlot {
+    font-size: 10px;
+    padding: 0 4px;
+  }
+  
+  .agendaDateHeader {
+    padding: 8px 12px;
+  }
+  
+  .agendaDateNumber {
+    font-size: 24px;
+    min-width: 32px;
+  }
+  
+  .agendaEventItem {
+    padding: 10px 12px;
+  }
+  
+  .agendaEventMeta {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 576px) {
+  .viewSwitch {
+    display: none;
+  }
+  
+  .headerRight {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .agendaEventColor {
+    min-height: 40px;
+  }
+}

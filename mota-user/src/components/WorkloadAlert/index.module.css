@@ -1,0 +1,130 @@
+.container {
+  padding: 16px 0;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.statsRow {
+  margin-bottom: 16px;
+}
+
+.statCard {
+  border-radius: 8px;
+  text-align: center;
+}
+
+:global(.dark) .statCard {
+  background: var(--bg-secondary, #1f1f1f);
+  border-color: var(--border-color, #303030);
+}
+
+.chartRow {
+  margin-bottom: 16px;
+}
+
+.chartCard {
+  height: 100%;
+  border-radius: 8px;
+}
+
+:global(.dark) .chartCard {
+  background: var(--bg-secondary, #1f1f1f);
+  border-color: var(--border-color, #303030);
+}
+
+.alertListCard {
+  border-radius: 8px;
+}
+
+:global(.dark) .alertListCard {
+  background: var(--bg-secondary, #1f1f1f);
+  border-color: var(--border-color, #303030);
+}
+
+.alertItem {
+  cursor: pointer;
+  transition: background 0.3s;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.alertItem:hover {
+  background: var(--bg-tertiary, #fafafa);
+}
+
+:global(.dark) .alertItem:hover {
+  background: var(--bg-tertiary, #141414);
+}
+
+.alertTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.alertTitleText {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.alertDesc {
+  margin-top: 8px;
+}
+
+.alertDesc p {
+  margin-bottom: 8px;
+  color: var(--text-secondary, #8c8c8c);
+}
+
+.alertMeta {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--text-secondary, #8c8c8c);
+  margin-bottom: 8px;
+}
+
+.alertMeta strong {
+  color: var(--text-primary, #262626);
+}
+
+:global(.dark) .alertMeta strong {
+  color: var(--text-primary, #ffffff);
+}
+
+.suggestions {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: var(--bg-tertiary, #fafafa);
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+:global(.dark) .suggestions {
+  background: var(--bg-tertiary, #141414);
+}
+
+.suggestions strong {
+  color: var(--text-primary, #262626);
+}
+
+:global(.dark) .suggestions strong {
+  color: var(--text-primary, #ffffff);
+}
+
+.suggestions ul {
+  margin: 4px 0 0 0;
+  padding-left: 16px;
+}
+
+.suggestions li {
+  color: var(--text-secondary, #8c8c8c);
+  margin-bottom: 2px;
+}

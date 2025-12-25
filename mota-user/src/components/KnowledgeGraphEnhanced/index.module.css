@@ -1,0 +1,532 @@
+.container {
+  width: 100%;
+  height: 100%;
+}
+
+.card {
+  height: 100%;
+}
+
+.card :global(.ant-card-body) {
+  padding: 0;
+}
+
+/* 图谱标签页 */
+.graphTab {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* 工具栏 */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--bg-color-secondary, #fafafa);
+  border-bottom: 1px solid var(--border-color, #f0f0f0);
+}
+
+/* 图例 */
+.legend {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  background: #fff;
+  border-bottom: 1px solid var(--border-color, #f0f0f0);
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* 图谱容器 */
+.graphContainer {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: #fff;
+  min-height: 400px;
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* 统计信息 */
+.stats {
+  padding: 8px 16px;
+  background: var(--bg-color-secondary, #fafafa);
+  border-top: 1px solid var(--border-color, #f0f0f0);
+  font-size: 12px;
+  color: var(--text-color-secondary, #8c8c8c);
+}
+
+/* 节点详情 */
+.nodeDetails {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  width: 280px;
+  padding: 16px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+.nodeDetailsHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.nodeDetailsMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.nodeDetailsActions {
+  display: flex;
+  gap: 8px;
+}
+
+/* 实体识别标签页 */
+.extractionTab {
+  padding: 16px;
+}
+
+.extractionResult {
+  margin-top: 16px;
+}
+
+.relationResult {
+  margin-top: 24px;
+}
+
+.attributeResult {
+  margin-top: 24px;
+}
+
+/* 知识融合标签页 */
+.fusionTab {
+  padding: 16px;
+}
+
+/* 聚类标签页 */
+.clusterTab {
+  padding: 16px;
+}
+
+/* 筛选表单 */
+.filterForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.filterItem {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 搜索结果 */
+.searchResults {
+  position: absolute;
+  top: 100px;
+  left: 16px;
+  width: 300px;
+  max-height: 300px;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 20;
+}
+
+.searchResultsTitle {
+  padding: 8px 12px;
+  font-weight: 500;
+  border-bottom: 1px solid var(--border-color, #f0f0f0);
+}
+
+.searchResultItem {
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.3s ease;
+}
+
+.searchResultItem:hover {
+  background: var(--bg-color-secondary, #f5f5f5);
+}
+
+/* 路径高亮 */
+.pathHighlight {
+  stroke: #ff4d4f !important;
+  stroke-width: 3px !important;
+  stroke-opacity: 1 !important;
+}
+
+/* 节点高亮 */
+.nodeHighlight circle {
+  stroke: #ff4d4f !important;
+  stroke-width: 3px !important;
+}
+
+/* 聚类边界 */
+.clusterBoundary {
+  fill: none;
+  stroke-dasharray: 5, 5;
+  stroke-opacity: 0.5;
+}
+
+/* 暗色主题适配 */
+:global(.dark) .toolbar {
+  background: var(--bg-color-secondary, #1f1f1f);
+  border-color: var(--border-color, #303030);
+}
+
+:global(.dark) .legend {
+  background: var(--bg-color, #141414);
+  border-color: var(--border-color, #303030);
+}
+
+:global(.dark) .graphContainer {
+  background: var(--bg-color, #141414);
+}
+
+:global(.dark) .stats {
+  background: var(--bg-color-secondary, #1f1f1f);
+  border-color: var(--border-color, #303030);
+}
+
+:global(.dark) .nodeDetails {
+  background: var(--bg-color, #141414);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+:global(.dark) .searchResults {
+  background: var(--bg-color, #141414);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+:global(.dark) .searchResultsTitle {
+  border-color: var(--border-color, #303030);
+}
+
+:global(.dark) .searchResultItem:hover {
+  background: var(--bg-color-secondary, #1f1f1f);
+}
+
+/* 响应式布局 */
+@media (max-width: 768px) {
+  .toolbar {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .toolbar > * {
+    justify-content: center;
+  }
+
+  .nodeDetails {
+    width: calc(100% - 32px);
+    left: 16px;
+    right: 16px;
+  }
+
+  .searchResults {
+    width: calc(100% - 32px);
+    left: 16px;
+    right: 16px;
+  }
+}
+
+/* 动画效果 */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.nodeHighlight circle {
+  animation: pulse 1s ease-in-out infinite;
+}
+
+/* 路径动画 */
+@keyframes pathFlow {
+  0% {
+    stroke-dashoffset: 20;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.pathHighlight {
+  stroke-dasharray: 10, 5;
+  animation: pathFlow 1s linear infinite;
+}
+
+/* 聚类颜色 */
+.cluster-1 { fill: rgba(24, 144, 255, 0.1); stroke: #1890ff; }
+.cluster-2 { fill: rgba(82, 196, 26, 0.1); stroke: #52c41a; }
+.cluster-3 { fill: rgba(114, 46, 209, 0.1); stroke: #722ed1; }
+.cluster-4 { fill: rgba(250, 140, 22, 0.1); stroke: #fa8c16; }
+.cluster-5 { fill: rgba(235, 47, 150, 0.1); stroke: #eb2f96; }
+.cluster-6 { fill: rgba(19, 194, 194, 0.1); stroke: #13c2c2; }
+.cluster-7 { fill: rgba(47, 84, 235, 0.1); stroke: #2f54eb; }
+.cluster-8 { fill: rgba(250, 173, 20, 0.1); stroke: #faad14; }
+
+/* 节点类型图标 */
+.nodeIcon {
+  font-size: 14px;
+  color: #fff;
+}
+
+/* 边标签 */
+.edgeLabel {
+  font-size: 10px;
+  fill: #666;
+  pointer-events: none;
+}
+
+/* 缩放控制 */
+.zoomControls {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 10;
+}
+
+/* 迷你地图 */
+.minimap {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  width: 150px;
+  height: 100px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--border-color, #f0f0f0);
+  border-radius: 4px;
+  overflow: hidden;
+  z-index: 10;
+}
+
+:global(.dark) .minimap {
+  background: rgba(20, 20, 20, 0.9);
+  border-color: var(--border-color, #303030);
+}
+
+/* 工具提示 */
+.tooltip {
+  position: absolute;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 4px;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 100;
+  max-width: 200px;
+}
+
+.tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid rgba(0, 0, 0, 0.8);
+}
+
+/* 进度条 */
+.progressBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--primary-color, #1890ff);
+  transform-origin: left;
+  animation: progress 2s ease-in-out infinite;
+}
+
+@keyframes progress {
+  0% {
+    transform: scaleX(0);
+  }
+  50% {
+    transform: scaleX(0.5);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+/* 空状态 */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 300px;
+}
+
+/* 标签页内容 */
+.tabContent {
+  padding: 16px;
+}
+
+/* 卡片网格 */
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+/* 实体卡片 */
+.entityCard {
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.entityCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* 关系线 */
+.relationLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.relationArrow {
+  color: var(--text-color-secondary, #8c8c8c);
+}
+
+/* 属性列表 */
+.attributeList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.attributeItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--bg-color-secondary, #f5f5f5);
+  border-radius: 4px;
+}
+
+:global(.dark) .attributeItem {
+  background: var(--bg-color-secondary, #1f1f1f);
+}
+
+/* 聚类卡片 */
+.clusterCard {
+  border-left-width: 4px;
+  border-left-style: solid;
+}
+
+/* 路径卡片 */
+.pathCard {
+  margin-bottom: 8px;
+}
+
+.pathNodes {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* 推荐列表 */
+.recommendationList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recommendationItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: var(--bg-color-secondary, #f5f5f5);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.recommendationItem:hover {
+  background: var(--primary-color-light, #e6f7ff);
+}
+
+:global(.dark) .recommendationItem {
+  background: var(--bg-color-secondary, #1f1f1f);
+}
+
+:global(.dark) .recommendationItem:hover {
+  background: var(--primary-color-dark, #111d2c);
+}
+
+/* 导航历史 */
+.navigationHistory {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.historyItem {
+  padding: 4px 12px;
+  background: var(--bg-color-secondary, #f5f5f5);
+  border-radius: 16px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.historyItem:hover {
+  background: var(--primary-color-light, #e6f7ff);
+}
+
+:global(.dark) .historyItem {
+  background: var(--bg-color-secondary, #1f1f1f);
+}

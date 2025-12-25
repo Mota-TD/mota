@@ -6,9 +6,13 @@ import {
   SettingOutlined,
   BellOutlined,
   SafetyOutlined,
-  TeamOutlined
+  TeamOutlined,
+  BgColorsOutlined,
+  ApartmentOutlined
 } from '@ant-design/icons'
 import type { Color } from 'antd/es/color-picker'
+import ThemeSwitch from '@/components/ThemeSwitch'
+import WorkflowEditor from '@/components/WorkflowEditor'
 import styles from './index.module.css'
 
 const { TextArea } = Input
@@ -141,6 +145,48 @@ const SettingsPage = () => {
       )
     },
     {
+      key: 'appearance',
+      label: (
+        <span>
+          <BgColorsOutlined />
+          外观设置
+        </span>
+      ),
+      children: (
+        <div className={styles.tabContent}>
+          <h3>主题设置</h3>
+          
+          <Form.Item
+            label="主题模式"
+            extra="选择您喜欢的主题模式，支持亮色、暗色和跟随系统"
+          >
+            <ThemeSwitch showLabel size="middle" />
+          </Form.Item>
+
+          <Divider />
+
+          <h3>显示设置</h3>
+          
+          <Form.Item
+            name="compactMode"
+            label="紧凑模式"
+            valuePropName="checked"
+            extra="启用后界面元素间距更小，显示更多内容"
+          >
+            <Switch />
+          </Form.Item>
+
+          <Form.Item
+            name="showSidebar"
+            label="显示侧边栏"
+            valuePropName="checked"
+          >
+            <Switch defaultChecked />
+          </Form.Item>
+        </div>
+      )
+    },
+    {
       key: 'notifications',
       label: (
         <span>
@@ -227,6 +273,24 @@ const SettingsPage = () => {
               <Option value="owner">仅创建者和管理员</Option>
             </Select>
           </Form.Item>
+        </div>
+      )
+    },
+    {
+      key: 'workflow',
+      label: (
+        <span>
+          <ApartmentOutlined />
+          工作流设置
+        </span>
+      ),
+      children: (
+        <div className={styles.tabContent}>
+          <h3>自定义工作流</h3>
+          <p style={{ color: '#666', marginBottom: 16 }}>
+            配置任务状态和流转规则，定义任务从创建到完成的流程
+          </p>
+          <WorkflowEditor />
         </div>
       )
     },

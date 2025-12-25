@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mota.project.mapper.DocumentAccessLogMapper">
+
+    <resultMap id="BaseResultMap" type="com.mota.project.entity.DocumentAccessLog">
+        <id column="id" property="id"/>
+        <result column="document_id" property="documentId"/>
+        <result column="user_id" property="userId"/>
+        <result column="project_id" property="projectId"/>
+        <result column="access_type" property="accessType"/>
+        <result column="access_source" property="accessSource"/>
+        <result column="duration_seconds" property="durationSeconds"/>
+        <result column="device_type" property="deviceType"/>
+        <result column="browser" property="browser"/>
+        <result column="ip_address" property="ipAddress"/>
+        <result column="access_date" property="accessDate"/>
+        <result column="access_time" property="accessTime"/>
+    </resultMap>
+
+    <select id="getDocumentAccessStats" resultType="java.util.Map">
+        SELECT 
+            COUNT(*) as totalViews,
+            COUNT(DISTINCT user_id) as uniqueVisitors,
+            SUM(duration_seconds) as totalDuration,
+            AVG(duration_seconds) as avgDuration,
+            SUM(CASE WHEN access_type = 'download' THEN 1 ELSE 0 END) as downloadCount,
+            SUM(CASE WHEN access_type = 'share' THEN 1 ELSE 0 END) as shareCount
+        FROM document_access_log
+        WHERE document_id = #{documentId}
+        <if test="startDate != null">
+            AND access_date >= #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND access_date &lt;= #{endDate}
+        </if>
+    </select>
+
+    <select id="getAccessTrend" resultType="java.util.Map">
+        SELECT 
+            <choose>
+                <when test="groupBy == 'day'">
+                    DATE_FORMAT(access_date, '%Y-%m-%d') as date,
+                </when>
+                <when test="groupBy == 'week'">
+                    DATE_FORMAT(access_date, '%Y-%u') as date,
+                </when>
+                <when test="groupBy == 'month'">
+                    DATE_FORMAT(access_date, '%Y-%m') as date,
+                </when>
+                <otherwise>
+                    DATE_FORMAT(access_date, '%Y-%m-%d') as date,
+                </otherwise>
+            </choose>
+            COUNT(*) as viewCount,
+            COUNT(DISTINCT user_id) as uniqueVisitors,
+            AVG(duration_seconds) as avgDuration
+        FROM document_access_log
+        WHERE 1=1
+        <if test="projectId != null">
+            AND project_id = #{projectId}
+        </if>
+        <if test="startDate != null">
+            AND access_date >= #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND access_date &lt;= #{endDate}
+        </if>
+        GROUP BY 
+        <choose>
+            <when test="groupBy == 'day'">
+                DATE_FORMAT(access_date, '%Y-%m-%d')
+            </when>
+            <when test="groupBy == 'week'">
+                DATE_FORMAT(access_date, '%Y-%u')
+            </when>
+            <when test="groupBy == 'month'">
+                DATE_FORMAT(access_date, '%Y-%m')
+            </when>
+            <otherwise>
+                DATE_FORMAT(access_date, '%Y-%m-%d')
+            </otherwise>
+        </choose>
+        ORDER BY date
+    </select>
+
+    <select id="getAccessSourceDistribution" resultType="java.util.Map">
+        SELECT 
+            access_source as source,
+            COUNT(*) as count,
+            ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(), 2) as percentage
+        FROM document_access_log
+        WHERE 1=1
+        <if test="projectId != null">
+            AND project_id = #{projectId}
+        </if>
+        <if test="startDate != null">
+            AND access_date >= #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND access_date &lt;= #{endDate}
+        </if>
+        GROUP BY access_source
+        ORDER BY count DESC
+    </select>
+
+    <select id="getDeviceTypeDistribution" resultType="java.util.Map">
+        SELECT 
+            device_type as deviceType,
+            COUNT(*) as count,
+            ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(), 2) as percentage
+        FROM document_access_log
+        WHERE 1=1
+        <if test="projectId != null">
+            AND project_id = #{projectId}
+        </if>
+        <if test="startDate != null">
+            AND access_date >= #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND access_date &lt;= #{endDate}
+        </if>
+        GROUP BY device_type
+        ORDER BY count DESC
+    </select>
+
+    <select id="getUniqueVisitors" resultType="java.lang.Integer">
+        SELECT COUNT(DISTINCT user_id)
+        FROM document_access_log
+        WHERE document_id = #{documentId}
+        <if test="startDate != null">
+            AND access_date >= #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND access_date &lt;= #{endDate}
+        </if>
+    </select>
+
+</mapper>

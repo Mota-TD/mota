@@ -4,14 +4,14 @@
   min-height: 100%;
 }
 
-/* 页面头部 - 科技蓝 (Tech Blue) */
+/* 页面头部 - 主题绿 */
 .pageHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
   border-radius: 16px;
   color: #fff;
 }
@@ -150,8 +150,8 @@
 }
 
 .taskCard:hover {
-  border-color: #1890ff;
-  box-shadow: 0 8px 24px rgba(24, 144, 255, 0.15);
+  border-color: #10B981;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.15);
   transform: translateY(-4px);
 }
 
@@ -225,7 +225,7 @@
 }
 
 .taskDeadline {
-  color: #1890ff;
+  color: #10B981;
   font-weight: 500;
 }
 
@@ -315,7 +315,7 @@
 }
 
 :global([data-theme='dark']) .pageHeader {
-  background: linear-gradient(135deg, #096dd9 0%, #1890ff 100%);
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
 }
 
 :global([data-theme='dark']) .headerTitle {
@@ -374,8 +374,8 @@
 }
 
 :global([data-theme='dark']) .taskCard:hover {
-  border-color: #40a9ff;
-  box-shadow: 0 8px 24px rgba(64, 169, 255, 0.2);
+  border-color: #34D399;
+  box-shadow: 0 8px 24px rgba(52, 211, 153, 0.2);
 }
 
 :global([data-theme='dark']) .overdueCard {

@@ -29,6 +29,11 @@ public class AINews {
     private String summary;
 
     /**
+     * 内容
+     */
+    private String content;
+
+    /**
      * 来源
      */
     private String source;

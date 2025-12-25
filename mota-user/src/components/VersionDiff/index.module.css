@@ -1,0 +1,370 @@
+/* 版本对比容器 */
+.container {
+  height: 100%;
+}
+
+.card {
+  height: 100%;
+}
+
+/* 加载状态 */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+}
+
+/* 时间线 */
+.timeline {
+  padding: 16px 0;
+}
+
+/* 版本项 */
+.versionItem {
+  padding: 12px 16px;
+  background: var(--item-bg, #f9f9f9);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.versionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.versionTime {
+  font-size: 12px;
+  color: var(--text-secondary, #999999);
+}
+
+.versionInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.changeStats {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.additions {
+  color: #52c41a;
+}
+
+.deletions {
+  color: #ff4d4f;
+}
+
+.changeSummary {
+  padding: 8px 12px;
+  background: var(--summary-bg, #ffffff);
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--text-color, #333333);
+  margin-bottom: 8px;
+}
+
+.versionActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* 对比选择器 */
+.compareTab {
+  padding: 16px 0;
+}
+
+.compareSelector {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  background: var(--selector-bg, #fafafa);
+  border-radius: 8px;
+}
+
+/* Diff弹窗 */
+.diffModal :global(.ant-modal-body) {
+  padding: 0;
+}
+
+.diffToolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--toolbar-bg, #fafafa);
+  border-bottom: 1px solid var(--border-color, #e8e8e8);
+}
+
+.diffStats {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+}
+
+.diffContainer {
+  max-height: 500px;
+  overflow: auto;
+}
+
+/* Diff内容 */
+.diffContent {
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.diffHunk {
+  margin-bottom: 16px;
+}
+
+.hunkHeader {
+  padding: 8px 16px;
+  background: var(--hunk-header-bg, #f0f0f0);
+  color: var(--text-secondary, #666666);
+  font-size: 12px;
+  border-bottom: 1px solid var(--border-color, #e8e8e8);
+}
+
+.diffLine {
+  display: flex;
+  padding: 2px 16px;
+  min-height: 22px;
+}
+
+.diffLine.unchanged {
+  background: var(--unchanged-bg, #ffffff);
+}
+
+.diffLine.added {
+  background: var(--added-bg, #e6ffed);
+}
+
+.diffLine.removed {
+  background: var(--removed-bg, #ffeef0);
+}
+
+.diffLine.modified {
+  background: var(--modified-bg, #fff5e6);
+}
+
+.lineNumbers {
+  display: flex;
+  gap: 8px;
+  min-width: 80px;
+  color: var(--line-number-color, #999999);
+  user-select: none;
+}
+
+.oldLineNum,
+.newLineNum {
+  width: 35px;
+  text-align: right;
+}
+
+.lineNum {
+  width: 40px;
+  text-align: right;
+  color: var(--line-number-color, #999999);
+  user-select: none;
+  padding-right: 12px;
+}
+
+.prefix {
+  width: 20px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.diffLine.added .prefix {
+  color: #52c41a;
+}
+
+.diffLine.removed .prefix {
+  color: #ff4d4f;
+}
+
+.lineContent {
+  flex: 1;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* 分栏视图 */
+.splitView {
+  display: flex;
+}
+
+.splitPane {
+  flex: 1;
+  border-right: 1px solid var(--border-color, #e8e8e8);
+}
+
+.splitPane:last-child {
+  border-right: none;
+}
+
+.paneHeader {
+  padding: 8px 16px;
+  background: var(--pane-header-bg, #fafafa);
+  border-bottom: 1px solid var(--border-color, #e8e8e8);
+  font-size: 13px;
+}
+
+.paneContent {
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* 回滚确认 */
+.rollbackConfirm {
+  padding: 8px 0;
+}
+
+.rollbackVersion {
+  padding: 16px;
+  background: var(--version-bg, #f5f5f5);
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+.rollbackTime {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-secondary, #999999);
+}
+
+.warning {
+  color: #faad14;
+  font-size: 13px;
+}
+
+/* 保存版本 */
+.saveVersion {
+  padding: 8px 0;
+}
+
+.summaryInput {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border-color, #d9d9d9);
+  border-radius: 6px;
+  font-size: 14px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.summaryInput:focus {
+  outline: none;
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+/* 暗色模式 */
+:global(.dark) .container {
+  --item-bg: #2a2a2a;
+  --summary-bg: #1f1f1f;
+  --text-color: #d4d4d4;
+  --text-secondary: #a0a0a0;
+  --selector-bg: #252525;
+  --toolbar-bg: #252525;
+  --border-color: #3c3c3c;
+  --hunk-header-bg: #2a2a2a;
+  --unchanged-bg: #1f1f1f;
+  --added-bg: #1a3a1a;
+  --removed-bg: #3a1a1a;
+  --modified-bg: #3a3a1a;
+  --line-number-color: #6e6e6e;
+  --pane-header-bg: #252525;
+  --version-bg: #2a2a2a;
+}
+
+:global(.dark) .summaryInput {
+  background: #2a2a2a;
+  border-color: #3c3c3c;
+  color: #d4d4d4;
+}
+
+/* 字符级别差异高亮 */
+.charAdded {
+  background: #acf2bd;
+  padding: 1px 0;
+}
+
+.charRemoved {
+  background: #fdb8c0;
+  padding: 1px 0;
+  text-decoration: line-through;
+}
+
+/* 折叠区域 */
+.foldedLines {
+  padding: 8px 16px;
+  background: var(--folded-bg, #f5f5f5);
+  color: var(--text-secondary, #999999);
+  font-size: 12px;
+  text-align: center;
+  cursor: pointer;
+  border-top: 1px dashed var(--border-color, #e8e8e8);
+  border-bottom: 1px dashed var(--border-color, #e8e8e8);
+}
+
+.foldedLines:hover {
+  background: var(--folded-hover-bg, #e8e8e8);
+}
+
+/* 版本对比统计 */
+.diffSummary {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  padding: 16px;
+  background: var(--summary-bg, #fafafa);
+  border-bottom: 1px solid var(--border-color, #e8e8e8);
+}
+
+.summaryItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.summaryItem.added {
+  color: #52c41a;
+}
+
+.summaryItem.removed {
+  color: #ff4d4f;
+}
+
+.summaryItem.modified {
+  color: #faad14;
+}
+
+/* 版本选择下拉 */
+.versionSelect {
+  min-width: 200px;
+}
+
+/* 空状态 */
+.emptyDiff {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--text-secondary, #999999);
+}
+
+.emptyDiff svg {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}

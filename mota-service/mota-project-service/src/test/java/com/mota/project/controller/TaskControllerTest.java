@@ -3,6 +3,8 @@ package com.mota.project.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mota.project.dto.request.AssignTaskRequest;
+import com.mota.project.dto.request.ProgressUpdateRequest;
 import com.mota.project.dto.request.StatusUpdateRequest;
 import com.mota.project.entity.Task;
 import com.mota.project.service.TaskService;
@@ -154,11 +156,14 @@ public class TaskControllerTest {
     @Test
     @DisplayName("PUT /api/v1/tasks/{id}/progress - Should update task progress")
     void updateTaskProgress_ShouldReturnSuccess() throws Exception {
+        ProgressUpdateRequest request = new ProgressUpdateRequest();
+        request.setProgress(50);
+        
         when(taskService.updateProgress(eq(1L), eq(50), any())).thenReturn(true);
 
         mockMvc.perform(put("/api/v1/tasks/1/progress")
-                .param("progress", "50")
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.data").value(true));
@@ -179,11 +184,14 @@ public class TaskControllerTest {
     @Test
     @DisplayName("PUT /api/v1/tasks/{id}/assign - Should assign task")
     void assignTask_ShouldReturnSuccess() throws Exception {
+        AssignTaskRequest request = new AssignTaskRequest();
+        request.setAssigneeId(2L);
+        
         when(taskService.assignTask(eq(1L), eq(2L))).thenReturn(true);
 
         mockMvc.perform(put("/api/v1/tasks/1/assign")
-                .param("assigneeId", "2")
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.data").value(true));

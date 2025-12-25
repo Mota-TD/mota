@@ -1,0 +1,425 @@
+/* 甘特图容器 */
+.ganttContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* 工具栏 */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.legend {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.legendColor {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+/* 甘特图主体包装 */
+.ganttWrapper {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* 左侧任务列表 */
+.taskList {
+  width: 400px;
+  min-width: 400px;
+  border-right: 2px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+}
+
+.taskListHeader {
+  display: flex;
+  height: 60px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.taskListHeaderCell {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-primary);
+  border-right: 1px solid var(--border-color);
+}
+
+.taskListHeaderCell:last-child {
+  border-right: none;
+}
+
+.taskListBody {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.taskListRow {
+  display: flex;
+  height: 40px;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.taskListRow:hover {
+  background: var(--bg-hover);
+}
+
+.taskListCell {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  font-size: 13px;
+  color: var(--text-primary);
+  border-right: 1px solid var(--border-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.taskListCell:first-child {
+  flex: 2;
+}
+
+.taskListCell:last-child {
+  border-right: none;
+}
+
+.milestoneIcon {
+  color: #faad14;
+  margin-right: 4px;
+}
+
+/* 右侧甘特图区域 */
+.ganttChart {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  position: relative;
+}
+
+/* 月份标题 */
+.monthHeader {
+  display: flex;
+  height: 30px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.monthHeaderCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-right: 1px solid var(--border-color);
+  box-sizing: border-box;
+}
+
+/* 日期标题 */
+.dateHeader {
+  display: flex;
+  height: 30px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.dateHeaderCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--text-secondary);
+  border-right: 1px solid var(--border-color);
+  box-sizing: border-box;
+}
+
+.dateHeaderCell.weekend {
+  background: rgba(0, 0, 0, 0.02);
+  color: var(--text-tertiary);
+}
+
+.dateHeaderCell.today {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+  font-weight: 600;
+}
+
+/* 甘特图主体 */
+.ganttBody {
+  position: relative;
+  min-height: calc(100% - 60px);
+}
+
+/* 网格背景 */
+.gridBackground {
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.gridCell {
+  height: 100%;
+  border-right: 1px solid var(--border-color);
+  box-sizing: border-box;
+}
+
+.gridCell.weekend {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.gridCell.todayLine {
+  background: rgba(16, 185, 129, 0.05);
+}
+
+/* 今日标记线 */
+.todayMarker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #10B981;
+  z-index: 10;
+}
+
+.todayMarker::before {
+  content: '今天';
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: #10B981;
+  white-space: nowrap;
+}
+
+/* 依赖线层 */
+.dependencyLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* 任务行 */
+.taskRow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+/* 任务条 */
+.taskBar {
+  position: absolute;
+  height: 24px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  overflow: hidden;
+  z-index: 6;
+}
+
+.taskBar:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.taskBar.criticalPath {
+  border: 2px solid #ff4d4f;
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2);
+}
+
+/* 任务进度条 */
+.taskProgress {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px 0 0 4px;
+}
+
+/* 任务标签 */
+.taskLabel {
+  padding: 0 8px;
+  font-size: 11px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 1;
+}
+
+/* 里程碑标记 */
+.milestoneMarker {
+  font-size: 16px;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* 工具栏分隔符 */
+.separator {
+  width: 1px;
+  height: 20px;
+  background: var(--border-color);
+  margin: 0 8px;
+}
+
+/* 依赖类型图例 */
+.dependencyLegend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.legendTitle {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.legendLine {
+  display: inline-block;
+  width: 24px;
+  height: 0;
+  border-top-width: 2px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+/* 依赖线提示框 */
+.dependencyTooltip {
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+}
+
+.dependencyTooltip div {
+  white-space: nowrap;
+}
+
+/* 冲突任务样式 */
+.taskBar.hasConflict {
+  animation: conflictPulse 2s ease-in-out infinite;
+}
+
+@keyframes conflictPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 77, 79, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(255, 77, 79, 0.2);
+  }
+}
+
+/* 响应式调整 */
+@media (max-width: 1200px) {
+  .taskList {
+    width: 300px;
+    min-width: 300px;
+  }
+  
+  .dependencyLegend {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .taskList {
+    width: 200px;
+    min-width: 200px;
+  }
+  
+  .taskListHeaderCell:nth-child(2),
+  .taskListHeaderCell:nth-child(3),
+  .taskListCell:nth-child(2),
+  .taskListCell:nth-child(3) {
+    display: none;
+  }
+  
+  .dependencyLegend {
+    display: none;
+  }
+}
+
+/* 暗色主题适配 */
+:global(.dark) .ganttContainer {
+  background: var(--bg-primary);
+}
+
+:global(.dark) .gridCell.weekend {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+:global(.dark) .dateHeaderCell.weekend {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+:global(.dark) .taskBar:hover {
+  filter: brightness(1.2);
+}
+
+:global(.dark) .dependencyTooltip {
+  background: rgba(30, 30, 30, 0.95);
+}
+
+:global(.dark) .dependencyLegend {
+  background: var(--bg-secondary);
+}

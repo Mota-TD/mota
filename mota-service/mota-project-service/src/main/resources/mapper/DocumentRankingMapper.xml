@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mota.project.mapper.DocumentRankingMapper">
+
+    <resultMap id="BaseResultMap" type="com.mota.project.entity.DocumentRanking">
+        <id column="id" property="id"/>
+        <result column="document_id" property="documentId"/>
+        <result column="project_id" property="projectId"/>
+        <result column="ranking_type" property="rankingType"/>
+        <result column="ranking_date" property="rankingDate"/>
+        <result column="rank_position" property="rankPosition"/>
+        <result column="score" property="score"/>
+        <result column="view_count" property="viewCount"/>
+        <result column="unique_visitors" property="uniqueVisitors"/>
+        <result column="reuse_count" property="reuseCount"/>
+        <result column="like_count" property="likeCount"/>
+        <result column="comment_count" property="commentCount"/>
+        <result column="rank_change" property="rankChange"/>
+        <result column="view_change_rate" property="viewChangeRate"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <select id="getRanking" resultMap="BaseResultMap">
+        SELECT r.*, d.title as document_title
+        FROM document_ranking r
+        LEFT JOIN document d ON r.document_id = d.id
+        WHERE r.ranking_type = #{rankingType}
+            AND r.ranking_date = #{rankingDate}
+        <if test="projectId != null">
+            AND r.project_id = #{projectId}
+        </if>
+        ORDER BY r.rank_position
+        LIMIT #{limit}
+    </select>
+
+    <select id="getDocumentRankingHistory" resultMap="BaseResultMap">
+        SELECT * FROM document_ranking
+        WHERE document_id = #{documentId}
+            AND ranking_type = #{rankingType}
+        <if test="startDate != null">
+            AND ranking_date >= #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND ranking_date &lt;= #{endDate}
+        </if>
+        ORDER BY ranking_date
+    </select>
+
+    <insert id="upsertRanking">
+        INSERT INTO document_ranking (
+            document_id, project_id, ranking_type, ranking_date, 
+            rank_position, score, view_count, unique_visitors, 
+            reuse_count, like_count, comment_count, rank_change, view_change_rate
+        ) VALUES (
+            #{documentId}, #{projectId}, #{rankingType}, #{rankingDate},
+            #{rankPosition}, #{score}, #{viewCount}, #{uniqueVisitors},
+            #{reuseCount}, #{likeCount}, #{commentCount}, #{rankChange}, #{viewChangeRate}
+        )
+        ON DUPLICATE KEY UPDATE
+            rank_position = VALUES(rank_position),
+            score = VALUES(score),
+            view_count = VALUES(view_count),
+            unique_visitors = VALUES(unique_visitors),
+            reuse_count = VALUES(reuse_count),
+            like_count = VALUES(like_count),
+            comment_count = VALUES(comment_count),
+            rank_change = VALUES(rank_change),
+            view_change_rate = VALUES(view_change_rate),
+            updated_at = NOW()
+    </insert>
+
+    <insert id="batchUpsertRanking">
+        INSERT INTO document_ranking (
+            document_id, project_id, ranking_type, ranking_date, 
+            rank_position, score, view_count, unique_visitors, 
+            reuse_count, like_count, comment_count, rank_change, view_change_rate
+        ) VALUES 
+        <foreach collection="list" item="item" separator=",">
+            (
+                #{item.documentId}, #{item.projectId}, #{item.rankingType}, #{item.rankingDate},
+                #{item.rankPosition}, #{item.score}, #{item.viewCount}, #{item.uniqueVisitors},
+                #{item.reuseCount}, #{item.likeCount}, #{item.commentCount}, #{item.rankChange}, #{item.viewChangeRate}
+            )
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+            rank_position = VALUES(rank_position),
+            score = VALUES(score),
+            view_count = VALUES(view_count),
+            unique_visitors = VALUES(unique_visitors),
+            reuse_count = VALUES(reuse_count),
+            like_count = VALUES(like_count),
+            comment_count = VALUES(comment_count),
+            rank_change = VALUES(rank_change),
+            view_change_rate = VALUES(view_change_rate),
+            updated_at = NOW()
+    </insert>
+
+    <delete id="deleteExpiredRanking">
+        DELETE FROM document_ranking
+        WHERE ranking_date &lt; #{beforeDate}
+    </delete>
+
+    <select id="getFastestRisingDocuments" resultMap="BaseResultMap">
+        SELECT * FROM document_ranking
+        WHERE ranking_type = #{rankingType}
+            AND ranking_date = #{rankingDate}
+            AND rank_change > 0
+        <if test="projectId != null">
+            AND project_id = #{projectId}
+        </if>
+        ORDER BY rank_change DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>

@@ -29,12 +29,31 @@ const MyTasks = lazy(() => import('@/pages/my-tasks'))
 const NotFound = lazy(() => import('@/pages/NotFound'))
 const Help = lazy(() => import('@/pages/help'))
 
+// 新增页面
+const CalendarPage = lazy(() => import('@/pages/calendar'))
+const KnowledgePage = lazy(() => import('@/pages/knowledge'))
+const KnowledgeStatisticsPage = lazy(() => import('@/pages/knowledge-statistics'))
+const DocumentsPage = lazy(() => import('@/pages/documents'))
+const ProgressTrackingPage = lazy(() => import('@/pages/progress-tracking'))
+const ResourceManagementPage = lazy(() => import('@/pages/resource-management'))
+const ReportAnalyticsPage = lazy(() => import('@/pages/report-analytics'))
+const FavoritesPage = lazy(() => import('@/pages/favorites'))
+const TemplatesPage = lazy(() => import('@/pages/templates'))
+
 // AI模块页面
 const AISolution = lazy(() => import('@/pages/ai/solution'))
+const AIProposal = lazy(() => import('@/pages/ai/proposal'))
 const AIPPT = lazy(() => import('@/pages/ai/ppt'))
 const AITraining = lazy(() => import('@/pages/ai/training'))
 const AINews = lazy(() => import('@/pages/ai/news'))
 const AIHistory = lazy(() => import('@/pages/ai/history'))
+const AIKnowledgeBase = lazy(() => import('@/pages/ai/knowledge-base'))
+const AISearch = lazy(() => import('@/pages/ai/search'))
+const AIAssistant = lazy(() => import('@/pages/ai/assistant'))
+const AIModelManagement = lazy(() => import('@/pages/ai/model-management'))
+
+// 系统管理页面
+const SystemManagement = lazy(() => import('@/pages/system'))
 
 // 加载中组件
 const Loading = () => (
@@ -142,6 +161,14 @@ export const routes: RouteObject[] = [
         )
       },
       {
+        path: 'proposal',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <AIProposal />
+          </Suspense>
+        )
+      },
+      {
         path: 'ppt',
         element: (
           <Suspense fallback={<Loading />}>
@@ -170,6 +197,38 @@ export const routes: RouteObject[] = [
         element: (
           <Suspense fallback={<Loading />}>
             <AIHistory />
+          </Suspense>
+        )
+      },
+      {
+        path: 'knowledge-base',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <AIKnowledgeBase />
+          </Suspense>
+        )
+      },
+      {
+        path: 'search',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <AISearch />
+          </Suspense>
+        )
+      },
+      {
+        path: 'assistant',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <AIAssistant />
+          </Suspense>
+        )
+      },
+      {
+        path: 'model-management',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <AIModelManagement />
           </Suspense>
         )
       }
@@ -365,6 +424,196 @@ export const routes: RouteObject[] = [
         element: (
           <Suspense fallback={<Loading />}>
             <Help />
+          </Suspense>
+        )
+      },
+    ]
+  },
+  // 日程管理路由
+  {
+    path: '/calendar',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <CalendarPage />
+          </Suspense>
+        )
+      },
+    ]
+  },
+  // 知识图谱路由
+  {
+    path: '/knowledge',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <KnowledgePage />
+          </Suspense>
+        )
+      },
+    ]
+  },
+  // 知识统计路由
+  {
+    path: '/knowledge-statistics',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <KnowledgeStatisticsPage />
+          </Suspense>
+        )
+      },
+    ]
+  },
+  // 文档管理路由
+  {
+    path: '/documents',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <DocumentsPage />
+          </Suspense>
+        )
+      },
+    ]
+  },
+  // 进度跟踪路由
+  {
+    path: '/progress-tracking',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <ProgressTrackingPage />
+          </Suspense>
+        )
+      },
+    ]
+  },
+  // 资源管理路由
+  {
+    path: '/resource-management',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <ResourceManagementPage />
+          </Suspense>
+        )
+      },
+    ]
+  },
+  // 报表分析路由
+  {
+    path: '/report-analytics',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <ReportAnalyticsPage />
+          </Suspense>
+        )
+      },
+    ]
+  },
+  // 收藏夹路由
+  {
+    path: '/favorites',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <FavoritesPage />
+          </Suspense>
+        )
+      },
+    ]
+  },
+  // 系统管理路由
+  {
+    path: '/system',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <SystemManagement />
+          </Suspense>
+        )
+      },
+    ]
+  },
+  // 模板库路由
+  {
+    path: '/templates',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <TemplatesPage />
           </Suspense>
         )
       },

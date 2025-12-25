@@ -12,7 +12,7 @@
 .loginHeader h2 {
   font-size: 28px;
   font-weight: 700;
-  background: linear-gradient(135deg, #fff 0%, #90caf9 100%);
+  background: linear-gradient(135deg, #fff 0%, #6ee7b7 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -36,8 +36,8 @@
 .loginContainer :global(.ant-input) {
   height: 50px;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  background: rgba(15, 23, 42, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
   font-size: 15px;
   color: #fff !important;
   transition: all 0.3s ease;
@@ -57,7 +57,7 @@
 .loginContainer :global(.ant-input-affix-wrapper-status-error),
 .loginContainer :global(.ant-input-status-error) {
   border-color: #ff4d4f !important;
-  background: rgba(15, 23, 42, 0.95) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
 }
 
 .loginContainer :global(.ant-input-affix-wrapper-status-error .ant-input),
@@ -68,16 +68,16 @@
 
 .loginContainer :global(.ant-input-affix-wrapper:hover),
 .loginContainer :global(.ant-input:hover) {
-  border-color: rgba(255, 255, 255, 0.2) !important;
-  background: rgba(15, 23, 42, 0.98) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  background: rgba(255, 255, 255, 0.15) !important;
 }
 
 .loginContainer :global(.ant-input-affix-wrapper:focus),
 .loginContainer :global(.ant-input-affix-wrapper-focused),
 .loginContainer :global(.ant-input:focus) {
-  border-color: #2b7de9 !important;
-  background: rgba(15, 23, 42, 0.98) !important;
-  box-shadow: 0 0 0 2px rgba(43, 125, 233, 0.15) !important;
+  border-color: #fff !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2) !important;
 }
 
 .loginContainer :global(.ant-input::placeholder) {
@@ -125,15 +125,17 @@
   border-radius: 10px;
   font-size: 16px;
   font-weight: 600;
-  background: linear-gradient(135deg, #2b7de9 0%, #1565c0 100%);
+  background: #fff;
+  color: #047857 !important;
   border: none;
-  box-shadow: 0 4px 16px rgba(43, 125, 233, 0.35);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
 }
 
 .loginContainer :global(.ant-btn-primary:hover) {
-  background: linear-gradient(135deg, #1976d2 0%, #0d47a1 100%);
-  box-shadow: 0 6px 24px rgba(43, 125, 233, 0.45);
+  background: #f0fdf4;
+  color: #047857 !important;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
   transform: translateY(-1px);
 }
 
@@ -151,18 +153,22 @@
 }
 
 .loginContainer :global(.ant-checkbox-inner) {
-  background: transparent;
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
   border-radius: 4px;
 }
 
 .loginContainer :global(.ant-checkbox:hover .ant-checkbox-inner) {
-  border-color: rgba(255, 255, 255, 0.4);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .loginContainer :global(.ant-checkbox-checked .ant-checkbox-inner) {
-  background: #2b7de9;
-  border-color: #2b7de9;
+  background: #fff;
+  border-color: #fff;
+}
+
+.loginContainer :global(.ant-checkbox-checked .ant-checkbox-inner::after) {
+  border-color: #047857;
 }
 
 .loginOptions {
@@ -172,13 +178,13 @@
 }
 
 .forgotLink {
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.9);
   font-size: 14px;
   transition: all 0.2s;
 }
 
 .forgotLink:hover {
-  color: #64b5f6;
+  color: #fff;
 }
 
 .loginFooter {
@@ -195,13 +201,14 @@
 }
 
 .loginFooter a {
-  color: #64b5f6;
+  color: #fff;
   font-weight: 500;
   transition: all 0.2s;
+  text-decoration: underline;
 }
 
 .loginFooter a:hover {
-  color: #90caf9;
+  color: #d1fae5;
 }
 
 /* 响应式 - 最小宽度600px，低于此宽度显示水平滚动条 */

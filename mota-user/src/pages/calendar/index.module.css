@@ -1,0 +1,253 @@
+.container {
+  padding: 0;
+  min-height: 100%;
+}
+
+/* 页面头部 - 清新绿 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  border-radius: 16px;
+  color: #fff;
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.headerIcon {
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #fff;
+  backdrop-filter: blur(10px);
+}
+
+.header :global(.ant-typography) {
+  color: #fff !important;
+}
+
+.header :global(.ant-typography-secondary) {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.headerActions {
+  display: flex;
+  gap: 12px;
+}
+
+.headerActions :global(.ant-btn) {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+.headerActions :global(.ant-btn:hover) {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.description {
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+}
+
+/* 主内容区域 */
+.mainContent {
+  display: flex;
+  gap: 24px;
+}
+
+/* 侧边栏 */
+.sidebar {
+  width: 280px;
+  flex-shrink: 0;
+}
+
+.sidebarCard {
+  border-radius: 16px;
+  border: 1px solid #e8e9eb;
+  position: sticky;
+  top: 24px;
+}
+
+.sidebarSection {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sidebarSection:last-child {
+  border-bottom: none;
+}
+
+.sectionTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.calendarItem {
+  padding: 6px 4px !important;
+  border: none !important;
+}
+
+.calendarItemContent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.calendarColor {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.calendarName {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.emptySubscription {
+  padding: 16px 0;
+}
+
+.emptySubscription :global(.ant-empty-description) {
+  font-size: 12px;
+}
+
+.subscriptionUrlBox {
+  padding: 8px 4px;
+}
+
+.subscriptionUrlBox :global(.ant-input) {
+  font-size: 11px;
+}
+
+.copyIcon {
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: color 0.2s;
+}
+
+.copyIcon:hover {
+  color: var(--primary-color);
+}
+
+.subscriptionHint {
+  display: block;
+  font-size: 11px;
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+/* 日历卡片 */
+.calendarCard {
+  flex: 1;
+  border-radius: 16px;
+  border: 1px solid #e8e9eb;
+  min-width: 0;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+/* 设置弹窗 */
+.reminderSettings {
+  padding: 16px 0;
+}
+
+.settingItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.settingItem:last-child {
+  border-bottom: none;
+}
+
+.settingLabel {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+/* 响应式 */
+@media (max-width: 1200px) {
+  .sidebar {
+    width: 240px;
+  }
+}
+
+@media (max-width: 992px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .mainContent {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+  }
+  
+  .sidebarCard {
+    position: static;
+  }
+}
+
+@media (max-width: 576px) {
+  .header {
+    padding: 16px;
+    border-radius: 12px;
+  }
+  
+  .headerIcon {
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
+  }
+  
+  .headerActions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .mainContent {
+    gap: 16px;
+  }
+}

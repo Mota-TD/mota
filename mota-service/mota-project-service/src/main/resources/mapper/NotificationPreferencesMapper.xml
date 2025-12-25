@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mota.project.mapper.NotificationPreferencesMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="PreferencesResultMap" type="com.mota.project.entity.NotificationPreferences">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="enable_aggregation" property="enableAggregation"/>
+        <result column="aggregation_interval" property="aggregationInterval"/>
+        <result column="enable_ai_classification" property="enableAiClassification"/>
+        <result column="auto_collapse_threshold" property="autoCollapseThreshold"/>
+        <result column="auto_pin_urgent" property="autoPinUrgent"/>
+        <result column="auto_pin_mentions" property="autoPinMentions"/>
+        <result column="show_low_priority_collapsed" property="showLowPriorityCollapsed"/>
+        <result column="max_visible_notifications" property="maxVisibleNotifications"/>
+        <result column="email_digest_enabled" property="emailDigestEnabled"/>
+        <result column="email_digest_frequency" property="emailDigestFrequency"/>
+        <result column="email_digest_time" property="emailDigestTime"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <!-- 根据用户ID获取偏好设置 -->
+    <select id="selectByUserId" resultMap="PreferencesResultMap">
+        SELECT * FROM notification_preferences
+        WHERE user_id = #{userId}
+        LIMIT 1
+    </select>
+
+    <!-- 插入或更新设置 -->
+    <insert id="insertOrUpdate">
+        INSERT INTO notification_preferences (
+            user_id, enable_aggregation, aggregation_interval,
+            enable_ai_classification, auto_collapse_threshold,
+            auto_pin_urgent, auto_pin_mentions,
+            show_low_priority_collapsed, max_visible_notifications,
+            email_digest_enabled, email_digest_frequency, email_digest_time,
+            created_at, updated_at
+        ) VALUES (
+            #{userId}, #{enableAggregation}, #{aggregationInterval},
+            #{enableAiClassification}, #{autoCollapseThreshold},
+            #{autoPinUrgent}, #{autoPinMentions},
+            #{showLowPriorityCollapsed}, #{maxVisibleNotifications},
+            #{emailDigestEnabled}, #{emailDigestFrequency}, #{emailDigestTime},
+            NOW(), NOW()
+        )
+        ON DUPLICATE KEY UPDATE
+            enable_aggregation = VALUES(enable_aggregation),
+            aggregation_interval = VALUES(aggregation_interval),
+            enable_ai_classification = VALUES(enable_ai_classification),
+            auto_collapse_threshold = VALUES(auto_collapse_threshold),
+            auto_pin_urgent = VALUES(auto_pin_urgent),
+            auto_pin_mentions = VALUES(auto_pin_mentions),
+            show_low_priority_collapsed = VALUES(show_low_priority_collapsed),
+            max_visible_notifications = VALUES(max_visible_notifications),
+            email_digest_enabled = VALUES(email_digest_enabled),
+            email_digest_frequency = VALUES(email_digest_frequency),
+            email_digest_time = VALUES(email_digest_time),
+            updated_at = NOW()
+    </insert>
+
+    <!-- 更新聚合设置 -->
+    <update id="updateAggregationSettings">
+        UPDATE notification_preferences
+        SET enable_aggregation = #{enableAggregation},
+            aggregation_interval = #{aggregationInterval},
+            updated_at = NOW()
+        WHERE user_id = #{userId}
+    </update>
+
+    <!-- 更新AI分类设置 -->
+    <update id="updateAiClassificationSettings">
+        UPDATE notification_preferences
+        SET enable_ai_classification = #{enableAiClassification},
+            auto_collapse_threshold = #{autoCollapseThreshold},
+            updated_at = NOW()
+        WHERE user_id = #{userId}
+    </update>
+
+    <!-- 更新置顶设置 -->
+    <update id="updatePinSettings">
+        UPDATE notification_preferences
+        SET auto_pin_urgent = #{autoPinUrgent},
+            auto_pin_mentions = #{autoPinMentions},
+            updated_at = NOW()
+        WHERE user_id = #{userId}
+    </update>
+
+    <!-- 更新显示设置 -->
+    <update id="updateDisplaySettings">
+        UPDATE notification_preferences
+        SET show_low_priority_collapsed = #{showLowPriorityCollapsed},
+            max_visible_notifications = #{maxVisibleNotifications},
+            updated_at = NOW()
+        WHERE user_id = #{userId}
+    </update>
+
+    <!-- 更新邮件摘要设置 -->
+    <update id="updateEmailDigestSettings">
+        UPDATE notification_preferences
+        SET email_digest_enabled = #{emailDigestEnabled},
+            email_digest_frequency = #{emailDigestFrequency},
+            email_digest_time = #{emailDigestTime},
+            updated_at = NOW()
+        WHERE user_id = #{userId}
+    </update>
+
+</mapper>

@@ -229,12 +229,24 @@ public class TaskController {
     }
 
     /**
-     * 完成任务
+     * 完成任务 (PUT)
      */
     @Operation(summary = "完成任务", description = "将任务标记为已完成")
     @ApiResponse(responseCode = "200", description = "操作成功")
     @PutMapping("/{id}/complete")
     public Result<Boolean> complete(
+            @Parameter(description = "任务ID", required = true) @PathVariable Long id) {
+        boolean result = taskService.completeTask(id);
+        return Result.success(result);
+    }
+
+    /**
+     * 完成任务 (POST)
+     */
+    @Operation(summary = "完成任务", description = "将任务标记为已完成")
+    @ApiResponse(responseCode = "200", description = "操作成功")
+    @PostMapping("/{id}/complete")
+    public Result<Boolean> completePost(
             @Parameter(description = "任务ID", required = true) @PathVariable Long id) {
         boolean result = taskService.completeTask(id);
         return Result.success(result);
@@ -266,9 +278,21 @@ public class TaskController {
     }
 
     /**
-     * 获取即将到期的任务
+     * 获取即将到期的任务（全局）
      */
-    @Operation(summary = "获取即将到期任务", description = "获取指定天数内即将到期的任务")
+    @Operation(summary = "获取即将到期任务", description = "获取指定天数内即将到期的所有任务")
+    @ApiResponse(responseCode = "200", description = "查询成功")
+    @GetMapping("/upcoming")
+    public Result<List<Task>> getUpcomingTasksGlobal(
+            @Parameter(description = "天数范围") @RequestParam(defaultValue = "7") Integer days) {
+        List<Task> list = taskService.getUpcomingTasks(days);
+        return Result.success(list);
+    }
+
+    /**
+     * 获取即将到期的任务（按用户）
+     */
+    @Operation(summary = "获取用户即将到期任务", description = "获取指定用户在指定天数内即将到期的任务")
     @ApiResponse(responseCode = "200", description = "查询成功")
     @GetMapping("/upcoming/{userId}")
     public Result<List<Task>> getUpcomingTasks(
@@ -279,9 +303,20 @@ public class TaskController {
     }
 
     /**
-     * 获取已逾期的任务
+     * 获取已逾期的任务（全局）
      */
     @Operation(summary = "获取逾期任务", description = "获取所有已逾期的任务")
+    @ApiResponse(responseCode = "200", description = "查询成功")
+    @GetMapping("/overdue")
+    public Result<List<Task>> getOverdueTasksGlobal() {
+        List<Task> list = taskService.getOverdueTasks();
+        return Result.success(list);
+    }
+
+    /**
+     * 获取已逾期的任务（按用户）
+     */
+    @Operation(summary = "获取用户逾期任务", description = "获取指定用户已逾期的任务")
     @ApiResponse(responseCode = "200", description = "查询成功")
     @GetMapping("/overdue/{userId}")
     public Result<List<Task>> getOverdueTasks(
@@ -309,6 +344,18 @@ public class TaskController {
     @ApiResponse(responseCode = "200", description = "查询成功")
     @GetMapping("/stats/project/{projectId}")
     public Result<Map<String, Long>> getStatisticsByProject(
+            @Parameter(description = "项目ID", required = true) @PathVariable Long projectId) {
+        Map<String, Long> statistics = taskService.countByProjectIdGroupByStatus(projectId);
+        return Result.success(statistics);
+    }
+
+    /**
+     * 统计项目下各状态的执行任务数量（兼容路径）
+     */
+    @Operation(summary = "项目任务统计", description = "统计项目下各状态的执行任务数量")
+    @ApiResponse(responseCode = "200", description = "查询成功")
+    @GetMapping("/project/{projectId}/statistics")
+    public Result<Map<String, Long>> getProjectStatistics(
             @Parameter(description = "项目ID", required = true) @PathVariable Long projectId) {
         Map<String, Long> statistics = taskService.countByProjectIdGroupByStatus(projectId);
         return Result.success(statistics);

@@ -1,0 +1,213 @@
+.container {
+  padding: 16px 0;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 8px 16px;
+  background: var(--bg-secondary, #fafafa);
+  border-radius: 8px;
+}
+
+:global(.dark) .legend {
+  background: var(--bg-secondary, #1f1f1f);
+}
+
+.legendTitle {
+  font-weight: 600;
+  color: var(--text-primary, #262626);
+}
+
+:global(.dark) .legendTitle {
+  color: var(--text-primary, #ffffff);
+}
+
+.calendarCard {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+:global(.dark) .calendarCard {
+  background: var(--bg-secondary, #1f1f1f);
+  border-color: var(--border-color, #303030);
+}
+
+.calendarWrapper {
+  overflow-x: auto;
+}
+
+.calendarTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.calendarTable th,
+.calendarTable td {
+  border: 1px solid var(--border-color, #f0f0f0);
+  padding: 8px;
+  text-align: center;
+}
+
+:global(.dark) .calendarTable th,
+:global(.dark) .calendarTable td {
+  border-color: var(--border-color, #303030);
+}
+
+.resourceHeader {
+  width: 180px;
+  min-width: 180px;
+  background: var(--bg-tertiary, #fafafa);
+  font-weight: 600;
+  text-align: left !important;
+  padding-left: 16px !important;
+}
+
+:global(.dark) .resourceHeader {
+  background: var(--bg-tertiary, #141414);
+}
+
+.dateHeader {
+  min-width: 60px;
+  background: var(--bg-tertiary, #fafafa);
+}
+
+:global(.dark) .dateHeader {
+  background: var(--bg-tertiary, #141414);
+}
+
+.dateHeader.weekend {
+  background: #fff7e6;
+}
+
+:global(.dark) .dateHeader.weekend {
+  background: #2b2111;
+}
+
+.dateDay {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary, #262626);
+}
+
+:global(.dark) .dateDay {
+  color: var(--text-primary, #ffffff);
+}
+
+.dateWeek {
+  font-size: 11px;
+  color: var(--text-secondary, #8c8c8c);
+}
+
+.resourceCell {
+  text-align: left !important;
+  padding-left: 12px !important;
+  background: var(--bg-primary, #ffffff);
+}
+
+:global(.dark) .resourceCell {
+  background: var(--bg-primary, #141414);
+}
+
+.resourceInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.resourceDetails {
+  flex: 1;
+  min-width: 0;
+}
+
+.resourceName {
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--text-primary, #262626);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:global(.dark) .resourceName {
+  color: var(--text-primary, #ffffff);
+}
+
+.resourceDept {
+  font-size: 11px;
+  color: var(--text-secondary, #8c8c8c);
+}
+
+.allocationTd {
+  padding: 4px !important;
+}
+
+.allocationTd.weekend {
+  background: #fffbe6;
+}
+
+:global(.dark) .allocationTd.weekend {
+  background: #2b2111;
+}
+
+.allocationCell {
+  height: 40px;
+  border-radius: 4px;
+  border: 1px solid;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.allocationCell:hover {
+  transform: scale(1.05);
+}
+
+.cellHours {
+  font-size: 11px;
+  font-weight: 500;
+  z-index: 1;
+}
+
+.cellBar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+}
+
+.tooltipContent {
+  font-size: 12px;
+}
+
+.tooltipContent div {
+  margin-bottom: 4px;
+}
+
+.tooltipTasks {
+  margin-top: 8px;
+}
+
+.tooltipTasks ul {
+  margin: 4px 0 0 0;
+  padding-left: 16px;
+}
+
+.tooltipTasks li {
+  margin-bottom: 2px;
+}

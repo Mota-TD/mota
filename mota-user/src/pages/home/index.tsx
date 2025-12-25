@@ -171,7 +171,7 @@ const Home = () => {
           </div>
           <div className={styles.pillarsGrid}>
             <div className={styles.pillarCard}>
-              <div className={styles.pillarIcon} style={{ background: 'linear-gradient(135deg, #2b7de9 0%, #667eea 100%)' }}>
+              <div className={styles.pillarIcon} style={{ background: 'linear-gradient(135deg, #10B981 0%, #0EA5E9 100%)' }}>
                 <ProjectOutlined style={{ fontSize: 32, color: '#fff' }} />
               </div>
               <h3 className={styles.pillarTitle}>项目管理</h3>
@@ -403,7 +403,7 @@ const Home = () => {
             <div className={styles.roleCard}>
               <div className={styles.roleCardHeader}>
                 <div className={`${styles.roleAvatar} ${styles.roleAvatarSecondary}`}>
-                  <TeamOutlined style={{ fontSize: 24, color: '#2b7de9' }} />
+                  <TeamOutlined style={{ fontSize: 24, color: '#10B981' }} />
                 </div>
                 <h3 className={styles.roleTitle}>咨询/专业服务</h3>
               </div>
@@ -417,7 +417,7 @@ const Home = () => {
             <div className={styles.roleCard}>
               <div className={styles.roleCardHeader}>
                 <div className={`${styles.roleAvatar} ${styles.roleAvatarSecondary}`}>
-                  <BarChartOutlined style={{ fontSize: 24, color: '#2b7de9' }} />
+                  <BarChartOutlined style={{ fontSize: 24, color: '#10B981' }} />
                 </div>
                 <h3 className={styles.roleTitle}>金融/保险</h3>
               </div>
@@ -431,7 +431,7 @@ const Home = () => {
             <div className={styles.roleCard}>
               <div className={styles.roleCardHeader}>
                 <div className={`${styles.roleAvatar} ${styles.roleAvatarSecondary}`}>
-                  <GlobalOutlined style={{ fontSize: 24, color: '#2b7de9' }} />
+                  <GlobalOutlined style={{ fontSize: 24, color: '#10B981' }} />
                 </div>
                 <h3 className={styles.roleTitle}>制造/贸易</h3>
               </div>
@@ -445,7 +445,7 @@ const Home = () => {
             <div className={styles.roleCard}>
               <div className={styles.roleCardHeader}>
                 <div className={`${styles.roleAvatar} ${styles.roleAvatarSecondary}`}>
-                  <BookOutlined style={{ fontSize: 24, color: '#2b7de9' }} />
+                  <BookOutlined style={{ fontSize: 24, color: '#10B981' }} />
                 </div>
                 <h3 className={styles.roleTitle}>教育/培训</h3>
               </div>
@@ -459,7 +459,7 @@ const Home = () => {
             <div className={styles.roleCard}>
               <div className={styles.roleCardHeader}>
                 <div className={`${styles.roleAvatar} ${styles.roleAvatarSecondary}`}>
-                  <AppstoreOutlined style={{ fontSize: 24, color: '#2b7de9' }} />
+                  <AppstoreOutlined style={{ fontSize: 24, color: '#10B981' }} />
                 </div>
                 <h3 className={styles.roleTitle}>更多行业</h3>
               </div>

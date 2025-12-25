@@ -221,4 +221,16 @@ public class DepartmentTaskController {
         Map<String, Long> statistics = departmentTaskService.countByProjectIdGroupByStatus(projectId);
         return Result.success(statistics);
     }
+
+    /**
+     * 统计项目下各状态的部门任务数量（兼容路径）
+     */
+    @Operation(summary = "项目部门任务统计", description = "统计项目下各状态的部门任务数量")
+    @ApiResponse(responseCode = "200", description = "查询成功")
+    @GetMapping("/project/{projectId}/statistics")
+    public Result<Map<String, Long>> getProjectStatistics(
+            @Parameter(description = "项目ID", required = true) @PathVariable Long projectId) {
+        Map<String, Long> statistics = departmentTaskService.countByProjectIdGroupByStatus(projectId);
+        return Result.success(statistics);
+    }
 }

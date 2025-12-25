@@ -29,7 +29,11 @@ import {
   FileTextOutlined,
   CommentOutlined,
   PaperClipOutlined,
-  HistoryOutlined
+  HistoryOutlined,
+  FileAddOutlined,
+  UnorderedListOutlined,
+  CheckSquareOutlined,
+  SubnodeOutlined
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { taskApi, departmentTaskApi, projectApi } from '@/services/api'
@@ -38,13 +42,16 @@ import type { DepartmentTask } from '@/services/api/departmentTask'
 import { getUsers } from '@/services/api/user'
 import TaskComments from '@/components/TaskComments'
 import DeliverableList from '@/components/DeliverableList'
+import TaskTemplateSelector from '@/components/TaskTemplateSelector'
+import SubtaskList from '@/components/SubtaskList'
+import ChecklistPanel from '@/components/ChecklistPanel'
 import styles from './index.module.css'
 
 const { TextArea } = Input
 
 /**
- * 执行任务详情页面 - V2.0
- * 集成TaskComments和DeliverableList组件
+ * 执行任务详情页面 - V3.0
+ * 集成TaskComments、DeliverableList、SubtaskList和ChecklistPanel组件
  */
 const TaskDetail = () => {
   const { id } = useParams<{ id: string }>()
@@ -55,7 +62,7 @@ const TaskDetail = () => {
   const [departmentTask, setDepartmentTask] = useState<DepartmentTask | null>(null)
   const [users, setUsers] = useState<any[]>([])
   const [projectMembers, setProjectMembers] = useState<Array<{ id: number; name: string; avatar?: string }>>([])
-  const [activeTab, setActiveTab] = useState('progress')
+  const [activeTab, setActiveTab] = useState('subtasks')
   
   // 从用户上下文获取当前用户ID
   const currentUserId = useMemo(() => user?.id || 0, [user])
@@ -64,6 +71,9 @@ const TaskDetail = () => {
   const [updateProgressDrawerVisible, setUpdateProgressDrawerVisible] = useState(false)
   const [updateProgressLoading, setUpdateProgressLoading] = useState(false)
   const [progressForm] = Form.useForm()
+  
+  // 任务模板选择器
+  const [templateSelectorVisible, setTemplateSelectorVisible] = useState(false)
 
   useEffect(() => {
     if (id) {
@@ -110,12 +120,12 @@ const TaskDetail = () => {
       message.error('加载任务失败')
       // 使用模拟数据
       setTask({
-        id: taskId,
-        departmentTaskId: 1,
-        projectId: 1,
+        id: String(taskId),
+        departmentTaskId: '1',
+        projectId: '1',
         name: '市场调研报告撰写',
         description: '完成Q1季度市场调研报告，包括竞品分析、用户画像、市场趋势等内容',
-        assigneeId: 1,
+        assigneeId: '1',
         status: 'in_progress' as TaskStatus,
         priority: 'high' as any,
         startDate: '2024-01-10',
@@ -125,10 +135,10 @@ const TaskDetail = () => {
         sortOrder: 1
       })
       setDepartmentTask({
-        id: 1,
-        projectId: 1,
-        departmentId: 1,
-        managerId: 1,
+        id: '1',
+        projectId: '1',
+        departmentId: '1',
+        managerId: '1',
         name: '市场推广方案制定',
         status: 'in_progress' as any,
         priority: 'high' as any,
@@ -213,6 +223,18 @@ const TaskDetail = () => {
         }
       }
     })
+  }
+
+  // 子任务进度变化回调
+  const handleSubtaskProgressChange = (progress: number) => {
+    console.log('Subtask progress changed:', progress)
+    // 可以在这里更新任务进度
+  }
+
+  // 检查清单进度变化回调
+  const handleChecklistProgressChange = (progress: number) => {
+    console.log('Checklist progress changed:', progress)
+    // 可以在这里更新任务进度
   }
 
   if (loading) {
@@ -370,12 +392,43 @@ const TaskDetail = () => {
             </div>
           </div>
 
-          {/* Tabs: 讨论、交付物、进度记录 */}
+          {/* Tabs: 子任务、检查清单、讨论、交付物、进度记录 */}
           <div className={styles.card}>
             <Tabs
               activeKey={activeTab}
               onChange={setActiveTab}
               items={[
+                {
+                  key: 'subtasks',
+                  label: (
+                    <span>
+                      <SubnodeOutlined /> 子任务
+                    </span>
+                  ),
+                  children: (
+                    <SubtaskList
+                      taskId={Number(task.id)}
+                      projectId={departmentTask?.projectId ? Number(departmentTask.projectId) : undefined}
+                      editable={task.status !== 'completed'}
+                      onProgressChange={handleSubtaskProgressChange}
+                    />
+                  )
+                },
+                {
+                  key: 'checklist',
+                  label: (
+                    <span>
+                      <CheckSquareOutlined /> 检查清单
+                    </span>
+                  ),
+                  children: (
+                    <ChecklistPanel
+                      taskId={Number(task.id)}
+                      editable={task.status !== 'completed'}
+                      onProgressChange={handleChecklistProgressChange}
+                    />
+                  )
+                },
                 {
                   key: 'comments',
                   label: (
@@ -385,7 +438,7 @@ const TaskDetail = () => {
                   ),
                   children: (
                     <TaskComments
-                      taskId={task.id}
+                      taskId={Number(task.id)}
                       currentUserId={currentUserId}
                       projectMembers={projectMembers}
                     />
@@ -399,7 +452,7 @@ const TaskDetail = () => {
                     </span>
                   ),
                   children: (
-                    <DeliverableList taskId={task.id} editable={true} />
+                    <DeliverableList taskId={Number(task.id)} editable={true} />
                   )
                 },
                 {
@@ -489,8 +542,8 @@ const TaskDetail = () => {
               <h3 className={styles.cardTitle}>快捷操作</h3>
             </div>
             <div className={styles.quickActions}>
-              <Button 
-                block 
+              <Button
+                block
                 icon={<RiseOutlined />}
                 onClick={() => {
                   progressForm.setFieldValue('progress', task.progress)
@@ -500,19 +553,40 @@ const TaskDetail = () => {
               >
                 更新进度
               </Button>
-              <Button 
-                block 
+              <Button
+                block
+                icon={<SubnodeOutlined />}
+                onClick={() => setActiveTab('subtasks')}
+              >
+                管理子任务
+              </Button>
+              <Button
+                block
+                icon={<CheckSquareOutlined />}
+                onClick={() => setActiveTab('checklist')}
+              >
+                管理检查清单
+              </Button>
+              <Button
+                block
                 icon={<PaperClipOutlined />}
                 onClick={() => setActiveTab('deliverables')}
               >
                 上传交付物
               </Button>
-              <Button 
-                block 
+              <Button
+                block
                 icon={<CommentOutlined />}
                 onClick={() => setActiveTab('comments')}
               >
                 添加评论
+              </Button>
+              <Button
+                block
+                icon={<FileAddOutlined />}
+                onClick={() => setTemplateSelectorVisible(true)}
+              >
+                从模板创建子任务
               </Button>
             </div>
           </div>
@@ -566,6 +640,18 @@ const TaskDetail = () => {
           </Form.Item>
         </Form>
       </Drawer>
+
+      {/* 任务模板选择器 */}
+      <TaskTemplateSelector
+        visible={templateSelectorVisible}
+        projectId={departmentTask?.projectId ? Number(departmentTask.projectId) : 0}
+        onSelect={(taskId) => {
+          setTemplateSelectorVisible(false)
+          message.success('子任务创建成功')
+          navigate(`/tasks/${taskId}`)
+        }}
+        onCancel={() => setTemplateSelectorVisible(false)}
+      />
     </div>
   )
 }

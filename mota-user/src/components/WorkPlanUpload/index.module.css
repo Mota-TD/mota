@@ -57,7 +57,7 @@
 }
 
 .attachmentList :global(.ant-list-item-meta-title) a {
-  color: var(--primary-color, #1677ff);
+  color: var(--primary-color, #10B981);
   text-decoration: none;
 }
 

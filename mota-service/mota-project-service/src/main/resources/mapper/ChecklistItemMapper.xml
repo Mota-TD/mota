@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mota.project.mapper.ChecklistItemMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.mota.project.entity.ChecklistItem">
+        <id column="id" property="id"/>
+        <result column="checklist_id" property="checklistId"/>
+        <result column="content" property="content"/>
+        <result column="is_completed" property="isCompleted"/>
+        <result column="completed_by" property="completedBy"/>
+        <result column="completed_at" property="completedAt"/>
+        <result column="assignee_id" property="assigneeId"/>
+        <result column="due_date" property="dueDate"/>
+        <result column="sort_order" property="sortOrder"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
+        <result column="deleted" property="deleted"/>
+        <result column="version" property="version"/>
+    </resultMap>
+
+    <!-- 基础列 -->
+    <sql id="Base_Column_List">
+        id, checklist_id, content, is_completed, completed_by, completed_at, assignee_id,
+        due_date, sort_order, created_at, updated_at, created_by, updated_by, deleted, version
+    </sql>
+
+    <!-- 根据清单ID查询清单项列表 -->
+    <select id="selectByChecklistId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM checklist_item
+        WHERE checklist_id = #{checklistId}
+        AND deleted = 0
+        ORDER BY sort_order ASC, created_at ASC
+    </select>
+
+    <!-- 根据任务ID查询所有清单项 -->
+    <select id="selectByTaskId" resultMap="BaseResultMap">
+        SELECT ci.id, ci.checklist_id, ci.content, ci.is_completed, ci.completed_by, 
+               ci.completed_at, ci.assignee_id, ci.due_date, ci.sort_order,
+               ci.created_at, ci.updated_at, ci.created_by, ci.updated_by, ci.deleted, ci.version
+        FROM checklist_item ci
+        INNER JOIN checklist c ON ci.checklist_id = c.id
+        WHERE c.task_id = #{taskId}
+        AND ci.deleted = 0
+        AND c.deleted = 0
+        ORDER BY c.sort_order ASC, ci.sort_order ASC
+    </select>
+
+    <!-- 统计清单的完成情况 -->
+    <select id="countCompletionByChecklistId" resultType="map">
+        SELECT 
+            COUNT(*) as total,
+            SUM(CASE WHEN is_completed = 1 THEN 1 ELSE 0 END) as completed
+        FROM checklist_item
+        WHERE checklist_id = #{checklistId}
+        AND deleted = 0
+    </select>
+
+    <!-- 统计任务的所有清单项完成情况 -->
+    <select id="countCompletionByTaskId" resultType="map">
+        SELECT 
+            COUNT(*) as total,
+            SUM(CASE WHEN ci.is_completed = 1 THEN 1 ELSE 0 END) as completed
+        FROM checklist_item ci
+        INNER JOIN checklist c ON ci.checklist_id = c.id
+        WHERE c.task_id = #{taskId}
+        AND ci.deleted = 0
+        AND c.deleted = 0
+    </select>
+
+    <!-- 更新清单项完成状态 -->
+    <update id="updateCompleted">
+        UPDATE checklist_item
+        SET is_completed = #{isCompleted},
+            completed_by = #{completedBy},
+            completed_at = CASE WHEN #{isCompleted} = 1 THEN NOW() ELSE NULL END,
+            updated_at = NOW()
+        WHERE id = #{id}
+        AND deleted = 0
+    </update>
+
+    <!-- 批量更新排序顺序 -->
+    <update id="batchUpdateSortOrder" parameterType="list">
+        <foreach collection="list" item="item" separator=";">
+            UPDATE checklist_item
+            SET sort_order = #{item.sortOrder}, updated_at = NOW()
+            WHERE id = #{item.id}
+        </foreach>
+    </update>
+
+    <!-- 获取清单下的最大排序顺序 -->
+    <select id="getMaxSortOrder" resultType="java.lang.Integer">
+        SELECT COALESCE(MAX(sort_order), 0)
+        FROM checklist_item
+        WHERE checklist_id = #{checklistId}
+        AND deleted = 0
+    </select>
+
+    <!-- 删除清单的所有清单项 -->
+    <update id="deleteByChecklistId">
+        UPDATE checklist_item
+        SET deleted = 1, updated_at = NOW()
+        WHERE checklist_id = #{checklistId}
+        AND deleted = 0
+    </update>
+
+    <!-- 批量插入清单项 -->
+    <insert id="batchInsert" parameterType="list" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO checklist_item (checklist_id, content, is_completed, assignee_id, due_date, sort_order, created_by)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.checklistId}, #{item.content}, #{item.isCompleted}, 
+             #{item.assigneeId}, #{item.dueDate}, #{item.sortOrder}, #{item.createdBy})
+        </foreach>
+    </insert>
+
+</mapper>

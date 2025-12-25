@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mota.project.mapper.WorkflowTransitionMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.mota.project.entity.WorkflowTransition">
+        <id column="id" property="id"/>
+        <result column="workflow_id" property="workflowId"/>
+        <result column="from_status_id" property="fromStatusId"/>
+        <result column="to_status_id" property="toStatusId"/>
+        <result column="name" property="name"/>
+        <result column="description" property="description"/>
+        <result column="conditions" property="conditions"/>
+        <result column="actions" property="actions"/>
+        <result column="allowed_roles" property="allowedRoles"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <!-- 包含状态信息的结果映射 -->
+    <resultMap id="WithStatusResultMap" type="com.mota.project.entity.WorkflowTransition" extends="BaseResultMap">
+        <association property="fromStatus" javaType="com.mota.project.entity.WorkflowStatus">
+            <id column="from_status_id" property="id"/>
+            <result column="from_status_name" property="name"/>
+            <result column="from_status_color" property="color"/>
+            <result column="from_status_icon" property="icon"/>
+        </association>
+        <association property="toStatus" javaType="com.mota.project.entity.WorkflowStatus">
+            <id column="to_status_id" property="id"/>
+            <result column="to_status_name" property="name"/>
+            <result column="to_status_color" property="color"/>
+            <result column="to_status_icon" property="icon"/>
+        </association>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, workflow_id, from_status_id, to_status_id, name, description, conditions, actions, allowed_roles, created_at, updated_at
+    </sql>
+
+    <!-- 获取工作流的所有流转规则 -->
+    <select id="selectByWorkflowId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM workflow_transition
+        WHERE workflow_id = #{workflowId}
+        ORDER BY id ASC
+    </select>
+
+    <!-- 获取从指定状态出发的流转规则 -->
+    <select id="selectByFromStatusId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM workflow_transition
+        WHERE from_status_id = #{fromStatusId}
+        ORDER BY id ASC
+    </select>
+
+    <!-- 获取到达指定状态的流转规则 -->
+    <select id="selectByToStatusId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM workflow_transition
+        WHERE to_status_id = #{toStatusId}
+        ORDER BY id ASC
+    </select>
+
+    <!-- 检查流转是否存在 -->
+    <select id="selectByFromAndTo" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM workflow_transition
+        WHERE workflow_id = #{workflowId}
+        AND from_status_id = #{fromStatusId}
+        AND to_status_id = #{toStatusId}
+        LIMIT 1
+    </select>
+
+    <!-- 获取流转规则（包含状态信息） -->
+    <select id="selectWithStatusByWorkflowId" resultMap="WithStatusResultMap">
+        SELECT 
+            wt.id, wt.workflow_id, wt.from_status_id, wt.to_status_id, wt.name, wt.description,
+            wt.conditions, wt.actions, wt.allowed_roles, wt.created_at, wt.updated_at,
+            fs.name as from_status_name, fs.color as from_status_color, fs.icon as from_status_icon,
+            ts.name as to_status_name, ts.color as to_status_color, ts.icon as to_status_icon
+        FROM workflow_transition wt
+        LEFT JOIN workflow_status fs ON wt.from_status_id = fs.id
+        LEFT JOIN workflow_status ts ON wt.to_status_id = ts.id
+        WHERE wt.workflow_id = #{workflowId}
+        ORDER BY wt.id ASC
+    </select>
+
+    <!-- 批量插入流转规则 -->
+    <insert id="batchInsert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO workflow_transition (workflow_id, from_status_id, to_status_id, name, description, conditions, actions, allowed_roles, created_at, updated_at)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.workflowId}, #{item.fromStatusId}, #{item.toStatusId}, #{item.name}, #{item.description},
+             #{item.conditions}, #{item.actions}, #{item.allowedRoles}, NOW(), NOW())
+        </foreach>
+    </insert>
+
+    <!-- 删除工作流的所有流转规则 -->
+    <delete id="deleteByWorkflowId">
+        DELETE FROM workflow_transition
+        WHERE workflow_id = #{workflowId}
+    </delete>
+
+    <!-- 删除涉及指定状态的流转规则 -->
+    <delete id="deleteByStatusId">
+        DELETE FROM workflow_transition
+        WHERE from_status_id = #{statusId} OR to_status_id = #{statusId}
+    </delete>
+
+</mapper>

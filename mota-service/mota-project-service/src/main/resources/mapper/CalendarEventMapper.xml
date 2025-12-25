@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mota.project.mapper.CalendarEventMapper">
+    
+    <resultMap id="BaseResultMap" type="com.mota.project.entity.CalendarEvent">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="description" property="description"/>
+        <result column="event_type" property="eventType"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="all_day" property="allDay"/>
+        <result column="location" property="location"/>
+        <result column="color" property="color"/>
+        <result column="creator_id" property="creatorId"/>
+        <result column="project_id" property="projectId"/>
+        <result column="task_id" property="taskId"/>
+        <result column="milestone_id" property="milestoneId"/>
+        <result column="recurrence_rule" property="recurrenceRule"/>
+        <result column="recurrence_end_date" property="recurrenceEndDate"/>
+        <result column="reminder_minutes" property="reminderMinutes"/>
+        <result column="visibility" property="visibility"/>
+        <result column="status" property="status"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="creator_name" property="creatorName"/>
+        <result column="project_name" property="projectName"/>
+    </resultMap>
+    
+    <resultMap id="WithAttendeesResultMap" type="com.mota.project.entity.CalendarEvent" extends="BaseResultMap">
+        <collection property="attendees" ofType="com.mota.project.entity.CalendarEventAttendee">
+            <id column="attendee_id" property="id"/>
+            <result column="attendee_event_id" property="eventId"/>
+            <result column="attendee_user_id" property="userId"/>
+            <result column="attendee_response_status" property="responseStatus"/>
+            <result column="attendee_required" property="required"/>
+            <result column="attendee_responded_at" property="respondedAt"/>
+            <result column="attendee_user_name" property="userName"/>
+            <result column="attendee_user_avatar" property="userAvatar"/>
+        </collection>
+    </resultMap>
+    
+    <sql id="Base_Column_List">
+        e.id, e.title, e.description, e.event_type, e.start_time, e.end_time, e.all_day,
+        e.location, e.color, e.creator_id, e.project_id, e.task_id, e.milestone_id,
+        e.recurrence_rule, e.recurrence_end_date, e.reminder_minutes, e.visibility,
+        e.status, e.created_at, e.updated_at
+    </sql>
+    
+    <!-- 根据用户ID查询事件列表 -->
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>,
+               u.name as creator_name,
+               p.name as project_name
+        FROM calendar_event e
+        LEFT JOIN user u ON e.creator_id = u.id
+        LEFT JOIN project p ON e.project_id = p.id
+        WHERE e.creator_id = #{userId}
+          AND e.status = 'active'
+        <if test="startTime != null">
+          AND e.start_time >= #{startTime}
+        </if>
+        <if test="endTime != null">
+          AND e.end_time &lt;= #{endTime}
+        </if>
+        ORDER BY e.start_time ASC
+    </select>
+    
+    <!-- 根据项目ID查询事件列表 -->
+    <select id="selectByProjectId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>,
+               u.name as creator_name,
+               p.name as project_name
+        FROM calendar_event e
+        LEFT JOIN user u ON e.creator_id = u.id
+        LEFT JOIN project p ON e.project_id = p.id
+        WHERE e.project_id = #{projectId}
+          AND e.status = 'active'
+        <if test="startTime != null">
+          AND e.start_time >= #{startTime}
+        </if>
+        <if test="endTime != null">
+          AND e.end_time &lt;= #{endTime}
+        </if>
+        ORDER BY e.start_time ASC
+    </select>
+    
+    <!-- 查询用户在指定时间范围内的所有事件(包括参与的事件) -->
+    <select id="selectUserEventsInRange" resultMap="BaseResultMap">
+        SELECT DISTINCT <include refid="Base_Column_List"/>,
+               u.name as creator_name,
+               p.name as project_name
+        FROM calendar_event e
+        LEFT JOIN user u ON e.creator_id = u.id
+        LEFT JOIN project p ON e.project_id = p.id
+        LEFT JOIN calendar_event_attendee a ON e.id = a.event_id
+        WHERE e.status = 'active'
+          AND (e.creator_id = #{userId} OR a.user_id = #{userId})
+        <if test="startTime != null">
+          AND e.start_time >= #{startTime}
+        </if>
+        <if test="endTime != null">
+          AND e.end_time &lt;= #{endTime}
+        </if>
+        ORDER BY e.start_time ASC
+    </select>
+    
+    <!-- 查询事件详情(包含参与者信息) -->
+    <select id="selectWithAttendees" resultMap="WithAttendeesResultMap">
+        SELECT <include refid="Base_Column_List"/>,
+               u.name as creator_name,
+               p.name as project_name,
+               a.id as attendee_id,
+               a.event_id as attendee_event_id,
+               a.user_id as attendee_user_id,
+               a.response_status as attendee_response_status,
+               a.required as attendee_required,
+               a.responded_at as attendee_responded_at,
+               au.name as attendee_user_name,
+               au.avatar as attendee_user_avatar
+        FROM calendar_event e
+        LEFT JOIN user u ON e.creator_id = u.id
+        LEFT JOIN project p ON e.project_id = p.id
+        LEFT JOIN calendar_event_attendee a ON e.id = a.event_id
+        LEFT JOIN user au ON a.user_id = au.id
+        WHERE e.id = #{id}
+    </select>
+    
+    <!-- 查询即将到来的事件(用于提醒) -->
+    <select id="selectUpcomingEvents" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>,
+               u.name as creator_name
+        FROM calendar_event e
+        LEFT JOIN user u ON e.creator_id = u.id
+        LEFT JOIN calendar_event_attendee a ON e.id = a.event_id
+        WHERE e.status = 'active'
+          AND e.reminder_minutes IS NOT NULL
+          AND e.reminder_minutes > 0
+          AND (e.creator_id = #{userId} OR a.user_id = #{userId})
+          AND e.start_time BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL #{minutes} MINUTE)
+        ORDER BY e.start_time ASC
+    </select>
+    
+    <!-- 根据任务ID查询关联事件 -->
+    <select id="selectByTaskId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM calendar_event e
+        WHERE e.task_id = #{taskId}
+          AND e.status = 'active'
+        ORDER BY e.start_time ASC
+    </select>
+    
+    <!-- 根据里程碑ID查询关联事件 -->
+    <select id="selectByMilestoneId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM calendar_event e
+        WHERE e.milestone_id = #{milestoneId}
+          AND e.status = 'active'
+        ORDER BY e.start_time ASC
+    </select>
+    
+    <!-- 批量删除事件 -->
+    <delete id="deleteByIds">
+        DELETE FROM calendar_event
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+    <!-- 取消事件 -->
+    <update id="cancelEvent">
+        UPDATE calendar_event
+        SET status = 'cancelled',
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+</mapper>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Card,
@@ -30,7 +30,8 @@ import {
   ColorPicker,
   Steps,
   List,
-  App
+  App,
+  Segmented
 } from 'antd'
 import type { Color } from 'antd/es/color-picker'
 import {
@@ -68,7 +69,9 @@ import {
   PauseCircleOutlined,
   StopOutlined,
   CloseOutlined,
-  EyeOutlined
+  EyeOutlined,
+  BarChartOutlined,
+  TableOutlined
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-cn'
@@ -82,6 +85,13 @@ import { getRecentActivities } from '@/services/api/activity'
 import type { Department } from '@/services/api/department'
 import AIProjectAssistant from '@/components/AIProjectAssistant'
 import MilestoneTimeline from '@/components/MilestoneTimeline'
+import GanttChart from '@/components/GanttChart'
+import type { GanttTask } from '@/components/GanttChart'
+import Calendar from '@/components/Calendar'
+import KanbanBoard from '@/components/KanbanBoard'
+import type { KanbanTask, TaskStatus as KanbanTaskStatus } from '@/components/KanbanBoard'
+import ViewSaver from '@/components/ViewSaver'
+import type { ViewConfigData } from '@/services/api/viewConfig'
 import styles from './index.module.css'
 import detailStyles from '../project-detail/index.module.css'
 
@@ -153,7 +163,7 @@ const Projects = () => {
   const [loading, setLoading] = useState(true)
   const [projects, setProjects] = useState<Project[]>([])
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([])
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'gantt' | 'calendar' | 'kanban'>('grid')
   const [searchText, setSearchText] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   
@@ -204,6 +214,14 @@ const Projects = () => {
   const [departmentTasks, setDepartmentTasks] = useState<DepartmentTask[]>([])
   const [tasks, setTasks] = useState<Task[]>([])
   const [activities, setActivities] = useState<any[]>([])
+  
+  // 视图配置状态
+  const [currentViewConfig, setCurrentViewConfig] = useState<ViewConfigData>({
+    filters: {},
+    sort: { field: 'createdAt', order: 'desc' },
+    columns: ['name', 'status', 'progress', 'memberCount'],
+    viewMode: 'grid'
+  })
   
   // 当前激活的标签页
   const activeTab = searchParams.get('tab') || 'list'
@@ -1711,6 +1729,110 @@ const Projects = () => {
     )
   }
 
+  // ==================== 甘特图数据转换 ====================
+  const ganttTasks: GanttTask[] = useMemo(() => {
+    return filteredProjects.map(project => ({
+      id: project.id,
+      name: project.name,
+      startDate: project.startDate || null,
+      endDate: project.endDate || null,
+      progress: project.progress || 0,
+      status: project.status === 'active' ? 'in_progress' : project.status === 'completed' ? 'completed' : 'pending',
+      priority: project.priority || 'medium',
+      assigneeName: project.ownerId ? `负责人 ${project.ownerId}` : undefined,
+      color: project.color
+    }))
+  }, [filteredProjects])
+
+  // ==================== 看板数据转换 ====================
+  const kanbanTasks: KanbanTask[] = useMemo(() => {
+    return filteredProjects.map(project => {
+      let status: KanbanTaskStatus = 'todo'
+      if (project.status === 'active') status = 'in_progress'
+      else if (project.status === 'completed') status = 'done'
+      else if (project.status === 'planning') status = 'todo'
+      else if (project.status === 'archived') status = 'done'
+      
+      return {
+        id: Number(project.id),
+        title: project.name,
+        description: project.description,
+        status,
+        priority: (project.priority as 'low' | 'normal' | 'high' | 'urgent') || 'normal',
+        projectId: Number(project.id),
+        projectName: project.key,
+        dueDate: project.endDate
+      }
+    })
+  }, [filteredProjects])
+
+  // 处理看板任务移动
+  const handleKanbanTaskMove = async (taskId: number, newStatus: KanbanTaskStatus): Promise<boolean> => {
+    try {
+      let projectStatus = 'planning'
+      if (newStatus === 'in_progress') projectStatus = 'active'
+      else if (newStatus === 'done') projectStatus = 'completed'
+      else if (newStatus === 'review') projectStatus = 'active'
+      
+      await projectApi.updateProject(String(taskId), { status: projectStatus })
+      loadProjects()
+      return true
+    } catch (error) {
+      console.error('Failed to update project status:', error)
+      return false
+    }
+  }
+
+  // 处理看板任务点击
+  const handleKanbanTaskClick = (task: KanbanTask) => {
+    const project = projects.find(p => Number(p.id) === task.id)
+    if (project) {
+      openDetailDrawer(project)
+    }
+  }
+
+  // 处理甘特图任务点击
+  const handleGanttTaskClick = (task: GanttTask) => {
+    const project = projects.find(p => p.id === task.id)
+    if (project) {
+      openDetailDrawer(project)
+    }
+  }
+
+  // 处理视图配置应用
+  const handleApplyViewConfig = (config: ViewConfigData) => {
+    setCurrentViewConfig(config)
+    // 应用筛选条件
+    if (config.filters?.status) {
+      setStatusFilter(config.filters.status as string)
+    }
+    if (config.filters?.search) {
+      setSearchText(config.filters.search as string)
+    }
+    // 应用视图模式
+    if (config.viewMode) {
+      setViewMode(config.viewMode as typeof viewMode)
+    }
+  }
+
+  // 更新当前视图配置
+  const updateCurrentViewConfig = () => {
+    setCurrentViewConfig({
+      filters: {
+        status: statusFilter,
+        search: searchText
+      },
+      sort: { field: 'createdAt', order: 'desc' },
+      columns: ['name', 'status', 'progress', 'memberCount'],
+      viewMode
+    })
+  }
+
+  // 监听筛选条件变化，更新视图配置
+  useEffect(() => {
+    updateCurrentViewConfig()
+  }, [statusFilter, searchText, viewMode])
+
   // ==================== 项目列表视图 ====================
   const renderListTab = () => (
     <div className={styles.tabContent}>
@@ -1737,16 +1859,24 @@ const Projects = () => {
           />
         </div>
         <div className={styles.viewToggle}>
-          <Button
-            type={viewMode === 'grid' ? 'primary' : 'default'}
-            icon={<AppstoreOutlined />}
-            onClick={() => setViewMode('grid')}
-          />
-          <Button
-            type={viewMode === 'list' ? 'primary' : 'default'}
-            icon={<UnorderedListOutlined />}
-            onClick={() => setViewMode('list')}
-          />
+          <Space>
+            <ViewSaver
+              viewType="project"
+              currentConfig={currentViewConfig}
+              onApplyView={handleApplyViewConfig}
+            />
+            <Segmented
+              value={viewMode}
+              onChange={(value) => setViewMode(value as typeof viewMode)}
+              options={[
+                { value: 'grid', icon: <AppstoreOutlined />, label: '卡片' },
+                { value: 'list', icon: <UnorderedListOutlined />, label: '列表' },
+                { value: 'gantt', icon: <BarChartOutlined />, label: '甘特图' },
+                { value: 'calendar', icon: <CalendarOutlined />, label: '日历' },
+                { value: 'kanban', icon: <TableOutlined />, label: '看板' },
+              ]}
+            />
+          </Space>
         </div>
       </div>
 
@@ -1754,7 +1884,7 @@ const Projects = () => {
         <div className={styles.loading}>
           <Spin size="large" />
         </div>
-      ) : filteredProjects.length === 0 ? (
+      ) : filteredProjects.length === 0 && viewMode !== 'calendar' ? (
         <Empty
           description="暂无项目"
           image={Empty.PRESENTED_IMAGE_SIMPLE}
@@ -1764,9 +1894,54 @@ const Projects = () => {
           </Button>
         </Empty>
       ) : (
-        viewMode === 'grid' ? renderGridView() : renderListView()
+        <>
+          {viewMode === 'grid' && renderGridView()}
+          {viewMode === 'list' && renderListView()}
+          {viewMode === 'gantt' && renderGanttView()}
+          {viewMode === 'calendar' && renderCalendarView()}
+          {viewMode === 'kanban' && renderKanbanView()}
+        </>
       )}
     </div>
+  )
+
+  // ==================== 甘特图视图 ====================
+  const renderGanttView = () => (
+    <Card className={styles.ganttCard}>
+      <GanttChart
+        tasks={ganttTasks}
+        onTaskClick={handleGanttTaskClick}
+        onTaskDoubleClick={handleGanttTaskClick}
+        showDependencies={true}
+        showProgress={true}
+        showToday={true}
+      />
+    </Card>
+  )
+
+  // ==================== 日历视图 ====================
+  const renderCalendarView = () => (
+    <Card className={styles.calendarCard}>
+      <Calendar
+        userId={1}
+        defaultView="month"
+        height="calc(100vh - 300px)"
+        onDateSelect={(date) => {
+          console.log('Selected date:', date)
+        }}
+      />
+    </Card>
+  )
+
+  // ==================== 看板视图 ====================
+  const renderKanbanView = () => (
+    <KanbanBoard
+      tasks={kanbanTasks}
+      loading={loading}
+      onTaskMove={handleKanbanTaskMove}
+      onTaskClick={handleKanbanTaskClick}
+      validateDependencies={false}
+    />
   )
 
   const renderGridView = () => (

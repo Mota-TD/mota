@@ -1,0 +1,383 @@
+.container {
+  padding: 24px;
+  min-height: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.tabContent {
+  padding: 16px 0;
+}
+
+.toolbar {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.statsRow {
+  margin-bottom: 24px;
+}
+
+.statsCard {
+  text-align: center;
+}
+
+.statsCard .ant-statistic-title {
+  font-size: 14px;
+  color: #666;
+}
+
+.statsCard .ant-statistic-content {
+  font-size: 24px;
+}
+
+.orgChartContainer {
+  padding: 24px;
+  background: #fafafa;
+  border-radius: 8px;
+  min-height: 400px;
+}
+
+.orgNode {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.orgNode:hover {
+  border-color: #1890ff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.15);
+}
+
+.orgNodeAvatar {
+  margin-right: 8px;
+}
+
+.orgNodeInfo {
+  flex: 1;
+}
+
+.orgNodeName {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.orgNodeTitle {
+  font-size: 12px;
+  color: #999;
+}
+
+.complianceCard {
+  margin-bottom: 16px;
+}
+
+.complianceStats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+
+.complianceStat {
+  text-align: center;
+}
+
+.complianceStatValue {
+  font-size: 32px;
+  font-weight: 600;
+}
+
+.complianceStatLabel {
+  font-size: 14px;
+  color: #666;
+}
+
+.riskBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.riskBadge.low {
+  color: #52c41a;
+}
+
+.riskBadge.medium {
+  color: #faad14;
+}
+
+.riskBadge.high {
+  color: #ff4d4f;
+}
+
+.riskBadge.critical {
+  color: #cf1322;
+}
+
+.timelineItem {
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.timelineItemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.timelineItemTitle {
+  font-weight: 500;
+}
+
+.timelineItemTime {
+  font-size: 12px;
+  color: #999;
+}
+
+.timelineItemContent {
+  font-size: 14px;
+  color: #666;
+}
+
+.integrationCard {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  transition: all 0.3s;
+}
+
+.integrationCard:hover {
+  border-color: #1890ff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.integrationIcon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f5ff;
+  border-radius: 8px;
+  margin-right: 16px;
+  font-size: 24px;
+  color: #1890ff;
+}
+
+.integrationInfo {
+  flex: 1;
+}
+
+.integrationName {
+  font-weight: 500;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.integrationDesc {
+  font-size: 14px;
+  color: #666;
+}
+
+.integrationStatus {
+  margin-left: 16px;
+}
+
+.dataChangeDetail {
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.dataChangeField {
+  display: flex;
+  margin-bottom: 8px;
+  padding: 8px;
+  background: #fff;
+  border-radius: 4px;
+}
+
+.dataChangeFieldName {
+  width: 120px;
+  font-weight: 500;
+  color: #333;
+}
+
+.dataChangeFieldOld {
+  flex: 1;
+  color: #ff4d4f;
+  text-decoration: line-through;
+}
+
+.dataChangeFieldNew {
+  flex: 1;
+  color: #52c41a;
+}
+
+.auditFinding {
+  padding: 12px;
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.auditFindingHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.auditFindingTitle {
+  font-weight: 500;
+}
+
+.auditFindingContent {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.auditFindingRecommendation {
+  font-size: 13px;
+  color: #1890ff;
+  background: #f0f5ff;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.snapshotCard {
+  padding: 16px;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.snapshotCard:hover {
+  border-color: #1890ff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.snapshotHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.snapshotName {
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.snapshotDate {
+  font-size: 14px;
+  color: #999;
+}
+
+.snapshotStats {
+  display: flex;
+  gap: 24px;
+}
+
+.snapshotStat {
+  text-align: center;
+}
+
+.snapshotStatValue {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1890ff;
+}
+
+.snapshotStatLabel {
+  font-size: 12px;
+  color: #666;
+}
+
+/* 暗色主题适配 */
+:global(.dark) .container {
+  background: #141414;
+}
+
+:global(.dark) .orgChartContainer {
+  background: #1f1f1f;
+}
+
+:global(.dark) .orgNode {
+  background: #262626;
+  border-color: #434343;
+}
+
+:global(.dark) .orgNode:hover {
+  border-color: #177ddc;
+}
+
+:global(.dark) .timelineItem {
+  background: #1f1f1f;
+}
+
+:global(.dark) .integrationCard {
+  border-color: #434343;
+  background: #1f1f1f;
+}
+
+:global(.dark) .integrationCard:hover {
+  border-color: #177ddc;
+}
+
+:global(.dark) .integrationIcon {
+  background: #111d2c;
+  color: #177ddc;
+}
+
+:global(.dark) .dataChangeDetail {
+  background: #1f1f1f;
+}
+
+:global(.dark) .dataChangeField {
+  background: #262626;
+}
+
+:global(.dark) .auditFinding {
+  border-color: #434343;
+}
+
+:global(.dark) .auditFindingRecommendation {
+  background: #111d2c;
+  color: #177ddc;
+}
+
+:global(.dark) .snapshotCard {
+  border-color: #434343;
+  background: #1f1f1f;
+}
+
+:global(.dark) .snapshotCard:hover {
+  border-color: #177ddc;
+}

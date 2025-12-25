@@ -4,14 +4,14 @@
   min-height: 100%;
 }
 
-/* 页面头部 - 靛蓝紫 */
+/* 页面头部 - 主题绿 */
 .pageHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #616AE5 0%, #818CF8 100%);
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
   border-radius: 16px;
   color: #fff;
 }
@@ -82,7 +82,7 @@
 
 .cardIcon {
   font-size: 20px;
-  color: #616AE5;
+  color: #10B981;
 }
 
 .cardTitle {
@@ -121,9 +121,9 @@
 }
 
 .templateTag:hover {
-  border-color: #616AE5;
-  color: #616AE5;
-  background: rgba(97, 106, 229, 0.05);
+  border-color: #10B981;
+  color: #10B981;
+  background: rgba(16, 185, 129, 0.05);
 }
 
 /* 表单样式 */
@@ -139,14 +139,14 @@
 
 .form :global(.ant-input:hover),
 .form :global(.ant-select-selector:hover) {
-  border-color: #616AE5 !important;
+  border-color: #10B981 !important;
 }
 
 .form :global(.ant-input:focus),
 .form :global(.ant-input-focused),
 .form :global(.ant-select-focused .ant-select-selector) {
-  border-color: #616AE5 !important;
-  box-shadow: 0 0 0 3px rgba(97, 106, 229, 0.1) !important;
+  border-color: #10B981 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
 }
 
 .textarea {
@@ -197,7 +197,7 @@
   height: 44px;
   border-radius: 10px;
   font-weight: 500;
-  box-shadow: 0 4px 12px rgba(97, 106, 229, 0.25);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
 }
 
 /* 进度区域 */
@@ -268,7 +268,7 @@
 
 .outputIcon {
   font-size: 18px;
-  color: #616AE5;
+  color: #10B981;
 }
 
 /* 加载状态 */
@@ -284,7 +284,7 @@
 .loadingAnimation {
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, rgba(97, 106, 229, 0.1) 0%, rgba(129, 140, 248, 0.1) 100%);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
   border-radius: 20px;
   display: flex;
   align-items: center;
@@ -306,7 +306,7 @@
 
 .loadingIcon {
   font-size: 36px;
-  color: #616AE5;
+  color: #10B981;
   animation: bounce 1s ease-in-out infinite;
 }
 
@@ -408,13 +408,13 @@
 
 .markdownContent h1 {
   font-size: 22px;
-  border-bottom: 2px solid #616AE5;
+  border-bottom: 2px solid #10B981;
   padding-bottom: 8px;
 }
 
 .markdownContent h2 {
   font-size: 18px;
-  color: #616AE5;
+  color: #10B981;
 }
 
 .markdownContent h3 {

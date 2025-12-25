@@ -1,0 +1,476 @@
+/* 看板组件样式 */
+.kanbanContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* 看板头部 */
+.kanbanHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.taskCount {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.filterButton {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.filterButton:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* 看板主体 */
+.kanbanBody {
+  display: flex;
+  flex: 1;
+  overflow-x: auto;
+  padding: 16px;
+  gap: 16px;
+}
+
+/* 列 */
+.column {
+  display: flex;
+  flex-direction: column;
+  min-width: 280px;
+  max-width: 320px;
+  background: var(--bg-primary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  transition: all 0.2s;
+}
+
+.column.dragOver {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+.column.invalidDrop {
+  border-color: var(--error-color);
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2);
+}
+
+/* 列头部 */
+.columnHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.columnTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.columnName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.columnCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border-radius: 10px;
+}
+
+.columnActions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.columnHeader:hover .columnActions {
+  opacity: 1;
+}
+
+.columnActionButton {
+  padding: 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-secondary);
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.columnActionButton:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* 列内容 */
+.columnContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  min-height: 100px;
+}
+
+/* 任务卡片 */
+.taskCard {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  cursor: grab;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.taskCard:active {
+  cursor: grabbing;
+}
+
+.taskCard:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.taskCard.dragging {
+  opacity: 0.5;
+  transform: rotate(3deg);
+}
+
+.taskCard.blocked {
+  border-left: 3px solid var(--error-color);
+}
+
+/* 任务卡片内容 */
+.taskTitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.taskMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.taskTag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: 11px;
+  border-radius: 3px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+.priorityUrgent {
+  background: rgba(255, 77, 79, 0.1);
+  color: #f5222d;
+}
+
+.priorityHigh {
+  background: rgba(250, 173, 20, 0.1);
+  color: #fa8c16;
+}
+
+.priorityNormal {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+}
+
+.priorityLow {
+  background: rgba(140, 140, 140, 0.1);
+  color: #8c8c8c;
+}
+
+.taskFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-color);
+}
+
+.taskAssignee {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.assigneeAvatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.assigneeName {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.taskDueDate {
+  font-size: 12px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.overdue {
+  color: var(--error-color);
+}
+
+.dueToday {
+  color: var(--warning-color);
+}
+
+/* 依赖指示器 */
+.dependencyIndicator {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+}
+
+.dependencyBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-size: 10px;
+  border-radius: 50%;
+  cursor: help;
+}
+
+.blockedBy {
+  background: rgba(255, 77, 79, 0.1);
+  color: #f5222d;
+}
+
+.blocking {
+  background: rgba(250, 173, 20, 0.1);
+  color: #fa8c16;
+}
+
+/* 子任务进度 */
+.subtaskProgress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.progressBar {
+  flex: 1;
+  height: 4px;
+  background: var(--bg-secondary);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--primary-color);
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+
+.progressText {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* 添加任务按钮 */
+.addTaskButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  padding: 8px;
+  margin-top: 8px;
+  border: 1px dashed var(--border-color);
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.addTaskButton:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  background: rgba(24, 144, 255, 0.05);
+}
+
+/* 拖拽占位符 */
+.dropPlaceholder {
+  height: 80px;
+  border: 2px dashed var(--primary-color);
+  border-radius: 6px;
+  background: rgba(24, 144, 255, 0.05);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-color);
+  font-size: 13px;
+}
+
+.invalidPlaceholder {
+  border-color: var(--error-color);
+  background: rgba(255, 77, 79, 0.05);
+  color: var(--error-color);
+}
+
+/* 空列状态 */
+.emptyColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: var(--text-disabled);
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 32px;
+  margin-bottom: 8px;
+  opacity: 0.5;
+}
+
+.emptyText {
+  font-size: 13px;
+}
+
+/* 依赖警告提示 */
+.dependencyWarning {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 24px;
+  background: var(--error-color);
+  color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.warningIcon {
+  font-size: 16px;
+}
+
+.warningText {
+  font-size: 14px;
+}
+
+/* 加载状态 */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-secondary);
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .kanbanBody {
+    padding: 8px;
+    gap: 8px;
+  }
+  
+  .column {
+    min-width: 260px;
+    max-width: 280px;
+  }
+  
+  .taskCard {
+    padding: 10px;
+  }
+}

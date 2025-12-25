@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mota.project.mapper.WorkflowStatusMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.mota.project.entity.WorkflowStatus">
+        <id column="id" property="id"/>
+        <result column="workflow_id" property="workflowId"/>
+        <result column="name" property="name"/>
+        <result column="description" property="description"/>
+        <result column="color" property="color"/>
+        <result column="icon" property="icon"/>
+        <result column="sort_order" property="sortOrder"/>
+        <result column="is_initial" property="isInitial"/>
+        <result column="is_final" property="isFinal"/>
+        <result column="status_type" property="statusType"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, workflow_id, name, description, color, icon, sort_order, is_initial, is_final, status_type, created_at, updated_at
+    </sql>
+
+    <!-- 获取工作流的所有状态 -->
+    <select id="selectByWorkflowId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM workflow_status
+        WHERE workflow_id = #{workflowId}
+        ORDER BY sort_order ASC
+    </select>
+
+    <!-- 获取初始状态 -->
+    <select id="selectInitialStatus" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM workflow_status
+        WHERE workflow_id = #{workflowId}
+        AND is_initial = 1
+        LIMIT 1
+    </select>
+
+    <!-- 获取终态列表 -->
+    <select id="selectFinalStatuses" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM workflow_status
+        WHERE workflow_id = #{workflowId}
+        AND is_final = 1
+        ORDER BY sort_order ASC
+    </select>
+
+    <!-- 按排序顺序获取状态 -->
+    <select id="selectByWorkflowIdOrdered" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM workflow_status
+        WHERE workflow_id = #{workflowId}
+        ORDER BY sort_order ASC
+    </select>
+
+    <!-- 更新排序顺序 -->
+    <update id="updateSortOrder">
+        UPDATE workflow_status
+        SET sort_order = #{sortOrder}, updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 批量插入状态 -->
+    <insert id="batchInsert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO workflow_status (workflow_id, name, description, color, icon, sort_order, is_initial, is_final, status_type, created_at, updated_at)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.workflowId}, #{item.name}, #{item.description}, #{item.color}, #{item.icon}, 
+             #{item.sortOrder}, #{item.isInitial}, #{item.isFinal}, #{item.statusType}, NOW(), NOW())
+        </foreach>
+    </insert>
+
+    <!-- 删除工作流的所有状态 -->
+    <delete id="deleteByWorkflowId">
+        DELETE FROM workflow_status
+        WHERE workflow_id = #{workflowId}
+    </delete>
+
+    <!-- 获取最大排序顺序 -->
+    <select id="selectMaxSortOrder" resultType="java.lang.Integer">
+        SELECT COALESCE(MAX(sort_order), 0)
+        FROM workflow_status
+        WHERE workflow_id = #{workflowId}
+    </select>
+
+</mapper>

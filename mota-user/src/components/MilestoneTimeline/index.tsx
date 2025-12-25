@@ -62,7 +62,8 @@ const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({
   const loadMilestones = async () => {
     setLoading(true)
     try {
-      const data = await milestoneApi.getMilestonesByProjectId(projectId)
+      const numericProjectId = typeof projectId === 'string' ? parseInt(projectId, 10) : projectId
+      const data = await milestoneApi.getMilestonesByProjectId(numericProjectId)
       setMilestones(data || [])
     } catch (error) {
       console.error('Load milestones error:', error)
@@ -88,7 +89,7 @@ const MilestoneTimeline: React.FC<MilestoneTimelineProps> = ({
     setModalVisible(true)
   }
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string | number) => {
     try {
       await milestoneApi.deleteMilestone(id)
       message.success('里程碑已删除')

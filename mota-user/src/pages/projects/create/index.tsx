@@ -74,8 +74,8 @@ const CreateProject = () => {
   const [loadingData, setLoadingData] = useState(false)
   
   // 选中的部门和成员
-  const [selectedDepartments, setSelectedDepartments] = useState<number[]>([])
-  const [selectedMembers, setSelectedMembers] = useState<number[]>([])
+  const [selectedDepartments, setSelectedDepartments] = useState<(string | number)[]>([])
+  const [selectedMembers, setSelectedMembers] = useState<(string | number)[]>([])
   
   // 里程碑
   const [milestones, setMilestones] = useState<MilestoneItem[]>([])
@@ -86,12 +86,12 @@ const CreateProject = () => {
 
   // 默认部门数据（当API不可用时使用）
   const defaultDepartments: Department[] = [
-    { id: 1, orgId: 1, name: '技术部', sortOrder: 1, status: 'active' as any, memberCount: 25 },
-    { id: 2, orgId: 1, name: '市场部', sortOrder: 2, status: 'active' as any, memberCount: 12 },
-    { id: 3, orgId: 1, name: '运营部', sortOrder: 3, status: 'active' as any, memberCount: 8 },
-    { id: 4, orgId: 1, name: '产品部', sortOrder: 4, status: 'active' as any, memberCount: 6 },
-    { id: 5, orgId: 1, name: '财务部', sortOrder: 5, status: 'active' as any, memberCount: 5 },
-    { id: 6, orgId: 1, name: '人力资源部', sortOrder: 6, status: 'active' as any, memberCount: 4 },
+    { id: '1', orgId: '1', name: '技术部', sortOrder: 1, status: 'active' as any, memberCount: 25 },
+    { id: '2', orgId: '1', name: '市场部', sortOrder: 2, status: 'active' as any, memberCount: 12 },
+    { id: '3', orgId: '1', name: '运营部', sortOrder: 3, status: 'active' as any, memberCount: 8 },
+    { id: '4', orgId: '1', name: '产品部', sortOrder: 4, status: 'active' as any, memberCount: 6 },
+    { id: '5', orgId: '1', name: '财务部', sortOrder: 5, status: 'active' as any, memberCount: 5 },
+    { id: '6', orgId: '1', name: '人力资源部', sortOrder: 6, status: 'active' as any, memberCount: 4 },
   ]
   
   // 默认用户数据（当API不可用时使用）
@@ -199,8 +199,8 @@ const CreateProject = () => {
         startDate: dateRange?.[0]?.format('YYYY-MM-DD'),
         endDate: dateRange?.[1]?.format('YYYY-MM-DD'),
         ownerId: formData.ownerId,
-        departmentIds: selectedDepartments,
-        memberIds: selectedMembers,
+        departmentIds: selectedDepartments.map(id => String(id)),
+        memberIds: selectedMembers.map(id => String(id)),
         milestones: milestones.map(m => ({
           name: m.name,
           targetDate: m.targetDate,
@@ -220,11 +220,11 @@ const CreateProject = () => {
   }
 
   // 切换部门选择
-  const handleDepartmentToggle = (deptId: number) => {
+  const handleDepartmentToggle = (deptId: string | number) => {
     if (selectedDepartments.includes(deptId)) {
       setSelectedDepartments(selectedDepartments.filter(id => id !== deptId))
       // 同时移除该部门的成员
-      const deptMembers = users.filter(u => u.departmentId === deptId).map(u => u.id)
+      const deptMembers = users.filter(u => String(u.departmentId) === String(deptId)).map(u => u.id)
       setSelectedMembers(selectedMembers.filter(id => !deptMembers.includes(id)))
     } else {
       setSelectedDepartments([...selectedDepartments, deptId])
@@ -232,7 +232,7 @@ const CreateProject = () => {
   }
 
   // 切换成员选择
-  const handleMemberToggle = (memberId: number) => {
+  const handleMemberToggle = (memberId: string | number) => {
     if (selectedMembers.includes(memberId)) {
       setSelectedMembers(selectedMembers.filter(id => id !== memberId))
     } else {
@@ -241,8 +241,8 @@ const CreateProject = () => {
   }
 
   // 全选部门成员
-  const handleSelectAllDeptMembers = (deptId: number) => {
-    const deptMembers = users.filter(u => u.departmentId === deptId).map(u => u.id)
+  const handleSelectAllDeptMembers = (deptId: string | number) => {
+    const deptMembers = users.filter(u => String(u.departmentId) === String(deptId)).map(u => u.id)
     const allSelected = deptMembers.every(id => selectedMembers.includes(id))
     
     if (allSelected) {
@@ -471,10 +471,10 @@ const CreateProject = () => {
                 {departments.map(dept => (
                   <div
                     key={dept.id}
-                    className={`${styles.departmentItem} ${selectedDepartments.includes(dept.id) ? styles.departmentItemSelected : ''}`}
+                    className={`${styles.departmentItem} ${selectedDepartments.some(id => String(id) === String(dept.id)) ? styles.departmentItemSelected : ''}`}
                     onClick={() => handleDepartmentToggle(dept.id)}
                   >
-                    <Checkbox checked={selectedDepartments.includes(dept.id)} />
+                    <Checkbox checked={selectedDepartments.some(id => String(id) === String(dept.id))} />
                     <div className={styles.departmentInfo}>
                       <div className={styles.departmentName}>{dept.name}</div>
                       <div className={styles.departmentMeta}>
@@ -509,10 +509,10 @@ const CreateProject = () => {
             ) : (
               <div className={styles.memberSelection}>
                 {selectedDepartments.map(deptId => {
-                  const dept = departments.find(d => d.id === deptId)
-                  const deptMembers = users.filter(u => u.departmentId === deptId)
-                  const selectedCount = deptMembers.filter(m => selectedMembers.includes(m.id)).length
-                  const allSelected = deptMembers.length > 0 && deptMembers.every(m => selectedMembers.includes(m.id))
+                  const dept = departments.find(d => String(d.id) === String(deptId))
+                  const deptMembers = users.filter(u => String(u.departmentId) === String(deptId))
+                  const selectedCount = deptMembers.filter(m => selectedMembers.some(id => String(id) === String(m.id))).length
+                  const allSelected = deptMembers.length > 0 && deptMembers.every(m => selectedMembers.some(id => String(id) === String(m.id)))
                   
                   return (
                     <div key={deptId} className={styles.memberGroup}>
@@ -530,12 +530,12 @@ const CreateProject = () => {
                       </div>
                       <div className={styles.memberList}>
                         {deptMembers.map(member => (
-                          <div 
+                          <div
                             key={member.id}
-                            className={`${styles.memberItem} ${selectedMembers.includes(member.id) ? styles.memberItemSelected : ''}`}
+                            className={`${styles.memberItem} ${selectedMembers.some(id => String(id) === String(member.id)) ? styles.memberItemSelected : ''}`}
                             onClick={() => handleMemberToggle(member.id)}
                           >
-                            <Checkbox checked={selectedMembers.includes(member.id)} />
+                            <Checkbox checked={selectedMembers.some(id => String(id) === String(member.id))} />
                             <Avatar size="small" src={member.avatar}>{member.name?.charAt(0)}</Avatar>
                             <div className={styles.memberInfo}>
                               <div className={styles.memberName}>{member.name}</div>
@@ -736,8 +736,8 @@ const CreateProject = () => {
                   <div style={{ color: '#666', fontSize: 12, marginBottom: 8 }}>参与部门</div>
                   <Space wrap>
                     {selectedDepartments.map(deptId => {
-                      const dept = departments.find(d => d.id === deptId)
-                      return <Tag key={deptId}>{dept?.name}</Tag>
+                      const dept = departments.find(d => String(d.id) === String(deptId))
+                      return <Tag key={String(deptId)}>{dept?.name}</Tag>
                     })}
                   </Space>
                 </div>

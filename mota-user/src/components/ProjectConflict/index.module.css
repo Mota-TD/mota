@@ -1,0 +1,149 @@
+.container {
+  padding: 16px 0;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.statsRow {
+  margin-bottom: 16px;
+}
+
+.statCard {
+  border-radius: 8px;
+  text-align: center;
+}
+
+:global(.dark) .statCard {
+  background: var(--bg-secondary, #1f1f1f);
+  border-color: var(--border-color, #303030);
+}
+
+.chartRow {
+  margin-bottom: 16px;
+}
+
+.chartCard {
+  height: 100%;
+  border-radius: 8px;
+}
+
+:global(.dark) .chartCard {
+  background: var(--bg-secondary, #1f1f1f);
+  border-color: var(--border-color, #303030);
+}
+
+.conflictListCard {
+  border-radius: 8px;
+}
+
+:global(.dark) .conflictListCard {
+  background: var(--bg-secondary, #1f1f1f);
+  border-color: var(--border-color, #303030);
+}
+
+.conflictItem {
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: background 0.3s;
+}
+
+.conflictItem:hover {
+  background: var(--bg-tertiary, #fafafa);
+}
+
+:global(.dark) .conflictItem:hover {
+  background: var(--bg-tertiary, #141414);
+}
+
+.conflictTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.conflictUser {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.conflictDesc {
+  margin-top: 8px;
+}
+
+.conflictDesc p {
+  margin-bottom: 8px;
+  color: var(--text-secondary, #8c8c8c);
+}
+
+.conflictProjects {
+  margin-bottom: 8px;
+}
+
+.conflictProjects strong {
+  margin-right: 8px;
+}
+
+.conflictMeta {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--text-secondary, #8c8c8c);
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.suggestions {
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--bg-tertiary, #fafafa);
+  border-radius: 8px;
+}
+
+:global(.dark) .suggestions {
+  background: var(--bg-tertiary, #141414);
+}
+
+.suggestions strong {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-primary, #262626);
+}
+
+:global(.dark) .suggestions strong {
+  color: var(--text-primary, #ffffff);
+}
+
+.suggestionTimeline {
+  margin-top: 8px;
+}
+
+.suggestionItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.suggestionScore {
+  font-size: 11px;
+  color: #faad14;
+}
+
+.resolveModal p {
+  margin-bottom: 12px;
+}
+
+.resolveModal strong {
+  color: var(--text-primary, #262626);
+}
+
+:global(.dark) .resolveModal strong {
+  color: var(--text-primary, #ffffff);
+}

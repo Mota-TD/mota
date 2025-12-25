@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mota.project.mapper.CalendarEventAttendeeMapper">
+    
+    <resultMap id="BaseResultMap" type="com.mota.project.entity.CalendarEventAttendee">
+        <id column="id" property="id"/>
+        <result column="event_id" property="eventId"/>
+        <result column="user_id" property="userId"/>
+        <result column="response_status" property="responseStatus"/>
+        <result column="required" property="required"/>
+        <result column="responded_at" property="respondedAt"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="user_name" property="userName"/>
+        <result column="user_avatar" property="userAvatar"/>
+        <result column="user_email" property="userEmail"/>
+    </resultMap>
+    
+    <!-- 根据事件ID查询参与者列表 -->
+    <select id="selectByEventId" resultMap="BaseResultMap">
+        SELECT a.id, a.event_id, a.user_id, a.response_status, a.required, 
+               a.responded_at, a.created_at,
+               u.name as user_name, u.avatar as user_avatar, u.email as user_email
+        FROM calendar_event_attendee a
+        LEFT JOIN user u ON a.user_id = u.id
+        WHERE a.event_id = #{eventId}
+        ORDER BY a.required DESC, a.created_at ASC
+    </select>
+    
+    <!-- 根据用户ID查询参与的事件ID列表 -->
+    <select id="selectEventIdsByUserId" resultType="java.lang.Long">
+        SELECT event_id
+        FROM calendar_event_attendee
+        WHERE user_id = #{userId}
+    </select>
+    
+    <!-- 批量插入参与者 -->
+    <insert id="batchInsert">
+        INSERT INTO calendar_event_attendee (event_id, user_id, response_status, required, created_at)
+        VALUES
+        <foreach collection="attendees" item="attendee" separator=",">
+            (#{attendee.eventId}, #{attendee.userId}, #{attendee.responseStatus}, 
+             #{attendee.required}, NOW())
+        </foreach>
+    </insert>
+    
+    <!-- 根据事件ID删除所有参与者 -->
+    <delete id="deleteByEventId">
+        DELETE FROM calendar_event_attendee
+        WHERE event_id = #{eventId}
+    </delete>
+    
+    <!-- 更新参与者响应状态 -->
+    <update id="updateResponseStatus">
+        UPDATE calendar_event_attendee
+        SET response_status = #{responseStatus},
+            responded_at = NOW()
+        WHERE event_id = #{eventId}
+          AND user_id = #{userId}
+    </update>
+    
+    <!-- 检查用户是否是事件参与者 -->
+    <select id="isAttendee" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM calendar_event_attendee
+        WHERE event_id = #{eventId}
+          AND user_id = #{userId}
+    </select>
+    
+    <!-- 统计事件参与者响应情况 -->
+    <select id="countByResponseStatus" resultType="int">
+        SELECT COUNT(*)
+        FROM calendar_event_attendee
+        WHERE event_id = #{eventId}
+          AND response_status = #{responseStatus}
+    </select>
+</mapper>

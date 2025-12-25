@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mota.project.mapper.ChecklistMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.mota.project.entity.Checklist">
+        <id column="id" property="id"/>
+        <result column="task_id" property="taskId"/>
+        <result column="name" property="name"/>
+        <result column="sort_order" property="sortOrder"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
+        <result column="deleted" property="deleted"/>
+        <result column="version" property="version"/>
+    </resultMap>
+
+    <!-- 包含清单项的结果映射 -->
+    <resultMap id="WithItemsResultMap" type="com.mota.project.entity.Checklist" extends="BaseResultMap">
+        <collection property="items" ofType="com.mota.project.entity.ChecklistItem">
+            <id column="item_id" property="id"/>
+            <result column="item_checklist_id" property="checklistId"/>
+            <result column="item_content" property="content"/>
+            <result column="item_is_completed" property="isCompleted"/>
+            <result column="item_completed_by" property="completedBy"/>
+            <result column="item_completed_at" property="completedAt"/>
+            <result column="item_assignee_id" property="assigneeId"/>
+            <result column="item_due_date" property="dueDate"/>
+            <result column="item_sort_order" property="sortOrder"/>
+            <result column="item_created_at" property="createdAt"/>
+            <result column="item_updated_at" property="updatedAt"/>
+            <result column="item_created_by" property="createdBy"/>
+            <result column="item_updated_by" property="updatedBy"/>
+            <result column="item_deleted" property="deleted"/>
+            <result column="item_version" property="version"/>
+        </collection>
+    </resultMap>
+
+    <!-- 基础列 -->
+    <sql id="Base_Column_List">
+        id, task_id, name, sort_order, created_at, updated_at, created_by, updated_by, deleted, version
+    </sql>
+
+    <!-- 根据任务ID查询检查清单列表 -->
+    <select id="selectByTaskId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM checklist
+        WHERE task_id = #{taskId}
+        AND deleted = 0
+        ORDER BY sort_order ASC, created_at ASC
+    </select>
+
+    <!-- 根据任务ID查询检查清单列表（包含清单项） -->
+    <select id="selectWithItemsByTaskId" resultMap="WithItemsResultMap">
+        SELECT 
+            c.id, c.task_id, c.name, c.sort_order, c.created_at, c.updated_at, 
+            c.created_by, c.updated_by, c.deleted, c.version,
+            ci.id as item_id, ci.checklist_id as item_checklist_id, ci.content as item_content,
+            ci.is_completed as item_is_completed, ci.completed_by as item_completed_by,
+            ci.completed_at as item_completed_at, ci.assignee_id as item_assignee_id,
+            ci.due_date as item_due_date, ci.sort_order as item_sort_order,
+            ci.created_at as item_created_at, ci.updated_at as item_updated_at,
+            ci.created_by as item_created_by, ci.updated_by as item_updated_by,
+            ci.deleted as item_deleted, ci.version as item_version
+        FROM checklist c
+        LEFT JOIN checklist_item ci ON c.id = ci.checklist_id AND ci.deleted = 0
+        WHERE c.task_id = #{taskId}
+        AND c.deleted = 0
+        ORDER BY c.sort_order ASC, c.created_at ASC, ci.sort_order ASC
+    </select>
+
+    <!-- 批量更新排序顺序 -->
+    <update id="batchUpdateSortOrder" parameterType="list">
+        <foreach collection="list" item="item" separator=";">
+            UPDATE checklist
+            SET sort_order = #{item.sortOrder}, updated_at = NOW()
+            WHERE id = #{item.id}
+        </foreach>
+    </update>
+
+    <!-- 获取任务下的最大排序顺序 -->
+    <select id="getMaxSortOrder" resultType="java.lang.Integer">
+        SELECT COALESCE(MAX(sort_order), 0)
+        FROM checklist
+        WHERE task_id = #{taskId}
+        AND deleted = 0
+    </select>
+
+    <!-- 删除任务的所有检查清单 -->
+    <update id="deleteByTaskId">
+        UPDATE checklist
+        SET deleted = 1, updated_at = NOW()
+        WHERE task_id = #{taskId}
+        AND deleted = 0
+    </update>
+
+</mapper>

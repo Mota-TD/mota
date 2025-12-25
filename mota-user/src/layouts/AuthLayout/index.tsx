@@ -1,4 +1,5 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet, Link } from 'react-router-dom'
+import { HomeOutlined } from '@ant-design/icons'
 import styles from './index.module.css'
 
 /**
@@ -8,6 +9,12 @@ import styles from './index.module.css'
 const AuthLayout = () => {
   return (
     <div className={styles.authContainer}>
+      {/* 返回官网按钮 */}
+      <Link to="/" className={styles.backToHome}>
+        <HomeOutlined />
+        <span>返回官网</span>
+      </Link>
+      
       {/* 左侧品牌区域 */}
       <div className={styles.authBrand}>
         <div className={styles.brandContent}>

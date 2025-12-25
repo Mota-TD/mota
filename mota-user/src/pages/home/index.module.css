@@ -17,12 +17,12 @@
 .logoWrapper {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, #2b7de9 0%, #1a6dd6 100%);
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(43, 125, 233, 0.3);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .logoIcon {
@@ -69,7 +69,7 @@
 .navbarTitle {
   font-size: 20px;
   font-weight: 700;
-  color: #1a1f36;
+  color: #10B981;
   letter-spacing: -0.5px;
 }
 
@@ -90,8 +90,8 @@
 }
 
 .navbarItem:hover {
-  color: #2b7de9;
-  background: rgba(43, 125, 233, 0.06);
+  color: #10B981;
+  background: rgba(16, 185, 129, 0.06);
 }
 
 .navDropdown {
@@ -131,7 +131,7 @@
 
 .navDropdownItem > span {
   font-size: 20px;
-  color: #2b7de9;
+  color: #10B981;
   margin-top: 2px;
 }
 
@@ -163,6 +163,21 @@
   padding: 0 24px;
   font-size: 15px;
   border-radius: 10px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+  border: none !important;
+  transition: all 0.3s ease;
+}
+
+.registerBtn:hover,
+.registerBtn:focus,
+.registerBtn:active {
+  opacity: 0.8;
+  transform: translateY(-2px);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.5);
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+  border: none !important;
+  border-color: transparent !important;
+  color: #fff !important;
 }
 
 /* Hero区域 */
@@ -187,7 +202,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, #f8faff 0%, #e8f4ff 50%, #f0f5ff 100%);
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
 }
 
 .heroBgPattern {
@@ -196,9 +211,9 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: radial-gradient(circle at 1px 1px, #e0e7ff 1px, transparent 0);
+  background-image: radial-gradient(circle at 1px 1px, rgba(16, 185, 129, 0.15) 1px, transparent 0);
   background-size: 40px 40px;
-  opacity: 0.5;
+  opacity: 0.6;
 }
 
 .heroBgOrbs {
@@ -216,7 +231,7 @@
   right: 10%;
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, rgba(43, 125, 233, 0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, transparent 70%);
   border-radius: 50%;
   animation: float 8s ease-in-out infinite;
 }
@@ -227,7 +242,7 @@
   left: 5%;
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
   border-radius: 50%;
   animation: float 10s ease-in-out infinite reverse;
 }
@@ -238,7 +253,7 @@
   left: 30%;
   width: 200px;
   height: 200px;
-  background: radial-gradient(circle, rgba(34, 197, 94, 0.1) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(52, 211, 153, 0.2) 0%, transparent 70%);
   border-radius: 50%;
   animation: float 6s ease-in-out infinite;
 }
@@ -266,29 +281,32 @@
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  background: linear-gradient(135deg, rgba(43, 125, 233, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+  background: rgba(16, 185, 129, 0.4);
+  border: 1px solid rgba(16, 185, 129, 0.5);
   border-radius: 100px;
   font-size: 14px;
-  color: #2b7de9;
+  color: #fff;
   font-weight: 500;
   margin-bottom: 24px;
+  backdrop-filter: blur(4px);
 }
 
 .heroBadge span:first-child {
-  color: #a855f7;
+  color: #fff;
 }
 
 .heroTitle {
   font-size: 52px;
   font-weight: 800;
   line-height: 1.15;
-  color: #1a1f36;
+  color: #fff;
   margin-bottom: 24px;
   letter-spacing: -1px;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
 }
 
 .heroTitleHighlight {
-  background: linear-gradient(135deg, #2b7de9 0%, #667eea 50%, #a855f7 100%);
+  background: linear-gradient(135deg, #10B981 0%, #34d399 50%, #10B981 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -297,7 +315,7 @@
 .heroSubtitle {
   font-size: 18px;
   line-height: 1.7;
-  color: #4a5568;
+  color: rgba(255, 255, 255, 0.9);
   margin-bottom: 36px;
 }
 
@@ -316,7 +334,16 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 8px 24px rgba(43, 125, 233, 0.3);
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  border: none;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4), 0 0 40px rgba(16, 185, 129, 0.2);
+  transition: all 0.3s ease;
+}
+
+.heroBtn:hover {
+  opacity: 0.8;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
 }
 
 .heroBtnSecondary {
@@ -328,12 +355,17 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  border-color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
 }
 
 .heroBtnSecondary:hover {
-  border-color: #2b7de9;
-  color: #2b7de9;
+  background: #10B981;
+  opacity: 0.8;
+  color: #fff;
+  transform: translateY(-2px);
 }
 
 .heroTrust {
@@ -344,7 +376,7 @@
 
 .heroTrustLabel {
   font-size: 14px;
-  color: #718096;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .heroTrustLogos {
@@ -356,12 +388,12 @@
 .trustNumber {
   font-size: 28px;
   font-weight: 700;
-  color: #2b7de9;
+  color: #fff;
 }
 
 .trustText {
   font-size: 14px;
-  color: #4a5568;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .heroImage {
@@ -427,7 +459,7 @@
 
 .heroCardIcon {
   font-size: 20px;
-  color: #2b7de9;
+  color: #10B981;
 }
 
 .heroCardInput span {
@@ -452,7 +484,7 @@
 }
 
 .heroCardOutputHeader > span:first-child {
-  color: #2b7de9;
+  color: #10B981;
 }
 
 .heroCardOutputHeader > span:nth-child(2) {
@@ -465,7 +497,7 @@
 .heroCardBadge {
   font-size: 11px;
   padding: 4px 10px;
-  background: linear-gradient(135deg, #2b7de9 0%, #667eea 100%);
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
   color: #fff;
   border-radius: 100px;
   font-weight: 500;
@@ -560,8 +592,8 @@
 }
 
 .kanbanCardActive {
-  background: #e8f4ff;
-  border-color: #2b7de9;
+  background: #ecfdf5;
+  border-color: #10B981;
 }
 
 .kanbanCardDone {
@@ -596,7 +628,7 @@
 
 .kanbanProgress {
   font-size: 10px;
-  color: #2b7de9;
+  color: #10B981;
   font-weight: 600;
 }
 
@@ -628,8 +660,9 @@
 }
 
 .pillarCard:hover {
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.15), 0 0 0 1px rgba(16, 185, 129, 0.3);
   transform: translateY(-4px);
+  border-color: rgba(16, 185, 129, 0.5);
 }
 
 .pillarIcon {
@@ -691,10 +724,10 @@
 .sectionBadge {
   display: inline-block;
   padding: 8px 20px;
-  background: linear-gradient(135deg, rgba(43, 125, 233, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
   border-radius: 100px;
   font-size: 14px;
-  color: #2b7de9;
+  color: #10B981;
   font-weight: 600;
   margin-bottom: 20px;
 }
@@ -708,7 +741,7 @@
 }
 
 .textPrimary {
-  color: #2b7de9;
+  color: #10B981;
 }
 
 .sectionSubtitle {
@@ -734,8 +767,9 @@
 }
 
 .featureCard:hover {
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.15), 0 0 0 1px rgba(16, 185, 129, 0.3);
   transform: translateY(-4px);
+  border-color: rgba(16, 185, 129, 0.5);
 }
 
 .featureCardLarge {
@@ -804,7 +838,7 @@
   align-items: center;
   gap: 6px;
   font-size: 14px;
-  color: #2b7de9;
+  color: #10B981;
   font-weight: 500;
   transition: gap 0.2s;
 }
@@ -836,14 +870,15 @@
 }
 
 .valueCard:hover {
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.15), 0 0 0 1px rgba(16, 185, 129, 0.3);
   transform: translateY(-4px);
+  border-color: rgba(16, 185, 129, 0.5);
 }
 
 .valueNumber {
   font-size: 48px;
   font-weight: 800;
-  background: linear-gradient(135deg, #2b7de9 0%, #667eea 100%);
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -876,9 +911,10 @@
 
 .valueFeatures li {
   font-size: 13px;
-  color: #4a5568;
+  color: #10B981;
   padding: 6px 14px;
-  background: #f5f7fa;
+  background: #ECFDF5;
+  border: 1px solid rgba(16, 185, 129, 0.3);
   border-radius: 100px;
 }
 
@@ -904,11 +940,12 @@
 }
 
 .roleCard:hover {
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.15), 0 0 0 1px rgba(16, 185, 129, 0.3);
+  border-color: rgba(16, 185, 129, 0.5);
 }
 
 .roleCardPrimary {
-  background: linear-gradient(135deg, #2b7de9 0%, #667eea 100%);
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
   color: #fff;
   border: none;
 }
@@ -940,7 +977,7 @@
 }
 
 .roleAvatarSecondary {
-  background: #e8f4ff;
+  background: #ecfdf5;
 }
 
 .roleTitle {
@@ -1004,21 +1041,22 @@
 }
 
 .techCard:hover {
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.15), 0 0 0 1px rgba(16, 185, 129, 0.3);
   transform: translateY(-4px);
+  border-color: rgba(16, 185, 129, 0.5);
 }
 
 .techCardIcon {
   width: 64px;
   height: 64px;
   margin: 0 auto 20px;
-  background: linear-gradient(135deg, rgba(43, 125, 233, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
   border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 28px;
-  color: #2b7de9;
+  color: #10B981;
 }
 
 .techCardTitle {
@@ -1075,7 +1113,7 @@
 }
 
 .ctaTitleHighlight {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: linear-gradient(135deg, #10B981 0%, #34d399 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1143,7 +1181,7 @@
 .ctaCardIcon {
   width: 64px;
   height: 64px;
-  background: linear-gradient(135deg, #2b7de9 0%, #667eea 100%);
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
   border-radius: 16px;
   display: flex;
   align-items: center;
@@ -1166,7 +1204,7 @@
 
 /* 页脚 */
 .footer {
-  background: #1a1f36;
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
   color: #fff;
   padding: 80px 0 32px;
 }

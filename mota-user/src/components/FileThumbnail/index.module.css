@@ -1,0 +1,212 @@
+.container {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-color-secondary, #f5f5f5);
+  transition: all 0.3s ease;
+}
+
+.container.clickable {
+  cursor: pointer;
+}
+
+.container.clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+  position: relative;
+}
+
+.imageWrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.imageWrapper :global(.ant-image) {
+  width: 100%;
+  height: 100%;
+}
+
+.imageWrapper :global(.ant-image-img) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.videoOverlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 20px;
+  pointer-events: none;
+}
+
+.generateBtn {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 12px;
+}
+
+.generateBtn:hover {
+  background: #fff;
+}
+
+.fileName {
+  width: 100%;
+  padding: 4px 8px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-color, #333);
+  background: var(--bg-color, #fff);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 文件类型图标样式 */
+.fileIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 加载状态 */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* 错误状态 */
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* 预览遮罩 */
+.previewMask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.container:hover .previewMask {
+  opacity: 1;
+}
+
+.previewMask :global(.anticon) {
+  color: #fff;
+  font-size: 24px;
+}
+
+/* 不同尺寸的样式 */
+.small {
+  border-radius: 4px;
+}
+
+.small .placeholder {
+  font-size: 20px;
+}
+
+.medium {
+  border-radius: 6px;
+}
+
+.medium .placeholder {
+  font-size: 32px;
+}
+
+.large {
+  border-radius: 8px;
+}
+
+.large .placeholder {
+  font-size: 48px;
+}
+
+/* 暗色主题适配 */
+:global(.dark) .container {
+  background: var(--bg-color-secondary, #1f1f1f);
+}
+
+:global(.dark) .placeholder {
+  background: linear-gradient(135deg, #1f1f1f 0%, #2d2d2d 100%);
+}
+
+:global(.dark) .fileName {
+  background: var(--bg-color, #141414);
+  color: var(--text-color, #fff);
+}
+
+:global(.dark) .generateBtn {
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+}
+
+:global(.dark) .generateBtn:hover {
+  background: rgba(0, 0, 0, 0.9);
+}
+
+/* 网格布局中的缩略图 */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 16px;
+}
+
+.grid .container {
+  width: 100%;
+  aspect-ratio: 1;
+}
+
+/* 列表布局中的缩略图 */
+.list .container {
+  flex-shrink: 0;
+}
+
+/* 响应式布局 */
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 12px;
+  }
+}

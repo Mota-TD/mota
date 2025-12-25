@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mota.project.mapper.NotificationMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="NotificationResultMap" type="com.mota.project.entity.Notification">
+        <id column="id" property="id"/>
+        <result column="type" property="type"/>
+        <result column="category" property="category"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="user_id" property="userId"/>
+        <result column="is_read" property="isRead"/>
+        <result column="is_pinned" property="isPinned"/>
+        <result column="is_collapsed" property="isCollapsed"/>
+        <result column="related_id" property="relatedId"/>
+        <result column="related_type" property="relatedType"/>
+        <result column="group_key" property="groupKey"/>
+        <result column="aggregated_count" property="aggregatedCount"/>
+        <result column="priority" property="priority"/>
+        <result column="ai_classification" property="aiClassification"/>
+        <result column="ai_score" property="aiScore"/>
+        <result column="sender_id" property="senderId"/>
+        <result column="sender_name" property="senderName"/>
+        <result column="sender_avatar" property="senderAvatar"/>
+        <result column="project_id" property="projectId"/>
+        <result column="project_name" property="projectName"/>
+        <result column="action_url" property="actionUrl"/>
+        <result column="extra_data" property="extraData"/>
+        <result column="email_sent" property="emailSent"/>
+        <result column="email_sent_at" property="emailSentAt"/>
+        <result column="push_sent" property="pushSent"/>
+        <result column="push_sent_at" property="pushSentAt"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <!-- 获取用户的聚合通知列表 -->
+    <select id="selectAggregatedNotifications" resultMap="NotificationResultMap">
+        SELECT 
+            n.*,
+            (SELECT COUNT(*) FROM notification n2 
+             WHERE n2.user_id = n.user_id 
+             AND n2.group_key = n.group_key) as aggregated_count
+        FROM (
+            SELECT * FROM notification
+            WHERE user_id = #{userId}
+            <if test="category != null and category != ''">
+                AND category = #{category}
+            </if>
+            <if test="isRead != null">
+                AND is_read = #{isRead}
+            </if>
+            AND id IN (
+                SELECT MAX(id) FROM notification
+                WHERE user_id = #{userId}
+                <if test="category != null and category != ''">
+                    AND category = #{category}
+                </if>
+                <if test="isRead != null">
+                    AND is_read = #{isRead}
+                </if>
+                GROUP BY COALESCE(group_key, CONCAT('single_', id))
+            )
+        ) n
+        ORDER BY n.created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 获取聚合通知的总数 -->
+    <select id="countAggregatedNotifications" resultType="java.lang.Long">
+        SELECT COUNT(DISTINCT COALESCE(group_key, CONCAT('single_', id)))
+        FROM notification
+        WHERE user_id = #{userId}
+        <if test="category != null and category != ''">
+            AND category = #{category}
+        </if>
+        <if test="isRead != null">
+            AND is_read = #{isRead}
+        </if>
+    </select>
+
+    <!-- 获取分组内的所有通知 -->
+    <select id="selectByGroupKey" resultMap="NotificationResultMap">
+        SELECT * FROM notification
+        WHERE user_id = #{userId}
+        AND group_key = #{groupKey}
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 获取各分类的未读数量 -->
+    <select id="selectUnreadCountByCategory" resultType="java.util.Map">
+        SELECT 
+            COALESCE(category, 'other') as category,
+            COUNT(*) as count
+        FROM notification
+        WHERE user_id = #{userId}
+        AND is_read = 0
+        GROUP BY category
+    </select>
+
+    <!-- 批量标记为已读 -->
+    <update id="markAsReadByIds">
+        UPDATE notification
+        SET is_read = 1, updated_at = NOW()
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <!-- 标记分组通知为已读 -->
+    <update id="markGroupAsRead">
+        UPDATE notification
+        SET is_read = 1, updated_at = NOW()
+        WHERE user_id = #{userId}
+        AND group_key = #{groupKey}
+    </update>
+
+    <!-- 标记某分类的所有通知为已读 -->
+    <update id="markCategoryAsRead">
+        UPDATE notification
+        SET is_read = 1, updated_at = NOW()
+        WHERE user_id = #{userId}
+        AND category = #{category}
+    </update>
+
+    <!-- 标记用户所有通知为已读 -->
+    <update id="markAllAsRead">
+        UPDATE notification
+        SET is_read = 1, updated_at = NOW()
+        WHERE user_id = #{userId}
+        AND is_read = 0
+    </update>
+
+    <!-- 删除分组通知 -->
+    <delete id="deleteByGroupKey">
+        DELETE FROM notification
+        WHERE user_id = #{userId}
+        AND group_key = #{groupKey}
+    </delete>
+
+    <!-- 删除过期通知 -->
+    <delete id="deleteOldNotifications">
+        DELETE FROM notification
+        WHERE created_at &lt; #{beforeDate}
+        AND is_read = 1
+    </delete>
+
+    <!-- 更新聚合计数 -->
+    <update id="updateAggregatedCount">
+        UPDATE notification
+        SET aggregated_count = (
+            SELECT COUNT(*) FROM notification n2
+            WHERE n2.user_id = #{userId}
+            AND n2.group_key = #{groupKey}
+        ),
+        updated_at = NOW()
+        WHERE user_id = #{userId}
+        AND group_key = #{groupKey}
+    </update>
+
+    <!-- 批量插入通知 -->
+    <insert id="batchInsert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO notification (
+            type, category, title, content, user_id, is_read, is_pinned, is_collapsed,
+            related_id, related_type, group_key, aggregated_count,
+            priority, ai_classification, ai_score,
+            sender_id, sender_name, sender_avatar,
+            project_id, project_name, action_url, extra_data,
+            created_at, updated_at
+        ) VALUES
+        <foreach collection="notifications" item="n" separator=",">
+            (
+                #{n.type}, #{n.category}, #{n.title}, #{n.content}, #{n.userId}, 0,
+                COALESCE(#{n.isPinned}, 0), COALESCE(#{n.isCollapsed}, 0),
+                #{n.relatedId}, #{n.relatedType}, #{n.groupKey}, 1,
+                #{n.priority}, #{n.aiClassification}, #{n.aiScore},
+                #{n.senderId}, #{n.senderName}, #{n.senderAvatar},
+                #{n.projectId}, #{n.projectName}, #{n.actionUrl}, #{n.extraData},
+                NOW(), NOW()
+            )
+        </foreach>
+    </insert>
+
+    <!-- 置顶通知 -->
+    <update id="pinNotification">
+        UPDATE notification
+        SET is_pinned = 1, updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 取消置顶 -->
+    <update id="unpinNotification">
+        UPDATE notification
+        SET is_pinned = 0, updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 折叠通知 -->
+    <update id="collapseNotification">
+        UPDATE notification
+        SET is_collapsed = 1, updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 展开通知 -->
+    <update id="expandNotification">
+        UPDATE notification
+        SET is_collapsed = 0, updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 批量折叠低优先级通知 -->
+    <update id="collapseLowPriorityNotifications">
+        UPDATE notification
+        SET is_collapsed = 1, updated_at = NOW()
+        WHERE user_id = #{userId}
+        AND (ai_classification = 'low_priority' OR priority = 'low')
+        AND is_collapsed = 0
+    </update>
+
+    <!-- 获取置顶通知 -->
+    <select id="selectPinnedNotifications" resultMap="NotificationResultMap">
+        SELECT * FROM notification
+        WHERE user_id = #{userId}
+        AND is_pinned = 1
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 更新AI分类 -->
+    <update id="updateAiClassification">
+        UPDATE notification
+        SET ai_classification = #{aiClassification},
+            ai_score = #{aiScore},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 批量更新AI分类 -->
+    <update id="batchUpdateAiClassification">
+        <foreach collection="classifications" item="item" separator=";">
+            UPDATE notification
+            SET ai_classification = #{item.classification},
+                ai_score = #{item.score},
+                updated_at = NOW()
+            WHERE id = #{item.id}
+        </foreach>
+    </update>
+
+    <!-- 标记邮件已发送 -->
+    <update id="markEmailSent">
+        UPDATE notification
+        SET email_sent = 1, email_sent_at = NOW(), updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 标记推送已发送 -->
+    <update id="markPushSent">
+        UPDATE notification
+        SET push_sent = 1, push_sent_at = NOW(), updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 获取需要发送邮件的通知 -->
+    <select id="selectPendingEmailNotifications" resultMap="NotificationResultMap">
+        SELECT n.* FROM notification n
+        INNER JOIN notification_subscription s
+            ON n.user_id = s.user_id AND n.category = s.category
+        WHERE n.email_sent = 0
+        AND s.email_enabled = 1
+        AND n.created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+        ORDER BY n.created_at ASC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 获取需要发送推送的通知 -->
+    <select id="selectPendingPushNotifications" resultMap="NotificationResultMap">
+        SELECT n.* FROM notification n
+        INNER JOIN notification_subscription s
+            ON n.user_id = s.user_id AND n.category = s.category
+        WHERE n.push_sent = 0
+        AND s.push_enabled = 1
+        AND n.created_at >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
+        ORDER BY n.created_at ASC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 根据AI分类获取通知 -->
+    <select id="selectByAiClassification" resultMap="NotificationResultMap">
+        SELECT * FROM notification
+        WHERE user_id = #{userId}
+        AND ai_classification = #{aiClassification}
+        <if test="isRead != null">
+            AND is_read = #{isRead}
+        </if>
+        ORDER BY created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 获取重要通知（AI分类为important或优先级为urgent/high） -->
+    <select id="selectImportantNotifications" resultMap="NotificationResultMap">
+        SELECT * FROM notification
+        WHERE user_id = #{userId}
+        AND (ai_classification = 'important' OR priority IN ('urgent', 'high'))
+        <if test="isRead != null">
+            AND is_read = #{isRead}
+        </if>
+        ORDER BY
+            CASE WHEN is_pinned = 1 THEN 0 ELSE 1 END,
+            created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+</mapper>

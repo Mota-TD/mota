@@ -315,7 +315,7 @@ const DepartmentTaskDetail: React.FC = () => {
       children: task && (
         <ProgressReportComponent
           taskId={taskId}
-          projectId={task.projectId}
+          projectId={task.projectId ? Number(task.projectId) : undefined}
           onReportChange={loadTask}
         />
       )

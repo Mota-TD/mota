@@ -3,13 +3,13 @@
   padding: 0;
 }
 
-/* 蓝色头部卡片 */
+/* 主题绿头部卡片 */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #2b7de9 0%, #667eea 100%);
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
   border-radius: 16px 16px 0 0;
   color: #fff;
   margin-bottom: 0;
@@ -31,7 +31,7 @@
   background: #fff !important;
   border: none !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
-  color: #2b7de9 !important;
+  color: #10B981 !important;
   font-weight: 600 !important;
 }
 
@@ -57,16 +57,16 @@
 .tabs :global(.ant-tabs-tab) {
   padding: 12px 16px;
   font-size: 14px;
-  color: #2b7de9;
+  color: #10B981;
 }
 
 .tabs :global(.ant-tabs-tab-active .ant-tabs-tab-btn) {
-  color: #2b7de9;
+  color: #10B981;
   font-weight: 600;
 }
 
 .tabs :global(.ant-tabs-ink-bar) {
-  background: #2b7de9;
+  background: #10B981;
 }
 
 /* 标签页内容区域 */
@@ -115,6 +115,23 @@
 .viewToggle :global(.ant-btn-primary) {
   background: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.viewToggle :global(.ant-segmented) {
+  background: #f5f7fa;
+  border-radius: 8px;
+}
+
+.viewToggle :global(.ant-segmented-item-selected) {
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.viewToggle :global(.ant-segmented-item-label) {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
 }
 
 .loading {
@@ -404,10 +421,25 @@
   margin-bottom: 8px;
 }
 
+/* 日历视图卡片 */
+.calendarCard {
+  border-radius: 12px;
+  overflow: hidden;
+  min-height: 600px;
+}
+
+.calendarCard :global(.ant-card-body) {
+  padding: 0;
+}
+
 /* 甘特图视图 */
 .ganttCard {
   border-radius: 12px;
   overflow: hidden;
+}
+
+.ganttCard :global(.ant-card-body) {
+  padding: 0;
 }
 
 .ganttContainer {
@@ -581,7 +613,7 @@
 }
 
 .drawerTitleIcon {
-  color: #2b7de9;
+  color: #10B981;
   font-size: 18px;
 }
 
@@ -630,7 +662,7 @@
 
 .longTermInput {
   background: #f5f7fa !important;
-  color: #2b7de9 !important;
+  color: #10B981 !important;
   font-weight: 500;
   text-align: center;
 }
@@ -686,11 +718,11 @@
 
 .drawerPreviewKey {
   font-size: 12px;
-  color: #2b7de9;
+  color: #10B981;
   margin: 0 0 12px;
   font-family: 'SFMono-Regular', Consolas, monospace;
   font-weight: 600;
-  background: #e6f4ff;
+  background: #D1FAE5;
   padding: 4px 12px;
   border-radius: 4px;
   display: inline-block;
@@ -736,7 +768,7 @@
 
 .tipIcon {
   font-size: 20px;
-  color: #2b7de9;
+  color: #10B981;
   margin-top: 2px;
 }
 
@@ -831,7 +863,7 @@
   align-items: center;
   gap: 16px;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #2b7de9 0%, #667eea 100%);
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
   color: #fff;
 }
 
@@ -875,11 +907,11 @@
 }
 
 .settingsTabs :global(.ant-tabs-tab-active) {
-  color: #2b7de9;
+  color: #10B981;
 }
 
 .settingsTabs :global(.ant-tabs-ink-bar) {
-  background: #2b7de9;
+  background: #10B981;
 }
 
 .settingsTabContent {
@@ -906,14 +938,14 @@
 
 .settingsTabContent :global(.ant-input:hover),
 .settingsTabContent :global(.ant-select-selector:hover) {
-  border-color: #2b7de9 !important;
+  border-color: #10B981 !important;
 }
 
 .settingsTabContent :global(.ant-input:focus),
 .settingsTabContent :global(.ant-input-focused),
 .settingsTabContent :global(.ant-select-focused .ant-select-selector) {
-  border-color: #2b7de9 !important;
-  box-shadow: 0 0 0 3px rgba(43, 125, 233, 0.1) !important;
+  border-color: #10B981 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
 }
 
 /* 危险区域样式 */
@@ -1009,13 +1041,13 @@
 }
 
 .departmentItem:hover {
-  border-color: #2b7de9;
-  background: #f0f7ff;
+  border-color: #10B981;
+  background: #ECFDF5;
 }
 
 .departmentItemSelected {
-  border-color: #2b7de9;
-  background: #e6f4ff;
+  border-color: #10B981;
+  background: #D1FAE5;
 }
 
 .departmentInfo {
@@ -1082,12 +1114,12 @@
 }
 
 .memberItem:hover {
-  border-color: #2b7de9;
+  border-color: #10B981;
 }
 
 .memberItemSelected {
-  border-color: #2b7de9;
-  background: #e6f4ff;
+  border-color: #10B981;
+  background: #D1FAE5;
 }
 
 .memberInfo {
@@ -1126,7 +1158,7 @@
 .milestoneIndex {
   width: 36px;
   height: 36px;
-  background: linear-gradient(135deg, #2b7de9 0%, #667eea 100%);
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -1151,13 +1183,13 @@
 }
 
 :global([data-theme='dark']) .departmentItem:hover {
-  border-color: #2b7de9;
-  background: #1a2a3a;
+  border-color: #10B981;
+  background: #064E3B;
 }
 
 :global([data-theme='dark']) .departmentItemSelected {
-  border-color: #2b7de9;
-  background: #1a2a3a;
+  border-color: #10B981;
+  background: #064E3B;
 }
 
 :global([data-theme='dark']) .departmentName {
@@ -1174,12 +1206,12 @@
 }
 
 :global([data-theme='dark']) .memberItem:hover {
-  border-color: #2b7de9;
+  border-color: #10B981;
 }
 
 :global([data-theme='dark']) .memberItemSelected {
-  border-color: #2b7de9;
-  background: #1a2a3a;
+  border-color: #10B981;
+  background: #064E3B;
 }
 
 :global([data-theme='dark']) .memberName {

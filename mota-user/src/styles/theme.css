@@ -1,178 +1,224 @@
-/* 主题变量定义 */
+/* 主题变量定义 - 清爽愉悦主题 */
 
-/* 亮色主题（默认） - 科技蓝主题 */
+/* 亮色主题（默认） - 薄荷绿主题 */
 :root {
-  /* 主色调 - 科技蓝 (Tech Blue) #1890ff */
-  --color-primary: #1890ff;
-  --color-primary-hover: #40a9ff;
-  --color-primary-active: #096dd9;
-  --color-primary-light: rgba(24, 144, 255, 0.1);
+  /* 主色调 - 薄荷绿 (Mint Green) */
+  --color-primary: #10B981;
+  --color-primary-hover: #34D399;
+  --color-primary-active: #059669;
+  --color-primary-light: rgba(16, 185, 129, 0.1);
+  --color-primary-50: #ECFDF5;
+  --color-primary-100: #D1FAE5;
+  --color-primary-200: #A7F3D0;
+  --color-primary-300: #6EE7B7;
+  --color-primary-400: #34D399;
+  --color-primary-500: #10B981;
+  --color-primary-600: #059669;
+  --color-primary-700: #047857;
+  
+  /* 辅助色 - 天空蓝 (Sky Blue) */
+  --color-secondary: #0EA5E9;
+  --color-secondary-hover: #38BDF8;
+  --color-secondary-active: #0284C7;
+  --color-secondary-light: rgba(14, 165, 233, 0.1);
+  --color-secondary-50: #F0F9FF;
+  --color-secondary-100: #E0F2FE;
+  --color-secondary-200: #BAE6FD;
+  --color-secondary-300: #7DD3FC;
+  --color-secondary-400: #38BDF8;
+  --color-secondary-500: #0EA5E9;
+  --color-secondary-600: #0284C7;
+  --color-secondary-700: #0369A1;
+  
+  /* 强调色 - 珊瑚橙 (Coral Orange) */
+  --color-accent: #F97316;
+  --color-accent-hover: #FB923C;
+  --color-accent-active: #EA580C;
+  --color-accent-light: rgba(249, 115, 22, 0.1);
   
   /* 背景色 */
-  --color-bg-base: #ffffff;
-  --color-bg-container: #ffffff;
-  --color-bg-elevated: #ffffff;
-  --color-bg-layout: #f5f7fa;
-  --color-bg-spotlight: #f0f2f5;
+  --color-bg-base: #FFFFFF;
+  --color-bg-container: #FFFFFF;
+  --color-bg-elevated: #FFFFFF;
+  --color-bg-layout: #F8FAFC;
+  --color-bg-spotlight: #F1F5F9;
   --color-bg-mask: rgba(0, 0, 0, 0.45);
   
   /* 文字颜色 */
-  --color-text-primary: #1a1f36;
-  --color-text-secondary: #4a5568;
-  --color-text-tertiary: #718096;
-  --color-text-quaternary: #9ca3af;
-  --color-text-placeholder: #bfbfbf;
-  --color-text-disabled: #c0c0c0;
-  --color-text-inverse: #ffffff;
+  --color-text-primary: #1E293B;
+  --color-text-secondary: #475569;
+  --color-text-tertiary: #64748B;
+  --color-text-quaternary: #94A3B8;
+  --color-text-placeholder: #CBD5E1;
+  --color-text-disabled: #CBD5E1;
+  --color-text-inverse: #FFFFFF;
   
   /* 边框颜色 */
-  --color-border: #e8e9eb;
-  --color-border-secondary: #f0f0f0;
-  --color-border-hover: #d1d5db;
+  --color-border: #E2E8F0;
+  --color-border-secondary: #F1F5F9;
+  --color-border-hover: #CBD5E1;
   
   /* 分割线 */
   --color-split: rgba(0, 0, 0, 0.06);
   
   /* 阴影 */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
-  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
-  --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.12);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
   
-  /* 状态颜色 */
-  --color-success: #52c41a;
-  --color-success-bg: #f6ffed;
-  --color-success-border: #b7eb8f;
+  /* 状态颜色 - 成功 */
+  --color-success: #22C55E;
+  --color-success-bg: #F0FDF4;
+  --color-success-border: #86EFAC;
   
-  --color-warning: #faad14;
-  --color-warning-bg: #fffbe6;
-  --color-warning-border: #ffe58f;
+  /* 状态颜色 - 警告 */
+  --color-warning: #F59E0B;
+  --color-warning-bg: #FFFBEB;
+  --color-warning-border: #FCD34D;
   
-  --color-error: #f5222d;
-  --color-error-bg: #fff2f0;
-  --color-error-border: #ffccc7;
+  /* 状态颜色 - 错误 */
+  --color-error: #EF4444;
+  --color-error-bg: #FEF2F2;
+  --color-error-border: #FCA5A5;
   
-  --color-info: #1890ff;
-  --color-info-bg: #e6f7ff;
-  --color-info-border: #91d5ff;
+  /* 状态颜色 - 信息 */
+  --color-info: #0EA5E9;
+  --color-info-bg: #F0F9FF;
+  --color-info-border: #7DD3FC;
   
   /* 侧边栏 */
-  --sider-bg: #ffffff;
-  --sider-border: #e8e9eb;
+  --sider-bg: #FFFFFF;
+  --sider-border: #E2E8F0;
   
   /* 头部 */
-  --header-bg: #ffffff;
-  --header-border: #e8e9eb;
+  --header-bg: #FFFFFF;
+  --header-border: #E2E8F0;
   
   /* 卡片 */
-  --card-bg: #ffffff;
-  --card-border: #e8e9eb;
-  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --card-bg: #FFFFFF;
+  --card-border: #E2E8F0;
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   
   /* 表格 */
-  --table-header-bg: #fafafa;
-  --table-row-hover-bg: #f5f7fa;
-  --table-border: #f0f0f0;
+  --table-header-bg: #F8FAFC;
+  --table-row-hover-bg: #F1F5F9;
+  --table-border: #E2E8F0;
   
   /* 输入框 */
-  --input-bg: #ffffff;
-  --input-border: #d9d9d9;
-  --input-hover-border: #40a9ff;
-  --input-focus-border: #1890ff;
+  --input-bg: #FFFFFF;
+  --input-border: #E2E8F0;
+  --input-hover-border: #34D399;
+  --input-focus-border: #10B981;
   
   /* 按钮 */
-  --btn-default-bg: #ffffff;
-  --btn-default-border: #d9d9d9;
-  --btn-default-hover-bg: #ffffff;
-  --btn-default-hover-border: #40a9ff;
+  --btn-default-bg: #FFFFFF;
+  --btn-default-border: #E2E8F0;
+  --btn-default-hover-bg: #F8FAFC;
+  --btn-default-hover-border: #34D399;
 }
 
-/* 暗色主题 - 科技蓝主题 */
+/* 暗色主题 - 薄荷绿主题 */
 :root.dark,
 [data-theme='dark'] {
-  /* 主色调 - 科技蓝 (Tech Blue) 暗色模式调整 */
-  --color-primary: #40a9ff;
-  --color-primary-hover: #69c0ff;
-  --color-primary-active: #1890ff;
-  --color-primary-light: rgba(64, 169, 255, 0.15);
+  /* 主色调 - 薄荷绿 (Mint Green) 深色模式调整 */
+  --color-primary: #34D399;
+  --color-primary-hover: #6EE7B7;
+  --color-primary-active: #10B981;
+  --color-primary-light: rgba(52, 211, 153, 0.15);
+  
+  /* 辅助色 - 天空蓝 (Sky Blue) 深色模式调整 */
+  --color-secondary: #38BDF8;
+  --color-secondary-hover: #7DD3FC;
+  --color-secondary-active: #0EA5E9;
+  --color-secondary-light: rgba(56, 189, 248, 0.15);
+  
+  /* 强调色 - 珊瑚橙 (Coral Orange) 深色模式调整 */
+  --color-accent: #FB923C;
+  --color-accent-hover: #FDBA74;
+  --color-accent-active: #F97316;
+  --color-accent-light: rgba(251, 146, 60, 0.15);
   
   /* 背景色 */
-  --color-bg-base: #0d1117;
-  --color-bg-container: #161b22;
-  --color-bg-elevated: #1c2128;
-  --color-bg-layout: #0d1117;
-  --color-bg-spotlight: #21262d;
+  --color-bg-base: #0F172A;
+  --color-bg-container: #1E293B;
+  --color-bg-elevated: #334155;
+  --color-bg-layout: #0F172A;
+  --color-bg-spotlight: #334155;
   --color-bg-mask: rgba(0, 0, 0, 0.65);
   
   /* 文字颜色 */
-  --color-text-primary: #e6edf3;
-  --color-text-secondary: #b1bac4;
-  --color-text-tertiary: #8b949e;
-  --color-text-quaternary: #6e7681;
-  --color-text-placeholder: #484f58;
-  --color-text-disabled: #484f58;
-  --color-text-inverse: #0d1117;
+  --color-text-primary: #F1F5F9;
+  --color-text-secondary: #CBD5E1;
+  --color-text-tertiary: #94A3B8;
+  --color-text-quaternary: #64748B;
+  --color-text-placeholder: #475569;
+  --color-text-disabled: #475569;
+  --color-text-inverse: #0F172A;
   
   /* 边框颜色 */
-  --color-border: #30363d;
-  --color-border-secondary: #21262d;
-  --color-border-hover: #484f58;
+  --color-border: #334155;
+  --color-border-secondary: #1E293B;
+  --color-border-hover: #475569;
   
   /* 分割线 */
   --color-split: rgba(255, 255, 255, 0.08);
   
   /* 阴影 */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
-  --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.6);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
   
-  /* 状态颜色 */
-  --color-success: #3fb950;
-  --color-success-bg: rgba(63, 185, 80, 0.15);
-  --color-success-border: rgba(63, 185, 80, 0.4);
+  /* 状态颜色 - 成功 */
+  --color-success: #4ADE80;
+  --color-success-bg: rgba(74, 222, 128, 0.15);
+  --color-success-border: rgba(74, 222, 128, 0.4);
   
-  --color-warning: #d29922;
-  --color-warning-bg: rgba(210, 153, 34, 0.15);
-  --color-warning-border: rgba(210, 153, 34, 0.4);
+  /* 状态颜色 - 警告 */
+  --color-warning: #FBBF24;
+  --color-warning-bg: rgba(251, 191, 36, 0.15);
+  --color-warning-border: rgba(251, 191, 36, 0.4);
   
-  --color-error: #f85149;
-  --color-error-bg: rgba(248, 81, 73, 0.15);
-  --color-error-border: rgba(248, 81, 73, 0.4);
+  /* 状态颜色 - 错误 */
+  --color-error: #F87171;
+  --color-error-bg: rgba(248, 113, 113, 0.15);
+  --color-error-border: rgba(248, 113, 113, 0.4);
   
-  --color-info: #40a9ff;
-  --color-info-bg: rgba(64, 169, 255, 0.15);
-  --color-info-border: rgba(64, 169, 255, 0.4);
+  /* 状态颜色 - 信息 */
+  --color-info: #38BDF8;
+  --color-info-bg: rgba(56, 189, 248, 0.15);
+  --color-info-border: rgba(56, 189, 248, 0.4);
   
   /* 侧边栏 */
-  --sider-bg: #161b22;
-  --sider-border: #30363d;
+  --sider-bg: #1E293B;
+  --sider-border: #334155;
   
   /* 头部 */
-  --header-bg: #161b22;
-  --header-border: #30363d;
+  --header-bg: #1E293B;
+  --header-border: #334155;
   
   /* 卡片 */
-  --card-bg: #161b22;
-  --card-border: #30363d;
-  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --card-bg: #1E293B;
+  --card-border: #334155;
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
   
   /* 表格 */
-  --table-header-bg: #21262d;
-  --table-row-hover-bg: #1c2128;
-  --table-border: #30363d;
+  --table-header-bg: #334155;
+  --table-row-hover-bg: #1E293B;
+  --table-border: #334155;
   
   /* 输入框 */
-  --input-bg: #0d1117;
-  --input-border: #30363d;
-  --input-hover-border: #40a9ff;
-  --input-focus-border: #40a9ff;
+  --input-bg: #0F172A;
+  --input-border: #334155;
+  --input-hover-border: #34D399;
+  --input-focus-border: #34D399;
   
   /* 按钮 */
-  --btn-default-bg: #21262d;
-  --btn-default-border: #30363d;
-  --btn-default-hover-bg: #30363d;
-  --btn-default-hover-border: #8b949e;
+  --btn-default-bg: #334155;
+  --btn-default-border: #475569;
+  --btn-default-hover-bg: #475569;
+  --btn-default-hover-border: #64748B;
 }
 
 /* 暗色主题下的 Ant Design 组件覆盖 */

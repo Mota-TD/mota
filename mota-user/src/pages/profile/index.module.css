@@ -4,17 +4,17 @@
   min-height: calc(100vh - 64px);
 }
 
-/* Page Header */
+/* Page Header - 主题绿 */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
   padding: 24px;
-  background: linear-gradient(135deg, #2b7de9 0%, #1890ff 100%);
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
   border-radius: 14px;
   color: #fff;
-  box-shadow: 0 4px 16px rgba(43, 125, 233, 0.2);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.2);
 }
 
 .header h2 {
@@ -64,11 +64,11 @@
 }
 
 .profileCard :global(.ant-tabs-tab-active) {
-  color: #2b7de9;
+  color: #10B981;
 }
 
 .profileCard :global(.ant-tabs-ink-bar) {
-  background: #2b7de9;
+  background: #10B981;
 }
 
 /* Tab Content */
@@ -90,9 +90,9 @@
   gap: 28px;
   margin-bottom: 32px;
   padding: 24px;
-  background: linear-gradient(135deg, rgba(43, 125, 233, 0.05) 0%, rgba(24, 144, 255, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%);
   border-radius: 12px;
-  border: 1px solid rgba(43, 125, 233, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.1);
 }
 
 .avatarSection :global(.ant-avatar) {
@@ -127,7 +127,7 @@
 }
 
 .avatarActions :global(.ant-btn-primary) {
-  background: linear-gradient(135deg, #2b7de9 0%, #1890ff 100%);
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
   border: none;
 }
 
@@ -148,17 +148,17 @@
 .tabContent :global(.ant-input:hover),
 .tabContent :global(.ant-input-affix-wrapper:hover),
 .tabContent :global(.ant-select-selector:hover) {
-  border-color: #2b7de9 !important;
+  border-color: #10B981 !important;
 }
 
 .tabContent :global(.ant-input:focus),
 .tabContent :global(.ant-input-affix-wrapper-focused) {
-  border-color: #2b7de9 !important;
-  box-shadow: 0 0 0 2px rgba(43, 125, 233, 0.1) !important;
+  border-color: #10B981 !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1) !important;
 }
 
 .tabContent :global(.ant-btn-primary) {
-  background: linear-gradient(135deg, #2b7de9 0%, #1890ff 100%);
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
   border: none;
   border-radius: 8px;
   height: 44px;
@@ -179,8 +179,8 @@
 }
 
 .securityItem:hover {
-  border-color: #2b7de9;
-  background: #f8fbff;
+  border-color: #10B981;
+  background: #ECFDF5;
 }
 
 .securityInfo h4 {

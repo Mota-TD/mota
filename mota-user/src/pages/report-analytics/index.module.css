@@ -1,0 +1,76 @@
+.container {
+  padding: 24px;
+  min-height: 100vh;
+  background: var(--bg-primary, #f5f5f5);
+}
+
+:global(.dark) .container {
+  background: var(--bg-primary, #141414);
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary, #262626);
+  margin: 0 0 8px 0;
+}
+
+:global(.dark) .title {
+  color: var(--text-primary, #ffffff);
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--text-secondary, #8c8c8c);
+  margin: 0;
+}
+
+.filterCard {
+  margin-bottom: 16px;
+  border-radius: 8px;
+}
+
+:global(.dark) .filterCard {
+  background: var(--bg-secondary, #1f1f1f);
+  border-color: var(--border-color, #303030);
+}
+
+.filterItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filterLabel {
+  font-weight: 500;
+  color: var(--text-primary, #262626);
+}
+
+:global(.dark) .filterLabel {
+  color: var(--text-primary, #ffffff);
+}
+
+.contentCard {
+  border-radius: 8px;
+}
+
+:global(.dark) .contentCard {
+  background: var(--bg-secondary, #1f1f1f);
+  border-color: var(--border-color, #303030);
+}
+
+.contentCard :global(.ant-tabs-nav) {
+  margin-bottom: 16px;
+}
+
+.contentCard :global(.ant-tabs-tab) {
+  font-size: 14px;
+}
+
+.contentCard :global(.ant-tabs-tab-active) {
+  font-weight: 600;
+}

@@ -1,0 +1,200 @@
+.container {
+  width: 100%;
+}
+
+.dragger {
+  margin-bottom: 16px;
+}
+
+.dragger :global(.ant-upload-drag) {
+  border: 2px dashed var(--border-color, #d9d9d9);
+  border-radius: 12px;
+  background: var(--bg-color-secondary, #fafafa);
+  transition: all 0.3s ease;
+}
+
+.dragger :global(.ant-upload-drag:hover) {
+  border-color: var(--primary-color, #1890ff);
+  background: var(--primary-color-light, #e6f7ff);
+}
+
+.dragger :global(.ant-upload-drag-icon) {
+  color: var(--primary-color, #1890ff);
+}
+
+.dragger :global(.ant-upload-drag-icon .anticon) {
+  font-size: 48px;
+}
+
+.taskList {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.taskList :global(.ant-card-head) {
+  border-bottom: 1px solid var(--border-color, #f0f0f0);
+}
+
+.totalProgress {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-color, #f0f0f0);
+  margin-bottom: 12px;
+}
+
+.totalProgress :global(.ant-typography) {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.taskItem {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-color, #f0f0f0);
+}
+
+.taskItem:last-child {
+  border-bottom: none;
+}
+
+.taskItem :global(.ant-list-item-meta-avatar) {
+  font-size: 24px;
+}
+
+.taskItem :global(.ant-list-item-meta-title) {
+  margin-bottom: 4px;
+}
+
+.taskMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.taskMeta :global(.ant-progress) {
+  margin-top: 4px;
+}
+
+/* 文件类型图标颜色 */
+.fileIcon {
+  font-size: 24px;
+}
+
+.fileIcon.image {
+  color: #1890ff;
+}
+
+.fileIcon.pdf {
+  color: #ff4d4f;
+}
+
+.fileIcon.word {
+  color: #2b579a;
+}
+
+.fileIcon.excel {
+  color: #217346;
+}
+
+.fileIcon.ppt {
+  color: #d24726;
+}
+
+.fileIcon.zip {
+  color: #faad14;
+}
+
+.fileIcon.text {
+  color: #52c41a;
+}
+
+.fileIcon.default {
+  color: #8c8c8c;
+}
+
+/* 状态标签样式 */
+.statusTag {
+  margin-left: 8px;
+}
+
+/* 进度条样式 */
+.progressBar {
+  margin-top: 8px;
+}
+
+/* 操作按钮样式 */
+.actionButton {
+  padding: 4px 8px;
+}
+
+.actionButton:hover {
+  background: var(--bg-color-secondary, #f5f5f5);
+  border-radius: 4px;
+}
+
+/* 空状态样式 */
+.emptyState {
+  padding: 40px 0;
+  text-align: center;
+}
+
+.emptyState :global(.anticon) {
+  font-size: 48px;
+  color: var(--text-color-secondary, #8c8c8c);
+  margin-bottom: 16px;
+}
+
+/* 上传速度和剩余时间 */
+.uploadStats {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--text-color-secondary, #8c8c8c);
+}
+
+/* 分片信息 */
+.chunkInfo {
+  font-size: 12px;
+  color: var(--text-color-secondary, #8c8c8c);
+}
+
+/* 错误信息 */
+.errorMessage {
+  color: var(--error-color, #ff4d4f);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* 响应式布局 */
+@media (max-width: 768px) {
+  .taskItem :global(.ant-list-item-meta-title) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .taskItem :global(.ant-list-item-action) {
+    margin-left: 0;
+    margin-top: 8px;
+  }
+}
+
+/* 暗色主题适配 */
+:global(.dark) .dragger :global(.ant-upload-drag) {
+  background: var(--bg-color-secondary, #1f1f1f);
+  border-color: var(--border-color, #434343);
+}
+
+:global(.dark) .dragger :global(.ant-upload-drag:hover) {
+  background: var(--primary-color-dark, #111d2c);
+}
+
+:global(.dark) .taskList {
+  background: var(--bg-color, #141414);
+}
+
+:global(.dark) .taskItem {
+  border-color: var(--border-color, #303030);
+}
+
+:global(.dark) .totalProgress {
+  border-color: var(--border-color, #303030);
+}

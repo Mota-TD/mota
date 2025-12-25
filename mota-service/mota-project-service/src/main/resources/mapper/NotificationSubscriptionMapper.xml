@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mota.project.mapper.NotificationSubscriptionMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="SubscriptionResultMap" type="com.mota.project.entity.NotificationSubscription">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="category" property="category"/>
+        <result column="type" property="type"/>
+        <result column="project_id" property="projectId"/>
+        <result column="enabled" property="enabled"/>
+        <result column="email_enabled" property="emailEnabled"/>
+        <result column="push_enabled" property="pushEnabled"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <!-- 获取用户的所有订阅规则 -->
+    <select id="selectByUserId" resultMap="SubscriptionResultMap">
+        SELECT * FROM notification_subscription
+        WHERE user_id = #{userId}
+        ORDER BY category, type
+    </select>
+
+    <!-- 获取用户对特定分类的订阅 -->
+    <select id="selectByUserAndCategory" resultMap="SubscriptionResultMap">
+        SELECT * FROM notification_subscription
+        WHERE user_id = #{userId}
+        AND category = #{category}
+        AND type IS NULL
+        LIMIT 1
+    </select>
+
+    <!-- 获取用户对特定分类和类型的订阅 -->
+    <select id="selectByUserCategoryAndType" resultMap="SubscriptionResultMap">
+        SELECT * FROM notification_subscription
+        WHERE user_id = #{userId}
+        AND category = #{category}
+        AND type = #{type}
+        LIMIT 1
+    </select>
+
+    <!-- 批量更新订阅状态 -->
+    <update id="batchUpdateEnabled">
+        UPDATE notification_subscription
+        SET enabled = #{enabled}, updated_at = NOW()
+        WHERE user_id = #{userId}
+        <if test="category != null">
+            AND category = #{category}
+        </if>
+    </update>
+
+    <!-- 批量更新邮件通知状态 -->
+    <update id="batchUpdateEmailEnabled">
+        UPDATE notification_subscription
+        SET email_enabled = #{emailEnabled}, updated_at = NOW()
+        WHERE user_id = #{userId}
+        <if test="category != null">
+            AND category = #{category}
+        </if>
+    </update>
+
+    <!-- 批量更新推送通知状态 -->
+    <update id="batchUpdatePushEnabled">
+        UPDATE notification_subscription
+        SET push_enabled = #{pushEnabled}, updated_at = NOW()
+        WHERE user_id = #{userId}
+        <if test="category != null">
+            AND category = #{category}
+        </if>
+    </update>
+
+    <!-- 删除用户的所有订阅 -->
+    <delete id="deleteByUserId">
+        DELETE FROM notification_subscription
+        WHERE user_id = #{userId}
+    </delete>
+
+    <!-- 初始化用户默认订阅 -->
+    <insert id="insertDefaultSubscriptions">
+        INSERT IGNORE INTO notification_subscription (user_id, category, enabled, email_enabled, push_enabled, created_at, updated_at)
+        VALUES
+        (#{userId}, 'task', 1, 1, 1, NOW(), NOW()),
+        (#{userId}, 'project', 1, 1, 0, NOW(), NOW()),
+        (#{userId}, 'comment', 1, 0, 1, NOW(), NOW()),
+        (#{userId}, 'system', 1, 1, 1, NOW(), NOW()),
+        (#{userId}, 'reminder', 1, 1, 1, NOW(), NOW()),
+        (#{userId}, 'plan', 1, 1, 0, NOW(), NOW()),
+        (#{userId}, 'feedback', 1, 0, 1, NOW(), NOW())
+    </insert>
+
+</mapper>

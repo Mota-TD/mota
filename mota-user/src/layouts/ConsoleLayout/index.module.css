@@ -1,16 +1,20 @@
-/* 控制台布局样式 - 摩塔 Mota - 科技蓝主题 */
+/* 控制台布局样式 - 摩塔 Mota - 清爽愉悦主题 */
 .layout {
   min-height: 100vh;
-  --theme-color: #1890ff;
-  --theme-color-light: rgba(24, 144, 255, 0.1);
-  --theme-color-hover: rgba(24, 144, 255, 0.85);
+  /* 统一使用薄荷绿主题色 */
+  --theme-color: #10B981;
+  --theme-color-light: rgba(16, 185, 129, 0.1);
+  --theme-color-hover: #34D399;
+  --theme-color-active: #059669;
+  --theme-color-shadow: rgba(16, 185, 129, 0.25);
+  --theme-color-glow: rgba(16, 185, 129, 0.4);
 }
 
 /* 全局主题色应用 - 主按钮 */
 .layout :global(.ant-btn-primary) {
   background: var(--theme-color) !important;
   border-color: var(--theme-color) !important;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: all 0.3s ease !important;
 }
 
 .layout :global(.ant-btn-primary:hover) {
@@ -18,9 +22,19 @@
   border-color: var(--theme-color-hover) !important;
 }
 
+.layout :global(.ant-btn-primary:active) {
+  background: var(--theme-color-active) !important;
+  border-color: var(--theme-color-active) !important;
+}
+
 /* 全局主题色应用 - 链接 */
 .layout :global(a) {
+  color: var(--theme-color);
   transition: color 0.3s;
+}
+
+.layout :global(a:hover) {
+  color: var(--theme-color-hover);
 }
 
 /* 全局主题色应用 - 输入框聚焦 */
@@ -83,13 +97,13 @@
 
 /* 全局主题色应用 - 徽章 */
 .layout :global(.ant-badge-count) {
-  background: var(--theme-color) !important;
+  background: #EF4444 !important;
 }
 
 /* 全局主题色应用 - 表格链接 */
 .layout :global(.ant-table a) {
   color: var(--theme-color) !important;
-  transition: color 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: color 0.3s ease !important;
 }
 
 .layout :global(.ant-table a:hover) {
@@ -99,28 +113,29 @@
 /* 全局主题色应用 - 头像背景 */
 .layout :global(.ant-avatar) {
   background-color: var(--theme-color) !important;
-  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: background-color 0.3s ease !important;
 }
 
 /* 全局主题色应用 - 列表链接 */
 .layout :global(.ant-list a) {
   color: var(--theme-color) !important;
-  transition: color 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: color 0.3s ease !important;
 }
 
 /* 全局主题色应用 - 卡片链接 */
 .layout :global(.ant-card a) {
   color: var(--theme-color) !important;
-  transition: color 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: color 0.3s ease !important;
 }
 
 /* 全局主题色应用 - 描述列表链接 */
 .layout :global(.ant-descriptions a) {
   color: var(--theme-color) !important;
-  transition: color 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: color 0.3s ease !important;
 }
 
 /* 全局主题色应用 - 标签 */
+.layout :global(.ant-tag-green),
 .layout :global(.ant-tag-blue) {
   color: var(--theme-color) !important;
   border-color: var(--theme-color) !important;
@@ -142,6 +157,7 @@
 }
 
 /* 全局主题色应用 - 时间线 */
+.layout :global(.ant-timeline-item-head-green),
 .layout :global(.ant-timeline-item-head-blue) {
   color: var(--theme-color) !important;
   border-color: var(--theme-color) !important;
@@ -204,7 +220,7 @@
 /* 全局主题色应用 - 卡片 hover 效果 */
 .layout :global(.ant-card) {
   transition: all 0.3s ease !important;
-  border: 1px solid #e8ecf0 !important;
+  border: 1px solid #E2E8F0 !important;
 }
 
 .layout :global(.ant-card:hover) {
@@ -246,7 +262,7 @@
 /* 侧边栏 */
 .sider {
   background: #fff !important;
-  border-right: 1px solid #e8e9eb;
+  border-right: 1px solid #E2E8F0;
   height: 100vh;
   position: fixed !important;
   left: 0;
@@ -268,7 +284,7 @@
   display: flex;
   align-items: center;
   padding: 0 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #F1F5F9;
   flex-shrink: 0;
 }
 
@@ -287,7 +303,7 @@
 .logoIcon {
   width: 36px;
   height: 36px;
-  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -295,7 +311,7 @@
   color: #fff;
   font-size: 18px;
   font-weight: 700;
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.25);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
 }
 
 .logoImage {
@@ -304,17 +320,11 @@
   border-radius: 10px;
 }
 
-/* SVG Logo 渐变过渡动画 */
-.logoImage rect:first-of-type {
-  transition: fill 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 .logoText {
   font-size: 18px;
   font-weight: 700;
   letter-spacing: -0.5px;
-  color: #1a1f36;
-  transition: color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #10B981;
 }
 
 .siderContent {
@@ -333,12 +343,12 @@
 }
 
 .siderContent::-webkit-scrollbar-thumb {
-  background: #e8e9eb;
+  background: #E2E8F0;
   border-radius: 2px;
 }
 
 .siderContent::-webkit-scrollbar-thumb:hover {
-  background: #d1d5db;
+  background: #CBD5E1;
 }
 
 /* 菜单样式 */
@@ -351,7 +361,7 @@
   padding: 16px 16px 8px !important;
   font-size: 11px;
   font-weight: 600;
-  color: #9ca3af;
+  color: #94A3B8;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -362,16 +372,18 @@
   height: 40px !important;
   line-height: 40px !important;
   border-radius: 8px !important;
-  color: #4a5568;
+  color: #475569;
   font-size: 14px;
 }
 
 .menu :global(.ant-menu-item:hover) {
-  background: #f5f7fa !important;
-  color: #1a1f36 !important;
+  background: rgba(16, 185, 129, 0.08) !important;
+  color: #10B981 !important;
 }
 
 .menu :global(.ant-menu-item-selected) {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%) !important;
+  color: #10B981 !important;
   font-weight: 500;
 }
 
@@ -385,256 +397,12 @@
 
 .menu :global(.ant-menu-item-divider) {
   margin: 8px 16px !important;
-  background: #f0f0f0;
-}
-
-/* 主题颜色 - 科技蓝 (项目管理/工作台/AI助理) */
-.themeBlue :global(.ant-menu-item-selected) {
-  background: linear-gradient(135deg, rgba(24, 144, 255, 0.1) 0%, rgba(9, 109, 217, 0.1) 100%) !important;
-  color: #1890ff !important;
-}
-
-/* 主题颜色 - 绿色 (任务管理) */
-.themeGreen :global(.ant-menu-item-selected) {
-  background: linear-gradient(135deg, rgba(82, 196, 26, 0.1) 0%, rgba(115, 209, 61, 0.1) 100%) !important;
-  color: #52c41a !important;
-}
-
-/* 主题颜色 - 紫色 (需求管理) */
-.themePurple :global(.ant-menu-item-selected) {
-  background: linear-gradient(135deg, rgba(114, 46, 209, 0.1) 0%, rgba(146, 84, 222, 0.1) 100%) !important;
-  color: #722ed1 !important;
-}
-
-/* 主题颜色 - 橙色 (测试管理) */
-.themeOrange :global(.ant-menu-item-selected) {
-  background: linear-gradient(135deg, rgba(250, 140, 22, 0.1) 0%, rgba(255, 169, 64, 0.1) 100%) !important;
-  color: #fa8c16 !important;
-}
-
-/* 主题颜色 - 青色 (迭代管理) */
-.themeCyan :global(.ant-menu-item-selected) {
-  background: linear-gradient(135deg, rgba(19, 194, 194, 0.1) 0%, rgba(54, 207, 201, 0.1) 100%) !important;
-  color: #13c2c2 !important;
-}
-
-/* 主题颜色 - 粉色 */
-.themePink :global(.ant-menu-item-selected) {
-  background: linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(244, 114, 182, 0.1) 100%) !important;
-  color: #ec4899 !important;
-}
-
-/* 主题颜色 - 靛蓝色 (需求池) */
-.themeIndigo :global(.ant-menu-item-selected) {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(129, 140, 248, 0.1) 100%) !important;
-  color: #6366f1 !important;
-}
-
-/* 主题颜色 - 洋红色 (看板) */
-.themeMagenta :global(.ant-menu-item-selected) {
-  background: linear-gradient(135deg, rgba(235, 47, 150, 0.1) 0%, rgba(244, 114, 182, 0.1) 100%) !important;
-  color: #eb2f96 !important;
-}
-
-/* 主题颜色 - 玫瑰红 (知识库) */
-.themeRose :global(.ant-menu-item-selected) {
-  background: linear-gradient(135deg, rgba(244, 63, 94, 0.1) 0%, rgba(251, 113, 133, 0.1) 100%) !important;
-  color: #f43f5e !important;
-}
-
-/* 主题颜色 - 天蓝色 (帮助中心) */
-.themeSky :global(.ant-menu-item-selected) {
-  background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(56, 189, 248, 0.1) 100%) !important;
-  color: #0ea5e9 !important;
-}
-
-/* 主题颜色 - AI方案生成 (靛蓝紫) */
-.themeAiIndigo :global(.ant-menu-item-selected) {
-  background: linear-gradient(135deg, rgba(97, 106, 229, 0.1) 0%, rgba(129, 140, 248, 0.1) 100%) !important;
-  color: #616AE5 !important;
-}
-
-/* 主题颜色 - AI PPT生成 (活力橙) */
-.themeAiOrange :global(.ant-menu-item-selected) {
-  background: linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(251, 146, 60, 0.1) 100%) !important;
-  color: #f97316 !important;
-}
-
-/* 主题颜色 - AI模型训练 (科技紫) */
-.themeAiPurple :global(.ant-menu-item-selected) {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(167, 139, 250, 0.1) 100%) !important;
-  color: #8b5cf6 !important;
-}
-
-/* 主题颜色 - AI新闻追踪 (清新绿) */
-.themeAiGreen :global(.ant-menu-item-selected) {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(52, 211, 153, 0.1) 100%) !important;
-  color: #10b981 !important;
-}
-
-/* 主题颜色 - AI历史记录 (浅黄色) */
-.themeAiYellow :global(.ant-menu-item-selected) {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(251, 191, 36, 0.1) 100%) !important;
-  color: #f59e0b !important;
-}
-
-/* 菜单项 Hover 效果 - 根据目标菜单项显示对应颜色 */
-/* 工作台 */
-.menu :global(.ant-menu-item[data-menu-id$="/dashboard"]:hover:not(.ant-menu-item-selected)) {
-  background: rgba(24, 144, 255, 0.08) !important;
-  color: #1890ff !important;
-}
-
-/* 项目管理 */
-.menu :global(.ant-menu-item[data-menu-id$="/projects"]:hover:not(.ant-menu-item-selected)) {
-  background: rgba(24, 144, 255, 0.08) !important;
-  color: #1890ff !important;
-}
-
-/* 任务管理 */
-.menu :global(.ant-menu-item[data-menu-id$="/issues"]:hover:not(.ant-menu-item-selected)) {
-  background: rgba(82, 196, 26, 0.08) !important;
-  color: #52c41a !important;
-}
-
-/* 需求管理 */
-.menu :global(.ant-menu-item[data-menu-id$="/requirements"]:hover:not(.ant-menu-item-selected)) {
-  background: rgba(114, 46, 209, 0.08) !important;
-  color: #722ed1 !important;
-}
-
-/* 测试管理 */
-.menu :global(.ant-menu-item[data-menu-id$="/testing"]:hover:not(.ant-menu-item-selected)) {
-  background: rgba(250, 140, 22, 0.08) !important;
-  color: #fa8c16 !important;
-}
-
-/* 迭代管理 */
-.menu :global(.ant-menu-item[data-menu-id$="/iterations"]:hover:not(.ant-menu-item-selected)) {
-  background: rgba(19, 194, 194, 0.08) !important;
-  color: #13c2c2 !important;
-}
-
-/* 需求池 */
-.menu :global(.ant-menu-item[data-menu-id$="/backlog"]:hover:not(.ant-menu-item-selected)) {
-  background: rgba(99, 102, 241, 0.08) !important;
-  color: #6366f1 !important;
-}
-
-/* 看板 */
-.menu :global(.ant-menu-item[data-menu-id$="/kanban"]:hover:not(.ant-menu-item-selected)) {
-  background: rgba(235, 47, 150, 0.08) !important;
-  color: #eb2f96 !important;
-}
-
-/* 知识库 */
-.menu :global(.ant-menu-item[data-menu-id$="/wiki"]:hover:not(.ant-menu-item-selected)) {
-  background: rgba(244, 63, 94, 0.08) !important;
-  color: #f43f5e !important;
-}
-
-/* 帮助中心 */
-.menu :global(.ant-menu-item[data-menu-id$="/help"]:hover:not(.ant-menu-item-selected)) {
-  background: rgba(14, 165, 233, 0.08) !important;
-  color: #0ea5e9 !important;
-}
-
-/* AI 方案生成 */
-.menu :global(.ant-menu-item[data-menu-id$="/ai/solution"]:hover:not(.ant-menu-item-selected)) {
-  background: rgba(97, 106, 229, 0.08) !important;
-  color: #616AE5 !important;
-}
-
-/* AI PPT生成 */
-.menu :global(.ant-menu-item[data-menu-id$="/ai/ppt"]:hover:not(.ant-menu-item-selected)) {
-  background: rgba(249, 115, 22, 0.08) !important;
-  color: #f97316 !important;
-}
-
-/* AI 模型训练 */
-.menu :global(.ant-menu-item[data-menu-id$="/ai/training"]:hover:not(.ant-menu-item-selected)) {
-  background: rgba(139, 92, 246, 0.08) !important;
-  color: #8b5cf6 !important;
-}
-
-/* AI 新闻追踪 */
-.menu :global(.ant-menu-item[data-menu-id$="/ai/news"]:hover:not(.ant-menu-item-selected)) {
-  background: rgba(16, 185, 129, 0.08) !important;
-  color: #10b981 !important;
-}
-
-/* AI 历史记录 */
-.menu :global(.ant-menu-item[data-menu-id$="/ai/history"]:hover:not(.ant-menu-item-selected)) {
-  background: rgba(245, 158, 11, 0.08) !important;
-  color: #f59e0b !important;
-}
-
-/* Logo文字主题颜色 - 科技蓝 */
-.logoBlue {
-  color: #1890ff !important;
-}
-
-.logoGreen {
-  color: #52c41a !important;
-}
-
-.logoPurple {
-  color: #722ed1 !important;
-}
-
-.logoOrange {
-  color: #fa8c16 !important;
-}
-
-.logoCyan {
-  color: #13c2c2 !important;
-}
-
-.logoPink {
-  color: #ec4899 !important;
-}
-
-/* 需求池和看板Logo颜色 */
-.logoIndigo {
-  color: #6366f1 !important;
-}
-
-.logoRose {
-  color: #f43f5e !important;
-}
-
-.logoSky {
-  color: #0ea5e9 !important;
-}
-
-/* AI子页面Logo颜色 */
-.logoAiIndigo {
-  color: #616AE5 !important;
-}
-
-.logoAiOrange {
-  color: #f97316 !important;
-}
-
-.logoAiPurple {
-  color: #8b5cf6 !important;
-}
-
-.logoAiGreen {
-  color: #10b981 !important;
-}
-
-.logoAiYellow {
-  color: #f59e0b !important;
-}
-
-.logoMagenta {
-  color: #eb2f96 !important;
+  background: #F1F5F9;
 }
 
 .siderFooter {
   padding: 16px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid #F1F5F9;
   flex-shrink: 0;
 }
 
@@ -644,15 +412,15 @@
   gap: 10px;
   padding: 10px 12px;
   border-radius: 8px;
-  color: #718096;
+  color: #64748B;
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .helpLink:hover {
-  background: #f5f7fa;
-  color: #1890ff;
+  background: rgba(16, 185, 129, 0.08);
+  color: #10B981;
 }
 
 /* 主布局 */
@@ -671,7 +439,7 @@
   top: 0;
   height: 64px;
   background: #fff;
-  border-bottom: 1px solid #e8e9eb;
+  border-bottom: 1px solid #E2E8F0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -691,13 +459,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #718096;
+  color: #64748B;
   border-radius: 8px;
 }
 
 .collapseBtn:hover {
-  background: #f5f7fa;
-  color: #1a1f36;
+  background: #F1F5F9;
+  color: #1E293B;
 }
 
 .searchWrapper {
@@ -708,34 +476,34 @@
   width: 320px;
   height: 40px;
   border-radius: 10px;
-  background: #f5f7fa;
+  background: #F8FAFC;
   border: 1px solid transparent;
   transition: all 0.2s;
 }
 
 .searchInput:hover {
   background: #fff;
-  border-color: #e8e9eb;
+  border-color: #E2E8F0;
 }
 
 .searchInput:focus,
 .searchInput:global(.ant-input-affix-wrapper-focused) {
   background: #fff;
-  border-color: #1890ff;
-  box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1);
+  border-color: #10B981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
 .searchIcon {
-  color: #9ca3af;
+  color: #94A3B8;
 }
 
 .searchShortcut {
   font-size: 11px;
   padding: 2px 6px;
   background: #fff;
-  border: 1px solid #e8e9eb;
+  border: 1px solid #E2E8F0;
   border-radius: 4px;
-  color: #9ca3af;
+  color: #94A3B8;
   font-family: monospace;
 }
 
@@ -749,7 +517,7 @@
   height: 36px;
   border-radius: 8px;
   font-weight: 500;
-  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
 }
 
 .headerBtn {
@@ -758,13 +526,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #718096;
+  color: #64748B;
   border-radius: 8px;
 }
 
 .headerBtn:hover {
-  color: #1a1f36;
-  background: #f5f7fa;
+  color: #1E293B;
+  background: #F1F5F9;
 }
 
 .userInfo {
@@ -779,7 +547,7 @@
 }
 
 .userInfo:hover {
-  background: #f5f7fa;
+  background: #F1F5F9;
 }
 
 .userAvatar {
@@ -795,19 +563,19 @@
 .userName {
   font-size: 14px;
   font-weight: 500;
-  color: #1a1f36;
+  color: #1E293B;
 }
 
 .userRole {
   font-size: 12px;
-  color: #9ca3af;
+  color: #94A3B8;
 }
 
 /* 主内容区域 */
 .content {
   padding: 24px;
   min-height: calc(100vh - 64px);
-  background: #f5f7fa;
+  background: #F8FAFC;
 }
 
 /* 响应式设计 */

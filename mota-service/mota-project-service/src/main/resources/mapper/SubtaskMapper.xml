@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mota.project.mapper.SubtaskMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.mota.project.entity.Subtask">
+        <id column="id" property="id"/>
+        <result column="parent_task_id" property="parentTaskId"/>
+        <result column="parent_subtask_id" property="parentSubtaskId"/>
+        <result column="level" property="level"/>
+        <result column="project_id" property="projectId"/>
+        <result column="name" property="name"/>
+        <result column="description" property="description"/>
+        <result column="assignee_id" property="assigneeId"/>
+        <result column="status" property="status"/>
+        <result column="priority" property="priority"/>
+        <result column="start_date" property="startDate"/>
+        <result column="end_date" property="endDate"/>
+        <result column="progress" property="progress"/>
+        <result column="sort_order" property="sortOrder"/>
+        <result column="completed_at" property="completedAt"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
+        <result column="deleted" property="deleted"/>
+        <result column="version" property="version"/>
+    </resultMap>
+
+    <!-- 树形结果映射 -->
+    <resultMap id="TreeResultMap" type="com.mota.project.entity.Subtask" extends="BaseResultMap">
+        <collection property="children" ofType="com.mota.project.entity.Subtask"
+                    select="selectByParentSubtaskId" column="id"/>
+    </resultMap>
+
+    <!-- 基础列 -->
+    <sql id="Base_Column_List">
+        id, parent_task_id, parent_subtask_id, level, project_id, name, description, assignee_id, status, priority,
+        start_date, end_date, progress, sort_order, completed_at,
+        created_at, updated_at, created_by, updated_by, deleted, version
+    </sql>
+
+    <!-- 根据父任务ID查询一级子任务列表（不包含子子任务） -->
+    <select id="selectByParentTaskId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM subtask
+        WHERE parent_task_id = #{parentTaskId}
+        AND (parent_subtask_id IS NULL OR parent_subtask_id = 0)
+        AND deleted = 0
+        ORDER BY sort_order ASC, created_at ASC
+    </select>
+
+    <!-- 根据父任务ID查询所有子任务（包含所有层级） -->
+    <select id="selectAllByParentTaskId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM subtask
+        WHERE parent_task_id = #{parentTaskId}
+        AND deleted = 0
+        ORDER BY level ASC, sort_order ASC, created_at ASC
+    </select>
+
+    <!-- 根据父子任务ID查询子任务列表 -->
+    <select id="selectByParentSubtaskId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM subtask
+        WHERE parent_subtask_id = #{parentSubtaskId}
+        AND deleted = 0
+        ORDER BY sort_order ASC, created_at ASC
+    </select>
+
+    <!-- 根据父任务ID查询子任务树形结构 -->
+    <select id="selectTreeByParentTaskId" resultMap="TreeResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM subtask
+        WHERE parent_task_id = #{parentTaskId}
+        AND (parent_subtask_id IS NULL OR parent_subtask_id = 0)
+        AND deleted = 0
+        ORDER BY sort_order ASC, created_at ASC
+    </select>
+
+    <!-- 根据项目ID查询所有子任务 -->
+    <select id="selectByProjectId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM subtask
+        WHERE project_id = #{projectId}
+        AND deleted = 0
+        ORDER BY parent_task_id ASC, level ASC, sort_order ASC
+    </select>
+
+    <!-- 根据执行人ID查询子任务列表 -->
+    <select id="selectByAssigneeId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM subtask
+        WHERE assignee_id = #{assigneeId}
+        AND deleted = 0
+        ORDER BY end_date ASC, priority DESC
+    </select>
+
+    <!-- 统计父任务下各状态的子任务数量（包含所有层级） -->
+    <select id="countByParentTaskIdGroupByStatus" resultType="map">
+        SELECT status, COUNT(*) as count
+        FROM subtask
+        WHERE parent_task_id = #{parentTaskId}
+        AND deleted = 0
+        GROUP BY status
+    </select>
+
+    <!-- 统计子任务的子任务数量 -->
+    <select id="countByParentSubtaskId" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM subtask
+        WHERE parent_subtask_id = #{parentSubtaskId}
+        AND deleted = 0
+    </select>
+
+    <!-- 统计子任务的已完成子任务数量 -->
+    <select id="countCompletedByParentSubtaskId" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM subtask
+        WHERE parent_subtask_id = #{parentSubtaskId}
+        AND status = 'completed'
+        AND deleted = 0
+    </select>
+
+    <!-- 更新子任务状态 -->
+    <update id="updateStatus">
+        UPDATE subtask
+        SET status = #{status},
+            updated_at = NOW(),
+            completed_at = CASE WHEN #{status} = 'completed' THEN NOW() ELSE completed_at END
+        WHERE id = #{id}
+        AND deleted = 0
+    </update>
+
+    <!-- 更新子任务进度 -->
+    <update id="updateProgress">
+        UPDATE subtask
+        SET progress = #{progress},
+            updated_at = NOW(),
+            status = CASE
+                WHEN #{progress} >= 100 THEN 'completed'
+                WHEN #{progress} > 0 THEN 'in_progress'
+                ELSE status
+            END,
+            completed_at = CASE WHEN #{progress} >= 100 THEN NOW() ELSE completed_at END
+        WHERE id = #{id}
+        AND deleted = 0
+    </update>
+
+    <!-- 批量更新排序顺序 -->
+    <update id="batchUpdateSortOrder" parameterType="list">
+        <foreach collection="list" item="item" separator=";">
+            UPDATE subtask
+            SET sort_order = #{item.sortOrder}, updated_at = NOW()
+            WHERE id = #{item.id}
+        </foreach>
+    </update>
+
+    <!-- 获取父任务下的最大排序顺序 -->
+    <select id="getMaxSortOrder" resultType="java.lang.Integer">
+        SELECT COALESCE(MAX(sort_order), 0)
+        FROM subtask
+        WHERE parent_task_id = #{parentTaskId}
+        AND (parent_subtask_id IS NULL OR parent_subtask_id = 0)
+        AND deleted = 0
+    </select>
+
+    <!-- 获取父子任务下的最大排序顺序 -->
+    <select id="getMaxSortOrderByParentSubtask" resultType="java.lang.Integer">
+        SELECT COALESCE(MAX(sort_order), 0)
+        FROM subtask
+        WHERE parent_subtask_id = #{parentSubtaskId}
+        AND deleted = 0
+    </select>
+
+    <!-- 递归删除子任务及其所有子子任务 -->
+    <update id="deleteWithChildren">
+        UPDATE subtask
+        SET deleted = 1, updated_at = NOW()
+        WHERE (id = #{id} OR parent_subtask_id = #{id})
+        AND deleted = 0
+    </update>
+
+    <!-- 计算子任务的进度（基于其子子任务） -->
+    <select id="calculateSubtaskProgress" resultType="java.lang.Integer">
+        SELECT COALESCE(AVG(progress), 0)
+        FROM subtask
+        WHERE parent_subtask_id = #{subtaskId}
+        AND deleted = 0
+    </select>
+
+</mapper>

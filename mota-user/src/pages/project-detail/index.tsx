@@ -23,15 +23,10 @@ import {
   DatePicker,
   Tooltip,
   Card,
-  Divider,
   Popconfirm,
-  Badge,
-  Switch,
-  ColorPicker,
   List,
   Typography
 } from 'antd'
-import type { Color } from 'antd/es/color-picker'
 import {
   SettingOutlined,
   StarOutlined,
@@ -54,14 +49,14 @@ import {
   TeamOutlined,
   ExclamationCircleOutlined,
   SaveOutlined,
-  BellOutlined,
-  SafetyOutlined,
   WarningOutlined,
   PlayCircleOutlined,
   PauseCircleOutlined,
   StopOutlined,
   CheckOutlined,
-  SyncOutlined
+  LineChartOutlined,
+  AppstoreOutlined,
+  AuditOutlined
 } from '@ant-design/icons'
 import { RobotOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
@@ -69,16 +64,23 @@ import * as projectApi from '@/services/api/project'
 import type { Project, ProjectMember, ProjectStatistics, Milestone } from '@/services/api/project'
 import { departmentTaskApi, taskApi, departmentApi } from '@/services/api'
 import type { DepartmentTask, DepartmentTaskStatus } from '@/services/api/departmentTask'
-import type { Task, TaskStatus } from '@/services/api/task'
+import type { Task } from '@/services/api/task'
+import { TaskStatus } from '@/services/api/task'
 import type { Department } from '@/services/api/department'
 import { getUsers } from '@/services/api/user'
 import { getRecentActivities } from '@/services/api/activity'
 import AIProjectAssistant from '@/components/AIProjectAssistant'
 import MilestoneTimeline from '@/components/MilestoneTimeline'
+import GanttChart from '@/components/GanttChart'
+import type { GanttTask, GanttDependency } from '@/components/GanttChart'
+import BurndownChart from '@/components/BurndownChart'
+import KanbanBoard from '@/components/KanbanBoard'
+import WorkPlanApproval from '@/components/WorkPlanApproval'
+import * as taskDependencyApi from '@/services/api/taskDependency'
 import styles from './index.module.css'
 
 const { TextArea } = Input
-const { Text, Title } = Typography
+const { Text } = Typography
 const { RangePicker } = DatePicker
 
 // 项目状态配置
@@ -123,6 +125,8 @@ const ProjectDetail = () => {
   const [starred, setStarred] = useState(false)
   const [users, setUsers] = useState<any[]>([])
   const [activities, setActivities] = useState<any[]>([])
+  const [taskDependencies, setTaskDependencies] = useState<any[]>([])
+  const [criticalPath, setCriticalPath] = useState<number[]>([])
   
   // 创建部门任务抽屉
   const [createDeptTaskDrawerVisible, setCreateDeptTaskDrawerVisible] = useState(false)
@@ -168,11 +172,12 @@ const ProjectDetail = () => {
         projectRes = await projectApi.getProjectById(projectId)
       }
       
-      const [deptTasksRes, tasksRes, usersRes, activitiesRes] = await Promise.all([
+      const [deptTasksRes, tasksRes, usersRes, activitiesRes, dependenciesRes] = await Promise.all([
         departmentTaskApi.getDepartmentTasksByProjectId(projectId).catch(() => []),
         taskApi.getTasksByProjectId(projectId).catch(() => []),
         getUsers().catch(() => ({ list: [] })),
-        getRecentActivities(5).catch(() => [])
+        getRecentActivities(5).catch(() => []),
+        taskDependencyApi.getProjectDependencies(Number(projectId)).catch(() => [])
       ])
       
       setProject(projectRes)
@@ -181,9 +186,20 @@ const ProjectDetail = () => {
       setTasks(tasksRes || [])
       setUsers((usersRes as any).list || [])
       setActivities(activitiesRes as any || [])
+      setTaskDependencies(dependenciesRes || [])
+      
+      // 计算关键路径
+      if (dependenciesRes && dependenciesRes.length > 0) {
+        try {
+          const criticalPathRes = await taskDependencyApi.calculateCriticalPath(Number(projectId))
+          setCriticalPath(criticalPathRes || [])
+        } catch {
+          setCriticalPath([])
+        }
+      }
       
       // 如果没有从完整详情获取成员和里程碑，单独加载
-      if (!projectRes.members) {
+      if (!(projectRes as any).members) {
         try {
           const members = await projectApi.getProjectMembers(projectId)
           setProjectMembers(members || [])
@@ -192,7 +208,7 @@ const ProjectDetail = () => {
         }
       }
       
-      if (!projectRes.milestones) {
+      if (!(projectRes as any).milestones) {
         try {
           const milestones = await projectApi.getProjectMilestones(projectId)
           setProjectMilestones(milestones || [])
@@ -201,7 +217,7 @@ const ProjectDetail = () => {
         }
       }
       
-      if (!projectRes.statistics) {
+      if (!(projectRes as any).statistics) {
         try {
           const stats = await projectApi.getProjectStatistics(projectId)
           setProjectStats(stats)
@@ -685,9 +701,6 @@ const ProjectDetail = () => {
     }
   }
 
-  // 团队成员
-  const teamMembers = users.slice(0, 5)
-
   // 最近活动
   const recentActivities = activities.slice(0, 5).map((a: any) => ({
     ...a,
@@ -1115,6 +1128,120 @@ const ProjectDetail = () => {
             )
           },
           {
+            key: 'gantt',
+            label: (
+              <span>
+                <CalendarOutlined /> 甘特图
+              </span>
+            ),
+            children: (
+              <div style={{ padding: '16px 0', height: 'calc(100vh - 400px)', minHeight: '500px' }}>
+                <GanttChart
+                  tasks={tasks.map(task => ({
+                    id: task.id,
+                    name: task.name,
+                    startDate: task.startDate,
+                    endDate: task.endDate,
+                    progress: task.progress || 0,
+                    status: task.status,
+                    priority: task.priority,
+                    assigneeId: task.assigneeId,
+                    assigneeName: users.find(u => u.id === task.assigneeId)?.name,
+                    isMilestone: false,
+                  } as GanttTask))}
+                  dependencies={taskDependencies.map(dep => ({
+                    predecessorId: dep.predecessorId,
+                    successorId: dep.successorId,
+                    dependencyType: dep.dependencyType || 'FS',
+                  } as GanttDependency))}
+                  criticalPath={criticalPath}
+                  onTaskClick={(task) => navigate(`/tasks/${task.id}`)}
+                  showDependencies={true}
+                  showProgress={true}
+                  showToday={true}
+                />
+              </div>
+            )
+          },
+          {
+            key: 'burndown',
+            label: (
+              <span>
+                <LineChartOutlined /> 燃尽图
+              </span>
+            ),
+            children: (
+              <div style={{ padding: '16px 0', height: 'calc(100vh - 400px)', minHeight: '400px' }}>
+                <BurndownChart
+                  title={`${project.name} - 燃尽图`}
+                  startDate={project.startDate || dayjs().format('YYYY-MM-DD')}
+                  endDate={project.endDate || dayjs().add(30, 'day').format('YYYY-MM-DD')}
+                  totalPoints={tasks.length}
+                  completedByDate={(() => {
+                    // 按日期统计完成的任务数
+                    const completedTasks = tasks.filter(t => t.status === 'completed')
+                    const dateMap = new Map<string, number>()
+                    completedTasks.forEach(t => {
+                      if (t.endDate) {
+                        const date = dayjs(t.endDate).format('YYYY-MM-DD')
+                        dateMap.set(date, (dateMap.get(date) || 0) + 1)
+                      }
+                    })
+                    return Array.from(dateMap.entries()).map(([date, completed]) => ({ date, completed }))
+                  })()}
+                  height={400}
+                  showLegend={true}
+                  unit="tasks"
+                />
+              </div>
+            )
+          },
+          {
+            key: 'kanban',
+            label: (
+              <span>
+                <AppstoreOutlined /> 看板视图
+              </span>
+            ),
+            children: (
+              <div style={{ padding: '16px 0', minHeight: '500px' }}>
+                <KanbanBoard
+                  tasks={tasks.map(task => ({
+                    id: Number(task.id),
+                    title: task.name,
+                    description: task.description,
+                    status: (task.status === 'pending' ? 'todo' : task.status === 'in_progress' ? 'in_progress' : task.status === 'completed' ? 'done' : 'todo') as 'todo' | 'in_progress' | 'review' | 'done',
+                    priority: (task.priority === 'urgent' ? 'urgent' : task.priority === 'high' ? 'high' : task.priority === 'medium' ? 'normal' : 'low') as 'low' | 'normal' | 'high' | 'urgent',
+                    assigneeId: task.assigneeId ? Number(task.assigneeId) : undefined,
+                    assigneeName: users.find(u => u.id === task.assigneeId)?.name,
+                    assigneeAvatar: users.find(u => u.id === task.assigneeId)?.avatar,
+                    dueDate: task.endDate,
+                    projectId: Number(id),
+                  }))}
+                  onTaskMove={async (taskId, newStatus) => {
+                    // 映射看板状态到任务状态
+                    const statusMap: Record<string, TaskStatus> = {
+                      'todo': TaskStatus.PENDING,
+                      'in_progress': TaskStatus.IN_PROGRESS,
+                      'review': TaskStatus.IN_PROGRESS,
+                      'done': TaskStatus.COMPLETED
+                    }
+                    try {
+                      await taskApi.updateTaskStatus(taskId, statusMap[newStatus] || TaskStatus.PENDING)
+                      message.success('任务状态已更新')
+                      loadProjectData(id!)
+                      return true
+                    } catch {
+                      message.error('更新失败')
+                      return false
+                    }
+                  }}
+                  onTaskClick={(task) => navigate(`/tasks/${task.id}`)}
+                />
+              </div>
+            )
+          },
+          {
             key: 'milestones',
             label: (
               <span>
@@ -1226,6 +1353,22 @@ const ProjectDetail = () => {
             )
           },
           {
+            key: 'work-plan-approval',
+            label: (
+              <span>
+                <AuditOutlined /> 工作计划审批
+              </span>
+            ),
+            children: (
+              <div style={{ padding: '16px 0' }}>
+                <WorkPlanApproval
+                  projectId={Number(id)}
+                  onApprovalComplete={() => loadProjectData(id!)}
+                />
+              </div>
+            )
+          },
+          {
             key: 'ai-assistant',
             label: (
               <span>
@@ -1237,7 +1380,7 @@ const ProjectDetail = () => {
                 projectId={id!}
                 projectName={project.name}
                 projectDescription={project.description}
-                departments={departments}
+                departments={departments.map(d => ({ id: Number(d.id), name: d.name }))}
                 departmentTasks={departmentTasks}
                 tasks={tasks}
               />

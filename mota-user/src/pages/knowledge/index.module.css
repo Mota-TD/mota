@@ -1,0 +1,447 @@
+.container {
+  padding: 0;
+  min-height: 100%;
+}
+
+/* 页面头部 - 清新绿 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  border-radius: 16px;
+  color: #fff;
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.headerIcon {
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #fff;
+  backdrop-filter: blur(10px);
+}
+
+.header :global(.ant-typography) {
+  color: #fff !important;
+}
+
+.header :global(.ant-typography-secondary) {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.header :global(.ant-btn) {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+.header :global(.ant-btn:hover) {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.description {
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+}
+
+.graphContainer {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+/* 文件管理标签页 */
+.filesTab {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 统计卡片行 */
+.statsRow {
+  margin-bottom: 16px;
+}
+
+.statsRow :global(.ant-card) {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.statsRow :global(.ant-statistic-title) {
+  color: var(--text-color-secondary, #8c8c8c);
+}
+
+.statsRow :global(.ant-statistic-content) {
+  color: var(--text-color, #333);
+}
+
+/* 工具栏 */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* 文件网格 */
+.fileGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+  padding: 16px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.fileCard {
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.fileCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.fileCard.selected {
+  border-color: var(--primary-color, #1890ff);
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+.fileCardContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.fileCardMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.aiIcon {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  color: #722ed1;
+  font-size: 16px;
+  background: rgba(114, 46, 209, 0.1);
+  padding: 4px;
+  border-radius: 4px;
+}
+
+/* 分类管理 */
+.categoryItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid var(--border-color, #f0f0f0);
+  transition: background 0.3s ease;
+}
+
+.categoryItem:hover {
+  background: var(--bg-color-secondary, #f5f5f5);
+}
+
+.categoryItem:last-child {
+  border-bottom: none;
+}
+
+/* 标签云 */
+.tagCloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tagCloud :global(.ant-tag) {
+  margin: 0;
+  padding: 4px 12px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tagCloud :global(.ant-tag:hover) {
+  transform: scale(1.05);
+}
+
+/* 表格样式 */
+.filesTab :global(.ant-table) {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.filesTab :global(.ant-table-thead > tr > th) {
+  background: var(--bg-color-secondary, #fafafa);
+}
+
+/* 标签页样式 */
+.container :global(.ant-tabs-nav) {
+  margin-bottom: 16px;
+}
+
+.container :global(.ant-tabs-tab) {
+  padding: 12px 16px;
+  font-size: 14px;
+}
+
+.container :global(.ant-tabs-tab-active) {
+  font-weight: 500;
+}
+
+/* 暗色主题适配 */
+:global(.dark) .toolbar {
+  background: var(--bg-color, #141414);
+}
+
+:global(.dark) .fileGrid {
+  background: var(--bg-color, #141414);
+}
+
+:global(.dark) .fileCard {
+  background: var(--bg-color-secondary, #1f1f1f);
+}
+
+:global(.dark) .statsRow :global(.ant-card) {
+  background: var(--bg-color, #141414);
+}
+
+:global(.dark) .categoryItem {
+  border-color: var(--border-color, #303030);
+}
+
+:global(.dark) .categoryItem:hover {
+  background: var(--bg-color-secondary, #1f1f1f);
+}
+
+:global(.dark) .filesTab :global(.ant-table) {
+  background: var(--bg-color, #141414);
+}
+
+:global(.dark) .filesTab :global(.ant-table-thead > tr > th) {
+  background: var(--bg-color-secondary, #1f1f1f);
+}
+
+/* 响应式布局 */
+@media (max-width: 1200px) {
+  .fileGrid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .toolbar > * {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .fileGrid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+  }
+
+  .statsRow {
+    flex-direction: column;
+  }
+
+  .statsRow :global(.ant-col) {
+    width: 100%;
+    margin-bottom: 12px;
+  }
+}
+
+/* 上传弹窗 */
+.uploadModal :global(.ant-modal-body) {
+  padding: 24px;
+}
+
+/* AI分类弹窗 */
+.classifierModal :global(.ant-modal-body) {
+  padding: 0;
+}
+
+/* 空状态 */
+.emptyState {
+  padding: 60px 0;
+  text-align: center;
+}
+
+/* 加载状态 */
+.loadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+:global(.dark) .loadingOverlay {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+/* 文件预览 */
+.filePreview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+}
+
+.filePreviewImage {
+  max-width: 100%;
+  max-height: 400px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.filePreviewInfo {
+  text-align: center;
+}
+
+/* 批量操作栏 */
+.batchActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--primary-color-light, #e6f7ff);
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+:global(.dark) .batchActions {
+  background: var(--primary-color-dark, #111d2c);
+}
+
+/* 分类筛选器 */
+.categoryFilter {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.categoryFilterItem {
+  padding: 6px 16px;
+  border-radius: 20px;
+  background: var(--bg-color-secondary, #f5f5f5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.categoryFilterItem:hover {
+  background: var(--primary-color-light, #e6f7ff);
+}
+
+.categoryFilterItem.active {
+  background: var(--primary-color, #1890ff);
+  color: #fff;
+}
+
+:global(.dark) .categoryFilterItem {
+  background: var(--bg-color-secondary, #1f1f1f);
+}
+
+:global(.dark) .categoryFilterItem:hover {
+  background: var(--primary-color-dark, #111d2c);
+}
+
+:global(.dark) .categoryFilterItem.active {
+  background: var(--primary-color, #1890ff);
+}
+
+/* 版本控制标签页 */
+.versionTab {
+  padding: 0;
+}
+
+.versionIntro {
+  margin-bottom: 16px;
+}
+
+.versionIntro h4 {
+  margin-bottom: 8px;
+}
+
+.featureCard {
+  text-align: center;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.featureCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.featureCard :global(.ant-statistic-title) {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.featureCard :global(.ant-statistic-content) {
+  font-size: 24px;
+}
+
+/* 版本控制弹窗 */
+.versionModal :global(.ant-modal-body) {
+  padding: 0;
+}
+
+/* 暗色主题适配 */
+:global(.dark) .featureCard {
+  background: var(--bg-color-secondary, #1f1f1f);
+}

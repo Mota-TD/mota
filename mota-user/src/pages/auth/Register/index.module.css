@@ -30,20 +30,22 @@
 
 .registerForm :global(.ant-form-item-label > label) {
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.85) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
   font-size: 14px;
 }
 
 .registerForm :global(.ant-form-item-label > label.ant-form-item-required::before) {
-  color: #ff6b6b !important;
+  color: #fca5a5 !important;
 }
 
 .registerForm :global(.ant-input-affix-wrapper),
 .registerForm :global(.ant-input) {
   height: 48px;
   border-radius: 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
   font-size: 15px;
+  color: #fff !important;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
@@ -52,25 +54,33 @@
 .registerForm :global(.ant-input-affix-wrapper .ant-input) {
   height: auto;
   line-height: 1.5;
+  background: transparent !important;
+  color: #fff !important;
 }
 
 .registerForm :global(.ant-input-affix-wrapper:hover),
 .registerForm :global(.ant-input:hover) {
-  border-color: #2b7de9;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  background: rgba(255, 255, 255, 0.15) !important;
 }
 
 .registerForm :global(.ant-input-affix-wrapper:focus),
 .registerForm :global(.ant-input-affix-wrapper-focused),
 .registerForm :global(.ant-input:focus) {
-  border-color: #2b7de9;
-  box-shadow: 0 0 0 3px rgba(43, 125, 233, 0.1);
+  border-color: #fff !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2) !important;
 }
 
 .registerForm :global(.ant-input-prefix) {
-  color: #a0aec0;
+  color: rgba(255, 255, 255, 0.6);
   margin-right: 10px;
   display: flex;
   align-items: center;
+}
+
+.registerForm :global(.ant-input::placeholder) {
+  color: rgba(255, 255, 255, 0.4) !important;
 }
 
 .registerForm :global(.ant-btn-primary) {
@@ -78,39 +88,51 @@
   border-radius: 10px;
   font-size: 16px;
   font-weight: 600;
-  background: linear-gradient(135deg, #2b7de9 0%, #1890ff 100%);
+  background: #fff;
+  color: #047857 !important;
   border: none;
-  box-shadow: 0 4px 12px rgba(43, 125, 233, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
 }
 
 .registerForm :global(.ant-btn-primary:hover) {
-  background: linear-gradient(135deg, #1a6fd8 0%, #0d7fe8 100%);
-  box-shadow: 0 6px 16px rgba(43, 125, 233, 0.4);
+  background: #f0fdf4;
+  color: #047857 !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
   transform: translateY(-1px);
 }
 
 .registerForm :global(.ant-checkbox-wrapper) {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .registerForm :global(.ant-checkbox-wrapper span:not(.ant-checkbox)) {
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.registerForm :global(.ant-checkbox-inner) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .registerForm :global(.ant-checkbox-checked .ant-checkbox-inner) {
-  background-color: #2b7de9;
-  border-color: #2b7de9;
+  background-color: #fff;
+  border-color: #fff;
+}
+
+.registerForm :global(.ant-checkbox-checked .ant-checkbox-inner::after) {
+  border-color: #047857;
 }
 
 .registerForm :global(.ant-checkbox-wrapper a) {
-  color: #2b7de9;
+  color: #fff;
   font-weight: 500;
+  text-decoration: underline;
 }
 
 .registerForm :global(.ant-checkbox-wrapper a:hover) {
-  color: #1a6fd8;
+  color: #d1fae5;
 }
 
 /* Register Footer */
@@ -118,23 +140,24 @@
   text-align: center;
   margin-top: 28px;
   padding-top: 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .registerFooter p {
   font-size: 15px;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.8);
   margin: 0;
 }
 
 .registerFooter a {
-  color: #2b7de9;
+  color: #fff;
   font-weight: 600;
   transition: color 0.2s;
+  text-decoration: underline;
 }
 
 .registerFooter a:hover {
-  color: #1a6fd8;
+  color: #d1fae5;
 }
 
 /* Responsive - 最小宽度600px，低于此宽度显示水平滚动条 */

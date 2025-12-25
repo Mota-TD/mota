@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mota.project.mapper.SearchKeywordStatsMapper">
+
+    <resultMap id="BaseResultMap" type="com.mota.project.entity.SearchKeywordStats">
+        <id column="id" property="id"/>
+        <result column="keyword" property="keyword"/>
+        <result column="project_id" property="projectId"/>
+        <result column="stats_date" property="statsDate"/>
+        <result column="search_count" property="searchCount"/>
+        <result column="unique_users" property="uniqueUsers"/>
+        <result column="click_count" property="clickCount"/>
+        <result column="avg_result_count" property="avgResultCount"/>
+        <result column="click_rate" property="clickRate"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <select id="getHotKeywords" resultMap="BaseResultMap">
+        SELECT 
+            keyword,
+            SUM(search_count) as search_count,
+            SUM(unique_users) as unique_users,
+            SUM(click_count) as click_count,
+            AVG(avg_result_count) as avg_result_count,
+            CASE WHEN SUM(search_count) > 0 
+                THEN SUM(click_count) * 1.0 / SUM(search_count) 
+                ELSE 0 
+            END as click_rate
+        FROM search_keyword_stats
+        WHERE 1=1
+        <if test="projectId != null">
+            AND (project_id = #{projectId} OR project_id IS NULL)
+        </if>
+        <if test="startDate != null">
+            AND stats_date >= #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND stats_date &lt;= #{endDate}
+        </if>
+        GROUP BY keyword
+        ORDER BY search_count DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="getKeywordTrend" resultType="java.util.Map">
+        SELECT 
+            DATE_FORMAT(stats_date, '%Y-%m-%d') as date,
+            search_count as searchCount,
+            click_count as clickCount,
+            click_rate as clickRate
+        FROM search_keyword_stats
+        WHERE keyword = #{keyword}
+        <if test="projectId != null">
+            AND (project_id = #{projectId} OR project_id IS NULL)
+        </if>
+        <if test="startDate != null">
+            AND stats_date >= #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND stats_date &lt;= #{endDate}
+        </if>
+        ORDER BY stats_date
+    </select>
+
+    <insert id="upsertKeywordStats">
+        INSERT INTO search_keyword_stats (keyword, project_id, stats_date, search_count, unique_users, click_count, avg_result_count, click_rate)
+        VALUES (#{keyword}, #{projectId}, #{statsDate}, #{searchCount}, #{uniqueUsers}, #{clickCount}, #{avgResultCount}, #{clickRate})
+        ON DUPLICATE KEY UPDATE
+            search_count = search_count + VALUES(search_count),
+            unique_users = unique_users + VALUES(unique_users),
+            click_count = click_count + VALUES(click_count),
+            avg_result_count = (avg_result_count + VALUES(avg_result_count)) / 2,
+            click_rate = CASE WHEN (search_count + VALUES(search_count)) > 0 
+                THEN (click_count + VALUES(click_count)) * 1.0 / (search_count + VALUES(search_count))
+                ELSE 0 
+            END,
+            updated_at = NOW()
+    </insert>
+
+    <select id="getKeywordCloud" resultType="java.util.Map">
+        SELECT 
+            keyword,
+            SUM(search_count) as value
+        FROM search_keyword_stats
+        WHERE 1=1
+        <if test="projectId != null">
+            AND (project_id = #{projectId} OR project_id IS NULL)
+        </if>
+        <if test="startDate != null">
+            AND stats_date >= #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND stats_date &lt;= #{endDate}
+        </if>
+        GROUP BY keyword
+        ORDER BY value DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="getLowClickRateKeywords" resultMap="BaseResultMap">
+        SELECT 
+            keyword,
+            SUM(search_count) as search_count,
+            SUM(unique_users) as unique_users,
+            SUM(click_count) as click_count,
+            AVG(avg_result_count) as avg_result_count,
+            CASE WHEN SUM(search_count) > 0 
+                THEN SUM(click_count) * 1.0 / SUM(search_count) 
+                ELSE 0 
+            END as click_rate
+        FROM search_keyword_stats
+        WHERE 1=1
+        <if test="projectId != null">
+            AND (project_id = #{projectId} OR project_id IS NULL)
+        </if>
+        <if test="startDate != null">
+            AND stats_date >= #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND stats_date &lt;= #{endDate}
+        </if>
+        GROUP BY keyword
+        HAVING SUM(search_count) >= #{minSearchCount}
+            AND (SUM(click_count) * 1.0 / SUM(search_count)) &lt;= #{maxClickRate}
+        ORDER BY search_count DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>

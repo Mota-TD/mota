@@ -1,0 +1,47 @@
+.container {
+  padding: 16px 0;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.statsRow {
+  margin-bottom: 16px;
+}
+
+.statCard {
+  border-radius: 8px;
+  text-align: center;
+}
+
+:global(.dark) .statCard {
+  background: var(--bg-secondary, #1f1f1f);
+  border-color: var(--border-color, #303030);
+}
+
+.changeInfo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.chartRow {
+  margin-bottom: 16px;
+}
+
+.chartCard {
+  height: 100%;
+  border-radius: 8px;
+}
+
+:global(.dark) .chartCard {
+  background: var(--bg-secondary, #1f1f1f);
+  border-color: var(--border-color, #303030);
+}

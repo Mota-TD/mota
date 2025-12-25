@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mota.project.mapper.UserViewConfigMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.mota.project.entity.UserViewConfig">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="view_type" property="viewType"/>
+        <result column="name" property="name"/>
+        <result column="description" property="description"/>
+        <result column="config" property="config" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+        <result column="is_default" property="isDefault"/>
+        <result column="is_shared" property="isShared"/>
+        <result column="project_id" property="projectId"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, user_id, view_type, name, description, config, is_default, is_shared, project_id, created_at, updated_at
+    </sql>
+
+    <!-- 获取用户的所有视图配置 -->
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM user_view_config
+        WHERE user_id = #{userId}
+        ORDER BY is_default DESC, updated_at DESC
+    </select>
+
+    <!-- 获取用户指定类型的视图配置 -->
+    <select id="selectByUserIdAndType" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM user_view_config
+        WHERE user_id = #{userId}
+        AND view_type = #{viewType}
+        ORDER BY is_default DESC, updated_at DESC
+    </select>
+
+    <!-- 获取用户的默认视图 -->
+    <select id="selectDefaultView" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM user_view_config
+        WHERE user_id = #{userId}
+        AND view_type = #{viewType}
+        AND is_default = 1
+        LIMIT 1
+    </select>
+
+    <!-- 获取项目相关的视图配置 -->
+    <select id="selectByProjectId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM user_view_config
+        WHERE project_id = #{projectId}
+        ORDER BY updated_at DESC
+    </select>
+
+    <!-- 获取共享的视图配置 -->
+    <select id="selectSharedViews" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM user_view_config
+        WHERE is_shared = 1
+        <if test="viewType != null and viewType != ''">
+            AND view_type = #{viewType}
+        </if>
+        ORDER BY updated_at DESC
+    </select>
+
+    <!-- 设置默认视图 -->
+    <update id="setDefaultView">
+        UPDATE user_view_config
+        SET is_default = CASE WHEN id = #{id} THEN 1 ELSE 0 END,
+            updated_at = NOW()
+        WHERE user_id = #{userId}
+        AND view_type = #{viewType}
+    </update>
+
+    <!-- 取消默认视图 -->
+    <update id="unsetDefaultView">
+        UPDATE user_view_config
+        SET is_default = 0, updated_at = NOW()
+        WHERE user_id = #{userId}
+        AND view_type = #{viewType}
+        AND is_default = 1
+    </update>
+
+    <!-- 检查视图名称是否存在 -->
+    <select id="countByUserIdAndName" resultType="int">
+        SELECT COUNT(*)
+        FROM user_view_config
+        WHERE user_id = #{userId}
+        AND name = #{name}
+    </select>
+
+</mapper>

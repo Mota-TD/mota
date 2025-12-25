@@ -1,0 +1,67 @@
+.container {
+  padding: 16px 0;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.periodSelector {
+  margin-bottom: 16px;
+}
+
+.statsRow {
+  margin-bottom: 16px;
+}
+
+.statCard {
+  border-radius: 8px;
+  text-align: center;
+}
+
+:global(.dark) .statCard {
+  background: var(--bg-secondary, #1f1f1f);
+  border-color: var(--border-color, #303030);
+}
+
+.chartRow {
+  margin-bottom: 16px;
+}
+
+.chartCard {
+  height: 100%;
+  border-radius: 8px;
+}
+
+:global(.dark) .chartCard {
+  background: var(--bg-secondary, #1f1f1f);
+  border-color: var(--border-color, #303030);
+}
+
+.tableCard {
+  border-radius: 8px;
+}
+
+:global(.dark) .tableCard {
+  background: var(--bg-secondary, #1f1f1f);
+  border-color: var(--border-color, #303030);
+}
+
+.memberCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.memberName {
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.memberDept {
+  font-size: 11px;
+  color: var(--text-secondary, #8c8c8c);
+}

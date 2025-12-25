@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { MenuInfo } from 'rc-menu/lib/interface'
 import {
@@ -14,7 +14,18 @@ import {
   Avatar,
   Tag,
   Dropdown,
-  Modal
+  Modal,
+  Switch,
+  Tooltip,
+  Collapse,
+  Form,
+  TimePicker,
+  Checkbox,
+  Select,
+  Slider,
+  Divider,
+  Popover,
+  Input
 } from 'antd'
 import {
   BellOutlined,
@@ -34,58 +45,45 @@ import {
   ExclamationCircleOutlined,
   RiseOutlined,
   MoreOutlined,
-  SyncOutlined
+  SyncOutlined,
+  PushpinOutlined,
+  PushpinFilled,
+  DownOutlined,
+  UpOutlined,
+  RobotOutlined,
+  FilterOutlined,
+  EyeInvisibleOutlined,
+  MailOutlined,
+  MobileOutlined,
+  StarOutlined,
+  StarFilled,
+  ThunderboltOutlined,
+  MinusCircleOutlined,
+  PlusOutlined,
+  CaretDownOutlined,
+  CaretRightOutlined
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/zh-cn'
 import * as notificationApi from '@/services/api/notification'
+import type { 
+  Notification, 
+  NotificationType, 
+  NotificationCategory,
+  NotificationPriority,
+  AIClassification,
+  DoNotDisturbSettings,
+  NotificationPreferences,
+  NotificationSubscription
+} from '@/services/api/notification'
 import styles from './index.module.css'
 
 dayjs.extend(relativeTime)
 dayjs.locale('zh-cn')
 
-// 通知类型定义
-type NotificationType = 
-  | 'task_assigned'      // 任务分配
-  | 'task_completed'     // 任务完成
-  | 'task_overdue'       // 任务逾期
-  | 'task_comment'       // 任务评论
-  | 'task_progress'      // 进度更新
-  | 'plan_submitted'     // 工作计划提交
-  | 'plan_approved'      // 工作计划审批通过
-  | 'plan_rejected'      // 工作计划驳回
-  | 'feedback_received'  // 收到反馈
-  | 'milestone_reached'  // 里程碑达成
-  | 'milestone_due'      // 里程碑即将到期
-  | 'deliverable_uploaded' // 交付物上传
-  | 'project_update'     // 项目更新
-  | 'member_joined'      // 成员加入
-  | 'mention'            // @提及
-  | 'system'             // 系统通知
-  | 'issue'              // 事项通知
-  | 'comment'            // 评论通知
-  | 'merge'              // 合并通知
-
-interface Notification {
-  id: number
-  type: NotificationType
-  title: string
-  content?: string
-  time: string
-  read: boolean
-  link: string
-  sender?: {
-    id: number
-    name: string
-    avatar?: string
-  }
-  project?: {
-    id: number
-    name: string
-  }
-  priority?: 'low' | 'medium' | 'high' | 'urgent'
-}
+const { Panel } = Collapse
+const { Option } = Select
 
 const NotificationsPage = () => {
   const navigate = useNavigate()
@@ -93,133 +91,259 @@ const NotificationsPage = () => {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [activeTab, setActiveTab] = useState('all')
   const [refreshing, setRefreshing] = useState(false)
+  const [settingsVisible, setSettingsVisible] = useState(false)
+  const [dndVisible, setDndVisible] = useState(false)
+  const [subscriptionVisible, setSubscriptionVisible] = useState(false)
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set())
+  const [showLowPriority, setShowLowPriority] = useState(false)
+  
+  // 设置状态
+  const [dndSettings, setDndSettings] = useState<DoNotDisturbSettings | null>(null)
+  const [preferences, setPreferences] = useState<NotificationPreferences | null>(null)
+  const [subscriptions, setSubscriptions] = useState<NotificationSubscription[]>([])
+  const [dndActive, setDndActive] = useState(false)
+  
+  const [form] = Form.useForm()
+  const [dndForm] = Form.useForm()
+
+  // 用户ID（实际应从用户状态获取）
+  const userId = 1
 
   useEffect(() => {
     loadNotifications()
+    loadSettings()
   }, [])
 
   const loadNotifications = async () => {
     setLoading(true)
     try {
-      const res = await notificationApi.getNotifications()
+      const res = await notificationApi.getNotifications({ userId, aggregated: true })
       const notificationsList = (res as any).list || res || []
       setNotifications(notificationsList.length > 0 ? notificationsList : getMockNotifications())
     } catch (error) {
       console.error('Failed to load notifications:', error)
-      // 使用模拟数据
       setNotifications(getMockNotifications())
     } finally {
       setLoading(false)
     }
   }
 
+  const loadSettings = async () => {
+    try {
+      // 加载免打扰设置
+      const dnd = await notificationApi.getDoNotDisturbSettings(userId)
+      setDndSettings(dnd)
+      
+      // 检查免打扰状态
+      const status = await notificationApi.checkDoNotDisturbStatus(userId)
+      setDndActive(status.isActive)
+      
+      // 加载偏好设置
+      const prefs = await notificationApi.getNotificationPreferences(userId)
+      setPreferences(prefs)
+      
+      // 加载订阅规则
+      const subs = await notificationApi.getSubscriptions(userId)
+      setSubscriptions(subs)
+    } catch (error) {
+      console.error('Failed to load settings:', error)
+      // 使用默认设置
+      setDndSettings(notificationApi.DEFAULT_DND_SETTINGS as DoNotDisturbSettings)
+      setPreferences(notificationApi.DEFAULT_NOTIFICATION_PREFERENCES as NotificationPreferences)
+      setSubscriptions(getMockSubscriptions())
+    }
+  }
+
+  // 模拟订阅数据
+  const getMockSubscriptions = (): NotificationSubscription[] => [
+    { id: 1, userId, category: 'task', enabled: true, emailEnabled: true, pushEnabled: true, createdAt: '', updatedAt: '' },
+    { id: 2, userId, category: 'project', enabled: true, emailEnabled: true, pushEnabled: false, createdAt: '', updatedAt: '' },
+    { id: 3, userId, category: 'comment', enabled: true, emailEnabled: false, pushEnabled: true, createdAt: '', updatedAt: '' },
+    { id: 4, userId, category: 'system', enabled: true, emailEnabled: true, pushEnabled: true, createdAt: '', updatedAt: '' },
+    { id: 5, userId, category: 'reminder', enabled: true, emailEnabled: true, pushEnabled: true, createdAt: '', updatedAt: '' },
+    { id: 6, userId, category: 'plan', enabled: true, emailEnabled: true, pushEnabled: false, createdAt: '', updatedAt: '' },
+    { id: 7, userId, category: 'feedback', enabled: true, emailEnabled: false, pushEnabled: true, createdAt: '', updatedAt: '' }
+  ]
+
   // 模拟通知数据
   const getMockNotifications = (): Notification[] => [
     {
       id: 1,
       type: 'task_assigned',
+      category: 'task',
       title: '您有新的任务分配',
       content: '张经理将任务"市场调研报告撰写"分配给您',
-      time: dayjs().subtract(10, 'minute').toISOString(),
-      read: false,
-      link: '/tasks/1',
-      sender: { id: 1, name: '张经理' },
-      project: { id: 1, name: '2024年度市场推广项目' },
-      priority: 'high'
+      userId,
+      isRead: 0,
+      isPinned: true,
+      priority: 'high',
+      aiClassification: 'important',
+      aiScore: 85,
+      createdAt: dayjs().subtract(10, 'minute').toISOString(),
+      senderId: 1,
+      senderName: '张经理',
+      projectId: 1,
+      projectName: '2024年度市场推广项目',
+      actionUrl: '/tasks/1'
     },
     {
       id: 2,
       type: 'plan_approved',
+      category: 'plan',
       title: '工作计划已审批通过',
       content: '您提交的"Q1市场推广计划"已通过审批',
-      time: dayjs().subtract(30, 'minute').toISOString(),
-      read: false,
-      link: '/department-tasks/1',
-      sender: { id: 2, name: '李总监' },
-      project: { id: 1, name: '2024年度市场推广项目' }
+      userId,
+      isRead: 0,
+      priority: 'normal',
+      aiClassification: 'normal',
+      aiScore: 60,
+      createdAt: dayjs().subtract(30, 'minute').toISOString(),
+      senderId: 2,
+      senderName: '李总监',
+      projectId: 1,
+      projectName: '2024年度市场推广项目',
+      actionUrl: '/department-tasks/1'
     },
     {
       id: 3,
-      type: 'task_comment',
+      type: 'mention',
+      category: 'comment',
       title: '有人在任务中@了您',
       content: '@您 请帮忙审核一下这份报告的数据部分',
-      time: dayjs().subtract(1, 'hour').toISOString(),
-      read: false,
-      link: '/tasks/2',
-      sender: { id: 3, name: '王小明' },
-      project: { id: 1, name: '2024年度市场推广项目' }
+      userId,
+      isRead: 0,
+      isPinned: true,
+      priority: 'high',
+      aiClassification: 'important',
+      aiScore: 80,
+      createdAt: dayjs().subtract(1, 'hour').toISOString(),
+      senderId: 3,
+      senderName: '王小明',
+      projectId: 1,
+      projectName: '2024年度市场推广项目',
+      actionUrl: '/tasks/2'
     },
     {
       id: 4,
       type: 'milestone_due',
+      category: 'project',
       title: '里程碑即将到期',
       content: '里程碑"需求分析完成"将于明天到期',
-      time: dayjs().subtract(2, 'hour').toISOString(),
-      read: true,
-      link: '/projects/1',
-      project: { id: 1, name: '2024年度市场推广项目' },
-      priority: 'urgent'
+      userId,
+      isRead: 1,
+      priority: 'urgent',
+      aiClassification: 'important',
+      aiScore: 95,
+      createdAt: dayjs().subtract(2, 'hour').toISOString(),
+      projectId: 1,
+      projectName: '2024年度市场推广项目',
+      actionUrl: '/projects/1'
     },
     {
       id: 5,
       type: 'feedback_received',
+      category: 'feedback',
       title: '收到工作反馈',
       content: '张经理对您的工作进行了反馈评价',
-      time: dayjs().subtract(3, 'hour').toISOString(),
-      read: true,
-      link: '/department-tasks/1',
-      sender: { id: 1, name: '张经理' }
+      userId,
+      isRead: 1,
+      priority: 'normal',
+      aiClassification: 'normal',
+      aiScore: 55,
+      createdAt: dayjs().subtract(3, 'hour').toISOString(),
+      senderId: 1,
+      senderName: '张经理',
+      actionUrl: '/department-tasks/1'
     },
     {
       id: 6,
       type: 'task_overdue',
+      category: 'task',
       title: '任务已逾期',
       content: '任务"竞品分析文档"已逾期2天',
-      time: dayjs().subtract(1, 'day').toISOString(),
-      read: true,
-      link: '/tasks/3',
-      project: { id: 1, name: '2024年度市场推广项目' },
-      priority: 'urgent'
+      userId,
+      isRead: 1,
+      priority: 'urgent',
+      aiClassification: 'important',
+      aiScore: 90,
+      createdAt: dayjs().subtract(1, 'day').toISOString(),
+      projectId: 1,
+      projectName: '2024年度市场推广项目',
+      actionUrl: '/tasks/3'
     },
+    // 聚合通知示例
     {
       id: 7,
-      type: 'deliverable_uploaded',
-      title: '新交付物已上传',
-      content: '王小明上传了交付物"市场调研报告V1.0.docx"',
-      time: dayjs().subtract(1, 'day').toISOString(),
-      read: true,
-      link: '/tasks/1',
-      sender: { id: 3, name: '王小明' }
+      type: 'task_comment',
+      category: 'comment',
+      title: '任务评论更新',
+      content: '任务"市场调研报告"有3条新评论',
+      userId,
+      isRead: 0,
+      priority: 'low',
+      aiClassification: 'low_priority',
+      aiScore: 30,
+      groupKey: 'task_comment_1',
+      aggregatedCount: 3,
+      createdAt: dayjs().subtract(4, 'hour').toISOString(),
+      projectId: 1,
+      projectName: '2024年度市场推广项目',
+      actionUrl: '/tasks/1',
+      aggregatedNotifications: [
+        { id: 71, type: 'task_comment', category: 'comment', title: '新评论', content: '王小明: 数据已更新', userId, isRead: 0, priority: 'low', createdAt: dayjs().subtract(4, 'hour').toISOString() },
+        { id: 72, type: 'task_comment', category: 'comment', title: '新评论', content: '李工: 格式需要调整', userId, isRead: 0, priority: 'low', createdAt: dayjs().subtract(5, 'hour').toISOString() },
+        { id: 73, type: 'task_comment', category: 'comment', title: '新评论', content: '张经理: 已审阅', userId, isRead: 0, priority: 'low', createdAt: dayjs().subtract(6, 'hour').toISOString() }
+      ]
     },
     {
       id: 8,
       type: 'task_progress',
+      category: 'task',
       title: '任务进度更新',
       content: '任务"用户访谈记录整理"进度已更新至80%',
-      time: dayjs().subtract(2, 'day').toISOString(),
-      read: true,
-      link: '/tasks/4',
-      sender: { id: 4, name: '赵小红' }
+      userId,
+      isRead: 1,
+      isCollapsed: true,
+      priority: 'low',
+      aiClassification: 'low_priority',
+      aiScore: 25,
+      createdAt: dayjs().subtract(2, 'day').toISOString(),
+      senderId: 4,
+      senderName: '赵小红',
+      actionUrl: '/tasks/4'
     },
     {
       id: 9,
       type: 'member_joined',
+      category: 'project',
       title: '新成员加入项目',
       content: '刘工程师已加入项目"2024年度市场推广项目"',
-      time: dayjs().subtract(3, 'day').toISOString(),
-      read: true,
-      link: '/projects/1',
-      sender: { id: 5, name: '刘工程师' },
-      project: { id: 1, name: '2024年度市场推广项目' }
+      userId,
+      isRead: 1,
+      isCollapsed: true,
+      priority: 'low',
+      aiClassification: 'low_priority',
+      aiScore: 20,
+      createdAt: dayjs().subtract(3, 'day').toISOString(),
+      senderId: 5,
+      senderName: '刘工程师',
+      projectId: 1,
+      projectName: '2024年度市场推广项目',
+      actionUrl: '/projects/1'
     },
     {
       id: 10,
       type: 'system',
+      category: 'system',
       title: '系统维护通知',
       content: '系统将于本周六凌晨2:00-4:00进行维护升级',
-      time: dayjs().subtract(5, 'day').toISOString(),
-      read: true,
-      link: '#'
+      userId,
+      isRead: 1,
+      priority: 'normal',
+      aiClassification: 'normal',
+      aiScore: 40,
+      createdAt: dayjs().subtract(5, 'day').toISOString(),
+      actionUrl: '#'
     }
   ]
 
@@ -230,6 +354,7 @@ const NotificationsPage = () => {
       task_overdue: <ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />,
       task_comment: <CommentOutlined style={{ color: '#10b981' }} />,
       task_progress: <RiseOutlined style={{ color: '#1890ff' }} />,
+      comment_added: <CommentOutlined style={{ color: '#10b981' }} />,
       plan_submitted: <FileTextOutlined style={{ color: '#722ed1' }} />,
       plan_approved: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
       plan_rejected: <ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />,
@@ -240,48 +365,42 @@ const NotificationsPage = () => {
       project_update: <ProjectOutlined style={{ color: '#2b7de9' }} />,
       member_joined: <TeamOutlined style={{ color: '#722ed1' }} />,
       mention: <CommentOutlined style={{ color: '#eb2f96' }} />,
-      system: <AlertOutlined style={{ color: '#f59e0b' }} />,
-      issue: <IssuesCloseOutlined style={{ color: '#2b7de9' }} />,
-      comment: <CommentOutlined style={{ color: '#10b981' }} />,
-      merge: <MergeCellsOutlined style={{ color: '#8b5cf6' }} />
+      deadline_reminder: <ClockCircleOutlined style={{ color: '#fa8c16' }} />,
+      system: <AlertOutlined style={{ color: '#f59e0b' }} />
     }
     return iconMap[type] || <BellOutlined style={{ color: '#999' }} />
   }
 
-  const getTypeLabel = (type: NotificationType) => {
-    const labelMap: Record<NotificationType, string> = {
-      task_assigned: '任务分配',
-      task_completed: '任务完成',
-      task_overdue: '任务逾期',
-      task_comment: '任务评论',
-      task_progress: '进度更新',
-      plan_submitted: '计划提交',
-      plan_approved: '计划审批',
-      plan_rejected: '计划驳回',
-      feedback_received: '工作反馈',
-      milestone_reached: '里程碑达成',
-      milestone_due: '里程碑到期',
-      deliverable_uploaded: '交付物上传',
-      project_update: '项目更新',
-      member_joined: '成员加入',
-      mention: '@提及',
-      system: '系统通知',
-      issue: '事项通知',
-      comment: '评论通知',
-      merge: '合并通知'
-    }
-    return labelMap[type] || '通知'
-  }
-
-  const getPriorityTag = (priority?: string) => {
+  const getPriorityTag = (priority?: NotificationPriority) => {
     if (!priority) return null
-    const config: Record<string, { color: string; text: string }> = {
-      low: { color: 'green', text: '低' },
-      medium: { color: 'blue', text: '中' },
+    const config: Record<NotificationPriority, { color: string; text: string }> = {
+      low: { color: 'default', text: '低' },
+      normal: { color: 'blue', text: '普通' },
       high: { color: 'orange', text: '高' },
       urgent: { color: 'red', text: '紧急' }
     }
     return <Tag color={config[priority]?.color}>{config[priority]?.text}</Tag>
+  }
+
+  const getAIClassificationTag = (classification?: AIClassification, score?: number) => {
+    if (!classification) return null
+    const config: Record<AIClassification, { color: string; icon: React.ReactNode }> = {
+      important: { color: '#f5222d', icon: <StarFilled /> },
+      normal: { color: '#1890ff', icon: <StarOutlined /> },
+      low_priority: { color: '#8c8c8c', icon: <MinusCircleOutlined /> },
+      spam: { color: '#d9d9d9', icon: <EyeInvisibleOutlined /> }
+    }
+    return (
+      <Tooltip title={`AI评分: ${score || 0}`}>
+        <Tag 
+          icon={<RobotOutlined />} 
+          color={config[classification]?.color}
+          style={{ marginLeft: 4 }}
+        >
+          {notificationApi.AI_CLASSIFICATION_LABELS[classification]}
+        </Tag>
+      </Tooltip>
+    )
   }
 
   const formatTime = (time: string) => {
@@ -297,11 +416,55 @@ const NotificationsPage = () => {
     }
   }
 
+  // 置顶/取消置顶
+  const handleTogglePin = async (notification: Notification) => {
+    try {
+      if (notification.isPinned) {
+        await notificationApi.unpinNotification(notification.id)
+      } else {
+        await notificationApi.pinNotification(notification.id)
+      }
+      setNotifications(notifications.map(n =>
+        n.id === notification.id ? { ...n, isPinned: !n.isPinned } : n
+      ))
+      message.success(notification.isPinned ? '已取消置顶' : '已置顶')
+    } catch (error) {
+      console.error('Failed to toggle pin:', error)
+    }
+  }
+
+  // 折叠/展开
+  const handleToggleCollapse = async (notification: Notification) => {
+    try {
+      if (notification.isCollapsed) {
+        await notificationApi.expandNotification(notification.id)
+      } else {
+        await notificationApi.collapseNotification(notification.id)
+      }
+      setNotifications(notifications.map(n =>
+        n.id === notification.id ? { ...n, isCollapsed: !n.isCollapsed } : n
+      ))
+    } catch (error) {
+      console.error('Failed to toggle collapse:', error)
+    }
+  }
+
+  // 展开/折叠聚合组
+  const handleToggleGroup = (groupKey: string) => {
+    const newCollapsed = new Set(collapsedGroups)
+    if (newCollapsed.has(groupKey)) {
+      newCollapsed.delete(groupKey)
+    } else {
+      newCollapsed.add(groupKey)
+    }
+    setCollapsedGroups(newCollapsed)
+  }
+
   const handleMarkAsRead = async (id: number) => {
     try {
       await notificationApi.markAsRead(id)
       setNotifications(notifications.map(n =>
-        n.id === id ? { ...n, read: true } : n
+        n.id === id ? { ...n, isRead: 1 } : n
       ))
       message.success('已标记为已读')
     } catch (error) {
@@ -311,8 +474,8 @@ const NotificationsPage = () => {
 
   const handleMarkAllAsRead = async () => {
     try {
-      await notificationApi.markAllAsRead()
-      setNotifications(notifications.map(n => ({ ...n, read: true })))
+      await notificationApi.markAllAsRead(userId)
+      setNotifications(notifications.map(n => ({ ...n, isRead: 1 })))
       message.success('已全部标记为已读')
     } catch (error) {
       console.error('Failed to mark all as read:', error)
@@ -321,6 +484,7 @@ const NotificationsPage = () => {
 
   const handleDelete = async (id: number) => {
     try {
+      await notificationApi.deleteNotification(id)
       setNotifications(notifications.filter(n => n.id !== id))
       message.success('通知已删除')
     } catch (error) {
@@ -334,9 +498,14 @@ const NotificationsPage = () => {
       content: '确定要清空所有通知吗？此操作不可恢复。',
       okText: '确认',
       cancelText: '取消',
-      onOk: () => {
-        setNotifications([])
-        message.success('已清空所有通知')
+      onOk: async () => {
+        try {
+          await notificationApi.batchDeleteNotifications(notifications.map(n => n.id))
+          setNotifications([])
+          message.success('已清空所有通知')
+        } catch (error) {
+          console.error('Failed to clear all:', error)
+        }
       }
     })
   }
@@ -349,44 +518,296 @@ const NotificationsPage = () => {
   }
 
   const handleNotificationClick = (notification: Notification) => {
-    if (!notification.read) {
+    if (!notification.isRead) {
       handleMarkAsRead(notification.id)
     }
-    if (notification.link && notification.link !== '#') {
-      navigate(notification.link)
+    if (notification.actionUrl && notification.actionUrl !== '#') {
+      navigate(notification.actionUrl)
+    }
+  }
+
+  // 快速开启免打扰
+  const handleQuickDnd = async (duration: number) => {
+    try {
+      await notificationApi.enableDoNotDisturb(userId, duration)
+      setDndActive(true)
+      message.success(duration === -1 ? '已开启免打扰模式' : `已开启免打扰模式 ${notificationApi.DND_DURATION_OPTIONS.find(o => o.value === duration)?.label}`)
+    } catch (error) {
+      console.error('Failed to enable DND:', error)
+    }
+  }
+
+  // 关闭免打扰
+  const handleDisableDnd = async () => {
+    try {
+      await notificationApi.disableDoNotDisturb(userId)
+      setDndActive(false)
+      message.success('已关闭免打扰模式')
+    } catch (error) {
+      console.error('Failed to disable DND:', error)
+    }
+  }
+
+  // 保存免打扰设置
+  const handleSaveDndSettings = async () => {
+    try {
+      const values = await dndForm.validateFields()
+      await notificationApi.updateDoNotDisturbSettings(userId, {
+        enabled: values.enabled,
+        startTime: values.timeRange?.[0]?.format('HH:mm') || '22:00',
+        endTime: values.timeRange?.[1]?.format('HH:mm') || '08:00',
+        weekdays: values.weekdays || [0, 1, 2, 3, 4, 5, 6],
+        allowUrgent: values.allowUrgent,
+        allowMentions: values.allowMentions
+      })
+      message.success('免打扰设置已保存')
+      setDndVisible(false)
+      loadSettings()
+    } catch (error) {
+      console.error('Failed to save DND settings:', error)
+    }
+  }
+
+  // 保存偏好设置
+  const handleSavePreferences = async () => {
+    try {
+      const values = await form.validateFields()
+      await notificationApi.updateNotificationPreferences(userId, values)
+      message.success('设置已保存')
+      setSettingsVisible(false)
+      loadSettings()
+    } catch (error) {
+      console.error('Failed to save preferences:', error)
+    }
+  }
+
+  // 更新订阅
+  const handleUpdateSubscription = async (sub: NotificationSubscription, field: string, value: boolean) => {
+    try {
+      await notificationApi.updateSubscription(sub.id, { [field]: value })
+      setSubscriptions(subscriptions.map(s =>
+        s.id === sub.id ? { ...s, [field]: value } : s
+      ))
+    } catch (error) {
+      console.error('Failed to update subscription:', error)
+    }
+  }
+
+  // 批量折叠低优先级
+  const handleCollapseLowPriority = async () => {
+    try {
+      await notificationApi.collapseLowPriorityNotifications(userId)
+      setNotifications(notifications.map(n =>
+        n.aiClassification === 'low_priority' ? { ...n, isCollapsed: true } : n
+      ))
+      message.success('已折叠低优先级通知')
+    } catch (error) {
+      console.error('Failed to collapse low priority:', error)
     }
   }
 
   // 根据类型分组筛选
   const getFilteredNotifications = () => {
-    if (activeTab === 'all') return notifications
-    if (activeTab === 'unread') return notifications.filter(n => !n.read)
-    
-    // 按类型分组
-    const typeGroups: Record<string, NotificationType[]> = {
-      task: ['task_assigned', 'task_completed', 'task_overdue', 'task_comment', 'task_progress'],
-      plan: ['plan_submitted', 'plan_approved', 'plan_rejected'],
-      project: ['project_update', 'milestone_reached', 'milestone_due', 'member_joined', 'deliverable_uploaded'],
-      feedback: ['feedback_received', 'mention'],
-      system: ['system']
+    let filtered = notifications
+
+    // 按标签筛选
+    if (activeTab === 'unread') {
+      filtered = filtered.filter(n => !n.isRead)
+    } else if (activeTab === 'pinned') {
+      filtered = filtered.filter(n => n.isPinned)
+    } else if (activeTab === 'important') {
+      filtered = filtered.filter(n => n.aiClassification === 'important' || n.priority === 'urgent' || n.priority === 'high')
+    } else if (activeTab !== 'all') {
+      // 按分类筛选
+      const categoryMap: Record<string, NotificationCategory[]> = {
+        task: ['task'],
+        plan: ['plan'],
+        project: ['project'],
+        feedback: ['feedback', 'comment'],
+        system: ['system', 'reminder']
+      }
+      const categories = categoryMap[activeTab] || [activeTab as NotificationCategory]
+      filtered = filtered.filter(n => categories.includes(n.category))
     }
-    
-    const types = typeGroups[activeTab] || [activeTab as NotificationType]
-    return notifications.filter(n => types.includes(n.type))
+
+    // 是否显示低优先级
+    if (!showLowPriority) {
+      filtered = filtered.filter(n => !n.isCollapsed)
+    }
+
+    // 排序：置顶优先，然后按时间
+    filtered.sort((a, b) => {
+      if (a.isPinned && !b.isPinned) return -1
+      if (!a.isPinned && b.isPinned) return 1
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    })
+
+    return filtered
   }
 
   const filteredNotifications = getFilteredNotifications()
-  const unreadCount = notifications.filter(n => !n.read).length
+  const unreadCount = notifications.filter(n => !n.isRead).length
+  const pinnedCount = notifications.filter(n => n.isPinned).length
+  const importantCount = notifications.filter(n => n.aiClassification === 'important' || n.priority === 'urgent').length
+  const collapsedCount = notifications.filter(n => n.isCollapsed).length
 
   const tabItems = [
     { key: 'all', label: `全部 (${notifications.length})` },
     { key: 'unread', label: <Badge count={unreadCount} size="small" offset={[8, 0]}>未读</Badge> },
+    { key: 'pinned', label: <><PushpinOutlined /> 置顶 ({pinnedCount})</> },
+    { key: 'important', label: <><StarOutlined /> 重要 ({importantCount})</> },
     { key: 'task', label: '任务' },
-    { key: 'plan', label: '计划审批' },
+    { key: 'plan', label: '计划' },
     { key: 'project', label: '项目' },
     { key: 'feedback', label: '反馈' },
     { key: 'system', label: '系统' },
   ]
+
+  // 渲染通知项
+  const renderNotificationItem = (item: Notification) => {
+    const isGroupExpanded = item.groupKey && !collapsedGroups.has(item.groupKey)
+
+    return (
+      <List.Item
+        key={item.id}
+        className={`${styles.notificationItem} ${!item.isRead ? styles.unread : ''} ${item.isPinned ? styles.pinned : ''} ${item.isCollapsed ? styles.collapsed : ''}`}
+        onClick={() => handleNotificationClick(item)}
+      >
+        <div className={styles.notificationContent}>
+          {/* 置顶标记 */}
+          {item.isPinned && (
+            <div className={styles.pinnedBadge}>
+              <PushpinFilled />
+            </div>
+          )}
+          
+          <div className={styles.iconWrapper}>
+            {getTypeIcon(item.type)}
+          </div>
+          
+          <div className={styles.mainContent}>
+            <div className={styles.notificationHeader}>
+              <span className={styles.notificationTitle}>
+                {!item.isRead && <Badge status="processing" />}
+                {item.title}
+                {item.aggregatedCount && item.aggregatedCount > 1 && (
+                  <Tag color="blue" style={{ marginLeft: 8 }}>
+                    <MergeCellsOutlined /> {item.aggregatedCount}条
+                  </Tag>
+                )}
+              </span>
+              <Space size={4}>
+                {getPriorityTag(item.priority)}
+                {getAIClassificationTag(item.aiClassification, item.aiScore)}
+              </Space>
+            </div>
+            
+            {item.content && (
+              <p className={styles.notificationDesc}>{item.content}</p>
+            )}
+            
+            {/* 聚合通知展开 */}
+            {item.aggregatedNotifications && item.aggregatedNotifications.length > 0 && (
+              <div className={styles.aggregatedSection}>
+                <Button 
+                  type="link" 
+                  size="small"
+                  icon={isGroupExpanded ? <CaretDownOutlined /> : <CaretRightOutlined />}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleToggleGroup(item.groupKey!)
+                  }}
+                >
+                  {isGroupExpanded ? '收起' : '展开'} {item.aggregatedNotifications.length} 条通知
+                </Button>
+                {isGroupExpanded && (
+                  <div className={styles.aggregatedList}>
+                    {item.aggregatedNotifications.map(sub => (
+                      <div key={sub.id} className={styles.aggregatedItem}>
+                        <span className={styles.aggregatedContent}>{sub.content}</span>
+                        <span className={styles.aggregatedTime}>{formatTime(sub.createdAt)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            
+            <div className={styles.notificationMeta}>
+              {item.senderName && (
+                <span className={styles.sender}>
+                  <Avatar size="small">{item.senderName.charAt(0)}</Avatar>
+                  {item.senderName}
+                </span>
+              )}
+              {item.projectName && (
+                <span className={styles.project}>
+                  <ProjectOutlined /> {item.projectName}
+                </span>
+              )}
+              <span className={styles.time}>
+                <ClockCircleOutlined /> {formatTime(item.createdAt)}
+              </span>
+            </div>
+          </div>
+          
+          <div className={styles.actions}>
+            <Dropdown
+              menu={{
+                items: [
+                  {
+                    key: 'pin',
+                    label: item.isPinned ? '取消置顶' : '置顶',
+                    icon: item.isPinned ? <PushpinOutlined /> : <PushpinFilled />,
+                    onClick: (info: MenuInfo) => {
+                      info.domEvent.stopPropagation()
+                      handleTogglePin(item)
+                    }
+                  },
+                  !item.isRead && {
+                    key: 'read',
+                    label: '标为已读',
+                    icon: <CheckOutlined />,
+                    onClick: (info: MenuInfo) => {
+                      info.domEvent.stopPropagation()
+                      handleMarkAsRead(item.id)
+                    }
+                  },
+                  {
+                    key: 'collapse',
+                    label: item.isCollapsed ? '展开' : '折叠',
+                    icon: item.isCollapsed ? <UpOutlined /> : <DownOutlined />,
+                    onClick: (info: MenuInfo) => {
+                      info.domEvent.stopPropagation()
+                      handleToggleCollapse(item)
+                    }
+                  },
+                  { type: 'divider' },
+                  {
+                    key: 'delete',
+                    label: '删除',
+                    icon: <DeleteOutlined />,
+                    danger: true,
+                    onClick: (info: MenuInfo) => {
+                      info.domEvent.stopPropagation()
+                      handleDelete(item.id)
+                    }
+                  }
+                ].filter(Boolean) as any
+              }}
+              trigger={['click']}
+            >
+              <Button 
+                type="text" 
+                icon={<MoreOutlined />} 
+                onClick={(e) => e.stopPropagation()}
+              />
+            </Dropdown>
+          </div>
+        </div>
+      </List.Item>
+    )
+  }
 
   if (loading) {
     return (
@@ -407,6 +828,11 @@ const NotificationsPage = () => {
             {unreadCount > 0 && (
               <Badge count={unreadCount} style={{ marginLeft: 8 }} />
             )}
+            {dndActive && (
+              <Tag icon={<EyeInvisibleOutlined />} color="warning" style={{ marginLeft: 8 }}>
+                免打扰
+              </Tag>
+            )}
           </div>
           <Space>
             <Button 
@@ -422,6 +848,41 @@ const NotificationsPage = () => {
             >
               全部已读
             </Button>
+            <Popover
+              content={
+                <div className={styles.dndQuickMenu}>
+                  <div className={styles.dndQuickTitle}>快速免打扰</div>
+                  {notificationApi.DND_DURATION_OPTIONS.map(option => (
+                    <Button 
+                      key={option.value}
+                      type="text" 
+                      block
+                      onClick={() => handleQuickDnd(option.value)}
+                    >
+                      {option.label}
+                    </Button>
+                  ))}
+                  {dndActive && (
+                    <>
+                      <Divider style={{ margin: '8px 0' }} />
+                      <Button type="text" block danger onClick={handleDisableDnd}>
+                        关闭免打扰
+                      </Button>
+                    </>
+                  )}
+                  <Divider style={{ margin: '8px 0' }} />
+                  <Button type="link" block onClick={() => setDndVisible(true)}>
+                    免打扰设置
+                  </Button>
+                </div>
+              }
+              trigger="click"
+              placement="bottomRight"
+            >
+              <Button icon={<EyeInvisibleOutlined />}>
+                免打扰
+              </Button>
+            </Popover>
             <Button 
               icon={<DeleteOutlined />} 
               onClick={handleClearAll}
@@ -429,9 +890,32 @@ const NotificationsPage = () => {
             >
               清空
             </Button>
-            <Button icon={<SettingOutlined />}>
+            <Button icon={<SettingOutlined />} onClick={() => setSettingsVisible(true)}>
               设置
             </Button>
+          </Space>
+        </div>
+
+        {/* 工具栏 */}
+        <div className={styles.toolbar}>
+          <Space>
+            <Button 
+              size="small"
+              icon={<DownOutlined />}
+              onClick={handleCollapseLowPriority}
+            >
+              折叠低优先级
+            </Button>
+            <Switch
+              size="small"
+              checked={showLowPriority}
+              onChange={setShowLowPriority}
+              checkedChildren="显示已折叠"
+              unCheckedChildren="隐藏已折叠"
+            />
+            {collapsedCount > 0 && (
+              <Tag>{collapsedCount} 条已折叠</Tag>
+            )}
           </Space>
         </div>
 
@@ -450,86 +934,151 @@ const NotificationsPage = () => {
           <List
             itemLayout="horizontal"
             dataSource={filteredNotifications}
-            renderItem={(item) => (
-              <List.Item
-                className={`${styles.notificationItem} ${!item.read ? styles.unread : ''}`}
-                onClick={() => handleNotificationClick(item)}
-              >
-                <div className={styles.notificationContent}>
-                  <div className={styles.iconWrapper}>
-                    {getTypeIcon(item.type)}
-                  </div>
-                  <div className={styles.mainContent}>
-                    <div className={styles.notificationHeader}>
-                      <span className={styles.notificationTitle}>
-                        {!item.read && <Badge status="processing" />}
-                        {item.title}
-                      </span>
-                      <Space size={8}>
-                        {getPriorityTag(item.priority)}
-                        <Tag>{getTypeLabel(item.type)}</Tag>
-                      </Space>
-                    </div>
-                    {item.content && (
-                      <p className={styles.notificationDesc}>{item.content}</p>
-                    )}
-                    <div className={styles.notificationMeta}>
-                      {item.sender && (
-                        <span className={styles.sender}>
-                          <Avatar size="small" src={item.sender.avatar}>
-                            {item.sender.name.charAt(0)}
-                          </Avatar>
-                          {item.sender.name}
-                        </span>
-                      )}
-                      {item.project && (
-                        <span className={styles.project}>
-                          <ProjectOutlined /> {item.project.name}
-                        </span>
-                      )}
-                      <span className={styles.time}>
-                        <ClockCircleOutlined /> {formatTime(item.time)}
-                      </span>
-                    </div>
-                  </div>
-                  <div className={styles.actions}>
-                    <Dropdown
-                      menu={{
-                        items: [
-                          !item.read && {
-                            key: 'read',
-                            label: '标为已读',
-                            onClick: (info: MenuInfo) => {
-                              info.domEvent.stopPropagation()
-                              handleMarkAsRead(item.id)
-                            }
-                          },
-                          {
-                            key: 'delete',
-                            label: '删除',
-                            danger: true,
-                            onClick: (info: MenuInfo) => {
-                              info.domEvent.stopPropagation()
-                              handleDelete(item.id)
-                            }
-                          }
-                        ].filter(Boolean) as any
-                      }}
-                      trigger={['click']}
-                    >
-                      <Button 
-                        type="text" 
-                        icon={<MoreOutlined />} 
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    </Dropdown>
-                  </div>
-                </div>
-              </List.Item>
-            )}
+            renderItem={renderNotificationItem}
           />
         )}
       </Card>
+
+      {/* 设置弹窗 */}
+      <Modal
+        title="通知设置"
+        open={settingsVisible}
+        onCancel={() => setSettingsVisible(false)}
+        onOk={handleSavePreferences}
+        width={600}
+      >
+        <Tabs defaultActiveKey="preferences">
+          <Tabs.TabPane tab="偏好设置" key="preferences">
+            <Form
+              form={form}
+              layout="vertical"
+              initialValues={preferences || notificationApi.DEFAULT_NOTIFICATION_PREFERENCES}
+            >
+              <Divider orientation="left">聚合设置</Divider>
+              <Form.Item name="enableAggregation" valuePropName="checked" label="启用通知聚合">
+                <Switch />
+              </Form.Item>
+              <Form.Item name="aggregationInterval" label="聚合间隔（分钟）">
+                <Slider min={5} max={120} step={5} marks={{ 5: '5', 30: '30', 60: '60', 120: '120' }} />
+              </Form.Item>
+
+              <Divider orientation="left">智能分类</Divider>
+              <Form.Item name="enableAIClassification" valuePropName="checked" label="启用AI智能分类">
+                <Switch />
+              </Form.Item>
+              <Form.Item name="autoCollapseThreshold" label="自动折叠阈值（AI评分低于此值自动折叠）">
+                <Slider min={0} max={100} step={5} marks={{ 0: '0', 30: '30', 50: '50', 100: '100' }} />
+              </Form.Item>
+
+              <Divider orientation="left">置顶设置</Divider>
+              <Form.Item name="autoPinUrgent" valuePropName="checked" label="自动置顶紧急通知">
+                <Switch />
+              </Form.Item>
+              <Form.Item name="autoPinMentions" valuePropName="checked" label="自动置顶@提及">
+                <Switch />
+              </Form.Item>
+
+              <Divider orientation="left">显示设置</Divider>
+              <Form.Item name="showLowPriorityCollapsed" valuePropName="checked" label="低优先级默认折叠">
+                <Switch />
+              </Form.Item>
+              <Form.Item name="maxVisibleNotifications" label="最大显示数量">
+                <Slider min={10} max={200} step={10} marks={{ 10: '10', 50: '50', 100: '100', 200: '200' }} />
+              </Form.Item>
+            </Form>
+          </Tabs.TabPane>
+
+          <Tabs.TabPane tab="订阅管理" key="subscriptions">
+            <List
+              dataSource={subscriptions}
+              renderItem={sub => (
+                <List.Item>
+                  <div className={styles.subscriptionItem}>
+                    <div className={styles.subscriptionInfo}>
+                      <span className={styles.subscriptionCategory}>
+                        {notificationApi.NOTIFICATION_CATEGORY_LABELS[sub.category]}
+                      </span>
+                    </div>
+                    <Space>
+                      <Tooltip title="启用通知">
+                        <Switch
+                          size="small"
+                          checked={sub.enabled}
+                          onChange={(checked) => handleUpdateSubscription(sub, 'enabled', checked)}
+                        />
+                      </Tooltip>
+                      <Tooltip title="邮件通知">
+                        <Button
+                          type={sub.emailEnabled ? 'primary' : 'default'}
+                          size="small"
+                          icon={<MailOutlined />}
+                          onClick={() => handleUpdateSubscription(sub, 'emailEnabled', !sub.emailEnabled)}
+                        />
+                      </Tooltip>
+                      <Tooltip title="推送通知">
+                        <Button
+                          type={sub.pushEnabled ? 'primary' : 'default'}
+                          size="small"
+                          icon={<MobileOutlined />}
+                          onClick={() => handleUpdateSubscription(sub, 'pushEnabled', !sub.pushEnabled)}
+                        />
+                      </Tooltip>
+                    </Space>
+                  </div>
+                </List.Item>
+              )}
+            />
+          </Tabs.TabPane>
+        </Tabs>
+      </Modal>
+
+      {/* 免打扰设置弹窗 */}
+      <Modal
+        title="免打扰设置"
+        open={dndVisible}
+        onCancel={() => setDndVisible(false)}
+        onOk={handleSaveDndSettings}
+      >
+        <Form
+          form={dndForm}
+          layout="vertical"
+          initialValues={{
+            enabled: dndSettings?.enabled,
+            timeRange: dndSettings ? [
+              dayjs(dndSettings.startTime, 'HH:mm'),
+              dayjs(dndSettings.endTime, 'HH:mm')
+            ] : undefined,
+            weekdays: dndSettings?.weekdays || [0, 1, 2, 3, 4, 5, 6],
+            allowUrgent: dndSettings?.allowUrgent ?? true,
+            allowMentions: dndSettings?.allowMentions ?? true
+          }}
+        >
+          <Form.Item name="enabled" valuePropName="checked" label="启用定时免打扰">
+            <Switch />
+          </Form.Item>
+          <Form.Item name="timeRange" label="免打扰时段">
+            <TimePicker.RangePicker format="HH:mm" />
+          </Form.Item>
+          <Form.Item name="weekdays" label="生效日期">
+            <Checkbox.Group>
+              <Checkbox value={1}>周一</Checkbox>
+              <Checkbox value={2}>周二</Checkbox>
+              <Checkbox value={3}>周三</Checkbox>
+              <Checkbox value={4}>周四</Checkbox>
+              <Checkbox value={5}>周五</Checkbox>
+              <Checkbox value={6}>周六</Checkbox>
+              <Checkbox value={0}>周日</Checkbox>
+            </Checkbox.Group>
+          </Form.Item>
+          <Divider orientation="left">例外设置</Divider>
+          <Form.Item name="allowUrgent" valuePropName="checked" label="允许紧急通知">
+            <Switch />
+          </Form.Item>
+          <Form.Item name="allowMentions" valuePropName="checked" label="允许@提及通知">
+            <Switch />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   )
 }

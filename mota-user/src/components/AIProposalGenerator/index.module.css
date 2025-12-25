@@ -1,0 +1,202 @@
+.container {
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.header h4 {
+  margin: 0;
+}
+
+.generatePanel {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 16px;
+  min-height: 500px;
+}
+
+.inputSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.messagesContainer {
+  flex: 1;
+  min-height: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: #fafafa;
+}
+
+.message {
+  margin-bottom: 16px;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.userMessage {
+  background: #e6f7ff;
+  margin-left: 40px;
+}
+
+.assistantMessage {
+  background: #f6ffed;
+  margin-right: 40px;
+}
+
+.messageHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.timestamp {
+  font-size: 12px;
+}
+
+.messageContent {
+  line-height: 1.6;
+}
+
+.messageContent pre {
+  background: #f5f5f5;
+  padding: 12px;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+.optimizeButtons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.inputArea {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.inputArea textarea {
+  flex: 1;
+}
+
+.sendButton {
+  height: 80px;
+}
+
+.sidePanel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.evaluationCard {
+  background: #fafafa;
+}
+
+.evaluationScores {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.scoreItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scoreItem > span:first-child {
+  font-weight: 500;
+}
+
+.suggestionList {
+  margin: 8px 0 0 0;
+  padding-left: 20px;
+}
+
+.suggestionList li {
+  margin-bottom: 4px;
+  color: #666;
+}
+
+.actionsCard {
+  background: #fafafa;
+}
+
+.loadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+/* 响应式布局 */
+@media (max-width: 768px) {
+  .generatePanel {
+    grid-template-columns: 1fr;
+  }
+
+  .sidePanel {
+    order: -1;
+  }
+
+  .userMessage {
+    margin-left: 0;
+  }
+
+  .assistantMessage {
+    margin-right: 0;
+  }
+
+  .inputArea {
+    flex-direction: column;
+  }
+
+  .sendButton {
+    width: 100%;
+    height: auto;
+  }
+}
+
+/* 暗色主题支持 */
+:global(.dark) .messagesContainer {
+  background: #1f1f1f;
+  border-color: #303030;
+}
+
+:global(.dark) .userMessage {
+  background: #111d2c;
+}
+
+:global(.dark) .assistantMessage {
+  background: #162312;
+}
+
+:global(.dark) .evaluationCard,
+:global(.dark) .actionsCard {
+  background: #1f1f1f;
+}
+
+:global(.dark) .loadingOverlay {
+  background: rgba(0, 0, 0, 0.8);
+}

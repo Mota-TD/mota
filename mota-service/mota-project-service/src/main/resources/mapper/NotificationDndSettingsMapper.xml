@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mota.project.mapper.NotificationDndSettingsMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="DndSettingsResultMap" type="com.mota.project.entity.NotificationDndSettings">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="enabled" property="enabled"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="weekdays" property="weekdays"/>
+        <result column="allow_urgent" property="allowUrgent"/>
+        <result column="allow_mentions" property="allowMentions"/>
+        <result column="temp_enabled" property="tempEnabled"/>
+        <result column="temp_end_time" property="tempEndTime"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <!-- 根据用户ID获取免打扰设置 -->
+    <select id="selectByUserId" resultMap="DndSettingsResultMap">
+        SELECT * FROM notification_dnd_settings
+        WHERE user_id = #{userId}
+        LIMIT 1
+    </select>
+
+    <!-- 更新定时免打扰设置 -->
+    <update id="updateScheduledDnd">
+        UPDATE notification_dnd_settings
+        SET enabled = #{enabled},
+            start_time = #{startTime},
+            end_time = #{endTime},
+            weekdays = #{weekdays},
+            allow_urgent = #{allowUrgent},
+            allow_mentions = #{allowMentions},
+            updated_at = NOW()
+        WHERE user_id = #{userId}
+    </update>
+
+    <!-- 启用临时免打扰 -->
+    <update id="enableTempDnd">
+        UPDATE notification_dnd_settings
+        SET temp_enabled = 1,
+            temp_end_time = #{tempEndTime},
+            updated_at = NOW()
+        WHERE user_id = #{userId}
+    </update>
+
+    <!-- 关闭临时免打扰 -->
+    <update id="disableTempDnd">
+        UPDATE notification_dnd_settings
+        SET temp_enabled = 0,
+            temp_end_time = NULL,
+            updated_at = NOW()
+        WHERE user_id = #{userId}
+    </update>
+
+    <!-- 检查用户是否在免打扰时段 -->
+    <select id="checkDndActive" resultType="boolean">
+        SELECT 
+            CASE 
+                -- 临时免打扰生效
+                WHEN temp_enabled = 1 AND temp_end_time > NOW() THEN 1
+                -- 定时免打扰生效
+                WHEN enabled = 1 
+                    AND FIND_IN_SET(DAYOFWEEK(NOW()) - 1, weekdays) > 0
+                    AND (
+                        (start_time &lt; end_time AND TIME(NOW()) BETWEEN start_time AND end_time)
+                        OR (start_time > end_time AND (TIME(NOW()) >= start_time OR TIME(NOW()) &lt;= end_time))
+                    )
+                THEN 1
+                ELSE 0
+            END as is_active
+        FROM notification_dnd_settings
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- 插入或更新设置 -->
+    <insert id="insertOrUpdate">
+        INSERT INTO notification_dnd_settings (
+            user_id, enabled, start_time, end_time, weekdays,
+            allow_urgent, allow_mentions, temp_enabled, temp_end_time,
+            created_at, updated_at
+        ) VALUES (
+            #{userId}, #{enabled}, #{startTime}, #{endTime}, #{weekdays},
+            #{allowUrgent}, #{allowMentions}, #{tempEnabled}, #{tempEndTime},
+            NOW(), NOW()
+        )
+        ON DUPLICATE KEY UPDATE
+            enabled = VALUES(enabled),
+            start_time = VALUES(start_time),
+            end_time = VALUES(end_time),
+            weekdays = VALUES(weekdays),
+            allow_urgent = VALUES(allow_urgent),
+            allow_mentions = VALUES(allow_mentions),
+            temp_enabled = VALUES(temp_enabled),
+            temp_end_time = VALUES(temp_end_time),
+            updated_at = NOW()
+    </insert>
+
+</mapper>

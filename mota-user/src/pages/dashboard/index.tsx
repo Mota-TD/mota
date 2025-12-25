@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react'
-import { Card, Row, Col, List, Avatar, Tag, Progress, Typography, Spin, Button, Input } from 'antd'
+import { Card, Row, Col, List, Avatar, Tag, Progress, Typography, Spin, Button, Input, Tabs } from 'antd'
 import {
   ProjectOutlined,
   UnorderedListOutlined,
@@ -16,13 +16,19 @@ import {
   SendOutlined,
   ArrowRightOutlined,
   FireOutlined,
-  TrophyOutlined
+  TrophyOutlined,
+  LineChartOutlined,
+  ReadOutlined
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import * as projectApi from '@/services/api/project'
 import * as taskApi from '@/services/api/task'
 import * as activityApi from '@/services/api/activity'
 import * as aiApi from '@/services/api/ai'
+import { useAuthStore } from '@/store/auth'
+import NewsFeed from '@/components/NewsFeed'
+import BurndownChart from '@/components/BurndownChart'
+import dayjs from 'dayjs'
 import styles from './index.module.css'
 
 const { Title, Text } = Typography
@@ -116,8 +122,10 @@ const getRandomGreeting = () => {
  */
 const Dashboard = () => {
   const navigate = useNavigate()
+  const { user } = useAuthStore()
   const [loading, setLoading] = useState(true)
   const [aiInput, setAiInput] = useState('')
+  const [activeOverviewTab, setActiveOverviewTab] = useState('tasks')
   const [stats, setStats] = useState({
     totalProjects: 0,
     totalTasks: 0,
@@ -515,80 +523,148 @@ const Dashboard = () => {
         </Col>
       </Row>
 
-      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
-        {/* 新闻追踪 */}
-        <Col xs={24} lg={12}>
-          <Card
-            title={
-              <div className={styles.cardTitle}>
-                <GlobalOutlined className={styles.cardTitleIcon} />
-                <span>新闻追踪</span>
-              </div>
-            }
-            extra={<a onClick={() => navigate('/ai/news')}>更多 <ArrowRightOutlined /></a>}
-            className={styles.newsCard}
-          >
-            <List
-              dataSource={news}
-              renderItem={(item: any) => (
-                <List.Item className={styles.newsItem}>
-                  <div className={styles.newsContent}>
-                    <div className={styles.newsTitle}>{item.title}</div>
-                    <div className={styles.newsMeta}>
-                      <Tag color="blue">{item.category}</Tag>
-                      <Text type="secondary" style={{ fontSize: 12 }}>{item.source} · {item.publishTime}</Text>
-                    </div>
-                  </div>
-                </List.Item>
-              )}
-              locale={{ emptyText: '暂无新闻' }}
-            />
-          </Card>
-        </Col>
+      {/* 数据概览标签页 */}
+      <Card className={styles.overviewCard} style={{ marginTop: 16 }}>
+        <Tabs
+          activeKey={activeOverviewTab}
+          onChange={setActiveOverviewTab}
+          items={[
+            {
+              key: 'tasks',
+              label: (
+                <span>
+                  <UnorderedListOutlined /> 任务动态
+                </span>
+              ),
+              children: (
+                <Row gutter={[16, 16]}>
+                  {/* 新闻追踪 */}
+                  <Col xs={24} lg={12}>
+                    <Card
+                      title={
+                        <div className={styles.cardTitle}>
+                          <GlobalOutlined className={styles.cardTitleIcon} />
+                          <span>新闻追踪</span>
+                        </div>
+                      }
+                      extra={<a onClick={() => navigate('/ai/news')}>更多 <ArrowRightOutlined /></a>}
+                      className={styles.newsCard}
+                    >
+                      <List
+                        dataSource={news}
+                        renderItem={(item: any) => (
+                          <List.Item className={styles.newsItem}>
+                            <div className={styles.newsContent}>
+                              <div className={styles.newsTitle}>{item.title}</div>
+                              <div className={styles.newsMeta}>
+                                <Tag color="blue">{item.category}</Tag>
+                                <Text type="secondary" style={{ fontSize: 12 }}>{item.source} · {item.publishTime}</Text>
+                              </div>
+                            </div>
+                          </List.Item>
+                        )}
+                        locale={{ emptyText: '暂无新闻' }}
+                      />
+                    </Card>
+                  </Col>
 
-        {/* 动态 */}
-        <Col xs={24} lg={12}>
-          <Card
-            title={
-              <div className={styles.cardTitle}>
-                <CalendarOutlined className={styles.cardTitleIcon} />
-                <span>最近动态</span>
-              </div>
-            }
-            className={styles.activityCard}
-          >
-            <List
-              dataSource={activities}
-              renderItem={(item: any) => (
-                <List.Item className={styles.activityItem}>
-                  <List.Item.Meta
-                    avatar={
-                      <Avatar style={{ backgroundColor: '#002FA7' }}>
-                        {getActivityIcon(item.type)}
-                      </Avatar>
-                    }
-                    title={
-                      <span>
-                        <Text strong>{item.user?.name || '用户'}</Text>
-                        <Text type="secondary"> {item.action}</Text>
-                      </span>
-                    }
-                    description={
-                      <div className={styles.activityMeta}>
-                        <Text type="secondary">{item.target}</Text>
-                        <Text type="secondary" className={styles.activityTime}>
-                          <CalendarOutlined /> {item.time}
-                        </Text>
-                      </div>
-                    }
+                  {/* 动态 */}
+                  <Col xs={24} lg={12}>
+                    <Card
+                      title={
+                        <div className={styles.cardTitle}>
+                          <CalendarOutlined className={styles.cardTitleIcon} />
+                          <span>最近动态</span>
+                        </div>
+                      }
+                      className={styles.activityCard}
+                    >
+                      <List
+                        dataSource={activities}
+                        renderItem={(item: any) => (
+                          <List.Item className={styles.activityItem}>
+                            <List.Item.Meta
+                              avatar={
+                                <Avatar style={{ backgroundColor: '#002FA7' }}>
+                                  {getActivityIcon(item.type)}
+                                </Avatar>
+                              }
+                              title={
+                                <span>
+                                  <Text strong>{item.user?.name || '用户'}</Text>
+                                  <Text type="secondary"> {item.action}</Text>
+                                </span>
+                              }
+                              description={
+                                <div className={styles.activityMeta}>
+                                  <Text type="secondary">{item.target}</Text>
+                                  <Text type="secondary" className={styles.activityTime}>
+                                    <CalendarOutlined /> {item.time}
+                                  </Text>
+                                </div>
+                              }
+                            />
+                          </List.Item>
+                        )}
+                        locale={{ emptyText: '暂无动态' }}
+                      />
+                    </Card>
+                  </Col>
+                </Row>
+              )
+            },
+            {
+              key: 'burndown',
+              label: (
+                <span>
+                  <LineChartOutlined /> 燃尽图
+                </span>
+              ),
+              children: (
+                <div style={{ padding: '16px 0' }}>
+                  <BurndownChart
+                    title="本周任务燃尽图"
+                    startDate={dayjs().startOf('week').format('YYYY-MM-DD')}
+                    endDate={dayjs().endOf('week').format('YYYY-MM-DD')}
+                    totalPoints={stats.totalTasks}
+                    completedByDate={(() => {
+                      // 模拟每日完成数据
+                      const data: { date: string; completed: number }[] = []
+                      const weekStart = dayjs().startOf('week')
+                      const today = dayjs()
+                      let current = weekStart
+                      while (current.isBefore(today) || current.isSame(today, 'day')) {
+                        data.push({
+                          date: current.format('YYYY-MM-DD'),
+                          completed: Math.floor(Math.random() * 3) + 1
+                        })
+                        current = current.add(1, 'day')
+                      }
+                      return data
+                    })()}
+                    height={350}
+                    showLegend={true}
+                    unit="tasks"
                   />
-                </List.Item>
-              )}
-              locale={{ emptyText: '暂无动态' }}
-            />
-          </Card>
-        </Col>
-      </Row>
+                </div>
+              )
+            },
+            {
+              key: 'news',
+              label: (
+                <span>
+                  <ReadOutlined /> 新闻推送
+                </span>
+              ),
+              children: (
+                <div style={{ padding: '16px 0' }}>
+                  <NewsFeed userId={user?.id || 1} />
+                </div>
+              )
+            }
+          ]}
+        />
+      </Card>
     </div>
   )
 }

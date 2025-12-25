@@ -1,0 +1,218 @@
+.container {
+  padding: 24px;
+  background: var(--bg-color);
+  min-height: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header h4 {
+  margin: 0;
+}
+
+.statCard {
+  height: 100%;
+  transition: all 0.3s ease;
+}
+
+.statCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.chartCard {
+  height: 100%;
+  min-height: 300px;
+}
+
+.rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-weight: bold;
+}
+
+/* 访问趋势图表 */
+.trendChart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 200px;
+  padding: 16px 0;
+  gap: 4px;
+}
+
+.trendItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+
+.trendBar {
+  flex: 1;
+  width: 100%;
+  max-width: 30px;
+  background: #f0f0f0;
+  border-radius: 4px 4px 0 0;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.trendBarFill {
+  width: 100%;
+  background: linear-gradient(180deg, #1890ff 0%, #69c0ff 100%);
+  border-radius: 4px 4px 0 0;
+  transition: height 0.3s ease;
+  min-height: 4px;
+}
+
+.trendDate {
+  font-size: 10px;
+  margin-top: 4px;
+  white-space: nowrap;
+}
+
+/* 关键词云 */
+.keywordCloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 16px;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.keywordTag {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.keywordTag:hover {
+  transform: scale(1.1);
+}
+
+/* 复用分布 */
+.reuseDistribution {
+  margin-top: 24px;
+}
+
+.reuseItem {
+  margin-bottom: 12px;
+}
+
+.reuseItem > span {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* 响应式布局 */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .trendChart {
+    height: 150px;
+  }
+
+  .trendDate {
+    display: none;
+  }
+}
+
+/* 暗色主题适配 */
+:global(.dark) .statCard,
+:global(.dark) .chartCard {
+  background: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+:global(.dark) .trendBar {
+  background: #303030;
+}
+
+:global(.dark) .trendBarFill {
+  background: linear-gradient(180deg, #177ddc 0%, #3c9ae8 100%);
+}
+
+/* 表格样式优化 */
+.container :global(.ant-table) {
+  background: transparent;
+}
+
+.container :global(.ant-table-thead > tr > th) {
+  background: var(--table-header-bg);
+}
+
+.container :global(.ant-card) {
+  background: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+/* 统计数字动画 */
+.container :global(.ant-statistic-content-value) {
+  transition: all 0.3s ease;
+}
+
+.container :global(.ant-statistic:hover .ant-statistic-content-value) {
+  transform: scale(1.05);
+}
+
+/* Tab样式 */
+.container :global(.ant-tabs-nav) {
+  margin-bottom: 16px;
+}
+
+.container :global(.ant-tabs-tab) {
+  padding: 12px 16px;
+}
+
+/* 进度条样式 */
+.container :global(.ant-progress-text) {
+  font-size: 12px;
+}
+
+/* 标签样式 */
+.container :global(.ant-tag) {
+  margin-right: 0;
+}
+
+/* 列表样式 */
+.container :global(.ant-list-item) {
+  padding: 12px 0;
+}
+
+/* 模态框样式 */
+.container :global(.ant-modal-content) {
+  border-radius: 8px;
+}
+
+/* 空状态样式 */
+.container :global(.ant-empty) {
+  padding: 40px 0;
+}
+
+/* 加载状态 */
+.container :global(.ant-spin-nested-loading) {
+  min-height: 400px;
+}

@@ -258,14 +258,14 @@ export function restoreProject(id: number | string): Promise<void> {
  * 更新项目状态
  */
 export function updateProjectStatus(id: number | string, status: string): Promise<void> {
-  return put<void>(`/api/v1/projects/${id}/status`, null, { params: { status } })
+  return put<void>(`/api/v1/projects/${id}/status?status=${encodeURIComponent(status)}`, null)
 }
 
 /**
  * 更新项目进度
  */
 export function updateProjectProgress(id: number | string, progress: number): Promise<void> {
-  return put<void>(`/api/v1/projects/${id}/progress`, null, { params: { progress } })
+  return put<void>(`/api/v1/projects/${id}/progress?progress=${progress}`, null)
 }
 
 /**
@@ -302,14 +302,22 @@ export function getProjectMembers(projectId: number | string): Promise<ProjectMe
  * 添加项目成员
  */
 export function addProjectMember(projectId: number | string, userId: string, role?: string): Promise<void> {
-  return post<void>(`/api/v1/projects/${projectId}/members`, null, { params: { userId, role } })
+  let url = `/api/v1/projects/${projectId}/members?userId=${encodeURIComponent(userId)}`
+  if (role) {
+    url += `&role=${encodeURIComponent(role)}`
+  }
+  return post<void>(url, null)
 }
 
 /**
  * 批量添加项目成员
  */
 export function addProjectMembers(projectId: number | string, userIds: string[], role?: string): Promise<void> {
-  return post<void>(`/api/v1/projects/${projectId}/members/batch`, userIds, { params: { role } })
+  let url = `/api/v1/projects/${projectId}/members/batch`
+  if (role) {
+    url += `?role=${encodeURIComponent(role)}`
+  }
+  return post<void>(url, userIds)
 }
 
 /**
@@ -323,7 +331,7 @@ export function removeProjectMember(projectId: number | string, userId: string):
  * 更新成员角色
  */
 export function updateMemberRole(projectId: number | string, userId: string, role: string): Promise<void> {
-  return put<void>(`/api/v1/projects/${projectId}/members/${userId}/role`, null, { params: { role } })
+  return put<void>(`/api/v1/projects/${projectId}/members/${userId}/role?role=${encodeURIComponent(role)}`, null)
 }
 
 // ==================== 项目里程碑管理 ====================

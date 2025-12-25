@@ -4,14 +4,14 @@
   min-height: 100%;
 }
 
-/* 页面头部 */
+/* 页面头部 - 主题绿 */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
   border-radius: 16px;
   color: #fff;
 }
@@ -50,11 +50,11 @@
 }
 
 .container :global(.ant-tabs-tab-active) {
-  color: #6366f1;
+  color: #10B981;
 }
 
 .container :global(.ant-tabs-ink-bar) {
-  background: #6366f1;
+  background: #10B981;
 }
 
 .tabContent {
@@ -82,14 +82,14 @@
 
 .container :global(.ant-input:hover),
 .container :global(.ant-select-selector:hover) {
-  border-color: #6366f1 !important;
+  border-color: #10B981 !important;
 }
 
 .container :global(.ant-input:focus),
 .container :global(.ant-input-focused),
 .container :global(.ant-select-focused .ant-select-selector) {
-  border-color: #6366f1 !important;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+  border-color: #10B981 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
 }
 
 /* 危险区域 */

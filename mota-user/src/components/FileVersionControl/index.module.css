@@ -1,0 +1,373 @@
+.container {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 0;
+}
+
+/* 时间线样式 */
+.timeline {
+  padding: 16px 0;
+}
+
+.timelineItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.versionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.versionMeta {
+  color: var(--text-color-secondary, #8c8c8c);
+  font-size: 12px;
+}
+
+/* 版本对比结果 */
+.diffResult {
+  padding: 16px;
+}
+
+.diffStats {
+  padding: 12px 16px;
+  background: var(--bg-color-secondary, #f5f5f5);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.additions {
+  color: #52c41a;
+  font-weight: 500;
+}
+
+.deletions {
+  color: #ff4d4f;
+  font-weight: 500;
+}
+
+.modifications {
+  color: #1890ff;
+  font-weight: 500;
+}
+
+.diffContent {
+  max-height: 400px;
+  overflow: auto;
+  padding: 16px;
+  background: var(--bg-color-secondary, #f5f5f5);
+  border-radius: 8px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.diffContent pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* Diff 高亮样式 */
+.diffContent :global(.diff-add) {
+  background: #e6ffed;
+  color: #22863a;
+}
+
+.diffContent :global(.diff-del) {
+  background: #ffeef0;
+  color: #cb2431;
+}
+
+.diffContent :global(.diff-mod) {
+  background: #fff5b1;
+  color: #735c0f;
+}
+
+/* 回滚表单 */
+.rollbackForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.formItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* 设置表单 */
+.settingsForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settingsForm .formItem {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 标签页样式 */
+.content :global(.ant-tabs-nav) {
+  margin-bottom: 16px;
+}
+
+.content :global(.ant-tabs-tab) {
+  padding: 8px 16px;
+}
+
+/* 表格样式 */
+.content :global(.ant-table) {
+  border-radius: 8px;
+}
+
+.content :global(.ant-table-thead > tr > th) {
+  background: var(--bg-color-secondary, #fafafa);
+}
+
+/* 版本标签样式 */
+.versionTag {
+  font-weight: 500;
+}
+
+.versionTag.latest {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  color: #fff;
+  border: none;
+}
+
+/* 变更类型图标 */
+.changeTypeIcon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.changeTypeIcon.create {
+  background: #e6f7ff;
+  color: #1890ff;
+}
+
+.changeTypeIcon.update {
+  background: #f6ffed;
+  color: #52c41a;
+}
+
+.changeTypeIcon.delete {
+  background: #fff2f0;
+  color: #ff4d4f;
+}
+
+.changeTypeIcon.rename {
+  background: #fffbe6;
+  color: #faad14;
+}
+
+.changeTypeIcon.restore {
+  background: #f9f0ff;
+  color: #722ed1;
+}
+
+/* 版本详情描述列表 */
+.versionDetails :global(.ant-descriptions-item-label) {
+  width: 100px;
+  background: var(--bg-color-secondary, #fafafa);
+}
+
+/* 空状态 */
+.emptyState {
+  padding: 40px 0;
+  text-align: center;
+}
+
+/* 操作按钮组 */
+.actionButtons {
+  display: flex;
+  gap: 8px;
+}
+
+/* 版本选择器 */
+.versionSelector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 暗色主题适配 */
+:global(.dark) .container {
+  background: var(--bg-color, #141414);
+}
+
+:global(.dark) .diffStats {
+  background: var(--bg-color-secondary, #1f1f1f);
+}
+
+:global(.dark) .diffContent {
+  background: var(--bg-color-secondary, #1f1f1f);
+}
+
+:global(.dark) .diffContent :global(.diff-add) {
+  background: #1a3a1a;
+  color: #7ee787;
+}
+
+:global(.dark) .diffContent :global(.diff-del) {
+  background: #3a1a1a;
+  color: #f85149;
+}
+
+:global(.dark) .diffContent :global(.diff-mod) {
+  background: #3a3a1a;
+  color: #d29922;
+}
+
+:global(.dark) .content :global(.ant-table-thead > tr > th) {
+  background: var(--bg-color-secondary, #1f1f1f);
+}
+
+:global(.dark) .versionDetails :global(.ant-descriptions-item-label) {
+  background: var(--bg-color-secondary, #1f1f1f);
+}
+
+/* 响应式布局 */
+@media (max-width: 768px) {
+  .versionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .versionSelector {
+    flex-wrap: wrap;
+  }
+
+  .settingsForm .formItem {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .diffStats {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.timelineItem {
+  animation: fadeIn 0.3s ease;
+}
+
+/* 版本对比箭头 */
+.compareArrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--primary-color, #1890ff);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 16px;
+}
+
+/* 版本信息卡片 */
+.versionCard {
+  padding: 16px;
+  background: var(--bg-color-secondary, #f5f5f5);
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #f0f0f0);
+  transition: all 0.3s ease;
+}
+
+.versionCard:hover {
+  border-color: var(--primary-color, #1890ff);
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.15);
+}
+
+.versionCard.selected {
+  border-color: var(--primary-color, #1890ff);
+  background: var(--primary-color-light, #e6f7ff);
+}
+
+:global(.dark) .versionCard {
+  background: var(--bg-color-secondary, #1f1f1f);
+  border-color: var(--border-color, #303030);
+}
+
+:global(.dark) .versionCard.selected {
+  background: var(--primary-color-dark, #111d2c);
+}
+
+/* 变更记录时间轴 */
+.changeLogTimeline {
+  position: relative;
+  padding-left: 24px;
+}
+
+.changeLogTimeline::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--border-color, #f0f0f0);
+}
+
+.changeLogItem {
+  position: relative;
+  padding: 12px 0;
+}
+
+.changeLogItem::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 18px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--primary-color, #1890ff);
+  border: 2px solid #fff;
+}
+
+:global(.dark) .changeLogTimeline::before {
+  background: var(--border-color, #303030);
+}
+
+:global(.dark) .changeLogItem::before {
+  border-color: var(--bg-color, #141414);
+}

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mota.project.mapper.TaskDependencyMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.mota.project.entity.TaskDependency">
+        <id column="id" property="id"/>
+        <result column="predecessor_id" property="predecessorId"/>
+        <result column="successor_id" property="successorId"/>
+        <result column="dependency_type" property="dependencyType"/>
+        <result column="lag_days" property="lagDays"/>
+        <result column="description" property="description"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
+        <result column="deleted" property="deleted"/>
+        <result column="version" property="version"/>
+    </resultMap>
+
+    <!-- 基础列 -->
+    <sql id="Base_Column_List">
+        id, predecessor_id, successor_id, dependency_type, lag_days, description,
+        created_at, updated_at, created_by, updated_by, deleted, version
+    </sql>
+
+    <!-- 根据后继任务ID查询所有前置依赖 -->
+    <select id="selectBySuccessorId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM task_dependency
+        WHERE successor_id = #{successorId}
+        AND deleted = 0
+        ORDER BY created_at ASC
+    </select>
+
+    <!-- 根据前置任务ID查询所有后继依赖 -->
+    <select id="selectByPredecessorId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM task_dependency
+        WHERE predecessor_id = #{predecessorId}
+        AND deleted = 0
+        ORDER BY created_at ASC
+    </select>
+
+    <!-- 根据任务ID查询所有相关依赖 -->
+    <select id="selectByTaskId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM task_dependency
+        WHERE (predecessor_id = #{taskId} OR successor_id = #{taskId})
+        AND deleted = 0
+        ORDER BY created_at ASC
+    </select>
+
+    <!-- 根据项目ID查询所有任务依赖关系 -->
+    <select id="selectByProjectId" resultMap="BaseResultMap">
+        SELECT td.id, td.predecessor_id, td.successor_id, td.dependency_type, 
+               td.lag_days, td.description, td.created_at, td.updated_at, 
+               td.created_by, td.updated_by, td.deleted, td.version
+        FROM task_dependency td
+        INNER JOIN task t ON td.predecessor_id = t.id
+        WHERE t.project_id = #{projectId}
+        AND td.deleted = 0
+        AND t.deleted = 0
+        ORDER BY td.created_at ASC
+    </select>
+
+    <!-- 检查是否存在依赖关系 -->
+    <select id="existsDependency" resultType="boolean">
+        SELECT COUNT(1) > 0
+        FROM task_dependency
+        WHERE predecessor_id = #{predecessorId}
+        AND successor_id = #{successorId}
+        AND deleted = 0
+    </select>
+
+    <!-- 批量插入依赖关系 -->
+    <insert id="batchInsert" parameterType="list">
+        INSERT INTO task_dependency (predecessor_id, successor_id, dependency_type, lag_days, description, created_by)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.predecessorId}, #{item.successorId}, #{item.dependencyType}, 
+             #{item.lagDays}, #{item.description}, #{item.createdBy})
+        </foreach>
+    </insert>
+
+    <!-- 删除任务的所有依赖关系 -->
+    <update id="deleteByTaskId">
+        UPDATE task_dependency
+        SET deleted = 1, updated_at = NOW()
+        WHERE (predecessor_id = #{taskId} OR successor_id = #{taskId})
+        AND deleted = 0
+    </update>
+
+</mapper>

@@ -17,7 +17,21 @@ import {
   HistoryOutlined,
   ThunderboltOutlined,
   QuestionCircleOutlined,
-  CheckSquareOutlined
+  CheckSquareOutlined,
+  CalendarOutlined,
+  ApartmentOutlined,
+  FileTextOutlined,
+  StarOutlined,
+  MessageOutlined,
+  DatabaseOutlined,
+  FileSearchOutlined,
+  LineChartOutlined,
+  TeamOutlined,
+  BarChartOutlined,
+  PieChartOutlined,
+  AppstoreOutlined,
+  SettingOutlined,
+  ApiOutlined
 } from '@ant-design/icons'
 import { useAuthStore } from '@/store/auth'
 import styles from './index.module.css'
@@ -25,6 +39,9 @@ import styles from './index.module.css'
 const { Header, Sider, Content } = Layout
 
 type MenuItem = Required<MenuProps>['items'][number]
+
+// 统一主题色 - 薄荷绿
+const THEME_COLOR = '#10B981'
 
 /**
  * 控制台布局组件
@@ -51,6 +68,11 @@ const ConsoleLayout = () => {
       label: collapsed ? '' : 'AI助理',
       children: [
         {
+          key: '/ai/assistant',
+          icon: <MessageOutlined />,
+          label: 'AI助手',
+        },
+        {
           key: '/ai/solution',
           icon: <RobotOutlined />,
           label: '方案生成',
@@ -61,9 +83,14 @@ const ConsoleLayout = () => {
           label: 'PPT生成',
         },
         {
-          key: '/ai/training',
-          icon: <ThunderboltOutlined />,
-          label: '模型训练',
+          key: '/ai/knowledge-base',
+          icon: <DatabaseOutlined />,
+          label: 'AI知识库',
+        },
+        {
+          key: '/ai/search',
+          icon: <FileSearchOutlined />,
+          label: '智能搜索',
         },
         {
           key: '/ai/news',
@@ -71,9 +98,19 @@ const ConsoleLayout = () => {
           label: '新闻追踪',
         },
         {
+          key: '/ai/training',
+          icon: <ThunderboltOutlined />,
+          label: '模型训练',
+        },
+        {
           key: '/ai/history',
           icon: <HistoryOutlined />,
           label: '历史记录',
+        },
+        {
+          key: '/ai/model-management',
+          icon: <ApiOutlined />,
+          label: '模型管理',
         },
       ],
     },
@@ -94,6 +131,96 @@ const ConsoleLayout = () => {
           key: '/my-tasks',
           icon: <CheckSquareOutlined />,
           label: '我的任务',
+        },
+        {
+          key: '/calendar',
+          icon: <CalendarOutlined />,
+          label: '日程管理',
+        },
+        {
+          key: '/progress-tracking',
+          icon: <LineChartOutlined />,
+          label: '进度跟踪',
+        },
+        {
+          key: '/resource-management',
+          icon: <TeamOutlined />,
+          label: '资源管理',
+        },
+        {
+          key: '/report-analytics',
+          icon: <BarChartOutlined />,
+          label: '报表分析',
+        },
+      ],
+    },
+    {
+      type: 'divider',
+    },
+    {
+      key: 'knowledge-group',
+      type: 'group',
+      label: collapsed ? '' : '知识管理',
+      children: [
+        {
+          key: '/knowledge',
+          icon: <ApartmentOutlined />,
+          label: '知识图谱',
+        },
+        {
+          key: '/documents',
+          icon: <FileTextOutlined />,
+          label: '文档管理',
+        },
+        {
+          key: '/templates',
+          icon: <AppstoreOutlined />,
+          label: '模板库',
+        },
+        {
+          key: '/knowledge-statistics',
+          icon: <PieChartOutlined />,
+          label: '知识统计',
+        },
+        {
+          key: '/favorites',
+          icon: <StarOutlined />,
+          label: '我的收藏',
+        },
+      ],
+    },
+    {
+      type: 'divider',
+    },
+    {
+      key: 'notification-group',
+      type: 'group',
+      label: collapsed ? '' : '消息中心',
+      children: [
+        {
+          key: '/notifications',
+          icon: <BellOutlined />,
+          label: '通知中心',
+        },
+      ],
+    },
+    {
+      type: 'divider',
+    },
+    {
+      key: 'system-group',
+      type: 'group',
+      label: collapsed ? '' : '系统管理',
+      children: [
+        {
+          key: '/system',
+          icon: <SettingOutlined />,
+          label: '系统管理',
+        },
+        {
+          key: '/settings',
+          icon: <SettingOutlined />,
+          label: '系统设置',
         },
       ],
     },
@@ -124,7 +251,7 @@ const ConsoleLayout = () => {
       label: '退出登录',
       onClick: () => {
         logout()
-        navigate('/login')
+        navigate('/')
       },
     },
   ]
@@ -142,52 +269,8 @@ const ConsoleLayout = () => {
     return [path]
   }
 
-  // 根据当前路由获取主题配置 - 使用克莱因蓝作为主色
-  const getThemeConfig = () => {
-    const path = location.pathname
-    // 工作台 - 克莱因蓝
-    if (path.startsWith('/dashboard')) {
-      return { menuClass: styles.themeBlue, logoClass: styles.logoBlue, logoColor: '#002FA7' }
-    }
-    // AI助理 - 每个子页面不同颜色
-    else if (path.startsWith('/ai/solution')) {
-      return { menuClass: styles.themeAiIndigo, logoClass: styles.logoAiIndigo, logoColor: '#616AE5' }
-    } else if (path.startsWith('/ai/ppt')) {
-      return { menuClass: styles.themeAiOrange, logoClass: styles.logoAiOrange, logoColor: '#f97316' }
-    } else if (path.startsWith('/ai/training')) {
-      return { menuClass: styles.themeAiPurple, logoClass: styles.logoAiPurple, logoColor: '#8b5cf6' }
-    } else if (path.startsWith('/ai/news')) {
-      return { menuClass: styles.themeAiGreen, logoClass: styles.logoAiGreen, logoColor: '#10b981' }
-    } else if (path.startsWith('/ai/history')) {
-      return { menuClass: styles.themeAiYellow, logoClass: styles.logoAiYellow, logoColor: '#f59e0b' }
-    }
-    // 项目协同 - 克莱因蓝
-    else if (path.startsWith('/projects') || path.startsWith('/department-tasks')) {
-      return { menuClass: styles.themeBlue, logoClass: styles.logoBlue, logoColor: '#002FA7' }
-    } else if (path.startsWith('/tasks') || path.startsWith('/my-tasks')) {
-      return { menuClass: styles.themeGreen, logoClass: styles.logoGreen, logoColor: '#52c41a' }
-    }
-    // 帮助中心
-    else if (path.startsWith('/help')) {
-      return { menuClass: styles.themeSky, logoClass: styles.logoSky, logoColor: '#0ea5e9' }
-    }
-    // 默认克莱因蓝
-    return { menuClass: styles.themeBlue, logoClass: '', logoColor: '#002FA7' }
-  }
-
-  const themeConfig = getThemeConfig()
-
-  // 设置全局主题色CSS变量
-  const themeStyle = {
-    '--theme-color': themeConfig.logoColor,
-    '--theme-color-light': `${themeConfig.logoColor}15`,
-    '--theme-color-hover': `${themeConfig.logoColor}dd`,
-    '--theme-color-shadow': `${themeConfig.logoColor}25`,
-    '--theme-color-glow': `${themeConfig.logoColor}40`,
-  } as React.CSSProperties
-
   return (
-    <Layout className={styles.layout} style={themeStyle}>
+    <Layout className={styles.layout}>
       <Sider
         trigger={null}
         collapsible
@@ -210,8 +293,7 @@ const ConsoleLayout = () => {
                 width="48"
                 height="48"
                 rx="10"
-                fill={themeConfig.logoColor}
-                style={{ transition: 'fill 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}
+                fill={THEME_COLOR}
               />
               <rect x="4" y="36" width="40" height="8" rx="2" fill="white" opacity="0.35"/>
               <rect x="8" y="26" width="32" height="8" rx="2" fill="white" opacity="0.35"/>
@@ -219,7 +301,7 @@ const ConsoleLayout = () => {
               <rect x="16" y="6" width="16" height="8" rx="2" fill="white" opacity="0.35"/>
               <path d="M5 36 L5 6 L15 6 L24 18 L33 6 L43 6 L43 36 L35 36 L35 18 L24 34 L13 18 L13 36 Z" fill="white"/>
             </svg>
-            {!collapsed && <span className={`${styles.logoText} ${themeConfig.logoClass}`}>摩塔 Mota</span>}
+            {!collapsed && <span className={styles.logoText}>摩塔 Mota</span>}
           </div>
         </div>
         <div className={styles.siderContent}>
@@ -227,7 +309,7 @@ const ConsoleLayout = () => {
             mode="inline"
             selectedKeys={getSelectedKeys()}
             items={menuItems}
-            className={`${styles.menu} ${themeConfig.menuClass}`}
+            className={styles.menu}
             onClick={({ key }) => {
               if (key.startsWith('/')) {
                 navigate(key)
@@ -278,7 +360,7 @@ const ConsoleLayout = () => {
                   <Avatar
                     size={32}
                     className={styles.userAvatar}
-                    style={{ backgroundColor: '#002FA7' }}
+                    style={{ backgroundColor: THEME_COLOR }}
                   >
                     {user?.name?.charAt(0) || 'U'}
                   </Avatar>

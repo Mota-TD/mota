@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mota.project.mapper.KnowledgeGapMapper">
+
+    <resultMap id="BaseResultMap" type="com.mota.project.entity.KnowledgeGap">
+        <id column="id" property="id"/>
+        <result column="project_id" property="projectId"/>
+        <result column="gap_type" property="gapType"/>
+        <result column="keyword" property="keyword"/>
+        <result column="description" property="description"/>
+        <result column="occurrence_count" property="occurrenceCount"/>
+        <result column="affected_users" property="affectedUsers"/>
+        <result column="status" property="status"/>
+        <result column="priority" property="priority"/>
+        <result column="resolved_by" property="resolvedBy"/>
+        <result column="resolved_document_id" property="resolvedDocumentId"/>
+        <result column="resolved_at" property="resolvedAt"/>
+        <result column="resolution_note" property="resolutionNote"/>
+        <result column="first_occurred_at" property="firstOccurredAt"/>
+        <result column="last_occurred_at" property="lastOccurredAt"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <select id="getGapList" resultMap="BaseResultMap">
+        SELECT * FROM knowledge_gap
+        WHERE 1=1
+        <if test="projectId != null">
+            AND (project_id = #{projectId} OR project_id IS NULL)
+        </if>
+        <if test="gapType != null and gapType != ''">
+            AND gap_type = #{gapType}
+        </if>
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        <if test="priority != null and priority != ''">
+            AND priority = #{priority}
+        </if>
+        ORDER BY 
+            CASE priority 
+                WHEN 'critical' THEN 1 
+                WHEN 'high' THEN 2 
+                WHEN 'medium' THEN 3 
+                WHEN 'low' THEN 4 
+            END,
+            occurrence_count DESC
+    </select>
+
+    <select id="getGapStats" resultType="java.util.Map">
+        SELECT 
+            COUNT(*) as totalGaps,
+            SUM(CASE WHEN status = 'open' THEN 1 ELSE 0 END) as openGaps,
+            SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as inProgressGaps,
+            SUM(CASE WHEN status = 'resolved' THEN 1 ELSE 0 END) as resolvedGaps,
+            SUM(CASE WHEN status = 'ignored' THEN 1 ELSE 0 END) as ignoredGaps,
+            SUM(CASE WHEN priority = 'critical' THEN 1 ELSE 0 END) as criticalGaps,
+            SUM(CASE WHEN priority = 'high' THEN 1 ELSE 0 END) as highGaps,
+            SUM(occurrence_count) as totalOccurrences,
+            SUM(affected_users) as totalAffectedUsers
+        FROM knowledge_gap
+        WHERE 1=1
+        <if test="projectId != null">
+            AND (project_id = #{projectId} OR project_id IS NULL)
+        </if>
+    </select>
+
+    <select id="getGapTypeDistribution" resultType="java.util.Map">
+        SELECT 
+            gap_type as gapType,
+            COUNT(*) as count,
+            SUM(occurrence_count) as occurrences
+        FROM knowledge_gap
+        WHERE 1=1
+        <if test="projectId != null">
+            AND (project_id = #{projectId} OR project_id IS NULL)
+        </if>
+        GROUP BY gap_type
+    </select>
+
+    <select id="getPriorityDistribution" resultType="java.util.Map">
+        SELECT 
+            priority,
+            COUNT(*) as count,
+            SUM(CASE WHEN status = 'open' THEN 1 ELSE 0 END) as openCount
+        FROM knowledge_gap
+        WHERE 1=1
+        <if test="projectId != null">
+            AND (project_id = #{projectId} OR project_id IS NULL)
+        </if>
+        GROUP BY priority
+    </select>
+
+    <select id="getHighPriorityOpenGaps" resultMap="BaseResultMap">
+        SELECT * FROM knowledge_gap
+        WHERE status = 'open'
+            AND priority IN ('critical', 'high')
+        <if test="projectId != null">
+            AND (project_id = #{projectId} OR project_id IS NULL)
+        </if>
+        ORDER BY 
+            CASE priority WHEN 'critical' THEN 1 WHEN 'high' THEN 2 END,
+            occurrence_count DESC
+        LIMIT #{limit}
+    </select>
+
+    <update id="incrementOccurrenceCount">
+        UPDATE knowledge_gap 
+        SET occurrence_count = occurrence_count + 1,
+            last_occurred_at = NOW(),
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <select id="findByKeyword" resultMap="BaseResultMap">
+        SELECT * FROM knowledge_gap
+        WHERE keyword = #{keyword}
+            AND gap_type = #{gapType}
+        <if test="projectId != null">
+            AND project_id = #{projectId}
+        </if>
+        <if test="projectId == null">
+            AND project_id IS NULL
+        </if>
+        LIMIT 1
+    </select>
+
+</mapper>
