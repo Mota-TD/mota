@@ -67,48 +67,20 @@ const AIPPT = () => {
   const loadConfig = async () => {
     try {
       const [templatesRes, colorSchemesRes, quickTemplatesRes] = await Promise.all([
-        getPPTTemplates().catch(() => []),
-        getPPTColorSchemes().catch(() => []),
-        getPPTQuickTemplates().catch(() => [])
+        getPPTTemplates(),
+        getPPTColorSchemes(),
+        getPPTQuickTemplates()
       ])
 
-      // 如果 API 返回空，使用默认值
-      if (templatesRes && templatesRes.length > 0) {
-        setTemplates(templatesRes)
-      } else {
-        setTemplates([
-          { value: 'business', label: '商务简约', color: '#2b7de9', icon: '💼' },
-          { value: 'tech', label: '科技风格', color: '#667eea', icon: '🚀' },
-          { value: 'creative', label: '创意设计', color: '#ec4899', icon: '🎨' },
-          { value: 'minimal', label: '极简风格', color: '#10b981', icon: '✨' },
-          { value: 'professional', label: '专业报告', color: '#f59e0b', icon: '📊' },
-        ])
-      }
-
-      if (colorSchemesRes && colorSchemesRes.length > 0) {
-        setColorSchemes(colorSchemesRes)
-      } else {
-        setColorSchemes([
-          { value: 'blue', label: '商务蓝', colors: ['#2b7de9', '#69c0ff', '#e6f7ff'] },
-          { value: 'purple', label: '科技紫', colors: ['#667eea', '#b37feb', '#f9f0ff'] },
-          { value: 'green', label: '自然绿', colors: ['#10b981', '#6ee7b7', '#d1fae5'] },
-          { value: 'orange', label: '活力橙', colors: ['#f59e0b', '#fcd34d', '#fef3c7'] },
-          { value: 'dark', label: '暗黑风', colors: ['#1f1f1f', '#434343', '#262626'] },
-        ])
-      }
-
-      if (quickTemplatesRes && quickTemplatesRes.length > 0) {
-        setQuickTemplates(quickTemplatesRes)
-      } else {
-        setQuickTemplates([
-          { label: '产品介绍', value: '公司产品介绍和核心功能展示' },
-          { label: '商业计划书', value: '创业项目商业计划书' },
-          { label: '年度总结', value: '年度工作总结与规划' },
-          { label: '培训课件', value: '员工培训课程内容' },
-        ])
-      }
+      setTemplates(templatesRes || [])
+      setColorSchemes(colorSchemesRes || [])
+      setQuickTemplates(quickTemplatesRes || [])
     } catch (error) {
       console.error('Failed to load config:', error)
+      message.error('加载配置失败')
+      setTemplates([])
+      setColorSchemes([])
+      setQuickTemplates([])
     }
   }
 

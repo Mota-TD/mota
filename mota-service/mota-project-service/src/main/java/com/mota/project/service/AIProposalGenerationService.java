@@ -128,7 +128,7 @@ public class AIProposalGenerationService {
         log.info("解析需求: sessionId={}", sessionId);
         
         RequirementAnalysis analysis = new RequirementAnalysis();
-        analysis.setSessionId(sessionId);
+        analysis.setSessionId(String.valueOf(sessionId));
         analysis.setOriginalInput(userInput);
         
         // 解析意图
@@ -297,12 +297,12 @@ public class AIProposalGenerationService {
         
         // 创建方案内容
         ProposalContent proposal = new ProposalContent();
-        proposal.setSessionId(sessionId);
+        proposal.setSessionId(String.valueOf(sessionId));
         proposal.setTitle(generateTitle(requirement));
         proposal.setProposalType(requirement.getIntentType());
         proposal.setTemplateId(templateId);
         proposal.setStatus("draft");
-        proposal.setQualityScore(0);
+        proposal.setQualityScore(BigDecimal.ZERO);
         proposal.setCreatedBy(getSessionUserId(sessionId));
         proposal.setCreatedAt(LocalDateTime.now());
         proposal.setUpdatedAt(LocalDateTime.now());
@@ -331,7 +331,7 @@ public class AIProposalGenerationService {
     }
     
     private String generateTitle(RequirementAnalysis requirement) {
-        String topic = requirement.getOriginalInput();
+        String topic = requirement.getOriginalText() != null ? requirement.getOriginalText() : requirement.getOriginalInput();
         if (topic.length() > 30) {
             topic = topic.substring(0, 30);
         }
@@ -343,7 +343,7 @@ public class AIProposalGenerationService {
         content.append("# 方案概述\n\n");
         content.append("基于您的需求，我们制定了以下方案：\n\n");
         content.append("## 背景分析\n\n");
-        content.append("根据您提供的信息：").append(requirement.getOriginalInput()).append("\n\n");
+        content.append("根据您提供的信息：").append(requirement.getOriginalText() != null ? requirement.getOriginalText() : requirement.getOriginalInput()).append("\n\n");
         content.append("## 目标与范围\n\n");
         content.append("本方案旨在解决上述需求，主要目标包括：\n");
         content.append("- 目标1：深入分析问题\n");
@@ -593,7 +593,7 @@ public class AIProposalGenerationService {
         
         // 更新方案质量得分
         int avgScore = checks.stream().mapToInt(QualityCheck::getScore).sum() / checks.size();
-        proposal.setQualityScore(avgScore);
+        proposal.setQualityScore(BigDecimal.valueOf(avgScore));
         contentMapper.updateById(proposal);
         
         return checks;
@@ -715,7 +715,7 @@ public class AIProposalGenerationService {
         version.setContentSnapshot(proposal.getContent());
         version.setChangeDescription(changeDescription);
         version.setChangeType("manual");
-        version.setQualityScore(proposal.getQualityScore());
+        version.setQualityScore(proposal.getQualityScore() != null ? proposal.getQualityScore().intValue() : 0);
         version.setIsCurrent(true);
         version.setCreatedBy(proposal.getCreatedBy());
         version.setCreatedAt(LocalDateTime.now());

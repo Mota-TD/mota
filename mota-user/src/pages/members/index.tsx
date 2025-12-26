@@ -1,16 +1,21 @@
 import { useState, useEffect } from 'react'
-import { Card, Table, Button, Input, Space, Tag, Avatar, Modal, Form, Select, Dropdown, Popconfirm, App, Spin } from 'antd'
+import { Card, Table, Button, Input, Space, Tag, Avatar, Modal, Form, Select, Dropdown, Popconfirm, App, Divider, Empty } from 'antd'
 import {
   PlusOutlined,
   SearchOutlined,
   MoreOutlined,
   UserOutlined,
+  PhoneOutlined,
   MailOutlined,
+  LockOutlined,
   DeleteOutlined,
   EditOutlined,
-  ReloadOutlined
+  ReloadOutlined,
+  ApartmentOutlined
 } from '@ant-design/icons'
+import { useNavigate } from 'react-router-dom'
 import * as userApi from '@/services/api/user'
+import * as departmentApi from '@/services/api/department'
 import styles from './index.module.css'
 
 interface Member {
@@ -18,24 +23,34 @@ interface Member {
   name?: string
   username?: string
   nickname?: string
-  email: string
+  phone?: string
+  email?: string
   avatar?: string
   role?: string
+  departmentId?: string
+  departmentName?: string
   status?: string
 }
 
+interface Department {
+  id: string
+  name: string
+}
+
+// 默认角色选项
 const roleOptions = [
+  { value: 'super_admin', label: '超级管理员', color: 'gold' },
   { value: 'admin', label: '管理员', color: 'red' },
-  { value: 'pm', label: '项目经理', color: 'orange' },
-  { value: 'developer', label: '开发者', color: 'blue' },
-  { value: 'designer', label: '设计师', color: 'green' },
-  { value: 'member', label: '成员', color: 'default' },
+  { value: 'member', label: '普通员工', color: 'default' },
 ]
 
 const MembersPage = () => {
   const { message } = App.useApp()
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [members, setMembers] = useState<Member[]>([])
+  const [departments, setDepartments] = useState<Department[]>([])
+  const [loadingDepts, setLoadingDepts] = useState(false)
   const [searchText, setSearchText] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingMember, setEditingMember] = useState<Member | null>(null)
@@ -43,6 +58,7 @@ const MembersPage = () => {
 
   useEffect(() => {
     loadMembers()
+    loadDepartments()
   }, [])
 
   const loadMembers = async () => {
@@ -65,14 +81,30 @@ const MembersPage = () => {
     }
   }
 
+  const loadDepartments = async () => {
+    setLoadingDepts(true)
+    try {
+      // 从API加载部门，与部门管理页面使用相同的 orgId
+      const depts = await departmentApi.getDepartmentsByOrgId('default')
+      setDepartments((depts || []).map(d => ({ id: d.id, name: d.name })))
+    } catch (error) {
+      console.error('加载部门列表失败:', error)
+      setDepartments([])
+    } finally {
+      setLoadingDepts(false)
+    }
+  }
+
   const getRoleInfo = (role: string) => {
     return roleOptions.find(r => r.value === role) || { label: role, color: 'default' }
   }
 
   const filteredMembers = members.filter(m => {
     const name = m.name || m.nickname || m.username || ''
+    const phone = m.phone || ''
     const email = m.email || ''
     return name.toLowerCase().includes(searchText.toLowerCase()) ||
+           phone.includes(searchText) ||
            email.toLowerCase().includes(searchText.toLowerCase())
   })
 
@@ -84,7 +116,13 @@ const MembersPage = () => {
 
   const handleEdit = (member: Member) => {
     setEditingMember(member)
-    form.setFieldsValue(member)
+    form.setFieldsValue({
+      name: member.name || member.nickname,
+      phone: member.phone,
+      email: member.email,
+      departmentId: member.departmentId,
+      role: member.role
+    })
     setIsModalOpen(true)
   }
 
@@ -105,10 +143,15 @@ const MembersPage = () => {
     try {
       const values = await form.validateFields()
       
+      // 获取部门名称
+      const dept = departments.find(d => d.id === values.departmentId)
+      const departmentName = dept?.name || ''
+      
       if (editingMember) {
         // 调用真实API更新用户
-        const updatedUser = await userApi.updateUser(editingMember.id, {
+        await userApi.updateUser(editingMember.id, {
           nickname: values.name,
+          phone: values.phone,
           email: values.email,
         })
         // 更新本地状态
@@ -117,7 +160,10 @@ const MembersPage = () => {
             ...m,
             name: values.name,
             nickname: values.name,
+            phone: values.phone,
             email: values.email,
+            departmentId: values.departmentId,
+            departmentName: departmentName,
             role: values.role
           } : m
         ))
@@ -125,17 +171,21 @@ const MembersPage = () => {
       } else {
         // 调用真实API创建用户
         const newUser = await userApi.createUser({
-          username: values.email.split('@')[0], // 使用邮箱前缀作为用户名
           nickname: values.name,
+          phone: values.phone,
           email: values.email,
-        })
+          password: values.password, // 密码
+        } as any)
         // 添加到本地状态
         const newMember: Member = {
           id: Number(newUser.id),
           name: values.name,
           nickname: values.name,
+          phone: values.phone,
           email: values.email,
           avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${Date.now()}`,
+          departmentId: values.departmentId,
+          departmentName: departmentName,
           role: values.role
         }
         setMembers([...members, newMember])
@@ -159,10 +209,16 @@ const MembersPage = () => {
           <Avatar src={record.avatar} icon={<UserOutlined />} />
           <div>
             <div style={{ fontWeight: 500 }}>{record.name}</div>
-            <div style={{ fontSize: 12, color: '#999' }}>{record.email}</div>
+            <div style={{ fontSize: 12, color: '#999' }}>{record.phone || record.email}</div>
           </div>
         </Space>
       )
+    },
+    {
+      title: '部门',
+      dataIndex: 'departmentName',
+      key: 'departmentName',
+      render: (text: string) => text || '-'
     },
     {
       title: '角色',
@@ -255,6 +311,7 @@ const MembersPage = () => {
         />
       </Card>
 
+      {/* 添加/编辑成员弹窗 */}
       <Modal
         title={editingMember ? '编辑成员' : '添加成员'}
         open={isModalOpen}
@@ -263,6 +320,7 @@ const MembersPage = () => {
           setIsModalOpen(false)
           form.resetFields()
         }}
+        width={500}
       >
         <Form form={form} layout="vertical">
           <Form.Item
@@ -272,25 +330,98 @@ const MembersPage = () => {
           >
             <Input prefix={<UserOutlined />} placeholder="请输入姓名" />
           </Form.Item>
+          
+          <Form.Item
+            name="phone"
+            label="手机号（用于登录）"
+            rules={[
+              { required: true, message: '请输入手机号' },
+              { pattern: /^1[3-9]\d{9}$/, message: '请输入有效的手机号' }
+            ]}
+          >
+            <Input prefix={<PhoneOutlined />} placeholder="请输入手机号" maxLength={11} />
+          </Form.Item>
+          
+          {!editingMember && (
+            <Form.Item
+              name="password"
+              label="登录密码"
+              rules={[
+                { required: true, message: '请输入登录密码' },
+                { min: 6, message: '密码至少6位' }
+              ]}
+            >
+              <Input.Password prefix={<LockOutlined />} placeholder="请输入登录密码" />
+            </Form.Item>
+          )}
+          
           <Form.Item
             name="email"
-            label="邮箱"
+            label="邮箱（可选）"
             rules={[
-              { required: true, message: '请输入邮箱' },
               { type: 'email', message: '请输入有效的邮箱地址' }
             ]}
           >
             <Input prefix={<MailOutlined />} placeholder="请输入邮箱" />
           </Form.Item>
+          
+          <Form.Item
+            name="departmentId"
+            label="所属部门"
+            rules={[{ required: true, message: '请选择所属部门' }]}
+          >
+            <Select
+              placeholder="请选择所属部门"
+              loading={loadingDepts}
+              notFoundContent={
+                <Empty description="暂无部门，请先在部门管理中创建" image={Empty.PRESENTED_IMAGE_SIMPLE}>
+                  <Button
+                    type="primary"
+                    size="small"
+                    icon={<ApartmentOutlined />}
+                    onClick={() => navigate('/departments')}
+                  >
+                    前往部门管理
+                  </Button>
+                </Empty>
+              }
+              dropdownRender={(menu) => (
+                <>
+                  {menu}
+                  <Divider style={{ margin: '8px 0' }} />
+                  <Button
+                    type="link"
+                    icon={<ApartmentOutlined />}
+                    onClick={() => navigate('/departments')}
+                    style={{ width: '100%', textAlign: 'left' }}
+                  >
+                    前往部门管理
+                  </Button>
+                </>
+              )}
+            >
+              {departments.map(dept => (
+                <Select.Option key={dept.id} value={dept.id}>
+                  <Space>
+                    <ApartmentOutlined />
+                    {dept.name}
+                  </Space>
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+          
           <Form.Item
             name="role"
             label="角色"
             rules={[{ required: true, message: '请选择角色' }]}
+            initialValue="member"
           >
             <Select placeholder="请选择角色" options={roleOptions} />
           </Form.Item>
         </Form>
       </Modal>
+
     </div>
   )
 }

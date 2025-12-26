@@ -56,6 +56,15 @@ spring:
             - StripPrefix=0
             - AuthFilter
 
+        # 部门服务（项目服务）
+        - id: mota-department-service
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/departments/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
         # 活动服务（项目服务）
         - id: mota-activity-service
           uri: lb://mota-project-service
@@ -115,6 +124,15 @@ spring:
           uri: lb://mota-project-service
           predicates:
             - Path=/api/v1/department-tasks/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # 视图配置服务
+        - id: mota-view-config-service
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/view-configs/**
           filters:
             - StripPrefix=0
             - AuthFilter

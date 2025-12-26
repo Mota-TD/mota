@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mota.project.mapper.MilestoneMapper">
+
+    <!-- 里程碑结果映射 -->
+    <resultMap id="MilestoneResultMap" type="com.mota.project.entity.Milestone">
+        <id column="id" property="id"/>
+        <result column="project_id" property="projectId"/>
+        <result column="name" property="name"/>
+        <result column="description" property="description"/>
+        <result column="target_date" property="targetDate"/>
+        <result column="status" property="status"/>
+        <result column="progress" property="progress"/>
+        <result column="task_count" property="taskCount"/>
+        <result column="completed_task_count" property="completedTaskCount"/>
+        <result column="completed_at" property="completedAt"/>
+        <result column="sort_order" property="sortOrder"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
+        <result column="deleted" property="deleted"/>
+        <result column="version" property="version"/>
+    </resultMap>
+
+    <!-- 根据项目ID查询里程碑列表 -->
+    <select id="selectByProjectId" resultMap="MilestoneResultMap">
+        SELECT m.*
+        FROM milestone m
+        WHERE m.project_id = #{projectId}
+          AND m.deleted = 0
+        ORDER BY m.sort_order ASC, m.target_date ASC
+    </select>
+
+    <!-- 查询即将到期的里程碑 -->
+    <select id="selectUpcomingMilestones" resultMap="MilestoneResultMap">
+        SELECT m.*
+        FROM milestone m
+        WHERE m.deleted = 0
+          AND m.status = 'pending'
+          AND m.target_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL #{days} DAY)
+        ORDER BY m.target_date ASC
+    </select>
+
+    <!-- 查询已延期的里程碑 -->
+    <select id="selectDelayedMilestones" resultMap="MilestoneResultMap">
+        SELECT m.*
+        FROM milestone m
+        WHERE m.deleted = 0
+          AND m.status = 'pending'
+          AND m.target_date &lt; CURDATE()
+        ORDER BY m.target_date ASC
+    </select>
+
+</mapper>

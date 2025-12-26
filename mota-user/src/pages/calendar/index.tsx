@@ -71,13 +71,8 @@ const CalendarPage = () => {
       setCalendarConfigs(configs)
     } catch (error) {
       console.error('Failed to load calendar configs:', error)
-      // 使用默认配置
-      setCalendarConfigs([
-        { id: 1, userId: user.id, calendarType: 'personal', name: '个人日历', color: CALENDAR_TYPE_COLORS.personal, visible: true, isDefault: true, createdAt: '', updatedAt: '' },
-        { id: 2, userId: user.id, calendarType: 'team', name: '团队日历', color: CALENDAR_TYPE_COLORS.team, visible: true, isDefault: false, createdAt: '', updatedAt: '' },
-        { id: 3, userId: user.id, calendarType: 'project', name: '项目日历', color: CALENDAR_TYPE_COLORS.project, visible: true, isDefault: false, createdAt: '', updatedAt: '' },
-        { id: 4, userId: user.id, calendarType: 'task', name: '任务日历', color: CALENDAR_TYPE_COLORS.task, visible: true, isDefault: false, createdAt: '', updatedAt: '' }
-      ])
+      message.error('加载日历配置失败')
+      setCalendarConfigs([])
     }
   }, [user?.id])
 
@@ -89,11 +84,8 @@ const CalendarPage = () => {
       setSubscriptions(subs)
     } catch (error) {
       console.error('Failed to load subscriptions:', error)
-      // 使用模拟数据
-      setSubscriptions([
-        { id: 1, userId: user.id, name: '中国节假日', url: 'https://calendar.google.com/calendar/ical/zh.china%23holiday%40group.v.calendar.google.com/public/basic.ics', color: '#ef4444', syncInterval: 1440, status: 'active', createdAt: '', updatedAt: '' },
-        { id: 2, userId: user.id, name: '公司日历', url: 'https://example.com/company-calendar.ics', color: '#3b82f6', syncInterval: 60, status: 'active', lastSyncAt: new Date().toISOString(), createdAt: '', updatedAt: '' }
-      ])
+      message.error('加载订阅列表失败')
+      setSubscriptions([])
     }
   }, [user?.id])
 
@@ -105,7 +97,7 @@ const CalendarPage = () => {
       setSubscriptionUrl(result.url)
     } catch (error) {
       console.error('Failed to get subscription URL:', error)
-      setSubscriptionUrl(`https://mota.example.com/api/v1/calendar/user/${user.id}/subscribe.ics`)
+      setSubscriptionUrl('')
     }
   }, [user?.id])
 

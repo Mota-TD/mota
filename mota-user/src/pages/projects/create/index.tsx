@@ -19,11 +19,13 @@ import {
   Tag,
   Empty,
   Tooltip,
-  Spin
+  Spin,
+  Modal
 } from 'antd'
 import {
   ArrowLeftOutlined,
   PlusOutlined,
+  UserAddOutlined,
   ProjectOutlined,
   TeamOutlined,
   ApartmentOutlined,
@@ -83,81 +85,58 @@ const CreateProject = () => {
   
   // 表单数据
   const [formData, setFormData] = useState<any>({})
-
-  // 默认部门数据（当API不可用时使用）
-  const defaultDepartments: Department[] = [
-    { id: '1', orgId: '1', name: '技术部', sortOrder: 1, status: 'active' as any, memberCount: 25 },
-    { id: '2', orgId: '1', name: '市场部', sortOrder: 2, status: 'active' as any, memberCount: 12 },
-    { id: '3', orgId: '1', name: '运营部', sortOrder: 3, status: 'active' as any, memberCount: 8 },
-    { id: '4', orgId: '1', name: '产品部', sortOrder: 4, status: 'active' as any, memberCount: 6 },
-    { id: '5', orgId: '1', name: '财务部', sortOrder: 5, status: 'active' as any, memberCount: 5 },
-    { id: '6', orgId: '1', name: '人力资源部', sortOrder: 6, status: 'active' as any, memberCount: 4 },
-  ]
   
-  // 默认用户数据（当API不可用时使用）
-  const defaultUsers = [
-    { id: 1, name: '张三', role: '技术总监', departmentId: 1, avatar: '' },
-    { id: 2, name: '李四', role: '前端开发', departmentId: 1, avatar: '' },
-    { id: 3, name: '王五', role: '后端开发', departmentId: 1, avatar: '' },
-    { id: 4, name: '赵六', role: '市场经理', departmentId: 2, avatar: '' },
-    { id: 5, name: '钱七', role: '市场专员', departmentId: 2, avatar: '' },
-    { id: 6, name: '孙八', role: '运营经理', departmentId: 3, avatar: '' },
-    { id: 7, name: '周九', role: '产品经理', departmentId: 4, avatar: '' },
-  ]
+  // 项目标识（系统自动生成）
+  const [projectKey, setProjectKey] = useState<string>('')
+  const [loadingKey, setLoadingKey] = useState(false)
+
 
   useEffect(() => {
     loadData()
+    loadNextProjectKey()
   }, [])
 
   const loadData = async () => {
     setLoadingData(true)
     try {
       const [deptsRes, usersRes] = await Promise.all([
-        departmentApi.getDepartmentsByOrgId(1).catch((err) => {
-          console.warn('Failed to load departments from API, using default data:', err)
-          return null
-        }),
-        getUsers().catch((err) => {
-          console.warn('Failed to load users from API, using default data:', err)
-          return null
-        })
+        departmentApi.getDepartmentsByOrgId(1),
+        getUsers()
       ])
       
-      // 如果API返回了有效数据则使用，否则使用默认数据
-      if (deptsRes && Array.isArray(deptsRes) && deptsRes.length > 0) {
+      if (deptsRes && Array.isArray(deptsRes)) {
         setDepartments(deptsRes)
       } else {
-        setDepartments(defaultDepartments)
+        setDepartments([])
       }
       
-      if (usersRes && (usersRes as any).list && (usersRes as any).list.length > 0) {
+      if (usersRes && (usersRes as any).list) {
         setUsers((usersRes as any).list)
       } else {
-        setUsers(defaultUsers)
+        setUsers([])
       }
     } catch (error) {
       console.error('Failed to load data:', error)
-      // 确保即使出错也设置默认数据
-      setDepartments(defaultDepartments)
-      setUsers(defaultUsers)
+      message.error('加载数据失败')
+      setDepartments([])
+      setUsers([])
     } finally {
       setLoadingData(false)
     }
   }
 
-  // 生成项目标识
-  const generateKey = (name: string) => {
-    if (!name) return ''
-    const englishChars = name.split('').filter(char => {
-      const code = char.charCodeAt(0)
-      return (code >= 65 && code <= 90) || (code >= 97 && code <= 122) || (code >= 48 && code <= 57)
-    }).map(char => char.toUpperCase()).join('')
-    
-    if (!englishChars) {
-      return 'PROJ' + Math.floor(Math.random() * 1000)
+  // 加载下一个项目标识
+  const loadNextProjectKey = async () => {
+    setLoadingKey(true)
+    try {
+      const nextKey = await projectApi.getNextProjectKey()
+      setProjectKey(nextKey)
+    } catch (error) {
+      console.error('Failed to load next project key:', error)
+      setProjectKey('AF-0001') // 默认值
+    } finally {
+      setLoadingKey(false)
     }
-    
-    return englishChars.slice(0, 6).toUpperCase()
   }
 
   // 下一步
@@ -224,9 +203,9 @@ const CreateProject = () => {
     setLoading(true)
     try {
       const dateRange = formData.dateRange
+      // 项目标识由系统自动生成，无需前端传递
       await projectApi.createProject({
         name: formData.name,
-        key: formData.key,
         description: formData.description,
         color: selectedColor,
         startDate: dateRange?.[0]?.format('YYYY-MM-DD'),
@@ -392,31 +371,28 @@ const CreateProject = () => {
             
             <Row gutter={16}>
               <Col span={16}>
-                <Form.Item 
-                  label="项目名称" 
+                <Form.Item
+                  label="项目名称"
                   name="name"
                   rules={[{ required: true, message: '请输入项目名称' }]}
                 >
-                  <Input 
-                    size="large" 
+                  <Input
+                    size="large"
                     placeholder="请输入项目名称"
-                    onChange={(e) => {
-                      const key = generateKey(e.target.value)
-                      form.setFieldValue('key', key)
-                    }}
                   />
                 </Form.Item>
               </Col>
               <Col span={8}>
-                <Form.Item 
-                  label="项目标识" 
-                  name="key"
-                  rules={[
-                    { required: true, message: '请输入项目标识' },
-                    { pattern: /^[A-Z0-9]+$/, message: '只能包含大写字母和数字' }
-                  ]}
+                <Form.Item
+                  label="项目标识"
+                  tooltip="项目标识由系统自动生成，创建后不可修改"
                 >
-                  <Input size="large" placeholder="如: PROJ" maxLength={10} />
+                  <Input
+                    size="large"
+                    value={loadingKey ? '加载中...' : projectKey}
+                    disabled
+                    style={{ backgroundColor: '#f5f5f5', color: '#1a1a1a', fontWeight: 500 }}
+                  />
                 </Form.Item>
               </Col>
             </Row>
@@ -448,20 +424,58 @@ const CreateProject = () => {
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item 
-                  label="项目负责人" 
+                <Form.Item
+                  label="项目负责人"
                   name="ownerId"
                   rules={[{ required: true, message: '请选择项目负责人' }]}
                 >
-                  <Select size="large" placeholder="请选择项目负责人">
-                    {users.map(user => (
-                      <Select.Option key={user.id} value={user.id}>
-                        <Space>
-                          <Avatar size="small" src={user.avatar}>{user.name?.charAt(0)}</Avatar>
-                          {user.name}
-                        </Space>
-                      </Select.Option>
-                    ))}
+                  <Select
+                    size="large"
+                    placeholder="请选择项目负责人"
+                    notFoundContent={
+                      <div style={{ padding: '16px', textAlign: 'center' }}>
+                        <Empty
+                          image={Empty.PRESENTED_IMAGE_SIMPLE}
+                          description="暂无员工"
+                        >
+                          <Button
+                            type="primary"
+                            icon={<UserAddOutlined />}
+                            onClick={() => navigate('/members?action=add')}
+                          >
+                            添加员工
+                          </Button>
+                        </Empty>
+                      </div>
+                    }
+                    dropdownRender={(menu) => (
+                      <>
+                        {menu}
+                        <Divider style={{ margin: '8px 0' }} />
+                        <div style={{ padding: '0 8px 8px' }}>
+                          <Button
+                            type="link"
+                            icon={<UserAddOutlined />}
+                            onClick={() => navigate('/members?action=add')}
+                            style={{ width: '100%' }}
+                          >
+                            添加新员工
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                  >
+                    {users.map(user => {
+                      const displayName = user.nickname || user.username || '未知用户'
+                      return (
+                        <Select.Option key={user.id} value={user.id}>
+                          <Space>
+                            <Avatar size="small" src={user.avatar}>{displayName.charAt(0)}</Avatar>
+                            {displayName}
+                          </Space>
+                        </Select.Option>
+                      )
+                    })}
                   </Select>
                 </Form.Item>
               </Col>
@@ -562,20 +576,23 @@ const CreateProject = () => {
                         </span>
                       </div>
                       <div className={styles.memberList}>
-                        {deptMembers.map(member => (
-                          <div
-                            key={member.id}
-                            className={`${styles.memberItem} ${selectedMembers.some(id => String(id) === String(member.id)) ? styles.memberItemSelected : ''}`}
-                            onClick={() => handleMemberToggle(member.id)}
-                          >
-                            <Checkbox checked={selectedMembers.some(id => String(id) === String(member.id))} />
-                            <Avatar size="small" src={member.avatar}>{member.name?.charAt(0)}</Avatar>
-                            <div className={styles.memberInfo}>
-                              <div className={styles.memberName}>{member.name}</div>
-                              <div className={styles.memberRole}>{member.role}</div>
+                        {deptMembers.map(member => {
+                          const memberDisplayName = member.nickname || member.username || '未知用户'
+                          return (
+                            <div
+                              key={member.id}
+                              className={`${styles.memberItem} ${selectedMembers.some(id => String(id) === String(member.id)) ? styles.memberItemSelected : ''}`}
+                              onClick={() => handleMemberToggle(member.id)}
+                            >
+                              <Checkbox checked={selectedMembers.some(id => String(id) === String(member.id))} />
+                              <Avatar size="small" src={member.avatar}>{memberDisplayName.charAt(0)}</Avatar>
+                              <div className={styles.memberInfo}>
+                                <div className={styles.memberName}>{memberDisplayName}</div>
+                                <div className={styles.memberRole}>{member.role}</div>
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          )
+                        })}
                       </div>
                     </div>
                   )
@@ -760,7 +777,7 @@ const CreateProject = () => {
                 {formData.name || form.getFieldValue('name') || '项目名称'}
               </h3>
               <p className={styles.previewKey}>
-                {formData.key || form.getFieldValue('key') || 'KEY'}
+                {loadingKey ? '加载中...' : projectKey || '系统自动生成'}
               </p>
               <p className={styles.previewDesc}>
                 {formData.description || form.getFieldValue('description') || '项目描述将显示在这里'}
@@ -784,9 +801,10 @@ const CreateProject = () => {
                   <Avatar.Group maxCount={5}>
                     {selectedMembers.map(memberId => {
                       const member = users.find(u => u.id === memberId)
+                      const memberName = member?.nickname || member?.username || '未知用户'
                       return (
-                        <Tooltip key={memberId} title={member?.name}>
-                          <Avatar src={member?.avatar}>{member?.name?.charAt(0)}</Avatar>
+                        <Tooltip key={memberId} title={memberName}>
+                          <Avatar src={member?.avatar}>{memberName.charAt(0)}</Avatar>
                         </Tooltip>
                       )
                     })}
@@ -806,7 +824,7 @@ const CreateProject = () => {
           {/* 提示信息 */}
           <Card className={styles.tipsCard} title="创建提示">
             <ul className={styles.tipsList}>
-              <li>项目标识创建后不可修改，请谨慎填写</li>
+              <li>项目标识由系统自动生成（格式：AF-0000），创建后不可修改</li>
               <li>选择参与部门后可以为每个部门分配任务</li>
               <li>里程碑可以帮助跟踪项目关键节点</li>
               <li>创建后可以在设置中修改其他信息</li>

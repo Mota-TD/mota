@@ -70,7 +70,14 @@ const routeBreadcrumbMap: Record<string, { title: string; icon?: React.ReactNode
   '/system': [{ title: '系统管理', icon: <SettingOutlined /> }],
   '/settings': [{ title: '系统设置', icon: <SettingOutlined /> }],
   '/profile': [{ title: '个人设置', icon: <UserOutlined /> }],
-  '/members': [{ title: '成员管理', icon: <TeamOutlined /> }],
+  '/members': [
+    { title: '组织架构', icon: <ApartmentOutlined /> },
+    { title: '成员管理', icon: <TeamOutlined /> }
+  ],
+  '/departments': [
+    { title: '组织架构', icon: <ApartmentOutlined /> },
+    { title: '部门管理', icon: <ApartmentOutlined /> }
+  ],
   '/help': [{ title: '帮助中心', icon: <QuestionCircleOutlined /> }],
   '/ai/assistant': [
     { title: 'AI助理', icon: <RobotOutlined /> },
@@ -311,6 +318,26 @@ const ConsoleLayout = () => {
           key: '/favorites',
           icon: <StarOutlined />,
           label: '我的收藏',
+        },
+      ],
+    },
+    {
+      type: 'divider',
+    },
+    {
+      key: 'org-group',
+      type: 'group',
+      label: collapsed ? '' : '组织架构',
+      children: [
+        {
+          key: '/departments',
+          icon: <ApartmentOutlined />,
+          label: '部门管理',
+        },
+        {
+          key: '/members',
+          icon: <TeamOutlined />,
+          label: '成员管理',
         },
       ],
     },

@@ -5,11 +5,11 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 搜索日志实体
+ * 智能搜索日志实体
  */
 @Data
 @TableName("search_log")
-public class SearchLog {
+public class SmartSearchLog {
     
     @TableId(type = IdType.AUTO)
     private Long id;

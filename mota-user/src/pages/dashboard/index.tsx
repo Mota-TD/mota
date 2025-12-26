@@ -131,8 +131,8 @@ const Dashboard = () => {
     totalTasks: 0,
     completedTasks: 0,
     inProgressTasks: 0,
-    aiSolutions: 12,
-    pptGenerated: 8
+    aiSolutions: 0,
+    pptGenerated: 0
   })
   const [recentProjects, setRecentProjects] = useState<any[]>([])
   const [myTasks, setMyTasks] = useState<any[]>([])
@@ -179,8 +179,8 @@ const Dashboard = () => {
       totalTasks: tasks.length,
       completedTasks: tasks.filter((t: any) => t.status === 'completed').length,
       inProgressTasks: tasks.filter((t: any) => t.status === 'in_progress').length,
-      aiSolutions: 12,
-      pptGenerated: 8
+      aiSolutions: 0,
+      pptGenerated: 0
     })
     
     // 加载活动记录

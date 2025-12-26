@@ -415,14 +415,14 @@ export const getProposalTemplates = (type?: string, industry?: string) => {
   return request.get<ProposalTemplate[]>(url);
 };
 
-// ==================== 兼容旧接口 ====================
+// ==================== 兼容旧接口（使用 legacy 路径） ====================
 
 export const generateProjectProposal = (
   requirement: string,
   projectType: string,
   context?: Record<string, unknown>
 ) => {
-  let url = `/api/ai/proposal/project?requirement=${encodeURIComponent(requirement)}&projectType=${encodeURIComponent(projectType)}`;
+  let url = `/api/ai/proposal/legacy/project?requirement=${encodeURIComponent(requirement)}&projectType=${encodeURIComponent(projectType)}`;
   return request.post<string>(url, context || {});
 };
 
@@ -431,7 +431,7 @@ export const generateTechnicalProposal = (
   techStack: string[],
   constraints?: Record<string, unknown>
 ) => {
-  return request.post<string>(`/api/ai/proposal/technical?requirement=${encodeURIComponent(requirement)}`, {
+  return request.post<string>(`/api/ai/proposal/legacy/technical?requirement=${encodeURIComponent(requirement)}`, {
     techStack,
     constraints
   });
@@ -442,7 +442,7 @@ export const generateMarketingProposal = (
   targetAudience: string,
   budget?: number
 ) => {
-  let url = `/api/ai/proposal/marketing?product=${encodeURIComponent(product)}&targetAudience=${encodeURIComponent(targetAudience)}`;
+  let url = `/api/ai/proposal/legacy/marketing?product=${encodeURIComponent(product)}&targetAudience=${encodeURIComponent(targetAudience)}`;
   if (budget) {
     url += `&budget=${budget}`;
   }
@@ -455,7 +455,7 @@ export const generateBusinessPlan = (
   scale: string
 ) => {
   return request.post<string>(
-    `/api/ai/proposal/business-plan?businessIdea=${encodeURIComponent(businessIdea)}&industry=${encodeURIComponent(industry)}&scale=${encodeURIComponent(scale)}`
+    `/api/ai/proposal/legacy/business-plan?businessIdea=${encodeURIComponent(businessIdea)}&industry=${encodeURIComponent(industry)}&scale=${encodeURIComponent(scale)}`
   );
 };
 
@@ -465,19 +465,19 @@ export const generateWorkReport = (
   period: string
 ) => {
   return request.post<string>(
-    `/api/ai/proposal/work-report?projectId=${projectId}&reportType=${encodeURIComponent(reportType)}&period=${encodeURIComponent(period)}`
+    `/api/ai/proposal/legacy/work-report?projectId=${projectId}&reportType=${encodeURIComponent(reportType)}&period=${encodeURIComponent(period)}`
   );
 };
 
 export const expandProposalSection = (proposal: string, section: string) => {
-  return request.post<string>('/api/ai/proposal/expand', {
+  return request.post<string>('/api/ai/proposal/legacy/expand', {
     proposal,
     section
   });
 };
 
 export const evaluateProposal = (proposal: string) => {
-  return request.post<ProposalEvaluation>('/api/ai/proposal/evaluate', proposal);
+  return request.post<ProposalEvaluation>('/api/ai/proposal/legacy/evaluate', proposal);
 };
 
 export const generateProposalWithKnowledge = (
@@ -485,61 +485,61 @@ export const generateProposalWithKnowledge = (
   knowledgeBaseIds: number[]
 ) => {
   return request.post<string>(
-    `/api/ai/proposal/with-knowledge?requirement=${encodeURIComponent(requirement)}`,
+    `/api/ai/proposal/legacy/with-knowledge?requirement=${encodeURIComponent(requirement)}`,
     knowledgeBaseIds
   );
 };
 
 export const searchRelatedProposals = (requirement: string, limit = 5) => {
   return request.get<Array<{ id: number; title: string; similarity: number }>>(
-    `/api/ai/proposal/search-related?requirement=${encodeURIComponent(requirement)}&limit=${limit}`
+    `/api/ai/proposal/legacy/search-related?requirement=${encodeURIComponent(requirement)}&limit=${limit}`
   );
 };
 
 export const startProposalSession = (userId: number, proposalType: string) => {
   return request.post<string>(
-    `/api/ai/proposal/session/start?userId=${userId}&proposalType=${encodeURIComponent(proposalType)}`
+    `/api/ai/proposal/legacy/session/start?userId=${userId}&proposalType=${encodeURIComponent(proposalType)}`
   );
 };
 
 export const continueProposalSession = (sessionId: string, userMessage: string) => {
-  return request.post<string>(`/api/ai/proposal/session/${sessionId}/continue`, userMessage);
+  return request.post<string>(`/api/ai/proposal/legacy/session/${sessionId}/continue`, userMessage);
 };
 
 export const getSessionHistory = (sessionId: string) => {
-  return request.get<SessionMessage[]>(`/api/ai/proposal/session/${sessionId}/history`);
+  return request.get<SessionMessage[]>(`/api/ai/proposal/legacy/session/${sessionId}/history`);
 };
 
 export const finalizeProposalSession = (sessionId: string) => {
-  return request.post<string>(`/api/ai/proposal/session/${sessionId}/finalize`);
+  return request.post<string>(`/api/ai/proposal/legacy/session/${sessionId}/finalize`);
 };
 
 export const generateFromTemplate = (templateId: number, variables: Record<string, unknown>) => {
-  return request.post<string>(`/api/ai/proposal/from-template/${templateId}`, variables);
+  return request.post<string>(`/api/ai/proposal/legacy/from-template/${templateId}`, variables);
 };
 
 export const askQuestion = (question: string, context?: Record<string, unknown>) => {
-  return request.post<string>(`/api/ai/proposal/ask?question=${encodeURIComponent(question)}`, context || {});
+  return request.post<string>(`/api/ai/proposal/legacy/ask?question=${encodeURIComponent(question)}`, context || {});
 };
 
 export const generateDocumentSummary = (documentId: number, maxLength = 500) => {
-  return request.get<string>(`/api/ai/proposal/document/${documentId}/summary?maxLength=${maxLength}`);
+  return request.get<string>(`/api/ai/proposal/legacy/document/${documentId}/summary?maxLength=${maxLength}`);
 };
 
 export const generateMeetingMinutes = (meetingNotes: string) => {
-  return request.post<string>('/api/ai/proposal/meeting-minutes', meetingNotes);
+  return request.post<string>('/api/ai/proposal/legacy/meeting-minutes', meetingNotes);
 };
 
 export const suggestTasks = (projectId: number, currentTasks?: number[]) => {
   return request.post<TaskSuggestion[]>(
-    `/api/ai/proposal/suggest-tasks?projectId=${projectId}`,
+    `/api/ai/proposal/legacy/suggest-tasks?projectId=${projectId}`,
     currentTasks || []
   );
 };
 
 export const analyzeData = (data: Record<string, unknown>, analysisType: string) => {
   return request.post<DataAnalysisResult>(
-    `/api/ai/proposal/analyze-data?analysisType=${encodeURIComponent(analysisType)}`,
+    `/api/ai/proposal/legacy/analyze-data?analysisType=${encodeURIComponent(analysisType)}`,
     data
   );
 };

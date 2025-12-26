@@ -65,6 +65,11 @@ public class ProposalSection {
     private Boolean isEdited;
     
     /**
+     * 状态(draft/completed/reviewing)
+     */
+    private String status;
+    
+    /**
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)

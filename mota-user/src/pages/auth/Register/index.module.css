@@ -135,6 +135,63 @@
   color: #d1fae5;
 }
 
+/* Invitation Alert */
+.invitationAlert {
+  margin-bottom: 24px;
+  border-radius: 10px;
+}
+
+.invitationAlert p {
+  margin: 4px 0;
+}
+
+.invitationAlert strong {
+  color: #047857;
+}
+
+/* Cascader Styles */
+.registerForm :global(.ant-cascader) {
+  width: 100%;
+}
+
+.registerForm :global(.ant-select-selector) {
+  height: 48px !important;
+  border-radius: 10px !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  padding: 8px 12px !important;
+}
+
+.registerForm :global(.ant-select-selection-search-input) {
+  height: 46px !important;
+  color: #fff !important;
+}
+
+.registerForm :global(.ant-select-selection-placeholder) {
+  color: rgba(255, 255, 255, 0.4) !important;
+  line-height: 30px !important;
+}
+
+.registerForm :global(.ant-select-selection-item) {
+  color: #fff !important;
+  line-height: 30px !important;
+}
+
+.registerForm :global(.ant-select:hover .ant-select-selector) {
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+.registerForm :global(.ant-select-focused .ant-select-selector) {
+  border-color: #fff !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2) !important;
+}
+
+.registerForm :global(.ant-select-arrow) {
+  color: rgba(255, 255, 255, 0.6);
+}
+
 /* Register Footer */
 .registerFooter {
   text-align: center;

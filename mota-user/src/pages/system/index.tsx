@@ -32,118 +32,29 @@ const { TabPane } = Tabs
 const { Option } = Select
 const { TextArea } = Input
 
-// 模拟数据
-const mockSSOProviders = [
-  { id: 1, providerCode: 'oauth2_github', providerName: 'GitHub', providerType: 'OAUTH2', status: 1, sortOrder: 1 },
-  { id: 2, providerCode: 'oauth2_google', providerName: 'Google', providerType: 'OAUTH2', status: 0, sortOrder: 2 },
-  { id: 3, providerCode: 'oauth2_wechat_work', providerName: '企业微信', providerType: 'OAUTH2', status: 1, sortOrder: 3 },
-  { id: 4, providerCode: 'oauth2_dingtalk', providerName: '钉钉', providerType: 'OAUTH2', status: 0, sortOrder: 4 },
-  { id: 5, providerCode: 'ldap_default', providerName: 'LDAP', providerType: 'LDAP', status: 0, sortOrder: 5 },
-]
+// 初始化为空数组，数据应从API获取
+const mockSSOProviders: any[] = []
 
-const mockPositions = [
-  { id: 1, positionCode: 'CEO', positionName: '首席执行官', positionLevel: 10, positionCategory: '管理类', headcount: 1, currentCount: 1, status: 1 },
-  { id: 2, positionCode: 'CTO', positionName: '首席技术官', positionLevel: 9, positionCategory: '管理类', headcount: 1, currentCount: 1, status: 1 },
-  { id: 3, positionCode: 'PM', positionName: '项目经理', positionLevel: 7, positionCategory: '管理类', headcount: 5, currentCount: 3, status: 1 },
-  { id: 4, positionCode: 'SE', positionName: '高级工程师', positionLevel: 6, positionCategory: '技术类', headcount: 10, currentCount: 8, status: 1 },
-  { id: 5, positionCode: 'DEV', positionName: '软件工程师', positionLevel: 5, positionCategory: '技术类', headcount: 20, currentCount: 15, status: 1 },
-]
+const mockPositions: any[] = []
 
-const mockTransfers = [
-  { id: 1, transferNo: 'TR202412001', userName: '张三', transferType: 'PROMOTION', fromPositionName: '软件工程师', toPositionName: '高级工程师', effectiveDate: '2025-01-01', status: 'APPROVED' },
-  { id: 2, transferNo: 'TR202412002', userName: '李四', transferType: 'DEPARTMENT', fromDepartmentName: '研发部', toDepartmentName: '产品部', effectiveDate: '2025-01-15', status: 'PENDING' },
-  { id: 3, transferNo: 'TR202412003', userName: '王五', transferType: 'TRANSFER', fromPositionName: '前端工程师', toPositionName: '全栈工程师', effectiveDate: '2025-02-01', status: 'EXECUTED' },
-]
+const mockTransfers: any[] = []
 
-const mockDataPermissionRules = [
-  { id: 1, ruleName: '查看全部项目', ruleCode: 'VIEW_ALL_PROJECTS', resourceType: 'PROJECT', scopeType: 'ALL', status: 1, priority: 100 },
-  { id: 2, ruleName: '查看本人项目', ruleCode: 'VIEW_OWN_PROJECTS', resourceType: 'PROJECT', scopeType: 'SELF', status: 1, priority: 50 },
-  { id: 3, ruleName: '查看本部门项目', ruleCode: 'VIEW_DEPT_PROJECTS', resourceType: 'PROJECT', scopeType: 'DEPARTMENT', status: 1, priority: 60 },
-  { id: 4, ruleName: '查看全部任务', ruleCode: 'VIEW_ALL_TASKS', resourceType: 'TASK', scopeType: 'ALL', status: 1, priority: 100 },
-  { id: 5, ruleName: '查看本人任务', ruleCode: 'VIEW_OWN_TASKS', resourceType: 'TASK', scopeType: 'SELF', status: 1, priority: 50 },
-]
+const mockDataPermissionRules: any[] = []
 
-const mockNewsSources = [
-  { id: 1, sourceName: '新华网', sourceCode: 'xinhua', sourceType: 'RSS', status: 1, lastFetchTime: '2025-12-25 10:00:00', totalFetchCount: 1520 },
-  { id: 2, sourceName: '人民网', sourceCode: 'people', sourceType: 'CRAWLER', status: 1, lastFetchTime: '2025-12-25 09:30:00', totalFetchCount: 2340 },
-  { id: 3, sourceName: '科技日报', sourceCode: 'stdaily', sourceType: 'API', status: 0, lastFetchTime: '2025-12-24 18:00:00', totalFetchCount: 890 },
-]
+const mockNewsSources: any[] = []
 
-const mockIntegrations = [
-  { id: 1, integrationName: '企业微信', integrationCode: 'WECHAT_WORK', integrationType: 'WECHAT_WORK', status: 1, lastSyncTime: '2025-12-25 08:00:00' },
-  { id: 2, integrationName: '钉钉', integrationCode: 'DINGTALK', integrationType: 'DINGTALK', status: 0, lastSyncTime: null },
-  { id: 3, integrationName: 'GitLab', integrationCode: 'GITLAB', integrationType: 'GITLAB', status: 1, lastSyncTime: '2025-12-25 10:30:00' },
-]
+const mockIntegrations: any[] = []
 
-const mockDataChangeLogs = [
-  { id: 1, tableName: 'sys_user', recordId: '1001', operationType: 'UPDATE', operatorName: '管理员', operationTime: '2025-12-25 10:30:00', changeSummary: '更新用户信息' },
-  { id: 2, tableName: 'project', recordId: '2001', operationType: 'INSERT', operatorName: '张三', operationTime: '2025-12-25 09:15:00', changeSummary: '创建新项目' },
-  { id: 3, tableName: 'task', recordId: '3001', operationType: 'DELETE', operatorName: '李四', operationTime: '2025-12-25 08:45:00', changeSummary: '删除任务' },
-]
+const mockDataChangeLogs: any[] = []
 
-const mockAuditReports = [
-  { id: 1, reportNo: 'AR202412001', reportName: '12月操作审计报告', reportType: 'OPERATION', reportStatus: 'PUBLISHED', riskLevel: 'LOW', generatedAt: '2025-12-20' },
-  { id: 2, reportNo: 'AR202412002', reportName: '12月安全审计报告', reportType: 'SECURITY', reportStatus: 'REVIEWING', riskLevel: 'MEDIUM', generatedAt: '2025-12-22' },
-  { id: 3, reportNo: 'AR202412003', reportName: '12月合规审计报告', reportType: 'COMPLIANCE', reportStatus: 'DRAFT', riskLevel: 'HIGH', generatedAt: '2025-12-24' },
-]
+const mockAuditReports: any[] = []
 
-const mockComplianceRules = [
-  { id: 1, ruleName: '密码复杂度检查', ruleCode: 'PASSWORD_COMPLEXITY', ruleCategory: 'SECURITY', checkType: 'REALTIME', severity: 'HIGH', status: 1 },
-  { id: 2, ruleName: '登录失败次数检查', ruleCode: 'LOGIN_FAILURE_CHECK', ruleCategory: 'SECURITY', checkType: 'SCHEDULED', severity: 'MEDIUM', status: 1 },
-  { id: 3, ruleName: '敏感数据访问检查', ruleCode: 'SENSITIVE_DATA_ACCESS', ruleCategory: 'DATA_PROTECTION', checkType: 'SCHEDULED', severity: 'HIGH', status: 1 },
-  { id: 4, ruleName: '权限变更审计', ruleCode: 'PERMISSION_CHANGE_AUDIT', ruleCategory: 'ACCESS_CONTROL', checkType: 'SCHEDULED', severity: 'MEDIUM', status: 1 },
-]
+const mockComplianceRules: any[] = []
 
-const mockComplianceRecords = [
-  { id: 1, ruleCode: 'PASSWORD_COMPLEXITY', ruleName: '密码复杂度检查', checkTime: '2025-12-25 00:00:00', checkResult: 'PASS', affectedCount: 0, remediationStatus: 'RESOLVED' },
-  { id: 2, ruleCode: 'LOGIN_FAILURE_CHECK', ruleName: '登录失败次数检查', checkTime: '2025-12-25 00:00:00', checkResult: 'WARNING', affectedCount: 3, remediationStatus: 'PENDING' },
-  { id: 3, ruleCode: 'SENSITIVE_DATA_ACCESS', ruleName: '敏感数据访问检查', checkTime: '2025-12-25 00:00:00', checkResult: 'FAIL', affectedCount: 5, remediationStatus: 'IN_PROGRESS' },
-]
+const mockComplianceRecords: any[] = []
 
-// 组织架构树数据
-const mockOrgTreeData = [
-  {
-    key: 'org-1',
-    title: '摩塔科技',
-    icon: <TeamOutlined />,
-    children: [
-      {
-        key: 'dept-1',
-        title: '技术中心',
-        icon: <ApartmentOutlined />,
-        children: [
-          { key: 'user-1', title: '张三 - CTO', icon: <UserOutlined /> },
-          { key: 'user-2', title: '李四 - 技术总监', icon: <UserOutlined /> },
-          {
-            key: 'dept-1-1',
-            title: '研发部',
-            icon: <ApartmentOutlined />,
-            children: [
-              { key: 'user-3', title: '王五 - 研发经理', icon: <UserOutlined /> },
-              { key: 'user-4', title: '赵六 - 高级工程师', icon: <UserOutlined /> },
-            ]
-          },
-          {
-            key: 'dept-1-2',
-            title: '测试部',
-            icon: <ApartmentOutlined />,
-            children: [
-              { key: 'user-5', title: '钱七 - 测试经理', icon: <UserOutlined /> },
-            ]
-          }
-        ]
-      },
-      {
-        key: 'dept-2',
-        title: '产品中心',
-        icon: <ApartmentOutlined />,
-        children: [
-          { key: 'user-6', title: '孙八 - 产品总监', icon: <UserOutlined /> },
-        ]
-      }
-    ]
-  }
-]
+// 组织架构树数据 - 初始化为空
+const mockOrgTreeData: any[] = []
 
 const SystemManagementPage = () => {
   const [activeTab, setActiveTab] = useState('sso')

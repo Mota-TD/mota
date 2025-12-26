@@ -1226,3 +1226,151 @@
   background: #141414;
   border-color: #303030;
 }
+
+/* 里程碑拖拽和编辑样式 */
+.milestoneItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #e8e9eb;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  cursor: grab;
+  transition: all 0.2s ease;
+}
+
+.milestoneItem:hover {
+  border-color: #10B981;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.1);
+}
+
+.milestoneItem:active {
+  cursor: grabbing;
+}
+
+.milestoneItemDragging {
+  opacity: 0.5;
+  border-color: #10B981;
+  background: #ECFDF5;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.milestoneDragHandle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 36px;
+  color: #9ca3af;
+  cursor: grab;
+  transition: color 0.2s;
+}
+
+.milestoneDragHandle:hover {
+  color: #10B981;
+}
+
+.milestoneDragHandle:active {
+  cursor: grabbing;
+}
+
+.milestoneContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.milestoneInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.milestoneTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1f36;
+  margin: 0;
+}
+
+.milestoneDesc {
+  font-size: 13px;
+  color: #718096;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.milestoneMeta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.milestoneActions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.milestoneItem:hover .milestoneActions {
+  opacity: 1;
+}
+
+.milestoneEditForm {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.milestoneEditForm :global(.ant-form-item) {
+  margin-bottom: 0;
+}
+
+.milestoneEditActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+/* 拖拽占位符样式 */
+.milestoneDragOver {
+  border-color: #10B981;
+  border-style: dashed;
+  background: #ECFDF5;
+}
+
+/* 暗色主题支持 - 里程碑拖拽 */
+:global([data-theme='dark']) .milestoneItem {
+  background: #1f1f1f;
+  border-color: #303030;
+}
+
+:global([data-theme='dark']) .milestoneItem:hover {
+  border-color: #10B981;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+}
+
+:global([data-theme='dark']) .milestoneItemDragging {
+  background: #064E3B;
+  border-color: #10B981;
+}
+
+:global([data-theme='dark']) .milestoneTitle {
+  color: #e8e8e8;
+}
+
+:global([data-theme='dark']) .milestoneDesc {
+  color: #9ca3af;
+}
+
+:global([data-theme='dark']) .milestoneDragOver {
+  background: #064E3B;
+  border-color: #10B981;
+}

@@ -118,105 +118,16 @@ const KnowledgePage = () => {
         setTags(tagsData)
       } catch (error) {
         console.error('加载数据失败:', error)
-        // 使用模拟数据
-        setFiles(mockFiles)
-        setCategories(mockCategories)
-        setTags(mockTags)
+        message.error('加载数据失败')
+        setFiles([])
+        setCategories([])
+        setTags([])
       } finally {
         setLoading(false)
       }
     }
     loadData()
   }, [searchKeyword, selectedCategory, selectedTags, pagination.current, pagination.pageSize])
-
-  // 模拟数据
-  const mockFiles: KnowledgeFile[] = [
-    {
-      id: 1,
-      name: 'project-requirements.pdf',
-      originalName: '项目需求文档.pdf',
-      size: 2048576,
-      mimeType: 'application/pdf',
-      extension: 'pdf',
-      path: '/files/project-requirements.pdf',
-      thumbnailPath: '/thumbnails/project-requirements.jpg',
-      uploaderId: 1,
-      uploaderName: '张三',
-      status: 'completed',
-      tags: ['需求', '项目'],
-      category: '项目文档',
-      aiSuggestedCategory: '技术文档',
-      aiSuggestedTags: ['需求分析', 'PRD'],
-      aiConfidence: 0.85,
-      createdAt: '2024-01-15T10:30:00Z',
-      updatedAt: '2024-01-15T10:30:00Z'
-    },
-    {
-      id: 2,
-      name: 'architecture-design.docx',
-      originalName: '架构设计文档.docx',
-      size: 1536000,
-      mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      extension: 'docx',
-      path: '/files/architecture-design.docx',
-      uploaderId: 2,
-      uploaderName: '李四',
-      status: 'completed',
-      tags: ['架构', '设计'],
-      category: '技术文档',
-      createdAt: '2024-01-14T14:20:00Z',
-      updatedAt: '2024-01-14T14:20:00Z'
-    },
-    {
-      id: 3,
-      name: 'ui-mockup.png',
-      originalName: 'UI设计稿.png',
-      size: 5242880,
-      mimeType: 'image/png',
-      extension: 'png',
-      path: '/files/ui-mockup.png',
-      thumbnailPath: '/thumbnails/ui-mockup.jpg',
-      uploaderId: 3,
-      uploaderName: '王五',
-      status: 'completed',
-      tags: ['UI', '设计'],
-      category: '设计资源',
-      createdAt: '2024-01-13T09:15:00Z',
-      updatedAt: '2024-01-13T09:15:00Z'
-    },
-    {
-      id: 4,
-      name: 'api-docs.md',
-      originalName: 'API接口文档.md',
-      size: 102400,
-      mimeType: 'text/markdown',
-      extension: 'md',
-      path: '/files/api-docs.md',
-      uploaderId: 1,
-      uploaderName: '张三',
-      status: 'completed',
-      tags: ['API', '接口'],
-      category: '技术文档',
-      createdAt: '2024-01-12T16:45:00Z',
-      updatedAt: '2024-01-12T16:45:00Z'
-    }
-  ]
-
-  const mockCategories: FileCategory[] = [
-    { id: 1, name: '项目文档', fileCount: 15, createdAt: '', updatedAt: '' },
-    { id: 2, name: '技术文档', fileCount: 28, createdAt: '', updatedAt: '' },
-    { id: 3, name: '设计资源', fileCount: 12, createdAt: '', updatedAt: '' },
-    { id: 4, name: '会议记录', fileCount: 8, createdAt: '', updatedAt: '' },
-    { id: 5, name: '培训资料', fileCount: 5, createdAt: '', updatedAt: '' }
-  ]
-
-  const mockTags: FileTag[] = [
-    { id: 1, name: '需求', color: '#1890ff', fileCount: 10, createdAt: '' },
-    { id: 2, name: '设计', color: '#52c41a', fileCount: 8, createdAt: '' },
-    { id: 3, name: 'API', color: '#722ed1', fileCount: 6, createdAt: '' },
-    { id: 4, name: '架构', color: '#fa8c16', fileCount: 5, createdAt: '' },
-    { id: 5, name: '测试', color: '#eb2f96', fileCount: 4, createdAt: '' }
-  ]
 
   // 获取文件图标
   const getFileIcon = (mimeType: string, extension: string) => {

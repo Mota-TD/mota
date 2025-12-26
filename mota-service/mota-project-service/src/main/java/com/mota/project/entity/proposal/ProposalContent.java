@@ -31,6 +31,11 @@ public class ProposalContent {
     private Long teamId;
     
     /**
+     * 模板ID
+     */
+    private Long templateId;
+    
+    /**
      * 方案类型
      */
     private String proposalType;
@@ -89,6 +94,11 @@ public class ProposalContent {
      * 质量评分
      */
     private BigDecimal qualityScore;
+    
+    /**
+     * 创建者ID
+     */
+    private Long createdBy;
     
     /**
      * 创建时间

@@ -1,0 +1,92 @@
+.container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.emptyContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.headerCard {
+  margin-bottom: 24px;
+  border-radius: 12px;
+}
+
+.enterpriseHeader {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.enterpriseLogo {
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.enterpriseInfo {
+  flex: 1;
+}
+
+.contentCard {
+  border-radius: 12px;
+}
+
+.tableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.tableHeader h5 {
+  margin: 0;
+}
+
+.inviteSuccess {
+  text-align: center;
+}
+
+.inviteCodeBox {
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.inviteCodeBox h3 {
+  margin: 8px 0 0 0;
+  color: #1890ff;
+}
+
+/* 响应式布局 */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
+  .enterpriseHeader {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .tableHeader {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .tableHeader h5 {
+    text-align: center;
+  }
+}

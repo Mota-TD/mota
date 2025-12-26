@@ -10,8 +10,10 @@ import com.mota.project.dto.response.ProjectDetailResponse;
 import com.mota.project.dto.response.ProjectListResponse;
 import com.mota.project.entity.Milestone;
 import com.mota.project.entity.Project;
+import com.mota.project.entity.MilestoneAssignee;
 import com.mota.project.entity.ProjectDepartment;
 import com.mota.project.entity.ProjectMember;
+import com.mota.project.mapper.MilestoneAssigneeMapper;
 import com.mota.project.mapper.MilestoneMapper;
 import com.mota.project.mapper.ProjectMapper;
 import com.mota.project.mapper.ProjectMemberMapper;
@@ -38,6 +40,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
 
     private final ProjectMemberMapper projectMemberMapper;
     private final MilestoneMapper milestoneMapper;
+    private final MilestoneAssigneeMapper milestoneAssigneeMapper;
 
     // ==================== 项目基础操作 ====================
 
@@ -115,12 +118,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Project createProject(Project project) {
-        // 检查项目标识是否已存在
-        LambdaQueryWrapper<Project> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Project::getKey, project.getKey());
-        if (count(wrapper) > 0) {
-            throw new BusinessException("项目标识已存在");
-        }
+        // 自动生成项目标识（格式：AF-0000）
+        String generatedKey = generateProjectKey();
+        project.setKey(generatedKey);
         
         // 设置默认值
         if (!StringUtils.hasText(project.getOrgId())) {
@@ -164,17 +164,13 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Project createProject(CreateProjectRequest request) {
-        // 检查项目标识是否已存在
-        LambdaQueryWrapper<Project> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Project::getKey, request.getKey());
-        if (count(wrapper) > 0) {
-            throw new BusinessException("项目标识已存在");
-        }
+        // 自动生成项目标识（格式：AF-0000）
+        String generatedKey = generateProjectKey();
         
         // 创建项目实体
         Project project = new Project();
         project.setName(request.getName());
-        project.setKey(request.getKey());
+        project.setKey(generatedKey);
         project.setDescription(request.getDescription());
         project.setColor(request.getColor());
         project.setStartDate(request.getStartDate());
@@ -217,6 +213,21 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
                 milestone.setStatus(Milestone.Status.PENDING);
                 milestone.setSortOrder(sortOrder++);
                 milestoneMapper.insert(milestone);
+                
+                // 添加里程碑负责人
+                if (!CollectionUtils.isEmpty(milestoneReq.getAssigneeIds())) {
+                    boolean isFirst = true;
+                    for (Long assigneeId : milestoneReq.getAssigneeIds()) {
+                        MilestoneAssignee assignee = new MilestoneAssignee();
+                        assignee.setMilestoneId(milestone.getId());
+                        assignee.setUserId(assigneeId);
+                        assignee.setIsPrimary(isFirst);  // 第一个负责人为主负责人
+                        assignee.setAssignedAt(LocalDateTime.now());
+                        assignee.setAssignedBy(project.getOwnerId());
+                        milestoneAssigneeMapper.insert(assignee);
+                        isFirst = false;
+                    }
+                }
             }
         }
         
@@ -234,14 +245,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
             throw new BusinessException("项目不存在");
         }
         
-        // 如果修改了项目标识，检查是否已存在
-        if (StringUtils.hasText(project.getKey()) && !project.getKey().equals(existing.getKey())) {
-            LambdaQueryWrapper<Project> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(Project::getKey, project.getKey());
-            if (count(wrapper) > 0) {
-                throw new BusinessException("项目标识已存在");
-            }
-        }
+        // 项目标识不允许修改，保持原有值
+        project.setKey(existing.getKey());
         
         project.setId(id);
         updateById(project);
@@ -652,5 +657,20 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
             return ((Number) value).intValue();
         }
         return 0;
+    }
+
+    /**
+     * 生成项目标识
+     * 格式：AF-0000，从0001开始递增
+     */
+    private synchronized String generateProjectKey() {
+        Integer maxSequence = baseMapper.getMaxProjectKeySequence();
+        int nextSequence = (maxSequence == null ? 0 : maxSequence) + 1;
+        return String.format("AF-%04d", nextSequence);
+    }
+
+    @Override
+    public String getNextProjectKey() {
+        return generateProjectKey();
     }
 }

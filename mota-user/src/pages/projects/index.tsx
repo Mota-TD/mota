@@ -31,7 +31,8 @@ import {
   Steps,
   List,
   App,
-  Segmented
+  Segmented,
+  Upload
 } from 'antd'
 import type { Color } from 'antd/es/color-picker'
 import {
@@ -71,7 +72,12 @@ import {
   CloseOutlined,
   EyeOutlined,
   BarChartOutlined,
-  TableOutlined
+  TableOutlined,
+  UserAddOutlined,
+  UploadOutlined,
+  FileOutlined,
+  PaperClipOutlined,
+  HolderOutlined
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-cn'
@@ -104,7 +110,7 @@ const { RangePicker } = DatePicker
 
 // 项目颜色
 const projectColors = [
-  '#2b7de9', '#52c41a', '#722ed1', '#fa8c16', 
+  '#2b7de9', '#52c41a', '#722ed1', '#fa8c16',
   '#13c2c2', '#eb2f96', '#f5222d', '#faad14'
 ]
 
@@ -150,6 +156,7 @@ interface MilestoneItem {
   name: string
   targetDate: string
   description?: string
+  assigneeIds?: string[]  // 负责人ID列表（支持多负责人）
 }
 
 /**
@@ -185,8 +192,15 @@ const Projects = () => {
   const [selectedDepartments, setSelectedDepartments] = useState<string[]>([])
   const [selectedMembers, setSelectedMembers] = useState<string[]>([])
   const [milestones, setMilestones] = useState<MilestoneItem[]>([])
-  const [newMilestone, setNewMilestone] = useState({ name: '', targetDate: '', description: '' })
+  const [newMilestone, setNewMilestone] = useState({ name: '', targetDate: '', description: '', assigneeIds: [] as string[] })
+  const [editingMilestone, setEditingMilestone] = useState<MilestoneItem | null>(null)
+  const [draggedMilestone, setDraggedMilestone] = useState<string | null>(null)
   const [formData, setFormData] = useState<any>({})
+  const [uploadedFiles, setUploadedFiles] = useState<any[]>([])
+  
+  // 项目标识（系统自动生成）
+  const [projectKey, setProjectKey] = useState<string>('')
+  const [loadingKey, setLoadingKey] = useState(false)
   
   // 编辑项目抽屉相关状态
   const [editDrawerVisible, setEditDrawerVisible] = useState(false)
@@ -236,24 +250,18 @@ const Projects = () => {
     setLoadingData(true)
     try {
       const [deptsRes, usersRes] = await Promise.all([
-        departmentApi.getDepartmentsByOrgId(1).catch((err) => {
+        departmentApi.getDepartmentsByOrgId('default').catch((err) => {
           console.warn('Failed to load departments from API:', err)
-          message.error('加载部门数据失败')
-          return null
+          return []
         }),
         getUsers().catch((err) => {
           console.warn('Failed to load users from API:', err)
-          message.error('加载用户数据失败')
           return null
         })
       ])
       
-      // 如果API返回了有效数据则使用，否则设置为空数组
-      if (deptsRes && Array.isArray(deptsRes) && deptsRes.length > 0) {
-        setDepartments(deptsRes)
-      } else {
-        setDepartments([])
-      }
+      // 从API加载部门数据，与部门管理页面保持一致
+      setDepartments(deptsRes || [])
       
       if (usersRes && (usersRes as any).list && (usersRes as any).list.length > 0) {
         setUsers((usersRes as any).list)
@@ -262,7 +270,6 @@ const Projects = () => {
       }
     } catch (error) {
       console.error('Failed to load data:', error)
-      message.error('加载数据失败，请稍后重试')
       setDepartments([])
       setUsers([])
     } finally {
@@ -309,23 +316,22 @@ const Projects = () => {
     setFilteredProjects(filtered)
   }
 
-  // 根据名称生成项目标识
-  const generateKeyFromName = (name: string) => {
-    if (!name) return ''
-    const englishChars = name.split('').filter(char => {
-      const code = char.charCodeAt(0)
-      return (code >= 65 && code <= 90) || (code >= 97 && code <= 122) || (code >= 48 && code <= 57)
-    }).map(char => char.toUpperCase()).join('')
-    
-    if (!englishChars) {
-      return 'PROJ' + Math.floor(Math.random() * 1000)
+  // 加载下一个项目标识
+  const loadNextProjectKey = async () => {
+    setLoadingKey(true)
+    try {
+      const nextKey = await projectApi.getNextProjectKey()
+      setProjectKey(nextKey)
+    } catch (error) {
+      console.error('Failed to load next project key:', error)
+      setProjectKey('AF-0001') // 默认值
+    } finally {
+      setLoadingKey(false)
     }
-    
-    return englishChars.slice(0, 6).toUpperCase()
   }
 
   // 打开创建项目抽屉
-  const openCreateDrawer = () => {
+  const openCreateDrawer = async () => {
     setDrawerVisible(true)
     setCurrentStep(0)
     setSelectedColor(projectColors[0])
@@ -334,9 +340,12 @@ const Projects = () => {
     setSelectedDepartments([])
     setSelectedMembers([])
     setMilestones([])
-    setNewMilestone({ name: '', targetDate: '', description: '' })
+    setNewMilestone({ name: '', targetDate: '', description: '', assigneeIds: [] })
     setFormData({})
+    setUploadedFiles([])
     form.resetFields()
+    // 加载下一个项目标识
+    await loadNextProjectKey()
   }
 
   // 关闭创建项目抽屉
@@ -350,6 +359,7 @@ const Projects = () => {
     setSelectedMembers([])
     setMilestones([])
     setFormData({})
+    setUploadedFiles([])
   }
 
   // 提交创建项目
@@ -357,20 +367,23 @@ const Projects = () => {
     setCreateLoading(true)
     try {
       const dateRange = formData.dateRange
-      await projectApi.createProject({
+      // 项目标识由系统自动生成，无需前端传递
+      // 使用完整创建 API 以支持成员和里程碑
+      await projectApi.createProjectFull({
         name: formData.name,
-        key: formData.key,
         description: formData.description,
         color: selectedColor,
         startDate: dateRange?.[0]?.format('YYYY-MM-DD'),
         endDate: dateRange?.[1]?.format('YYYY-MM-DD'),
         ownerId: formData.ownerId,
-        departmentIds: selectedDepartments,
+        // 过滤掉默认部门ID（以 'default_' 开头的）
+        departmentIds: selectedDepartments.filter(id => !String(id).startsWith('default_')),
         memberIds: selectedMembers,
         milestones: milestones.map(m => ({
           name: m.name,
           targetDate: m.targetDate,
-          description: m.description
+          description: m.description,
+          assigneeIds: m.assigneeIds  // 里程碑负责人
         }))
       })
       
@@ -398,14 +411,6 @@ const Projects = () => {
       } catch {
         // 验证失败
       }
-    } else if (currentStep === 1) {
-      if (selectedDepartments.length === 0) {
-        message.warning('请至少选择一个参与部门')
-        return
-      }
-      setCurrentStep(2)
-    } else if (currentStep === 2) {
-      setCurrentStep(3)
     }
   }
 
@@ -414,15 +419,24 @@ const Projects = () => {
     setCurrentStep(currentStep - 1)
   }
   
-  // 切换部门选择
-  const handleDepartmentToggle = (deptId: string) => {
-    if (selectedDepartments.includes(deptId)) {
-      setSelectedDepartments(selectedDepartments.filter(id => id !== deptId))
-      // 同时移除该部门的成员
-      const deptMembers = users.filter(u => u.departmentId === deptId).map(u => u.id)
-      setSelectedMembers(selectedMembers.filter(id => !deptMembers.includes(id)))
-    } else {
-      setSelectedDepartments([...selectedDepartments, deptId])
+  // 文件上传配置
+  const uploadProps = {
+    name: 'file',
+    multiple: true,
+    fileList: uploadedFiles,
+    beforeUpload: (file: any) => {
+      // 限制文件大小为 50MB
+      const isLt50M = file.size / 1024 / 1024 < 50
+      if (!isLt50M) {
+        message.error('文件大小不能超过 50MB')
+        return Upload.LIST_IGNORE
+      }
+      // 添加到文件列表
+      setUploadedFiles(prev => [...prev, file])
+      return false // 阻止自动上传
+    },
+    onRemove: (file: any) => {
+      setUploadedFiles(prev => prev.filter(f => f.uid !== file.uid))
     }
   }
 
@@ -460,21 +474,93 @@ const Projects = () => {
       return
     }
     
+    if (!newMilestone.assigneeIds || newMilestone.assigneeIds.length === 0) {
+      message.warning('请选择至少一个里程碑负责人')
+      return
+    }
+    
     setMilestones([
       ...milestones,
       {
         id: Date.now().toString(),
         name: newMilestone.name,
         targetDate: newMilestone.targetDate,
-        description: newMilestone.description
+        description: newMilestone.description,
+        assigneeIds: newMilestone.assigneeIds
       }
     ])
-    setNewMilestone({ name: '', targetDate: '', description: '' })
+    setNewMilestone({ name: '', targetDate: '', description: '', assigneeIds: [] })
   }
 
   // 删除里程碑
   const handleDeleteMilestone = (id: string) => {
     setMilestones(milestones.filter(m => m.id !== id))
+  }
+
+  // 编辑里程碑
+  const handleEditMilestone = (milestone: MilestoneItem) => {
+    setEditingMilestone({ ...milestone })
+  }
+
+  // 保存编辑的里程碑
+  const handleSaveEditMilestone = () => {
+    if (!editingMilestone) return
+    
+    if (!editingMilestone.name || !editingMilestone.targetDate) {
+      message.warning('请填写里程碑名称和目标日期')
+      return
+    }
+    
+    if (!editingMilestone.assigneeIds || editingMilestone.assigneeIds.length === 0) {
+      message.warning('请选择至少一个里程碑负责人')
+      return
+    }
+    
+    setMilestones(milestones.map(m =>
+      m.id === editingMilestone.id ? editingMilestone : m
+    ))
+    setEditingMilestone(null)
+    message.success('里程碑已更新')
+  }
+
+  // 取消编辑里程碑
+  const handleCancelEditMilestone = () => {
+    setEditingMilestone(null)
+  }
+
+  // 拖拽开始
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    setDraggedMilestone(id)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+
+  // 拖拽结束
+  const handleDragEnd = () => {
+    setDraggedMilestone(null)
+  }
+
+  // 拖拽经过
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+  }
+
+  // 放置
+  const handleDrop = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault()
+    if (!draggedMilestone || draggedMilestone === targetId) return
+    
+    const dragIndex = milestones.findIndex(m => m.id === draggedMilestone)
+    const targetIndex = milestones.findIndex(m => m.id === targetId)
+    
+    if (dragIndex === -1 || targetIndex === -1) return
+    
+    const newMilestones = [...milestones]
+    const [removed] = newMilestones.splice(dragIndex, 1)
+    newMilestones.splice(targetIndex, 0, removed)
+    
+    setMilestones(newMilestones)
+    setDraggedMilestone(null)
   }
 
   // AI生成里程碑建议
@@ -530,11 +616,18 @@ const Projects = () => {
       id: Date.now().toString() + '_5',
       name: '项目完成',
       targetDate: endDate.format('YYYY-MM-DD'),
-      description: '项目交付和总结'
+      description: '项目交付和总结',
+      assigneeIds: formData.ownerId ? [formData.ownerId] : []
     })
     
-    setMilestones(suggestedMilestones)
-    message.success('已生成里程碑建议')
+    // 为所有建议的里程碑设置默认负责人为项目负责人
+    const milestonesWithAssignees = suggestedMilestones.map(m => ({
+      ...m,
+      assigneeIds: formData.ownerId ? [formData.ownerId] : []
+    }))
+    
+    setMilestones(milestonesWithAssignees)
+    message.success('已生成里程碑建议，默认负责人为项目总负责人')
   }
 
   // 打开编辑项目抽屉
@@ -907,8 +1000,6 @@ const Projects = () => {
                     size="large"
                     placeholder="请输入项目名称"
                     onChange={(e) => {
-                      const key = generateKeyFromName(e.target.value)
-                      form.setFieldValue('key', key)
                       setPreviewName(e.target.value)
                     }}
                   />
@@ -917,13 +1008,14 @@ const Projects = () => {
               <Col span={8}>
                 <Form.Item
                   label="项目标识"
-                  name="key"
-                  rules={[
-                    { required: true, message: '请输入项目标识' },
-                    { pattern: /^[A-Z0-9]+$/, message: '只能包含大写字母和数字' }
-                  ]}
+                  tooltip="项目标识由系统自动生成，创建后不可修改"
                 >
-                  <Input size="large" placeholder="如: PROJ" maxLength={10} />
+                  <Input
+                    size="large"
+                    value={loadingKey ? '加载中...' : projectKey}
+                    disabled
+                    style={{ backgroundColor: '#f5f5f5', color: '#1a1a1a', fontWeight: 500 }}
+                  />
                 </Form.Item>
               </Col>
             </Row>
@@ -961,15 +1053,53 @@ const Projects = () => {
                   name="ownerId"
                   rules={[{ required: true, message: '请选择项目负责人' }]}
                 >
-                  <Select size="large" placeholder="请选择项目负责人">
-                    {users.map(user => (
-                      <Select.Option key={user.id} value={user.id}>
-                        <Space>
-                          <Avatar size="small" src={user.avatar}>{user.name?.charAt(0)}</Avatar>
-                          {user.name}
-                        </Space>
-                      </Select.Option>
-                    ))}
+                  <Select
+                    size="large"
+                    placeholder="请选择项目负责人"
+                    notFoundContent={
+                      <div style={{ padding: '16px', textAlign: 'center' }}>
+                        <Empty
+                          image={Empty.PRESENTED_IMAGE_SIMPLE}
+                          description="暂无员工"
+                        >
+                          <Button
+                            type="primary"
+                            icon={<UserAddOutlined />}
+                            onClick={() => navigate('/members?action=add')}
+                          >
+                            添加员工
+                          </Button>
+                        </Empty>
+                      </div>
+                    }
+                    dropdownRender={(menu) => (
+                      <>
+                        {menu}
+                        <Divider style={{ margin: '8px 0' }} />
+                        <div style={{ padding: '0 8px 8px' }}>
+                          <Button
+                            type="link"
+                            icon={<UserAddOutlined />}
+                            onClick={() => navigate('/members?action=add')}
+                            style={{ width: '100%' }}
+                          >
+                            添加新员工
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                  >
+                    {users.map(user => {
+                      const displayName = user.nickname || user.username || '未知用户'
+                      return (
+                        <Select.Option key={user.id} value={user.id}>
+                          <Space>
+                            <Avatar size="small" src={user.avatar}>{displayName.charAt(0)}</Avatar>
+                            {displayName}
+                          </Space>
+                        </Select.Option>
+                      )
+                    })}
                   </Select>
                 </Form.Item>
               </Col>
@@ -987,117 +1117,36 @@ const Projects = () => {
                 ))}
               </div>
             </Form.Item>
+
+            {/* 文件上传 */}
+            <Form.Item
+              label={
+                <span>
+                  <PaperClipOutlined style={{ marginRight: 4 }} />
+                  项目附件
+                  <span style={{ fontSize: 12, color: '#999', marginLeft: 8 }}>(可选)</span>
+                </span>
+              }
+            >
+              <Upload.Dragger {...uploadProps}>
+                <p className="ant-upload-drag-icon">
+                  <UploadOutlined style={{ fontSize: 32, color: '#1677ff' }} />
+                </p>
+                <p className="ant-upload-text">点击或拖拽文件到此区域上传</p>
+                <p className="ant-upload-hint">
+                  支持上传项目相关文档、设计稿、需求文档等，单个文件不超过 50MB
+                </p>
+              </Upload.Dragger>
+              {uploadedFiles.length > 0 && (
+                <div style={{ marginTop: 8 }}>
+                  <Text type="secondary">已选择 {uploadedFiles.length} 个文件</Text>
+                </div>
+              )}
+            </Form.Item>
           </Form>
         )
       
       case 1:
-        return (
-          <div>
-            <div className={styles.drawerSectionTitle}>
-              <ApartmentOutlined style={{ marginRight: 8 }} />
-              选择参与部门
-            </div>
-            <p style={{ color: '#666', marginBottom: 16 }}>
-              选择需要参与此项目的部门，后续可以为每个部门分配任务
-            </p>
-            
-            {loadingData ? (
-              <div className={styles.loading}>
-                <Spin tip="加载部门数据中..." />
-              </div>
-            ) : departments.length === 0 ? (
-              <Empty description="暂无可选部门" />
-            ) : (
-              <div className={styles.departmentList}>
-                {departments.map(dept => (
-                  <div
-                    key={dept.id}
-                    className={`${styles.departmentItem} ${selectedDepartments.includes(dept.id) ? styles.departmentItemSelected : ''}`}
-                    onClick={() => handleDepartmentToggle(dept.id)}
-                  >
-                    <Checkbox checked={selectedDepartments.includes(dept.id)} />
-                    <div className={styles.departmentInfo}>
-                      <div className={styles.departmentName}>{dept.name}</div>
-                      <div className={styles.departmentMeta}>
-                        <span><UserOutlined /> {dept.memberCount || 0} 人</span>
-                        {dept.managerName && <span>负责人: {dept.managerName}</span>}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            
-            <div style={{ marginTop: 16, color: '#666' }}>
-              已选择 <strong>{selectedDepartments.length}</strong> 个部门
-            </div>
-          </div>
-        )
-      
-      case 2:
-        return (
-          <div>
-            <div className={styles.drawerSectionTitle}>
-              <TeamOutlined style={{ marginRight: 8 }} />
-              添加项目成员
-            </div>
-            <p style={{ color: '#666', marginBottom: 16 }}>
-              从已选部门中选择参与项目的成员
-            </p>
-            
-            {selectedDepartments.length === 0 ? (
-              <Empty description="请先选择参与部门" />
-            ) : (
-              <div className={styles.memberSelection}>
-                {selectedDepartments.map(deptId => {
-                  const dept = departments.find(d => d.id === deptId)
-                  const deptMembers = users.filter(u => u.departmentId === deptId)
-                  const selectedCount = deptMembers.filter(m => selectedMembers.includes(m.id)).length
-                  const allSelected = deptMembers.length > 0 && deptMembers.every(m => selectedMembers.includes(m.id))
-                  
-                  return (
-                    <div key={deptId} className={styles.memberGroup}>
-                      <div className={styles.memberGroupHeader}>
-                        <Checkbox
-                          checked={allSelected}
-                          indeterminate={selectedCount > 0 && !allSelected}
-                          onChange={() => handleSelectAllDeptMembers(deptId)}
-                        >
-                          <strong>{dept?.name}</strong>
-                        </Checkbox>
-                        <span className={styles.memberCount}>
-                          已选 {selectedCount}/{deptMembers.length} 人
-                        </span>
-                      </div>
-                      <div className={styles.memberList}>
-                        {deptMembers.map(member => (
-                          <div
-                            key={member.id}
-                            className={`${styles.memberItem} ${selectedMembers.includes(member.id) ? styles.memberItemSelected : ''}`}
-                            onClick={() => handleMemberToggle(member.id)}
-                          >
-                            <Checkbox checked={selectedMembers.includes(member.id)} />
-                            <Avatar size="small" src={member.avatar}>{member.name?.charAt(0)}</Avatar>
-                            <div className={styles.memberInfo}>
-                              <div className={styles.memberName}>{member.name}</div>
-                              <div className={styles.memberRole}>{member.role}</div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-            
-            <div style={{ marginTop: 16, color: '#666' }}>
-              已选择 <strong>{selectedMembers.length}</strong> 名成员
-            </div>
-          </div>
-        )
-      
-      case 3:
         return (
           <div>
             <div className={styles.drawerSectionTitle}>
@@ -1110,7 +1159,7 @@ const Projects = () => {
             </p>
             
             <div className={styles.milestoneForm}>
-              <Row gutter={12}>
+              <Row gutter={12} style={{ marginBottom: 12 }}>
                 <Col span={8}>
                   <Input
                     placeholder="里程碑名称"
@@ -1126,16 +1175,58 @@ const Projects = () => {
                     onChange={(date) => setNewMilestone({ ...newMilestone, targetDate: date?.format('YYYY-MM-DD') || '' })}
                   />
                 </Col>
-                <Col span={7}>
+                <Col span={10}>
                   <Input
                     placeholder="描述（可选）"
                     value={newMilestone.description}
                     onChange={(e) => setNewMilestone({ ...newMilestone, description: e.target.value })}
                   />
                 </Col>
-                <Col span={3}>
-                  <Button type="primary" icon={<PlusOutlined />} onClick={handleAddMilestone}>
-                    添加
+              </Row>
+              <Row gutter={12}>
+                <Col span={18}>
+                  <Select
+                    mode="multiple"
+                    placeholder="选择里程碑负责人（可多选）"
+                    style={{ width: '100%' }}
+                    value={newMilestone.assigneeIds}
+                    onChange={(values) => setNewMilestone({ ...newMilestone, assigneeIds: values })}
+                    optionFilterProp="children"
+                    showSearch
+                    notFoundContent={
+                      <div style={{ padding: '8px', textAlign: 'center' }}>
+                        <Empty
+                          image={Empty.PRESENTED_IMAGE_SIMPLE}
+                          description="暂无员工"
+                        >
+                          <Button
+                            type="link"
+                            size="small"
+                            icon={<UserAddOutlined />}
+                            onClick={() => navigate('/members?action=add')}
+                          >
+                            添加员工
+                          </Button>
+                        </Empty>
+                      </div>
+                    }
+                  >
+                    {users.map(user => {
+                      const displayName = user.nickname || user.username || '未知用户'
+                      return (
+                        <Select.Option key={user.id} value={user.id}>
+                          <Space>
+                            <Avatar size="small" src={user.avatar}>{displayName.charAt(0)}</Avatar>
+                            {displayName}
+                          </Space>
+                        </Select.Option>
+                      )
+                    })}
+                  </Select>
+                </Col>
+                <Col span={6}>
+                  <Button type="primary" icon={<PlusOutlined />} onClick={handleAddMilestone} style={{ width: '100%' }}>
+                    添加里程碑
                   </Button>
                 </Col>
               </Row>
@@ -1153,38 +1244,151 @@ const Projects = () => {
             {milestones.length === 0 ? (
               <Empty description="暂未设置里程碑" image={Empty.PRESENTED_IMAGE_SIMPLE} />
             ) : (
-              <List
-                className={styles.milestoneList}
-                dataSource={milestones.sort((a, b) => dayjs(a.targetDate).diff(dayjs(b.targetDate)))}
-                renderItem={(item) => (
-                  <List.Item
-                    actions={[
-                      <Button
-                        type="text"
-                        danger
-                        icon={<DeleteOutlined />}
-                        onClick={() => handleDeleteMilestone(item.id)}
-                      />
-                    ]}
-                  >
-                    <List.Item.Meta
-                      avatar={
-                        <div className={styles.milestoneIndex}>
-                          <FlagOutlined />
+              <div className={styles.milestoneList}>
+                {milestones.map((item, index) => {
+                  // 获取负责人信息
+                  const assignees = (item.assigneeIds || []).map(id => {
+                    const user = users.find(u => u.id === id)
+                    return user ? (user.nickname || user.username || '未知用户') : '未知用户'
+                  })
+                  
+                  const isEditing = editingMilestone?.id === item.id
+                  const isDragging = draggedMilestone === item.id
+                  
+                  return (
+                    <div
+                      key={item.id}
+                      className={`${styles.milestoneItem} ${isDragging ? styles.milestoneItemDragging : ''}`}
+                      draggable={!isEditing}
+                      onDragStart={(e) => handleDragStart(e, item.id)}
+                      onDragEnd={handleDragEnd}
+                      onDragOver={handleDragOver}
+                      onDrop={(e) => handleDrop(e, item.id)}
+                    >
+                      {isEditing ? (
+                        // 编辑模式
+                        <div className={styles.milestoneEditForm}>
+                          <Row gutter={12} style={{ marginBottom: 12 }}>
+                            <Col span={8}>
+                              <Input
+                                placeholder="里程碑名称"
+                                value={editingMilestone.name}
+                                onChange={(e) => setEditingMilestone({ ...editingMilestone, name: e.target.value })}
+                              />
+                            </Col>
+                            <Col span={6}>
+                              <DatePicker
+                                placeholder="目标日期"
+                                style={{ width: '100%' }}
+                                value={editingMilestone.targetDate ? dayjs(editingMilestone.targetDate) : null}
+                                onChange={(date) => setEditingMilestone({ ...editingMilestone, targetDate: date?.format('YYYY-MM-DD') || '' })}
+                              />
+                            </Col>
+                            <Col span={10}>
+                              <Input
+                                placeholder="描述（可选）"
+                                value={editingMilestone.description}
+                                onChange={(e) => setEditingMilestone({ ...editingMilestone, description: e.target.value })}
+                              />
+                            </Col>
+                          </Row>
+                          <Row gutter={12}>
+                            <Col span={16}>
+                              <Select
+                                mode="multiple"
+                                placeholder="选择里程碑负责人（可多选）"
+                                style={{ width: '100%' }}
+                                value={editingMilestone.assigneeIds}
+                                onChange={(values) => setEditingMilestone({ ...editingMilestone, assigneeIds: values })}
+                                optionFilterProp="children"
+                                showSearch
+                              >
+                                {users.map(user => {
+                                  const displayName = user.nickname || user.username || '未知用户'
+                                  return (
+                                    <Select.Option key={user.id} value={user.id}>
+                                      <Space>
+                                        <Avatar size="small" src={user.avatar}>{displayName.charAt(0)}</Avatar>
+                                        {displayName}
+                                      </Space>
+                                    </Select.Option>
+                                  )
+                                })}
+                              </Select>
+                            </Col>
+                            <Col span={8}>
+                              <Space>
+                                <Button type="primary" size="small" onClick={handleSaveEditMilestone}>
+                                  保存
+                                </Button>
+                                <Button size="small" onClick={handleCancelEditMilestone}>
+                                  取消
+                                </Button>
+                              </Space>
+                            </Col>
+                          </Row>
                         </div>
-                      }
-                      title={item.name}
-                      description={
-                        <Space>
-                          <CalendarOutlined />
-                          {item.targetDate}
-                          {item.description && <span>· {item.description}</span>}
-                        </Space>
-                      }
-                    />
-                  </List.Item>
-                )}
-              />
+                      ) : (
+                        // 显示模式
+                        <>
+                          <div className={styles.milestoneDragHandle}>
+                            <HolderOutlined />
+                          </div>
+                          <div className={styles.milestoneIndex}>
+                            <FlagOutlined />
+                          </div>
+                          <div className={styles.milestoneInfo}>
+                            <div className={styles.milestoneTitle}>
+                              <Space>
+                                <span style={{ fontWeight: 500 }}>{item.name}</span>
+                                {assignees.length > 0 && (
+                                  <Avatar.Group maxCount={3} size="small">
+                                    {(item.assigneeIds || []).map(id => {
+                                      const user = users.find(u => u.id === id)
+                                      const displayName = user?.nickname || user?.username || '未知'
+                                      return (
+                                        <Tooltip key={id} title={displayName}>
+                                          <Avatar size="small" src={user?.avatar}>
+                                            {displayName.charAt(0)}
+                                          </Avatar>
+                                        </Tooltip>
+                                      )
+                                    })}
+                                  </Avatar.Group>
+                                )}
+                              </Space>
+                            </div>
+                            <div className={styles.milestoneDesc}>
+                              <Space wrap>
+                                <span><CalendarOutlined /> {item.targetDate}</span>
+                                {item.description && <span>· {item.description}</span>}
+                                {assignees.length > 0 && (
+                                  <Tag color="blue" icon={<UserOutlined />}>
+                                    {assignees.length} 位负责人
+                                  </Tag>
+                                )}
+                              </Space>
+                            </div>
+                          </div>
+                          <div className={styles.milestoneActions}>
+                            <Button
+                              type="text"
+                              icon={<EditOutlined />}
+                              onClick={() => handleEditMilestone(item)}
+                            />
+                            <Button
+                              type="text"
+                              danger
+                              icon={<DeleteOutlined />}
+                              onClick={() => handleDeleteMilestone(item.id)}
+                            />
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
             )}
           </div>
         )
@@ -1219,7 +1423,7 @@ const Projects = () => {
           </div>
           <Space>
             <Button onClick={closeCreateDrawer}>取消</Button>
-            {currentStep < 3 ? (
+            {currentStep < 1 ? (
               <Button type="primary" onClick={handleNext}>
                 下一步
               </Button>
@@ -1241,8 +1445,6 @@ const Projects = () => {
                 current={currentStep}
                 items={[
                   { title: '基本信息', icon: <ProjectOutlined /> },
-                  { title: '选择部门', icon: <ApartmentOutlined /> },
-                  { title: '添加成员', icon: <TeamOutlined /> },
                   { title: '设置里程碑', icon: <FlagOutlined /> },
                 ]}
                 style={{ marginBottom: 32 }}
@@ -1266,23 +1468,11 @@ const Projects = () => {
                   {previewName || formData.name || '项目名称'}
                 </h3>
                 <p className={styles.drawerPreviewKey}>
-                  {formData.key || form.getFieldValue('key') || 'KEY'}
+                  {loadingKey ? '加载中...' : projectKey || '系统自动生成'}
                 </p>
                 <p className={styles.drawerPreviewDesc}>
                   {previewDesc || formData.description || '项目描述将显示在这里'}
                 </p>
-                
-                {selectedDepartments.length > 0 && (
-                  <div style={{ marginTop: 16 }}>
-                    <div style={{ color: '#666', fontSize: 12, marginBottom: 8 }}>参与部门</div>
-                    <Space wrap>
-                      {selectedDepartments.map(deptId => {
-                        const dept = departments.find(d => d.id === deptId)
-                        return <Tag key={deptId}>{dept?.name}</Tag>
-                      })}
-                    </Space>
-                  </div>
-                )}
                 
                 {selectedMembers.length > 0 && (
                   <div style={{ marginTop: 12 }}>
@@ -1290,9 +1480,10 @@ const Projects = () => {
                     <Avatar.Group maxCount={5}>
                       {selectedMembers.map(memberId => {
                         const member = users.find(u => u.id === memberId)
+                        const memberName = member?.nickname || member?.username || '未知用户'
                         return (
-                          <Tooltip key={memberId} title={member?.name}>
-                            <Avatar src={member?.avatar}>{member?.name?.charAt(0)}</Avatar>
+                          <Tooltip key={memberId} title={memberName}>
+                            <Avatar src={member?.avatar}>{memberName.charAt(0)}</Avatar>
                           </Tooltip>
                         )
                       })}
@@ -2591,14 +2782,15 @@ const Projects = () => {
                           ) : (
                             activities.slice(0, 5).map((activity: any) => {
                               const user = users.find(u => u.id === activity.userId)
+                              const userName = user?.nickname || user?.username || '未知用户'
                               return (
                                 <div key={activity.id} className={detailStyles.activityItem}>
                                   <Avatar size="small" src={user?.avatar}>
-                                    {user?.name?.charAt(0)}
+                                    {userName.charAt(0)}
                                   </Avatar>
                                   <div className={detailStyles.activityContent}>
                                     <div className={detailStyles.activityText}>
-                                      <strong>{user?.name}</strong> {activity.action} {activity.target}
+                                      <strong>{userName}</strong> {activity.action} {activity.target}
                                     </div>
                                     <div className={detailStyles.activityTime}>{activity.time}</div>
                                   </div>
@@ -2659,10 +2851,11 @@ const Projects = () => {
                             width: 120,
                             render: (text: string, record: DepartmentTask) => {
                               const user = users.find(u => u.id === record.managerId)
+                              const managerName = user?.nickname || user?.username || text
                               return user ? (
                                 <Space>
-                                  <Avatar size="small" src={user.avatar}>{user.name?.charAt(0)}</Avatar>
-                                  {user.name}
+                                  <Avatar size="small" src={user.avatar}>{managerName?.charAt(0)}</Avatar>
+                                  {managerName}
                                 </Space>
                               ) : text || '-'
                             }
@@ -2749,10 +2942,11 @@ const Projects = () => {
                             width: 120,
                             render: (text: string, record: Task) => {
                               const user = users.find(u => u.id === record.assigneeId)
+                              const assigneeName = user?.nickname || user?.username || text
                               return user ? (
                                 <Space>
-                                  <Avatar size="small" src={user.avatar}>{user.name?.charAt(0)}</Avatar>
-                                  {user.name}
+                                  <Avatar size="small" src={user.avatar}>{assigneeName?.charAt(0)}</Avatar>
+                                  {assigneeName}
                                 </Space>
                               ) : text || '未分配'
                             }

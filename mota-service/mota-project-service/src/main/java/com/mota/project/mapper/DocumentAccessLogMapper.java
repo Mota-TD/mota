@@ -50,4 +50,22 @@ public interface DocumentAccessLogMapper extends BaseMapper<DocumentAccessLog> {
     Integer getUniqueVisitors(@Param("documentId") Long documentId,
                               @Param("startDate") LocalDate startDate,
                               @Param("endDate") LocalDate endDate);
+
+    /**
+     * 插入或更新访问记录
+     */
+    void upsertAccessLog(@Param("userId") Long userId,
+                         @Param("documentId") Long documentId,
+                         @Param("accessType") String accessType);
+
+    /**
+     * 获取用户最近访问记录（带详情）
+     */
+    List<DocumentAccessLog> selectRecentAccessWithDetails(@Param("userId") Long userId,
+                                                          @Param("limit") int limit);
+
+    /**
+     * 清除用户访问记录
+     */
+    int clearUserAccessLogs(@Param("userId") Long userId);
 }

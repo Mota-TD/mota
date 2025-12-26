@@ -1,11 +1,15 @@
 package com.mota.project.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.mota.common.core.result.Result;
+import com.mota.common.security.util.SecurityUtils;
+import com.mota.project.entity.User;
+import com.mota.project.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -17,7 +21,8 @@ import java.util.*;
 @RequiredArgsConstructor
 public class UserController {
 
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final UserService userService;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     /**
      * 获取用户列表
@@ -25,37 +30,24 @@ public class UserController {
     @GetMapping
     public Result<Map<String, Object>> list(
             @RequestParam(value = "keyword", required = false) String keyword,
-            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "status", required = false) Integer status,
             @RequestParam(value = "page", defaultValue = "1") Integer page,
             @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
         
-        // 返回模拟数据
-        List<Map<String, Object>> users = new ArrayList<>();
+        // 获取当前用户的企业ID
+        Long enterpriseId = SecurityUtils.getEnterpriseId();
         
-        users.add(createUser(1L, "admin", "管理员", "admin@example.com", "13800138001", "active"));
-        users.add(createUser(2L, "zhangsan", "张三", "zhangsan@example.com", "13800138002", "active"));
-        users.add(createUser(3L, "lisi", "李四", "lisi@example.com", "13800138003", "active"));
-        users.add(createUser(4L, "wangwu", "王五", "wangwu@example.com", "13800138004", "active"));
-        users.add(createUser(5L, "zhaoliu", "赵六", "zhaoliu@example.com", "13800138005", "inactive"));
+        IPage<User> userPage = userService.listUsers(keyword, status, page, pageSize, enterpriseId);
         
-        // 简单过滤
-        if (keyword != null && !keyword.isEmpty()) {
-            users = users.stream()
-                .filter(u -> u.get("username").toString().contains(keyword) 
-                    || u.get("nickname").toString().contains(keyword)
-                    || u.get("email").toString().contains(keyword))
-                .toList();
-        }
-        
-        if (status != null && !status.isEmpty()) {
-            users = users.stream()
-                .filter(u -> u.get("status").equals(status))
-                .toList();
+        // 转换为前端需要的格式
+        List<Map<String, Object>> userList = new ArrayList<>();
+        for (User user : userPage.getRecords()) {
+            userList.add(convertToMap(user));
         }
         
         Map<String, Object> result = new HashMap<>();
-        result.put("list", users);
-        result.put("total", users.size());
+        result.put("list", userList);
+        result.put("total", userPage.getTotal());
         
         return Result.success(result);
     }
@@ -65,16 +57,8 @@ public class UserController {
      */
     @GetMapping("/{id}")
     public Result<Map<String, Object>> detail(@PathVariable("id") Long id) {
-        Map<String, Object> user = switch (id.intValue()) {
-            case 1 -> createUser(1L, "admin", "管理员", "admin@example.com", "13800138001", "active");
-            case 2 -> createUser(2L, "zhangsan", "张三", "zhangsan@example.com", "13800138002", "active");
-            case 3 -> createUser(3L, "lisi", "李四", "lisi@example.com", "13800138003", "active");
-            case 4 -> createUser(4L, "wangwu", "王五", "wangwu@example.com", "13800138004", "active");
-            case 5 -> createUser(5L, "zhaoliu", "赵六", "zhaoliu@example.com", "13800138005", "inactive");
-            default -> createUser(id, "user" + id, "用户" + id, "user" + id + "@example.com", "13800138000", "active");
-        };
-        
-        return Result.success(user);
+        User user = userService.getUserById(id);
+        return Result.success(convertToMap(user));
     }
 
     /**
@@ -82,8 +66,27 @@ public class UserController {
      */
     @GetMapping("/me")
     public Result<Map<String, Object>> getCurrentUser() {
-        Map<String, Object> user = createUser(1L, "admin", "管理员", "admin@example.com", "13800138001", "active");
-        return Result.success(user);
+        Long userId = null;
+        try {
+            userId = SecurityUtils.getUserId();
+        } catch (Exception e) {
+            // 未登录
+        }
+        if (userId == null) {
+            // 如果没有登录用户，返回默认信息
+            Map<String, Object> defaultUser = new HashMap<>();
+            defaultUser.put("id", 0L);
+            defaultUser.put("username", "guest");
+            defaultUser.put("nickname", "访客");
+            defaultUser.put("email", "");
+            defaultUser.put("phone", "");
+            defaultUser.put("avatar", "");
+            defaultUser.put("status", "active");
+            defaultUser.put("role", "guest");
+            return Result.success(defaultUser);
+        }
+        User user = userService.getUserById(userId);
+        return Result.success(convertToMap(user));
     }
 
     /**
@@ -91,23 +94,34 @@ public class UserController {
      */
     @PutMapping("/me")
     public Result<Map<String, Object>> updateCurrentUser(@RequestBody Map<String, Object> data) {
-        Map<String, Object> user = createUser(1L, "admin", "管理员", "admin@example.com", "13800138001", "active");
-        // 合并更新的数据
+        Long userId = null;
+        try {
+            userId = SecurityUtils.getUserId();
+        } catch (Exception e) {
+            // 未登录
+        }
+        if (userId == null) {
+            return Result.fail("用户未登录");
+        }
+        
+        User user = new User();
+        user.setId(userId);
+        
         if (data.containsKey("nickname")) {
-            user.put("nickname", data.get("nickname"));
+            user.setNickname((String) data.get("nickname"));
         }
         if (data.containsKey("email")) {
-            user.put("email", data.get("email"));
+            user.setEmail((String) data.get("email"));
         }
         if (data.containsKey("phone")) {
-            user.put("phone", data.get("phone"));
+            user.setPhone((String) data.get("phone"));
         }
         if (data.containsKey("avatar")) {
-            user.put("avatar", data.get("avatar"));
+            user.setAvatar((String) data.get("avatar"));
         }
-        user.put("updatedAt", LocalDateTime.now().format(FORMATTER));
         
-        return Result.success(user);
+        User updatedUser = userService.updateUser(user);
+        return Result.success(convertToMap(updatedUser));
     }
 
     /**
@@ -115,14 +129,67 @@ public class UserController {
      */
     @PostMapping
     public Result<Map<String, Object>> create(@RequestBody Map<String, Object> data) {
-        Long id = System.currentTimeMillis();
-        String username = (String) data.getOrDefault("username", "newuser");
-        String nickname = (String) data.getOrDefault("nickname", "新用户");
-        String email = (String) data.getOrDefault("email", "newuser@example.com");
-        String phone = (String) data.getOrDefault("phone", "");
+        User user = new User();
         
-        Map<String, Object> user = createUser(id, username, nickname, email, phone, "active");
-        return Result.success(user);
+        // 设置企业ID
+        Long enterpriseId = SecurityUtils.getEnterpriseId();
+        user.setEnterpriseId(enterpriseId);
+        
+        if (data.containsKey("username")) {
+            user.setUsername((String) data.get("username"));
+        }
+        if (data.containsKey("nickname")) {
+            user.setNickname((String) data.get("nickname"));
+        }
+        if (data.containsKey("email")) {
+            user.setEmail((String) data.get("email"));
+        }
+        if (data.containsKey("phone")) {
+            user.setPhone((String) data.get("phone"));
+        }
+        if (data.containsKey("role")) {
+            user.setRole((String) data.get("role"));
+        }
+        if (data.containsKey("avatar")) {
+            user.setAvatar((String) data.get("avatar"));
+        }
+        
+        // 处理密码 - 使用BCrypt加密
+        if (data.containsKey("password")) {
+            String password = (String) data.get("password");
+            if (StringUtils.hasText(password)) {
+                user.setPasswordHash(passwordEncoder.encode(password));
+            }
+        }
+        
+        // 处理部门
+        if (data.containsKey("departmentId")) {
+            Object deptId = data.get("departmentId");
+            if (deptId instanceof Number) {
+                user.setDepartmentId(((Number) deptId).longValue());
+            } else if (deptId instanceof String) {
+                try {
+                    user.setDepartmentId(Long.parseLong((String) deptId));
+                } catch (NumberFormatException e) {
+                    // 忽略无效的部门ID
+                }
+            }
+        }
+        if (data.containsKey("departmentName")) {
+            user.setDepartmentName((String) data.get("departmentName"));
+        }
+        
+        // 如果没有用户名，使用手机号
+        if (!StringUtils.hasText(user.getUsername())) {
+            if (StringUtils.hasText(user.getPhone())) {
+                user.setUsername(user.getPhone());
+            } else if (StringUtils.hasText(user.getEmail())) {
+                user.setUsername(user.getEmail().split("@")[0]);
+            }
+        }
+        
+        User createdUser = userService.createUser(user);
+        return Result.success(convertToMap(createdUser));
     }
 
     /**
@@ -130,15 +197,38 @@ public class UserController {
      */
     @PutMapping("/{id}")
     public Result<Map<String, Object>> update(@PathVariable("id") Long id, @RequestBody Map<String, Object> data) {
-        Map<String, Object> user = createUser(id, 
-            (String) data.getOrDefault("username", "user" + id),
-            (String) data.getOrDefault("nickname", "用户" + id),
-            (String) data.getOrDefault("email", "user" + id + "@example.com"),
-            (String) data.getOrDefault("phone", ""),
-            (String) data.getOrDefault("status", "active"));
-        user.put("updatedAt", LocalDateTime.now().format(FORMATTER));
+        User user = new User();
+        user.setId(id);
         
-        return Result.success(user);
+        if (data.containsKey("username")) {
+            user.setUsername((String) data.get("username"));
+        }
+        if (data.containsKey("nickname")) {
+            user.setNickname((String) data.get("nickname"));
+        }
+        if (data.containsKey("email")) {
+            user.setEmail((String) data.get("email"));
+        }
+        if (data.containsKey("phone")) {
+            user.setPhone((String) data.get("phone"));
+        }
+        if (data.containsKey("role")) {
+            user.setRole((String) data.get("role"));
+        }
+        if (data.containsKey("avatar")) {
+            user.setAvatar((String) data.get("avatar"));
+        }
+        if (data.containsKey("status")) {
+            Object statusObj = data.get("status");
+            if (statusObj instanceof Integer) {
+                user.setStatus((Integer) statusObj);
+            } else if (statusObj instanceof String) {
+                user.setStatus("active".equals(statusObj) ? 1 : 0);
+            }
+        }
+        
+        User updatedUser = userService.updateUser(user);
+        return Result.success(convertToMap(updatedUser));
     }
 
     /**
@@ -146,24 +236,27 @@ public class UserController {
      */
     @DeleteMapping("/{id}")
     public Result<Void> delete(@PathVariable("id") Long id) {
+        userService.deleteUser(id);
         return Result.success();
     }
 
     /**
-     * 创建用户数据
+     * 将User实体转换为Map
      */
-    private Map<String, Object> createUser(Long id, String username, String nickname, 
-            String email, String phone, String status) {
-        Map<String, Object> user = new HashMap<>();
-        user.put("id", id);
-        user.put("username", username);
-        user.put("nickname", nickname);
-        user.put("email", email);
-        user.put("phone", phone);
-        user.put("avatar", "");
-        user.put("status", status);
-        user.put("createdAt", "2024-01-01 00:00:00");
-        user.put("updatedAt", "2024-01-01 00:00:00");
-        return user;
+    private Map<String, Object> convertToMap(User user) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", user.getId());
+        map.put("username", user.getUsername());
+        map.put("nickname", user.getNickname());
+        map.put("email", user.getEmail());
+        map.put("phone", user.getPhone());
+        map.put("avatar", user.getAvatar() != null ? user.getAvatar() : "");
+        map.put("status", user.getStatus() != null && user.getStatus() == 1 ? "active" : "inactive");
+        map.put("role", user.getRole() != null ? user.getRole() : "member");
+        map.put("departmentId", user.getDepartmentId());
+        map.put("departmentName", user.getDepartmentName());
+        map.put("createdAt", user.getCreatedAt() != null ? user.getCreatedAt().toString() : "");
+        map.put("updatedAt", user.getUpdatedAt() != null ? user.getUpdatedAt().toString() : "");
+        return map;
     }
 }

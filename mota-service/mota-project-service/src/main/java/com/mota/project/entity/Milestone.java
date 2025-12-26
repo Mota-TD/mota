@@ -1,5 +1,6 @@
 package com.mota.project.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.mota.common.mybatis.base.BaseEntityDO;
 import lombok.Data;
@@ -7,6 +8,7 @@ import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 项目里程碑实体
@@ -37,9 +39,24 @@ public class Milestone extends BaseEntityDO {
     private LocalDate targetDate;
 
     /**
-     * 状态(pending/completed/delayed)
+     * 状态(pending/in_progress/completed/delayed)
      */
     private String status;
+
+    /**
+     * 完成进度(0-100)
+     */
+    private Integer progress;
+
+    /**
+     * 任务总数
+     */
+    private Integer taskCount;
+
+    /**
+     * 已完成任务数
+     */
+    private Integer completedTaskCount;
 
     /**
      * 完成时间
@@ -52,10 +69,23 @@ public class Milestone extends BaseEntityDO {
     private Integer sortOrder;
 
     /**
+     * 负责人列表（非数据库字段）
+     */
+    @TableField(exist = false)
+    private List<MilestoneAssignee> assignees;
+
+    /**
+     * 任务列表（非数据库字段）
+     */
+    @TableField(exist = false)
+    private List<MilestoneTask> tasks;
+
+    /**
      * 里程碑状态枚举
      */
     public static class Status {
         public static final String PENDING = "pending";
+        public static final String IN_PROGRESS = "in_progress";
         public static final String COMPLETED = "completed";
         public static final String DELAYED = "delayed";
     }

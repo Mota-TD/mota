@@ -55,6 +55,12 @@ const AIModelManagement = lazy(() => import('@/pages/ai/model-management'))
 // 系统管理页面
 const SystemManagement = lazy(() => import('@/pages/system'))
 
+// 组织架构页面
+const Departments = lazy(() => import('@/pages/departments'))
+
+// 企业管理页面
+const EnterpriseManagement = lazy(() => import('@/pages/enterprise'))
+
 // 加载中组件
 const Loading = () => (
   <div style={{
@@ -348,6 +354,44 @@ export const routes: RouteObject[] = [
         element: (
           <Suspense fallback={<Loading />}>
             <Members />
+          </Suspense>
+        )
+      },
+    ]
+  },
+  // 部门管理路由
+  {
+    path: '/departments',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <Departments />
+          </Suspense>
+        )
+      },
+    ]
+  },
+  // 企业管理路由
+  {
+    path: '/enterprise',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <EnterpriseManagement />
           </Suspense>
         )
       },

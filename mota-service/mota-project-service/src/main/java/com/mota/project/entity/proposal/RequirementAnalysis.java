@@ -26,9 +26,19 @@ public class RequirementAnalysis {
     private String originalText;
     
     /**
+     * 原始输入（用于AI处理）
+     */
+    private String originalInput;
+    
+    /**
      * 解析的意图
      */
     private String parsedIntent;
+    
+    /**
+     * 意图类型
+     */
+    private String intentType;
     
     /**
      * 关键要素(JSON)
@@ -66,9 +76,24 @@ public class RequirementAnalysis {
     private String budget;
     
     /**
+     * 目标受众
+     */
+    private String targetAudience;
+    
+    /**
+     * 预期输出
+     */
+    private String expectedOutput;
+    
+    /**
      * 解析置信度
      */
     private BigDecimal confidence;
+    
+    /**
+     * 置信度分数
+     */
+    private BigDecimal confidenceScore;
     
     /**
      * 创建时间

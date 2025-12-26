@@ -191,4 +191,10 @@ public interface ProjectService extends IService<Project> {
      * 刷新项目任务数量
      */
     void refreshIssueCount(Long projectId);
+
+    /**
+     * 获取下一个项目标识
+     * 格式：AF-0000，从0001开始递增
+     */
+    String getNextProjectKey();
 }

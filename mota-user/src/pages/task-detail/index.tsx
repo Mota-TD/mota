@@ -118,34 +118,7 @@ const TaskDetail = () => {
     } catch (error) {
       console.error('Failed to load task:', error)
       message.error('加载任务失败')
-      // 使用模拟数据
-      setTask({
-        id: String(taskId),
-        departmentTaskId: '1',
-        projectId: '1',
-        name: '市场调研报告撰写',
-        description: '完成Q1季度市场调研报告，包括竞品分析、用户画像、市场趋势等内容',
-        assigneeId: '1',
-        status: 'in_progress' as TaskStatus,
-        priority: 'high' as any,
-        startDate: '2024-01-10',
-        endDate: '2024-01-20',
-        progress: 60,
-        progressNote: '已完成竞品分析部分，正在进行用户画像分析',
-        sortOrder: 1
-      })
-      setDepartmentTask({
-        id: '1',
-        projectId: '1',
-        departmentId: '1',
-        managerId: '1',
-        name: '市场推广方案制定',
-        status: 'in_progress' as any,
-        priority: 'high' as any,
-        progress: 45,
-        requirePlan: true,
-        requireApproval: true
-      })
+      // 加载失败时不设置模拟数据，保持为空
     } finally {
       setLoading(false)
     }
@@ -258,27 +231,8 @@ const TaskDetail = () => {
 
   const assignee = users.find(u => u.id === task.assigneeId)
 
-  // 模拟进度记录数据
-  const progressHistory = [
-    {
-      id: 1,
-      progress: 60,
-      note: '已完成竞品分析部分',
-      createdAt: '2024-01-15 14:30'
-    },
-    {
-      id: 2,
-      progress: 30,
-      note: '开始数据收集',
-      createdAt: '2024-01-12 10:00'
-    },
-    {
-      id: 3,
-      progress: 0,
-      note: '任务开始',
-      createdAt: '2024-01-10 09:00'
-    }
-  ]
+  // 进度记录数据 - 应从API获取
+  const progressHistory: Array<{ id: number; progress: number; note: string; createdAt: string }> = []
 
   return (
     <div className={styles.container}>

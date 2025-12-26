@@ -3,8 +3,8 @@
  * 集成所有报表分析组件：团队效能指标、平均完成时间、逾期率统计、成员贡献度
  */
 
-import React, { useState } from 'react'
-import { Tabs, DatePicker, Select, Card, Space, Button } from 'antd'
+import React, { useState, useEffect } from 'react'
+import { Tabs, DatePicker, Select, Card, Space, Button, message } from 'antd'
 import { 
   DashboardOutlined, 
   ClockCircleOutlined, 
@@ -28,16 +28,25 @@ const ReportAnalyticsPage: React.FC = () => {
     dayjs().startOf('month'),
     dayjs().endOf('month')
   ])
-  const [teamId, setTeamId] = useState<number>(1)
+  const [teamId, setTeamId] = useState<number>(0)
+  const [teams, setTeams] = useState<{ id: number; name: string }[]>([])
 
-  // 模拟团队列表
-  const teams = [
-    { id: 1, name: '研发一组' },
-    { id: 2, name: '研发二组' },
-    { id: 3, name: '产品组' },
-    { id: 4, name: '设计组' },
-    { id: 5, name: '测试组' }
-  ]
+  // 加载团队列表
+  useEffect(() => {
+    const loadTeams = async () => {
+      try {
+        // TODO: 从API获取团队列表
+        // const data = await getTeams()
+        // setTeams(data)
+        setTeams([])
+      } catch (error) {
+        console.error('加载团队列表失败:', error)
+        message.error('加载团队列表失败')
+        setTeams([])
+      }
+    }
+    loadTeams()
+  }, [])
 
   const startDate = dateRange[0].format('YYYY-MM-DD')
   const endDate = dateRange[1].format('YYYY-MM-DD')

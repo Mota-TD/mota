@@ -27,23 +27,48 @@ import { progressTrackingApi, BurndownChartData } from '@/services/api/progressT
 import styles from './index.module.css'
 
 interface BurndownChartProps {
-  projectId: number
+  // API 模式 - 通过 projectId 加载数据
+  projectId?: number
   sprintId?: number
   onSprintChange?: (sprintId: number) => void
+  // 直接数据模式 - 直接传入数据
+  title?: string
+  startDate?: string
+  endDate?: string
+  totalPoints?: number
+  completedByDate?: { date: string; completed: number }[]
+  height?: number
+  showLegend?: boolean
+  unit?: string
 }
 
 const BurndownChart: React.FC<BurndownChartProps> = ({
   projectId,
-  sprintId
+  sprintId,
+  title,
+  startDate: propStartDate,
+  endDate: propEndDate,
+  totalPoints: propTotalPoints,
+  completedByDate,
+  height = 400,
+  showLegend = true,
+  unit = '任务'
 }) => {
   const [loading, setLoading] = useState(false)
   const [data, setData] = useState<BurndownChartData | null>(null)
 
   useEffect(() => {
-    loadData()
-  }, [projectId, sprintId])
+    // 如果提供了 projectId，从 API 加载数据
+    if (projectId) {
+      loadData()
+    } else if (completedByDate && propStartDate && propEndDate && propTotalPoints !== undefined) {
+      // 如果直接提供了数据，构建本地数据
+      buildLocalData()
+    }
+  }, [projectId, sprintId, completedByDate, propStartDate, propEndDate, propTotalPoints])
 
   const loadData = async () => {
+    if (!projectId) return
     setLoading(true)
     try {
       const result = await progressTrackingApi.getBurndownChart(projectId, sprintId)
@@ -54,6 +79,57 @@ const BurndownChart: React.FC<BurndownChartProps> = ({
     } finally {
       setLoading(false)
     }
+  }
+
+  const buildLocalData = () => {
+    if (!completedByDate || !propStartDate || !propEndDate || propTotalPoints === undefined) return
+    
+    // 计算累计完成数
+    let cumulative = 0
+    const actualLine = completedByDate.map(item => {
+      cumulative += item.completed
+      return {
+        date: item.date,
+        value: propTotalPoints - cumulative,
+        completed: item.completed
+      }
+    })
+
+    // 计算理想燃尽线
+    const start = new Date(propStartDate)
+    const end = new Date(propEndDate)
+    const totalDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
+    const dailyBurn = propTotalPoints / totalDays
+    
+    const idealLine: { date: string; value: number; completed: number }[] = []
+    for (let i = 0; i <= totalDays; i++) {
+      const date = new Date(start)
+      date.setDate(date.getDate() + i)
+      idealLine.push({
+        date: date.toISOString().split('T')[0],
+        value: Math.max(0, propTotalPoints - dailyBurn * i),
+        completed: Math.round(dailyBurn)
+      })
+    }
+
+    const remaining = propTotalPoints - cumulative
+    const completionPercentage = propTotalPoints > 0 ? ((propTotalPoints - remaining) / propTotalPoints) * 100 : 0
+
+    setData({
+      projectId: 0,
+      projectName: title || '燃尽图',
+      sprintName: title || '燃尽图',
+      startDate: propStartDate,
+      endDate: propEndDate,
+      totalPoints: propTotalPoints,
+      remainingPoints: remaining,
+      completionPercentage,
+      idealLine,
+      actualLine,
+      predictedLine: [],
+      onTrack: remaining <= (propTotalPoints - cumulative),
+      deviationDays: 0
+    })
   }
 
   // 格式化日期显示
@@ -244,9 +320,9 @@ const BurndownChart: React.FC<BurndownChartProps> = ({
 
       {/* 图表 */}
       <div className={styles.chartContainer}>
-        <ReactECharts 
-          option={chartOption} 
-          style={{ height: 400 }}
+        <ReactECharts
+          option={chartOption}
+          style={{ height }}
           notMerge={true}
         />
       </div>

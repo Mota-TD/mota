@@ -3,7 +3,6 @@ package com.mota.project.dto.request;
 import lombok.Data;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.List;
@@ -22,11 +21,9 @@ public class CreateProjectRequest {
     private String name;
 
     /**
-     * 项目标识
+     * 项目标识（系统自动生成，格式：AF-0000，不允许用户修改）
+     * 此字段由系统自动生成，前端无需传递
      */
-    @NotBlank(message = "项目标识不能为空")
-    @Pattern(regexp = "^[A-Z0-9]+$", message = "项目标识只能包含大写字母和数字")
-    @Size(max = 10, message = "项目标识不能超过10个字符")
     private String key;
 
     /**
@@ -91,5 +88,10 @@ public class CreateProjectRequest {
         private LocalDate targetDate;
         
         private String description;
+        
+        /**
+         * 里程碑负责人ID列表（支持多负责人）
+         */
+        private List<Long> assigneeIds;
     }
 }

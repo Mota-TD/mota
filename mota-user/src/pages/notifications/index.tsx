@@ -119,10 +119,11 @@ const NotificationsPage = () => {
     try {
       const res = await notificationApi.getNotifications({ userId, aggregated: true })
       const notificationsList = (res as any).list || res || []
-      setNotifications(notificationsList.length > 0 ? notificationsList : getMockNotifications())
+      setNotifications(notificationsList)
     } catch (error) {
       console.error('Failed to load notifications:', error)
-      setNotifications(getMockNotifications())
+      message.error('加载通知失败')
+      setNotifications([])
     } finally {
       setLoading(false)
     }
@@ -150,202 +151,9 @@ const NotificationsPage = () => {
       // 使用默认设置
       setDndSettings(notificationApi.DEFAULT_DND_SETTINGS as DoNotDisturbSettings)
       setPreferences(notificationApi.DEFAULT_NOTIFICATION_PREFERENCES as NotificationPreferences)
-      setSubscriptions(getMockSubscriptions())
+      setSubscriptions([])
     }
   }
-
-  // 模拟订阅数据
-  const getMockSubscriptions = (): NotificationSubscription[] => [
-    { id: 1, userId, category: 'task', enabled: true, emailEnabled: true, pushEnabled: true, createdAt: '', updatedAt: '' },
-    { id: 2, userId, category: 'project', enabled: true, emailEnabled: true, pushEnabled: false, createdAt: '', updatedAt: '' },
-    { id: 3, userId, category: 'comment', enabled: true, emailEnabled: false, pushEnabled: true, createdAt: '', updatedAt: '' },
-    { id: 4, userId, category: 'system', enabled: true, emailEnabled: true, pushEnabled: true, createdAt: '', updatedAt: '' },
-    { id: 5, userId, category: 'reminder', enabled: true, emailEnabled: true, pushEnabled: true, createdAt: '', updatedAt: '' },
-    { id: 6, userId, category: 'plan', enabled: true, emailEnabled: true, pushEnabled: false, createdAt: '', updatedAt: '' },
-    { id: 7, userId, category: 'feedback', enabled: true, emailEnabled: false, pushEnabled: true, createdAt: '', updatedAt: '' }
-  ]
-
-  // 模拟通知数据
-  const getMockNotifications = (): Notification[] => [
-    {
-      id: 1,
-      type: 'task_assigned',
-      category: 'task',
-      title: '您有新的任务分配',
-      content: '张经理将任务"市场调研报告撰写"分配给您',
-      userId,
-      isRead: 0,
-      isPinned: true,
-      priority: 'high',
-      aiClassification: 'important',
-      aiScore: 85,
-      createdAt: dayjs().subtract(10, 'minute').toISOString(),
-      senderId: 1,
-      senderName: '张经理',
-      projectId: 1,
-      projectName: '2024年度市场推广项目',
-      actionUrl: '/tasks/1'
-    },
-    {
-      id: 2,
-      type: 'plan_approved',
-      category: 'plan',
-      title: '工作计划已审批通过',
-      content: '您提交的"Q1市场推广计划"已通过审批',
-      userId,
-      isRead: 0,
-      priority: 'normal',
-      aiClassification: 'normal',
-      aiScore: 60,
-      createdAt: dayjs().subtract(30, 'minute').toISOString(),
-      senderId: 2,
-      senderName: '李总监',
-      projectId: 1,
-      projectName: '2024年度市场推广项目',
-      actionUrl: '/department-tasks/1'
-    },
-    {
-      id: 3,
-      type: 'mention',
-      category: 'comment',
-      title: '有人在任务中@了您',
-      content: '@您 请帮忙审核一下这份报告的数据部分',
-      userId,
-      isRead: 0,
-      isPinned: true,
-      priority: 'high',
-      aiClassification: 'important',
-      aiScore: 80,
-      createdAt: dayjs().subtract(1, 'hour').toISOString(),
-      senderId: 3,
-      senderName: '王小明',
-      projectId: 1,
-      projectName: '2024年度市场推广项目',
-      actionUrl: '/tasks/2'
-    },
-    {
-      id: 4,
-      type: 'milestone_due',
-      category: 'project',
-      title: '里程碑即将到期',
-      content: '里程碑"需求分析完成"将于明天到期',
-      userId,
-      isRead: 1,
-      priority: 'urgent',
-      aiClassification: 'important',
-      aiScore: 95,
-      createdAt: dayjs().subtract(2, 'hour').toISOString(),
-      projectId: 1,
-      projectName: '2024年度市场推广项目',
-      actionUrl: '/projects/1'
-    },
-    {
-      id: 5,
-      type: 'feedback_received',
-      category: 'feedback',
-      title: '收到工作反馈',
-      content: '张经理对您的工作进行了反馈评价',
-      userId,
-      isRead: 1,
-      priority: 'normal',
-      aiClassification: 'normal',
-      aiScore: 55,
-      createdAt: dayjs().subtract(3, 'hour').toISOString(),
-      senderId: 1,
-      senderName: '张经理',
-      actionUrl: '/department-tasks/1'
-    },
-    {
-      id: 6,
-      type: 'task_overdue',
-      category: 'task',
-      title: '任务已逾期',
-      content: '任务"竞品分析文档"已逾期2天',
-      userId,
-      isRead: 1,
-      priority: 'urgent',
-      aiClassification: 'important',
-      aiScore: 90,
-      createdAt: dayjs().subtract(1, 'day').toISOString(),
-      projectId: 1,
-      projectName: '2024年度市场推广项目',
-      actionUrl: '/tasks/3'
-    },
-    // 聚合通知示例
-    {
-      id: 7,
-      type: 'task_comment',
-      category: 'comment',
-      title: '任务评论更新',
-      content: '任务"市场调研报告"有3条新评论',
-      userId,
-      isRead: 0,
-      priority: 'low',
-      aiClassification: 'low_priority',
-      aiScore: 30,
-      groupKey: 'task_comment_1',
-      aggregatedCount: 3,
-      createdAt: dayjs().subtract(4, 'hour').toISOString(),
-      projectId: 1,
-      projectName: '2024年度市场推广项目',
-      actionUrl: '/tasks/1',
-      aggregatedNotifications: [
-        { id: 71, type: 'task_comment', category: 'comment', title: '新评论', content: '王小明: 数据已更新', userId, isRead: 0, priority: 'low', createdAt: dayjs().subtract(4, 'hour').toISOString() },
-        { id: 72, type: 'task_comment', category: 'comment', title: '新评论', content: '李工: 格式需要调整', userId, isRead: 0, priority: 'low', createdAt: dayjs().subtract(5, 'hour').toISOString() },
-        { id: 73, type: 'task_comment', category: 'comment', title: '新评论', content: '张经理: 已审阅', userId, isRead: 0, priority: 'low', createdAt: dayjs().subtract(6, 'hour').toISOString() }
-      ]
-    },
-    {
-      id: 8,
-      type: 'task_progress',
-      category: 'task',
-      title: '任务进度更新',
-      content: '任务"用户访谈记录整理"进度已更新至80%',
-      userId,
-      isRead: 1,
-      isCollapsed: true,
-      priority: 'low',
-      aiClassification: 'low_priority',
-      aiScore: 25,
-      createdAt: dayjs().subtract(2, 'day').toISOString(),
-      senderId: 4,
-      senderName: '赵小红',
-      actionUrl: '/tasks/4'
-    },
-    {
-      id: 9,
-      type: 'member_joined',
-      category: 'project',
-      title: '新成员加入项目',
-      content: '刘工程师已加入项目"2024年度市场推广项目"',
-      userId,
-      isRead: 1,
-      isCollapsed: true,
-      priority: 'low',
-      aiClassification: 'low_priority',
-      aiScore: 20,
-      createdAt: dayjs().subtract(3, 'day').toISOString(),
-      senderId: 5,
-      senderName: '刘工程师',
-      projectId: 1,
-      projectName: '2024年度市场推广项目',
-      actionUrl: '/projects/1'
-    },
-    {
-      id: 10,
-      type: 'system',
-      category: 'system',
-      title: '系统维护通知',
-      content: '系统将于本周六凌晨2:00-4:00进行维护升级',
-      userId,
-      isRead: 1,
-      priority: 'normal',
-      aiClassification: 'normal',
-      aiScore: 40,
-      createdAt: dayjs().subtract(5, 'day').toISOString(),
-      actionUrl: '#'
-    }
-  ]
 
   const getTypeIcon = (type: NotificationType) => {
     const iconMap: Record<NotificationType, React.ReactNode> = {

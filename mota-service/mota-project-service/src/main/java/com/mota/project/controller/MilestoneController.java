@@ -4,7 +4,13 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mota.common.core.result.Result;
 import com.mota.project.entity.Milestone;
+import com.mota.project.entity.MilestoneAssignee;
+import com.mota.project.entity.MilestoneComment;
+import com.mota.project.entity.MilestoneTask;
+import com.mota.project.entity.MilestoneTaskAttachment;
+import com.mota.project.service.MilestoneCommentService;
 import com.mota.project.service.MilestoneService;
+import com.mota.project.service.MilestoneTaskService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -26,6 +32,8 @@ import java.util.Map;
 public class MilestoneController {
 
     private final MilestoneService milestoneService;
+    private final MilestoneTaskService milestoneTaskService;
+    private final MilestoneCommentService milestoneCommentService;
 
     /**
      * 获取里程碑列表（分页）
@@ -53,8 +61,14 @@ public class MilestoneController {
     @ApiResponse(responseCode = "200", description = "查询成功")
     @GetMapping("/project/{projectId}")
     public Result<List<Milestone>> getByProjectId(
-            @Parameter(description = "项目ID", required = true) @PathVariable Long projectId) {
-        List<Milestone> milestones = milestoneService.getByProjectId(projectId);
+            @Parameter(description = "项目ID", required = true) @PathVariable Long projectId,
+            @Parameter(description = "是否包含负责人信息") @RequestParam(defaultValue = "false") Boolean withAssignees) {
+        List<Milestone> milestones;
+        if (withAssignees) {
+            milestones = milestoneService.getByProjectIdWithAssignees(projectId);
+        } else {
+            milestones = milestoneService.getByProjectId(projectId);
+        }
         return Result.success(milestones);
     }
 
@@ -68,8 +82,14 @@ public class MilestoneController {
     })
     @GetMapping("/{id}")
     public Result<Milestone> getById(
-            @Parameter(description = "里程碑ID", required = true) @PathVariable Long id) {
-        Milestone milestone = milestoneService.getDetailById(id);
+            @Parameter(description = "里程碑ID", required = true) @PathVariable Long id,
+            @Parameter(description = "是否包含负责人和任务信息") @RequestParam(defaultValue = "false") Boolean withDetails) {
+        Milestone milestone;
+        if (withDetails) {
+            milestone = milestoneService.getDetailByIdWithAssignees(id);
+        } else {
+            milestone = milestoneService.getDetailById(id);
+        }
         return Result.success(milestone);
     }
 
@@ -84,6 +104,33 @@ public class MilestoneController {
     @PostMapping
     public Result<Milestone> create(@RequestBody Milestone milestone) {
         Milestone created = milestoneService.createMilestone(milestone);
+        return Result.success(created);
+    }
+
+    /**
+     * 创建里程碑（包含负责人）
+     */
+    @Operation(summary = "创建里程碑（包含负责人）", description = "创建一个新的里程碑并指定负责人")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "创建成功"),
+        @ApiResponse(responseCode = "400", description = "请求参数错误")
+    })
+    @PostMapping("/with-assignees")
+    public Result<Milestone> createWithAssignees(@RequestBody Map<String, Object> body) {
+        Milestone milestone = new Milestone();
+        milestone.setProjectId(Long.valueOf(body.get("projectId").toString()));
+        milestone.setName((String) body.get("name"));
+        milestone.setDescription((String) body.get("description"));
+        if (body.get("targetDate") != null) {
+            milestone.setTargetDate(java.time.LocalDate.parse(body.get("targetDate").toString()));
+        }
+        
+        @SuppressWarnings("unchecked")
+        List<Number> assigneeIds = (List<Number>) body.get("assigneeIds");
+        List<Long> assigneeIdList = assigneeIds != null ?
+            assigneeIds.stream().map(Number::longValue).toList() : null;
+        
+        Milestone created = milestoneService.createMilestoneWithAssignees(milestone, assigneeIdList);
         return Result.success(created);
     }
 
@@ -186,5 +233,353 @@ public class MilestoneController {
             @Parameter(description = "项目ID", required = true) @PathVariable Long projectId) {
         List<Milestone> milestones = milestoneService.getDelayedMilestones(projectId);
         return Result.success(milestones);
+    }
+
+    // ==================== 负责人管理 ====================
+
+    /**
+     * 获取里程碑负责人列表
+     */
+    @Operation(summary = "获取里程碑负责人", description = "获取指定里程碑的所有负责人")
+    @ApiResponse(responseCode = "200", description = "查询成功")
+    @GetMapping("/{id}/assignees")
+    public Result<List<MilestoneAssignee>> getAssignees(
+            @Parameter(description = "里程碑ID", required = true) @PathVariable Long id) {
+        List<MilestoneAssignee> assignees = milestoneService.getMilestoneAssignees(id);
+        return Result.success(assignees);
+    }
+
+    /**
+     * 更新里程碑负责人
+     */
+    @Operation(summary = "更新里程碑负责人", description = "更新里程碑的负责人列表")
+    @ApiResponse(responseCode = "200", description = "更新成功")
+    @PutMapping("/{id}/assignees")
+    public Result<Boolean> updateAssignees(
+            @Parameter(description = "里程碑ID", required = true) @PathVariable Long id,
+            @RequestBody Map<String, List<Long>> body) {
+        List<Long> assigneeIds = body.get("assigneeIds");
+        boolean result = milestoneService.updateMilestoneAssignees(id, assigneeIds);
+        return Result.success(result);
+    }
+
+    /**
+     * 添加里程碑负责人
+     */
+    @Operation(summary = "添加里程碑负责人", description = "为里程碑添加一个负责人")
+    @ApiResponse(responseCode = "200", description = "添加成功")
+    @PostMapping("/{id}/assignees")
+    public Result<Boolean> addAssignee(
+            @Parameter(description = "里程碑ID", required = true) @PathVariable Long id,
+            @RequestBody Map<String, Object> body) {
+        Long userId = Long.valueOf(body.get("userId").toString());
+        Boolean isPrimary = body.get("isPrimary") != null ? (Boolean) body.get("isPrimary") : false;
+        boolean result = milestoneService.addMilestoneAssignee(id, userId, isPrimary);
+        return Result.success(result);
+    }
+
+    /**
+     * 移除里程碑负责人
+     */
+    @Operation(summary = "移除里程碑负责人", description = "从里程碑移除一个负责人")
+    @ApiResponse(responseCode = "200", description = "移除成功")
+    @DeleteMapping("/{id}/assignees/{userId}")
+    public Result<Boolean> removeAssignee(
+            @Parameter(description = "里程碑ID", required = true) @PathVariable Long id,
+            @Parameter(description = "用户ID", required = true) @PathVariable Long userId) {
+        boolean result = milestoneService.removeMilestoneAssignee(id, userId);
+        return Result.success(result);
+    }
+
+    /**
+     * 根据用户获取负责的里程碑
+     */
+    @Operation(summary = "获取用户负责的里程碑", description = "获取指定用户负责的所有里程碑")
+    @ApiResponse(responseCode = "200", description = "查询成功")
+    @GetMapping("/assignee/{userId}")
+    public Result<List<Milestone>> getByAssignee(
+            @Parameter(description = "用户ID", required = true) @PathVariable Long userId) {
+        List<Milestone> milestones = milestoneService.getMilestonesByAssignee(userId);
+        return Result.success(milestones);
+    }
+
+    // ==================== 任务管理 ====================
+
+    /**
+     * 获取里程碑任务列表
+     */
+    @Operation(summary = "获取里程碑任务列表", description = "获取指定里程碑的所有任务")
+    @ApiResponse(responseCode = "200", description = "查询成功")
+    @GetMapping("/{id}/tasks")
+    public Result<List<MilestoneTask>> getTasks(
+            @Parameter(description = "里程碑ID", required = true) @PathVariable Long id) {
+        List<MilestoneTask> tasks = milestoneTaskService.getByMilestoneId(id);
+        return Result.success(tasks);
+    }
+
+    /**
+     * 获取任务详情
+     */
+    @Operation(summary = "获取任务详情", description = "获取任务详细信息，包含子任务和附件")
+    @ApiResponse(responseCode = "200", description = "查询成功")
+    @GetMapping("/tasks/{taskId}")
+    public Result<MilestoneTask> getTaskDetail(
+            @Parameter(description = "任务ID", required = true) @PathVariable Long taskId) {
+        MilestoneTask task = milestoneTaskService.getDetailById(taskId);
+        return Result.success(task);
+    }
+
+    /**
+     * 创建里程碑任务
+     */
+    @Operation(summary = "创建里程碑任务", description = "为里程碑创建一个新任务")
+    @ApiResponse(responseCode = "200", description = "创建成功")
+    @PostMapping("/{id}/tasks")
+    public Result<MilestoneTask> createTask(
+            @Parameter(description = "里程碑ID", required = true) @PathVariable Long id,
+            @RequestBody MilestoneTask task) {
+        task.setMilestoneId(id);
+        MilestoneTask created = milestoneTaskService.createTask(task);
+        return Result.success(created);
+    }
+
+    /**
+     * 创建子任务
+     */
+    @Operation(summary = "创建子任务", description = "为任务创建一个子任务")
+    @ApiResponse(responseCode = "200", description = "创建成功")
+    @PostMapping("/tasks/{taskId}/subtasks")
+    public Result<MilestoneTask> createSubTask(
+            @Parameter(description = "父任务ID", required = true) @PathVariable Long taskId,
+            @RequestBody MilestoneTask task) {
+        MilestoneTask created = milestoneTaskService.createSubTask(taskId, task);
+        return Result.success(created);
+    }
+
+    /**
+     * 更新任务
+     */
+    @Operation(summary = "更新任务", description = "更新任务信息")
+    @ApiResponse(responseCode = "200", description = "更新成功")
+    @PutMapping("/tasks/{taskId}")
+    public Result<MilestoneTask> updateTask(
+            @Parameter(description = "任务ID", required = true) @PathVariable Long taskId,
+            @RequestBody MilestoneTask task) {
+        task.setId(taskId);
+        MilestoneTask updated = milestoneTaskService.updateTask(task);
+        return Result.success(updated);
+    }
+
+    /**
+     * 更新任务进度
+     */
+    @Operation(summary = "更新任务进度", description = "更新任务的完成进度")
+    @ApiResponse(responseCode = "200", description = "更新成功")
+    @PutMapping("/tasks/{taskId}/progress")
+    public Result<Boolean> updateTaskProgress(
+            @Parameter(description = "任务ID", required = true) @PathVariable Long taskId,
+            @RequestBody Map<String, Integer> body) {
+        Integer progress = body.get("progress");
+        boolean result = milestoneTaskService.updateTaskProgress(taskId, progress);
+        return Result.success(result);
+    }
+
+    /**
+     * 完成任务
+     */
+    @Operation(summary = "完成任务", description = "将任务标记为已完成")
+    @ApiResponse(responseCode = "200", description = "操作成功")
+    @PutMapping("/tasks/{taskId}/complete")
+    public Result<MilestoneTask> completeTask(
+            @Parameter(description = "任务ID", required = true) @PathVariable Long taskId) {
+        MilestoneTask task = milestoneTaskService.completeTask(taskId);
+        return Result.success(task);
+    }
+
+    /**
+     * 分配任务
+     */
+    @Operation(summary = "分配任务", description = "将任务分配给指定用户")
+    @ApiResponse(responseCode = "200", description = "分配成功")
+    @PutMapping("/tasks/{taskId}/assign")
+    public Result<Boolean> assignTask(
+            @Parameter(description = "任务ID", required = true) @PathVariable Long taskId,
+            @RequestBody Map<String, Long> body) {
+        Long userId = body.get("userId");
+        boolean result = milestoneTaskService.assignTask(taskId, userId);
+        return Result.success(result);
+    }
+
+    /**
+     * 删除任务
+     */
+    @Operation(summary = "删除任务", description = "删除指定任务")
+    @ApiResponse(responseCode = "200", description = "删除成功")
+    @DeleteMapping("/tasks/{taskId}")
+    public Result<Boolean> deleteTask(
+            @Parameter(description = "任务ID", required = true) @PathVariable Long taskId) {
+        boolean result = milestoneTaskService.deleteTask(taskId);
+        return Result.success(result);
+    }
+
+    /**
+     * 获取用户的任务列表
+     */
+    @Operation(summary = "获取用户任务列表", description = "获取指定用户负责的所有任务")
+    @ApiResponse(responseCode = "200", description = "查询成功")
+    @GetMapping("/tasks/assignee/{userId}")
+    public Result<List<MilestoneTask>> getTasksByAssignee(
+            @Parameter(description = "用户ID", required = true) @PathVariable Long userId) {
+        List<MilestoneTask> tasks = milestoneTaskService.getByAssigneeId(userId);
+        return Result.success(tasks);
+    }
+
+    // ==================== 附件管理 ====================
+
+    /**
+     * 获取任务附件列表
+     */
+    @Operation(summary = "获取任务附件", description = "获取任务的所有附件")
+    @ApiResponse(responseCode = "200", description = "查询成功")
+    @GetMapping("/tasks/{taskId}/attachments")
+    public Result<List<MilestoneTaskAttachment>> getTaskAttachments(
+            @Parameter(description = "任务ID", required = true) @PathVariable Long taskId) {
+        List<MilestoneTaskAttachment> attachments = milestoneTaskService.getAttachments(taskId);
+        return Result.success(attachments);
+    }
+
+    /**
+     * 获取任务执行方案
+     */
+    @Operation(summary = "获取执行方案", description = "获取任务的执行方案附件")
+    @ApiResponse(responseCode = "200", description = "查询成功")
+    @GetMapping("/tasks/{taskId}/execution-plans")
+    public Result<List<MilestoneTaskAttachment>> getExecutionPlans(
+            @Parameter(description = "任务ID", required = true) @PathVariable Long taskId) {
+        List<MilestoneTaskAttachment> plans = milestoneTaskService.getExecutionPlans(taskId);
+        return Result.success(plans);
+    }
+
+    /**
+     * 添加任务附件
+     */
+    @Operation(summary = "添加任务附件", description = "为任务添加附件")
+    @ApiResponse(responseCode = "200", description = "添加成功")
+    @PostMapping("/tasks/{taskId}/attachments")
+    public Result<MilestoneTaskAttachment> addTaskAttachment(
+            @Parameter(description = "任务ID", required = true) @PathVariable Long taskId,
+            @RequestBody MilestoneTaskAttachment attachment) {
+        MilestoneTaskAttachment created = milestoneTaskService.addAttachment(taskId, attachment);
+        return Result.success(created);
+    }
+
+    /**
+     * 删除任务附件
+     */
+    @Operation(summary = "删除任务附件", description = "删除指定附件")
+    @ApiResponse(responseCode = "200", description = "删除成功")
+    @DeleteMapping("/tasks/attachments/{attachmentId}")
+    public Result<Boolean> deleteTaskAttachment(
+            @Parameter(description = "附件ID", required = true) @PathVariable Long attachmentId) {
+        boolean result = milestoneTaskService.deleteAttachment(attachmentId);
+        return Result.success(result);
+    }
+
+    // ==================== 评论和催办 ====================
+
+    /**
+     * 获取里程碑评论列表
+     */
+    @Operation(summary = "获取里程碑评论", description = "获取里程碑的所有评论和催办记录")
+    @ApiResponse(responseCode = "200", description = "查询成功")
+    @GetMapping("/{id}/comments")
+    public Result<List<MilestoneComment>> getMilestoneComments(
+            @Parameter(description = "里程碑ID", required = true) @PathVariable Long id) {
+        List<MilestoneComment> comments = milestoneCommentService.getByMilestoneId(id);
+        return Result.success(comments);
+    }
+
+    /**
+     * 获取任务评论列表
+     */
+    @Operation(summary = "获取任务评论", description = "获取任务的所有评论和催办记录")
+    @ApiResponse(responseCode = "200", description = "查询成功")
+    @GetMapping("/tasks/{taskId}/comments")
+    public Result<List<MilestoneComment>> getTaskComments(
+            @Parameter(description = "任务ID", required = true) @PathVariable Long taskId) {
+        List<MilestoneComment> comments = milestoneCommentService.getByTaskId(taskId);
+        return Result.success(comments);
+    }
+
+    /**
+     * 添加里程碑评论
+     */
+    @Operation(summary = "添加里程碑评论", description = "为里程碑添加评论")
+    @ApiResponse(responseCode = "200", description = "添加成功")
+    @PostMapping("/{id}/comments")
+    public Result<MilestoneComment> addMilestoneComment(
+            @Parameter(description = "里程碑ID", required = true) @PathVariable Long id,
+            @RequestBody Map<String, Object> body) {
+        Long userId = Long.valueOf(body.get("userId").toString());
+        String content = (String) body.get("content");
+        MilestoneComment comment = milestoneCommentService.addMilestoneComment(id, userId, content);
+        return Result.success(comment);
+    }
+
+    /**
+     * 添加任务评论
+     */
+    @Operation(summary = "添加任务评论", description = "为任务添加评论")
+    @ApiResponse(responseCode = "200", description = "添加成功")
+    @PostMapping("/tasks/{taskId}/comments")
+    public Result<MilestoneComment> addTaskComment(
+            @Parameter(description = "任务ID", required = true) @PathVariable Long taskId,
+            @RequestBody Map<String, Object> body) {
+        Long userId = Long.valueOf(body.get("userId").toString());
+        String content = (String) body.get("content");
+        MilestoneComment comment = milestoneCommentService.addTaskComment(taskId, userId, content);
+        return Result.success(comment);
+    }
+
+    /**
+     * 催办里程碑
+     */
+    @Operation(summary = "催办里程碑", description = "对里程碑进行催办")
+    @ApiResponse(responseCode = "200", description = "催办成功")
+    @PostMapping("/{id}/urge")
+    public Result<MilestoneComment> urgeMilestone(
+            @Parameter(description = "里程碑ID", required = true) @PathVariable Long id,
+            @RequestBody Map<String, Object> body) {
+        Long userId = Long.valueOf(body.get("userId").toString());
+        String content = body.get("content") != null ? (String) body.get("content") : null;
+        MilestoneComment comment = milestoneCommentService.urgeMilestone(id, userId, content);
+        return Result.success(comment);
+    }
+
+    /**
+     * 催办任务
+     */
+    @Operation(summary = "催办任务", description = "对任务进行催办")
+    @ApiResponse(responseCode = "200", description = "催办成功")
+    @PostMapping("/tasks/{taskId}/urge")
+    public Result<MilestoneComment> urgeTask(
+            @Parameter(description = "任务ID", required = true) @PathVariable Long taskId,
+            @RequestBody Map<String, Object> body) {
+        Long userId = Long.valueOf(body.get("userId").toString());
+        String content = body.get("content") != null ? (String) body.get("content") : null;
+        MilestoneComment comment = milestoneCommentService.urgeTask(taskId, userId, content);
+        return Result.success(comment);
+    }
+
+    /**
+     * 删除评论
+     */
+    @Operation(summary = "删除评论", description = "删除指定评论")
+    @ApiResponse(responseCode = "200", description = "删除成功")
+    @DeleteMapping("/comments/{commentId}")
+    public Result<Boolean> deleteComment(
+            @Parameter(description = "评论ID", required = true) @PathVariable Long commentId) {
+        boolean result = milestoneCommentService.deleteComment(commentId);
+        return Result.success(result);
     }
 }

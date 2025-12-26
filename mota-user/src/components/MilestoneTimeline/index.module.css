@@ -73,8 +73,147 @@
   color: var(--success-color, #52c41a);
 }
 
+.milestoneAssignees {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border-color-light, #e8e8e8);
+}
+
 .milestoneActions {
   margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border-color-light, #e8e8e8);
+}
+
+/* 任务列表区域 */
+.taskListSection {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border-color-light, #e8e8e8);
+}
+
+.taskCollapse {
+  background: transparent;
+}
+
+.taskCollapse :global(.ant-collapse-header) {
+  padding: 4px 0 !important;
+  font-size: 13px;
+}
+
+.taskCollapse :global(.ant-collapse-content-box) {
+  padding: 8px 0 !important;
+}
+
+.taskPanelHeader {
+  font-size: 13px;
+  color: var(--text-secondary, #666);
+}
+
+.inlineTaskList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inlineTaskItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--bg-tertiary, #fff);
+  border-radius: 6px;
+  border: 1px solid var(--border-color-light, #f0f0f0);
+  transition: all 0.2s ease;
+}
+
+.inlineTaskItem:hover {
+  border-color: var(--primary-color, #1677ff);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.taskMainContent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.taskCheckbox {
+  flex-shrink: 0;
+}
+
+.inlineTaskName {
+  font-size: 13px;
+  color: var(--text-primary, #333);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inlineTaskName.completed {
+  text-decoration: line-through;
+  color: var(--text-tertiary, #999);
+}
+
+.priorityTag {
+  flex-shrink: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  padding: 0 6px;
+}
+
+.taskAssignee {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text-secondary, #666);
+  flex-shrink: 0;
+}
+
+.taskDueDate {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-tertiary, #999);
+  flex-shrink: 0;
+}
+
+.taskQuickActions {
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.inlineTaskItem:hover .taskQuickActions {
+  opacity: 1;
+}
+
+.quickAddTaskForm {
+  padding: 8px 12px;
+  background: var(--bg-tertiary, #fff);
+  border-radius: 6px;
+  border: 1px dashed var(--border-color, #d9d9d9);
+}
+
+.quickAddTaskForm :global(.ant-form-item) {
+  margin-bottom: 0;
+}
+
+.addTaskBtn {
+  width: 100%;
+  border-style: dashed;
+}
+
+.emptyTaskSection {
+  margin-top: 12px;
   padding-top: 8px;
   border-top: 1px dashed var(--border-color-light, #e8e8e8);
 }
@@ -137,5 +276,44 @@
 }
 
 :global([data-theme='dark']) .container :global(.ant-card-head) {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+:global([data-theme='dark']) .taskListSection {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+:global([data-theme='dark']) .inlineTaskItem {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+:global([data-theme='dark']) .inlineTaskItem:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--primary-color, #1677ff);
+}
+
+:global([data-theme='dark']) .inlineTaskName {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+:global([data-theme='dark']) .inlineTaskName.completed {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+:global([data-theme='dark']) .taskAssignee {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+:global([data-theme='dark']) .taskDueDate {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+:global([data-theme='dark']) .quickAddTaskForm {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+:global([data-theme='dark']) .emptyTaskSection {
   border-color: rgba(255, 255, 255, 0.1);
 }

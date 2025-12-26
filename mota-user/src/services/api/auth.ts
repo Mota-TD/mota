@@ -30,11 +30,57 @@ export interface LoginResponse {
 // 注册请求参数
 export interface RegisterRequest {
   username: string
-  email: string
+  phone: string
+  email?: string
   password: string
   confirmPassword: string
+  enterpriseName: string
+  industryId: number
   captcha?: string
   captchaKey?: string
+  inviteCode?: string
+}
+
+// 注册响应
+export interface RegisterResponse {
+  userId: number
+  username: string
+  email?: string
+  enterpriseId: number
+  enterpriseName: string
+  orgId: string
+  industryId: number
+  industryName: string
+  enterpriseRole: string
+  isNewEnterprise: boolean
+}
+
+// 行业信息
+export interface Industry {
+  id: number
+  code: string
+  name: string
+  parentId?: number
+  level: number
+  sortOrder: number
+  icon?: string
+  description?: string
+  status: number
+}
+
+// 邀请验证结果
+export interface InvitationValidateResult {
+  valid: boolean
+  errorMessage?: string
+  enterpriseId?: number
+  enterpriseName?: string
+  enterpriseLogo?: string
+  industryName?: string
+  role?: string
+  roleName?: string
+  departmentName?: string
+  invitedByName?: string
+  expiredAt?: string
 }
 
 // 用户信息
@@ -48,6 +94,8 @@ export interface UserInfo {
   status: number
   orgId?: string
   orgName?: string
+  enterpriseId?: number
+  enterpriseRole?: string
   lastLoginAt?: string
   createdAt?: string
 }
@@ -83,8 +131,8 @@ export function getCaptcha(): Promise<string> {
 /**
  * 用户注册
  */
-export function register(data: RegisterRequest): Promise<UserInfo> {
-  return post<UserInfo>('/api/v1/auth/register', data)
+export function register(data: RegisterRequest): Promise<RegisterResponse> {
+  return post<RegisterResponse>('/api/v1/auth/register', data)
 }
 
 /**
@@ -92,4 +140,32 @@ export function register(data: RegisterRequest): Promise<UserInfo> {
  */
 export function getCurrentUser(): Promise<UserInfo> {
   return get<UserInfo>('/api/v1/user/me')
+}
+
+/**
+ * 获取所有行业列表
+ */
+export function getIndustries(): Promise<Industry[]> {
+  return get<Industry[]>('/api/v1/auth/industries')
+}
+
+/**
+ * 获取一级行业列表
+ */
+export function getTopLevelIndustries(): Promise<Industry[]> {
+  return get<Industry[]>('/api/v1/auth/industries/top')
+}
+
+/**
+ * 获取子行业列表
+ */
+export function getChildIndustries(parentId: number): Promise<Industry[]> {
+  return get<Industry[]>(`/api/v1/auth/industries/${parentId}/children`)
+}
+
+/**
+ * 验证邀请码
+ */
+export function validateInvitation(inviteCode: string): Promise<InvitationValidateResult> {
+  return get<InvitationValidateResult>(`/api/v1/enterprise/invitations/validate?inviteCode=${encodeURIComponent(inviteCode)}`)
 }

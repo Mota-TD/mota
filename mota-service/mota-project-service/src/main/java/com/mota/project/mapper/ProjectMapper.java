@@ -74,4 +74,10 @@ public interface ProjectMapper extends BaseMapper<Project> {
      * 获取项目统计信息
      */
     Map<String, Object> getProjectStatistics(@Param("projectId") Long projectId);
+
+    /**
+     * 获取最大的项目标识序号
+     * 用于生成新的项目标识（格式：AF-0000）
+     */
+    Integer getMaxProjectKeySequence();
 }

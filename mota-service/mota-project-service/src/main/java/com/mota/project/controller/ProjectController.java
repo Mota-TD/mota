@@ -36,6 +36,17 @@ public class ProjectController {
     // ==================== 项目基础操作 ====================
 
     /**
+     * 获取下一个项目标识
+     */
+    @Operation(summary = "获取下一个项目标识", description = "获取系统自动生成的下一个项目标识（格式：AF-0000）")
+    @ApiResponse(responseCode = "200", description = "获取成功")
+    @GetMapping("/key/next")
+    public Result<String> getNextProjectKey() {
+        String nextKey = projectService.getNextProjectKey();
+        return Result.success(nextKey);
+    }
+
+    /**
      * 获取项目列表（简单查询）
      */
     @Operation(summary = "获取项目列表", description = "根据关键字和状态筛选项目列表")

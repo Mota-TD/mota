@@ -79,7 +79,8 @@ export interface Milestone {
 // 创建项目请求
 export interface CreateProjectRequest {
   name: string
-  key: string
+  /** 项目标识（系统自动生成，格式：AF-0000，前端无需传递） */
+  key?: string
   description?: string
   color?: string
   startDate?: string
@@ -152,6 +153,14 @@ export interface DepartmentInfo {
 // ==================== 项目基础操作 ====================
 
 /**
+ * 获取下一个项目标识
+ * 系统自动生成，格式：AF-0000
+ */
+export function getNextProjectKey(): Promise<string> {
+  return get<string>('/api/v1/projects/key/next')
+}
+
+/**
  * 获取项目列表（简单查询）
  */
 export async function getProjects(params?: {
@@ -199,8 +208,15 @@ export function getProjectDetailFull(id: number | string): Promise<ProjectDetail
 /**
  * 创建项目（简单）
  */
-export function createProject(data: CreateProjectRequest): Promise<Project> {
+export function createProjectSimple(data: CreateProjectRequest): Promise<Project> {
   return post<Project>('/api/v1/projects', data)
+}
+
+/**
+ * 创建项目（默认使用完整流程，支持里程碑和成员）
+ */
+export function createProject(data: CreateProjectRequest): Promise<Project> {
+  return post<Project>('/api/v1/projects/create', data)
 }
 
 /**

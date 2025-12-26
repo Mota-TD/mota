@@ -51,6 +51,17 @@ public class SecurityUtils {
     }
 
     /**
+     * 获取当前企业ID
+     */
+    public static Long getEnterpriseId() {
+        try {
+            return getLoginUser().getEnterpriseId();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
      * 判断是否已登录
      */
     public static boolean isAuthenticated() {

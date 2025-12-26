@@ -1,11 +1,13 @@
 package com.mota.project.controller;
 
+import com.mota.common.core.result.Result;
 import com.mota.project.entity.search.*;
 import com.mota.project.service.SmartSearchService;
 import com.mota.project.service.SmartSearchService.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -20,6 +22,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/search")
 @RequiredArgsConstructor
+@Tag(name = "智能搜索", description = "智能搜索相关接口")
 public class SmartSearchController {
     
     private final SmartSearchService searchService;
@@ -30,7 +33,8 @@ public class SmartSearchController {
      * 全文关键词检索
      */
     @GetMapping("/keyword")
-    public ResponseEntity<SearchResult> keywordSearch(
+    @Operation(summary = "全文关键词检索", description = "SS-001: 基于关键词的全文检索")
+    public Result<SearchResult> keywordSearch(
             @RequestParam String query,
             @RequestParam(required = false) String type,
             @RequestParam(required = false, defaultValue = "1") int page,
@@ -44,7 +48,7 @@ public class SmartSearchController {
         request.setPageSize(pageSize);
         
         SearchResult result = searchService.keywordSearch(query, request);
-        return ResponseEntity.ok(result);
+        return Result.success(result);
     }
     
     // ==================== SS-002 语义搜索 ====================
@@ -53,7 +57,8 @@ public class SmartSearchController {
      * 语义相似度搜索
      */
     @GetMapping("/semantic")
-    public ResponseEntity<SearchResult> semanticSearch(
+    @Operation(summary = "语义相似度搜索", description = "SS-002: 基于语义理解的搜索")
+    public Result<SearchResult> semanticSearch(
             @RequestParam String query,
             @RequestParam(required = false) String type,
             @RequestParam(required = false, defaultValue = "1") int page,
@@ -67,7 +72,7 @@ public class SmartSearchController {
         request.setPageSize(pageSize);
         
         SearchResult result = searchService.semanticSearch(query, request);
-        return ResponseEntity.ok(result);
+        return Result.success(result);
     }
     
     // ==================== SS-003 向量检索 ====================
@@ -76,13 +81,14 @@ public class SmartSearchController {
      * 向量数据库检索
      */
     @PostMapping("/vector")
-    public ResponseEntity<List<DocumentVector>> vectorSearch(
+    @Operation(summary = "向量数据库检索", description = "SS-003: 基于向量的相似度检索")
+    public Result<List<DocumentVector>> vectorSearch(
             @RequestBody VectorSearchRequest request) {
         
         // 模拟向量输入
         float[] queryVector = new float[768];
         List<DocumentVector> results = searchService.vectorSearch(queryVector, request.getTopK());
-        return ResponseEntity.ok(results);
+        return Result.success(results);
     }
     
     // ==================== SS-004 混合检索 ====================
@@ -91,7 +97,8 @@ public class SmartSearchController {
      * 向量+关键词混合检索
      */
     @GetMapping("/hybrid")
-    public ResponseEntity<SearchResult> hybridSearch(
+    @Operation(summary = "混合检索", description = "SS-004: 向量+关键词混合检索")
+    public Result<SearchResult> hybridSearch(
             @RequestParam String query,
             @RequestParam(required = false) String type,
             @RequestParam(required = false, defaultValue = "1") int page,
@@ -105,7 +112,7 @@ public class SmartSearchController {
         request.setPageSize(pageSize);
         
         SearchResult result = searchService.hybridSearch(query, request);
-        return ResponseEntity.ok(result);
+        return Result.success(result);
     }
     
     // ==================== SS-005 意图识别 ====================
@@ -114,9 +121,10 @@ public class SmartSearchController {
      * 搜索意图识别
      */
     @GetMapping("/intent")
-    public ResponseEntity<SearchIntent> detectIntent(@RequestParam String query) {
+    @Operation(summary = "搜索意图识别", description = "SS-005: 识别用户搜索意图")
+    public Result<SearchIntent> detectIntent(@RequestParam String query) {
         SearchIntent intent = searchService.detectIntent(query);
-        return ResponseEntity.ok(intent);
+        return Result.success(intent);
     }
     
     // ==================== SS-006 自动纠错 ====================
@@ -125,17 +133,18 @@ public class SmartSearchController {
      * 搜索词自动纠错
      */
     @GetMapping("/correct")
-    public ResponseEntity<Map<String, Object>> autoCorrect(@RequestParam String query) {
+    @Operation(summary = "搜索词自动纠错", description = "SS-006: 自动纠正搜索词拼写错误")
+    public Result<CorrectionResult> autoCorrect(@RequestParam String query) {
         String corrected = searchService.autoCorrect(query);
         List<String> suggestions = searchService.getCorrectionSuggestions(query);
         
-        Map<String, Object> result = new HashMap<>();
-        result.put("original", query);
-        result.put("corrected", corrected);
-        result.put("wasCorrected", !query.equals(corrected));
-        result.put("suggestions", suggestions);
+        CorrectionResult result = new CorrectionResult();
+        result.setOriginal(query);
+        result.setCorrected(corrected);
+        result.setWasCorrected(!query.equals(corrected));
+        result.setSuggestions(suggestions);
         
-        return ResponseEntity.ok(result);
+        return Result.success(result);
     }
     
     // ==================== SS-007 智能补全 ====================
@@ -144,12 +153,13 @@ public class SmartSearchController {
      * 搜索词智能补全
      */
     @GetMapping("/complete")
-    public ResponseEntity<List<SearchSuggestion>> getCompletions(
+    @Operation(summary = "搜索词智能补全", description = "SS-007: 智能补全搜索词")
+    public Result<List<SearchSuggestion>> getCompletions(
             @RequestParam String prefix,
             @RequestParam(required = false, defaultValue = "10") int limit) {
         
         List<SearchSuggestion> completions = searchService.getCompletions(prefix, limit);
-        return ResponseEntity.ok(completions);
+        return Result.success(completions);
     }
     
     // ==================== SS-008 相关推荐 ====================
@@ -158,24 +168,26 @@ public class SmartSearchController {
      * 相关搜索推荐
      */
     @GetMapping("/related")
-    public ResponseEntity<List<SearchRelatedQuery>> getRelatedQueries(
+    @Operation(summary = "相关搜索推荐", description = "SS-008: 推荐相关搜索词")
+    public Result<List<SearchRelatedQuery>> getRelatedQueries(
             @RequestParam String query,
             @RequestParam(required = false, defaultValue = "10") int limit) {
         
         List<SearchRelatedQuery> related = searchService.getRelatedQueries(query, limit);
-        return ResponseEntity.ok(related);
+        return Result.success(related);
     }
     
     /**
      * 获取热门搜索
      */
     @GetMapping("/hot")
-    public ResponseEntity<List<SearchHotWord>> getHotSearches(
+    @Operation(summary = "获取热门搜索", description = "获取热门搜索词")
+    public Result<List<SearchHotWord>> getHotSearches(
             @RequestParam(required = false, defaultValue = "daily") String period,
             @RequestParam(required = false, defaultValue = "10") int limit) {
         
         List<SearchHotWord> hotWords = searchService.getHotSearches(period, limit);
-        return ResponseEntity.ok(hotWords);
+        return Result.success(hotWords);
     }
     
     // ==================== 用户偏好与历史 ====================
@@ -184,57 +196,61 @@ public class SmartSearchController {
      * 获取搜索历史
      */
     @GetMapping("/history")
-    public ResponseEntity<List<SearchLog>> getSearchHistory(
+    @Operation(summary = "获取搜索历史", description = "获取用户的搜索历史记录")
+    public Result<List<SmartSearchLog>> getSearchHistory(
             @RequestHeader(value = "X-User-Id", required = false, defaultValue = "1") Long userId,
             @RequestParam(required = false, defaultValue = "20") int limit) {
         
-        List<SearchLog> history = searchService.getSearchHistory(userId, limit);
-        return ResponseEntity.ok(history);
+        List<SmartSearchLog> history = searchService.getSearchHistory(userId, limit);
+        return Result.success(history);
     }
     
     /**
      * 清除搜索历史
      */
     @DeleteMapping("/history")
-    public ResponseEntity<Map<String, Object>> clearSearchHistory(
+    @Operation(summary = "清除搜索历史", description = "清除用户的搜索历史记录")
+    public Result<OperationResult> clearSearchHistory(
             @RequestHeader(value = "X-User-Id", required = false, defaultValue = "1") Long userId) {
         
         searchService.clearSearchHistory(userId);
         
-        Map<String, Object> result = new HashMap<>();
-        result.put("success", true);
-        result.put("message", "搜索历史已清除");
+        OperationResult result = new OperationResult();
+        result.setSuccess(true);
+        result.setMessage("搜索历史已清除");
         
-        return ResponseEntity.ok(result);
+        return Result.success(result);
     }
     
     /**
      * 获取用户搜索偏好
      */
     @GetMapping("/preference")
-    public ResponseEntity<UserSearchPreference> getUserPreference(
+    @Operation(summary = "获取用户搜索偏好", description = "获取用户的搜索偏好设置")
+    public Result<UserSearchPreference> getUserPreference(
             @RequestHeader(value = "X-User-Id", required = false, defaultValue = "1") Long userId) {
         
         UserSearchPreference preference = searchService.getUserPreference(userId);
-        return ResponseEntity.ok(preference);
+        return Result.success(preference);
     }
     
     /**
      * 保存用户搜索偏好
      */
     @PostMapping("/preference")
-    public ResponseEntity<Map<String, Object>> saveUserPreference(
+    @Operation(summary = "保存用户搜索偏好", description = "保存用户的搜索偏好设置")
+    public Result<OperationResult> saveUserPreference(
             @RequestHeader(value = "X-User-Id", required = false, defaultValue = "1") Long userId,
             @RequestBody UserSearchPreference preference) {
         
         preference.setUserId(userId);
         searchService.saveUserPreference(preference);
         
-        Map<String, Object> result = new HashMap<>();
-        result.put("success", true);
-        result.put("message", "搜索偏好已保存");
+        OperationResult result = new OperationResult();
+        result.setSuccess(true);
+        result.setMessage("搜索偏好已保存");
         
-        return ResponseEntity.ok(result);
+        return Result.success(result);
     }
     
     // ==================== 统一搜索入口 ====================
@@ -243,7 +259,8 @@ public class SmartSearchController {
      * 统一搜索接口（自动选择最佳搜索策略）
      */
     @GetMapping("")
-    public ResponseEntity<SearchResult> search(
+    @Operation(summary = "统一搜索", description = "统一搜索接口，自动选择最佳搜索策略")
+    public Result<SearchResult> search(
             @RequestParam String query,
             @RequestParam(required = false, defaultValue = "hybrid") String mode,
             @RequestParam(required = false) String type,
@@ -271,7 +288,7 @@ public class SmartSearchController {
                 break;
         }
         
-        return ResponseEntity.ok(result);
+        return Result.success(result);
     }
     
     // ==================== 内部类 ====================
@@ -280,5 +297,19 @@ public class SmartSearchController {
     public static class VectorSearchRequest {
         private float[] vector;
         private int topK = 10;
+    }
+    
+    @lombok.Data
+    public static class CorrectionResult {
+        private String original;
+        private String corrected;
+        private boolean wasCorrected;
+        private List<String> suggestions;
+    }
+    
+    @lombok.Data
+    public static class OperationResult {
+        private boolean success;
+        private String message;
     }
 }

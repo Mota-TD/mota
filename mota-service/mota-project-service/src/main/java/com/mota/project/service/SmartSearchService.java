@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SmartSearchService {
     
-    private final SearchLogMapper searchLogMapper;
+    private final SmartSearchLogMapper searchLogMapper;
     private final SearchSuggestionMapper suggestionMapper;
     private final SearchCorrectionDictMapper correctionMapper;
     private final SearchSynonymMapper synonymMapper;
@@ -537,7 +537,7 @@ public class SmartSearchService {
     @Transactional
     public void logSearch(Long userId, String query, String queryType, String correctedQuery,
                           SearchIntent intent, int resultCount, int searchTimeMs) {
-        SearchLog log = new SearchLog();
+        SmartSearchLog log = new SmartSearchLog();
         log.setUserId(userId);
         log.setQueryText(query);
         log.setQueryType(queryType);
@@ -596,7 +596,7 @@ public class SmartSearchService {
     /**
      * 获取搜索历史
      */
-    public List<SearchLog> getSearchHistory(Long userId, int limit) {
+    public List<SmartSearchLog> getSearchHistory(Long userId, int limit) {
         return searchLogMapper.findByUserId(userId, limit);
     }
     

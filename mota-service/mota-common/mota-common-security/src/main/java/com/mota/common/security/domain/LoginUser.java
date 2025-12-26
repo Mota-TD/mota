@@ -71,6 +71,11 @@ public class LoginUser implements UserDetails, Serializable {
     private String orgName;
 
     /**
+     * 企业ID
+     */
+    private Long enterpriseId;
+
+    /**
      * 角色列表
      */
     private Set<String> roles;

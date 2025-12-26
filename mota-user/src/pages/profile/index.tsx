@@ -24,7 +24,7 @@ const ProfilePage = () => {
   const [passwordForm] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [pageLoading, setPageLoading] = useState(true)
-  const [avatarUrl, setAvatarUrl] = useState('https://api.dicebear.com/7.x/avataaars/svg?seed=admin')
+  const [avatarUrl, setAvatarUrl] = useState('')
 
   // 加载用户数据
   const loadUserProfile = async () => {
@@ -34,18 +34,18 @@ const ProfilePage = () => {
       const userData = await userApi.getUserProfile()
       
       form.setFieldsValue({
-        name: userData.nickname || userData.username,
-        email: userData.email,
+        name: userData.nickname || userData.username || '',
+        email: userData.email || '',
         phone: userData.phone || '',
-        department: '技术部', // TODO: 从用户数据获取
-        position: '高级工程师', // TODO: 从用户数据获取
-        bio: '热爱技术，专注于前端开发', // TODO: 从用户数据获取
+        department: '', // 从用户数据获取
+        position: '', // 从用户数据获取
+        bio: '', // 从用户数据获取
         language: 'zh-CN',
         timezone: 'Asia/Shanghai',
-        emailNotify: true,
-        browserNotify: true,
-        issueNotify: true,
-        mentionNotify: true,
+        emailNotify: false,
+        browserNotify: false,
+        issueNotify: false,
+        mentionNotify: false,
         weeklyReport: false,
       })
       
@@ -68,22 +68,7 @@ const ProfilePage = () => {
       }
     } catch (error) {
       console.error('Failed to load user profile:', error)
-      // 使用默认值
-      form.setFieldsValue({
-        name: '管理员',
-        email: 'admin@mota.com',
-        phone: '13800138000',
-        department: '技术部',
-        position: '高级工程师',
-        bio: '热爱技术，专注于前端开发',
-        language: 'zh-CN',
-        timezone: 'Asia/Shanghai',
-        emailNotify: true,
-        browserNotify: true,
-        issueNotify: true,
-        mentionNotify: true,
-        weeklyReport: false,
-      })
+      // 加载失败时不设置默认值，保持表单为空
     } finally {
       setPageLoading(false)
     }

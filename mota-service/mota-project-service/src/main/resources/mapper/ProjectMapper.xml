@@ -223,7 +223,7 @@
 
     <!-- 获取项目统计信息 -->
     <select id="getProjectStatistics" resultType="map">
-        SELECT 
+        SELECT
             (SELECT COUNT(*) FROM task t WHERE t.project_id = #{projectId} AND t.deleted = 0) as totalTasks,
             (SELECT COUNT(*) FROM task t WHERE t.project_id = #{projectId} AND t.deleted = 0 AND t.status = 'completed') as completedTasks,
             (SELECT COUNT(*) FROM task t WHERE t.project_id = #{projectId} AND t.deleted = 0 AND t.status = 'in_progress') as inProgressTasks,
@@ -232,6 +232,14 @@
             (SELECT COUNT(*) FROM department_task dt WHERE dt.project_id = #{projectId} AND dt.deleted = 0) as departmentTaskCount,
             (SELECT COUNT(*) FROM milestone m WHERE m.project_id = #{projectId} AND m.deleted = 0) as totalMilestones,
             (SELECT COUNT(*) FROM milestone m WHERE m.project_id = #{projectId} AND m.deleted = 0 AND m.status = 'completed') as completedMilestones
+    </select>
+
+    <!-- 获取最大的项目标识序号（格式：AF-0000） -->
+    <!-- 注意：不过滤 deleted，确保生成的 key 不会与已删除的项目冲突 -->
+    <select id="getMaxProjectKeySequence" resultType="java.lang.Integer">
+        SELECT MAX(CAST(SUBSTRING(`key`, 4) AS UNSIGNED))
+        FROM project
+        WHERE `key` LIKE 'AF-%'
     </select>
 
 </mapper>

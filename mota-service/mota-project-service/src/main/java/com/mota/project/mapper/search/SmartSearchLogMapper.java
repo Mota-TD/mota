@@ -1,22 +1,22 @@
 package com.mota.project.mapper.search;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.mota.project.entity.search.SearchLog;
+import com.mota.project.entity.search.SmartSearchLog;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
 /**
- * 搜索日志Mapper
+ * 智能搜索日志Mapper
  */
 @Mapper
-public interface SearchLogMapper extends BaseMapper<SearchLog> {
+public interface SmartSearchLogMapper extends BaseMapper<SmartSearchLog> {
     
     /**
      * 根据用户ID查询搜索历史
      */
     @Select("SELECT * FROM search_log WHERE user_id = #{userId} ORDER BY created_at DESC LIMIT #{limit}")
-    List<SearchLog> findByUserId(@Param("userId") Long userId, @Param("limit") int limit);
+    List<SmartSearchLog> findByUserId(@Param("userId") Long userId, @Param("limit") int limit);
     
     /**
      * 删除用户搜索历史

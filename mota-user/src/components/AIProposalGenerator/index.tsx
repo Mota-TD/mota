@@ -161,7 +161,8 @@ const AIProposalGenerator: React.FC<AIProposalGeneratorProps> = ({
 
     setLoading(true);
     try {
-      const optimizedProposal = await aiProposalApi.optimizeProposal(currentProposal, direction);
+      // 使用 expandProposalSection 来优化方案
+      const optimizedProposal = await aiProposalApi.expandProposalSection(currentProposal, direction);
       setCurrentProposal(optimizedProposal);
 
       const userMessage: Message = {
@@ -414,8 +415,8 @@ const AIProposalGenerator: React.FC<AIProposalGeneratorProps> = ({
               key="use"
               type="link"
               onClick={() => {
-                setProposalType(template.type);
-                setInputText(template.description);
+                setProposalType(template.templateType || 'general');
+                setInputText(template.description || '');
                 setActiveTab('generate');
               }}
             >
@@ -430,7 +431,7 @@ const AIProposalGenerator: React.FC<AIProposalGeneratorProps> = ({
               <>
                 <Text type="secondary">{template.description}</Text>
                 <br />
-                <Tag color="blue">{getProposalTypeLabel(template.type)}</Tag>
+                <Tag color="blue">{getProposalTypeLabel(template.templateType)}</Tag>
               </>
             }
           />
