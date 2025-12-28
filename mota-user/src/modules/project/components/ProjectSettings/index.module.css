@@ -1,0 +1,39 @@
+/* 项目设置样式 */
+
+.colorPicker {
+  display: flex;
+  gap: 8px;
+}
+
+.colorItem {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 3px solid transparent;
+  transition: all 0.2s;
+}
+
+.colorItem:hover {
+  transform: scale(1.1);
+}
+
+.colorItemActive {
+  border-color: var(--primary-color, #1677ff);
+}
+
+.dangerZone {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dangerCard {
+  margin-bottom: 0;
+}
+
+.dangerItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

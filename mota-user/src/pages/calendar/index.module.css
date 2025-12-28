@@ -131,6 +131,70 @@
   text-overflow: ellipsis;
 }
 
+/* 任务截止日期列表 */
+.taskItem {
+  padding: 8px 4px !important;
+  border: none !important;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.taskItem:hover {
+  background: var(--bg-hover);
+}
+
+.taskItemContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
+}
+
+.taskInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.taskTitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+.taskMeta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.projectTag {
+  font-size: 11px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+}
+
+.taskArrow {
+  color: var(--text-disabled);
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+.emptyTasks {
+  padding: 16px 0;
+}
+
+.emptyTasks :global(.ant-empty-description) {
+  font-size: 12px;
+}
+
 .emptySubscription {
   padding: 16px 0;
 }

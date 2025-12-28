@@ -10,7 +10,11 @@ import com.mota.project.entity.Task;
 import com.mota.project.mapper.DepartmentTaskMapper;
 import com.mota.project.mapper.TaskMapper;
 import com.mota.project.service.DepartmentTaskService;
+import com.mota.project.service.ProgressSyncService;
+import com.mota.project.service.TaskCalendarSyncService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,12 +25,17 @@ import java.util.Map;
 /**
  * 部门任务 Service 实现类
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DepartmentTaskServiceImpl extends ServiceImpl<DepartmentTaskMapper, DepartmentTask> implements DepartmentTaskService {
 
     private final DepartmentTaskMapper departmentTaskMapper;
     private final TaskMapper taskMapper;
+    @Lazy
+    private final ProgressSyncService progressSyncService;
+    @Lazy
+    private final TaskCalendarSyncService taskCalendarSyncService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -49,14 +58,52 @@ public class DepartmentTaskServiceImpl extends ServiceImpl<DepartmentTaskMapper,
         }
         
         save(departmentTask);
+        
+        // 为部门任务创建日历事件（如果有负责人）
+        if (departmentTask.getManagerId() != null) {
+            try {
+                taskCalendarSyncService.createEventForDepartmentTask(departmentTask);
+            } catch (Exception e) {
+                log.warn("创建部门任务日历事件失败: {}", e.getMessage());
+            }
+        }
+        
+        // 同步里程碑进度
+        if (departmentTask.getMilestoneId() != null) {
+            try {
+                progressSyncService.syncMilestoneProgress(departmentTask.getMilestoneId());
+            } catch (Exception e) {
+                log.warn("同步里程碑进度失败: {}", e.getMessage());
+            }
+        }
+        
         return departmentTask;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public DepartmentTask updateDepartmentTask(DepartmentTask departmentTask) {
+        DepartmentTask oldTask = getById(departmentTask.getId());
         updateById(departmentTask);
-        return getById(departmentTask.getId());
+        DepartmentTask updatedTask = getById(departmentTask.getId());
+        
+        // 同步日历事件
+        try {
+            taskCalendarSyncService.syncDepartmentTaskCalendarEvent(updatedTask);
+        } catch (Exception e) {
+            log.warn("同步部门任务日历事件失败: {}", e.getMessage());
+        }
+        
+        // 同步里程碑进度
+        if (updatedTask.getMilestoneId() != null) {
+            try {
+                progressSyncService.syncMilestoneProgress(updatedTask.getMilestoneId());
+            } catch (Exception e) {
+                log.warn("同步里程碑进度失败: {}", e.getMessage());
+            }
+        }
+        
+        return updatedTask;
     }
 
     @Override
@@ -115,12 +162,58 @@ public class DepartmentTaskServiceImpl extends ServiceImpl<DepartmentTaskMapper,
     }
 
     @Override
+    public IPage<DepartmentTask> pageDepartmentTasksByManagerId(
+            Page<DepartmentTask> page,
+            Long managerId,
+            String status,
+            String priority
+    ) {
+        LambdaQueryWrapper<DepartmentTask> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(DepartmentTask::getDeleted, 0);
+        wrapper.eq(DepartmentTask::getManagerId, managerId);
+        
+        if (status != null && !status.isEmpty()) {
+            wrapper.eq(DepartmentTask::getStatus, status);
+        }
+        if (priority != null && !priority.isEmpty()) {
+            wrapper.eq(DepartmentTask::getPriority, priority);
+        }
+        
+        wrapper.orderByDesc(DepartmentTask::getCreatedAt);
+        return page(page, wrapper);
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateStatus(Long id, String status) {
         LambdaUpdateWrapper<DepartmentTask> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(DepartmentTask::getId, id)
                .set(DepartmentTask::getStatus, status);
-        return update(wrapper);
+        boolean result = update(wrapper);
+        
+        if (result) {
+            DepartmentTask task = getById(id);
+            
+            // 如果状态变为已完成，标记日历事件为已完成
+            if (DepartmentTask.Status.COMPLETED.equals(status) && task != null) {
+                try {
+                    taskCalendarSyncService.markDepartmentTaskEventCompleted(id);
+                } catch (Exception e) {
+                    log.warn("标记部门任务日历事件完成失败: {}", e.getMessage());
+                }
+            }
+            
+            // 同步里程碑进度
+            if (task != null && task.getMilestoneId() != null) {
+                try {
+                    progressSyncService.syncMilestoneProgress(task.getMilestoneId());
+                } catch (Exception e) {
+                    log.warn("同步里程碑进度失败: {}", e.getMessage());
+                }
+            }
+        }
+        
+        return result;
     }
 
     @Override
@@ -135,7 +228,31 @@ public class DepartmentTaskServiceImpl extends ServiceImpl<DepartmentTaskMapper,
             wrapper.set(DepartmentTask::getStatus, DepartmentTask.Status.COMPLETED);
         }
         
-        return update(wrapper);
+        boolean result = update(wrapper);
+        
+        if (result) {
+            DepartmentTask task = getById(id);
+            
+            // 如果进度为100%，标记日历事件为已完成
+            if (progress != null && progress >= 100 && task != null) {
+                try {
+                    taskCalendarSyncService.markDepartmentTaskEventCompleted(id);
+                } catch (Exception e) {
+                    log.warn("标记部门任务日历事件完成失败: {}", e.getMessage());
+                }
+            }
+            
+            // 同步里程碑进度
+            if (task != null && task.getMilestoneId() != null) {
+                try {
+                    progressSyncService.syncMilestoneProgress(task.getMilestoneId());
+                } catch (Exception e) {
+                    log.warn("同步里程碑进度失败: {}", e.getMessage());
+                }
+            }
+        }
+        
+        return result;
     }
 
     @Override

@@ -59,6 +59,16 @@ public class Milestone extends BaseEntityDO {
     private Integer completedTaskCount;
 
     /**
+     * 关联部门任务数
+     */
+    private Integer departmentTaskCount;
+
+    /**
+     * 已完成部门任务数
+     */
+    private Integer completedDepartmentTaskCount;
+
+    /**
      * 完成时间
      */
     private LocalDateTime completedAt;
@@ -79,6 +89,12 @@ public class Milestone extends BaseEntityDO {
      */
     @TableField(exist = false)
     private List<MilestoneTask> tasks;
+
+    /**
+     * 关联的部门任务列表（非数据库字段）
+     */
+    @TableField(exist = false)
+    private List<DepartmentTask> departmentTasks;
 
     /**
      * 里程碑状态枚举

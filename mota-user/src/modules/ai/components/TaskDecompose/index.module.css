@@ -1,0 +1,109 @@
+/**
+ * AI 任务分解组件样式
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 表单卡片 */
+.formCard {
+  border-radius: 8px;
+}
+
+.formHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.aiIcon {
+  font-size: 24px;
+  color: var(--ant-primary-color, #1890ff);
+}
+
+/* 结果卡片 */
+.resultCard {
+  border-radius: 8px;
+}
+
+.resultHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* 加载状态 */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 0;
+}
+
+/* 统计行 */
+.statsRow {
+  display: flex;
+  gap: 24px;
+  padding: 16px;
+  background: var(--ant-background-color-light, #fafafa);
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.statItem span:first-child {
+  font-size: 12px;
+}
+
+.statItem span:last-child {
+  font-size: 18px;
+}
+
+/* AI 提示 */
+.aiTip {
+  display: flex;
+  align-items: flex-start;
+  padding: 12px 16px;
+  background: var(--ant-warning-color-deprecated-bg, #fffbe6);
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+/* 表格样式 */
+.container :global(.ant-table-wrapper) {
+  border: 1px solid var(--ant-border-color-split, #f0f0f0);
+  border-radius: 8px;
+}
+
+.container :global(.ant-table-thead > tr > th) {
+  background: var(--ant-background-color-light, #fafafa);
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .statsRow {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .statItem {
+    flex: 1 1 45%;
+  }
+
+  .resultHeader {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+}

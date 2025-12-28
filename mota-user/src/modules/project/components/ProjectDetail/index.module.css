@@ -1,0 +1,415 @@
+/* 项目详情样式 */
+
+.container {
+  padding: 24px;
+  background: var(--bg-color, #f5f5f5);
+  min-height: 100vh;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.notFound {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+/* 头部样式 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px 24px;
+  background: var(--card-bg, #fff);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.headerLeft {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.projectAvatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 600;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.projectInfo {
+  flex: 1;
+}
+
+.projectTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.projectName {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-color, #333);
+}
+
+.projectKey {
+  font-size: 14px;
+  color: var(--text-secondary, #666);
+  background: var(--bg-secondary, #f0f0f0);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.projectDesc {
+  font-size: 14px;
+  color: var(--text-secondary, #666);
+  margin: 0 0 8px 0;
+  max-width: 600px;
+}
+
+.projectMeta {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--text-tertiary, #999);
+}
+
+.projectMeta span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 标签页内容 */
+.tabContent {
+  background: var(--card-bg, #fff);
+  border-radius: 8px;
+  padding: 24px;
+  min-height: 500px;
+}
+
+/* 概览标签页 */
+.overviewTab {
+  padding: 0;
+}
+
+.statCard {
+  height: 100%;
+}
+
+.statCard :global(.ant-statistic-title) {
+  font-size: 14px;
+  color: var(--text-secondary, #666);
+}
+
+.statCard :global(.ant-statistic-content) {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chartCard {
+  height: 100%;
+  min-height: 300px;
+}
+
+.chartCard :global(.ant-card-head-title) {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* 任务状态网格 */
+.taskStatusGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.taskStatusItem {
+  text-align: center;
+  padding: 16px;
+  background: var(--bg-secondary, #f9f9f9);
+  border-radius: 8px;
+}
+
+.taskStatusValue {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.taskStatusLabel {
+  font-size: 13px;
+  color: var(--text-secondary, #666);
+  margin-top: 4px;
+}
+
+/* 里程碑项 */
+.milestoneItem {
+  padding: 4px 0;
+}
+
+.milestoneName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-color, #333);
+  display: flex;
+  align-items: center;
+}
+
+.milestoneDate {
+  font-size: 12px;
+  color: var(--text-tertiary, #999);
+  margin-top: 4px;
+}
+
+/* 成员列表 */
+.memberList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.memberItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-secondary, #f9f9f9);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.memberItem:hover {
+  background: var(--bg-hover, #f0f0f0);
+}
+
+.memberInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.memberName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-color, #333);
+}
+
+.memberRole {
+  font-size: 12px;
+  color: var(--text-tertiary, #999);
+}
+
+.memberMore {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  background: var(--bg-secondary, #f9f9f9);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text-secondary, #666);
+}
+
+/* 活动项 */
+.activityItem {
+  padding: 4px 0;
+}
+
+.activityContent {
+  font-size: 14px;
+  color: var(--text-color, #333);
+}
+
+.activityUser {
+  font-weight: 500;
+  margin-right: 4px;
+}
+
+.activityAction {
+  color: var(--text-secondary, #666);
+}
+
+.activityTime {
+  font-size: 12px;
+  color: var(--text-tertiary, #999);
+  margin-top: 2px;
+}
+
+/* 部门任务标签页 */
+.deptTasksTab {
+  padding: 0;
+}
+
+.deptTaskToolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.deptTaskFilters {
+  display: flex;
+  gap: 12px;
+}
+
+/* 任务标签页 */
+.tasksTab {
+  padding: 0;
+}
+
+.taskToolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.taskFilters {
+  display: flex;
+  gap: 12px;
+}
+
+/* 甘特图标签页 */
+.ganttTab {
+  padding: 0;
+  height: 600px;
+}
+
+/* 看板标签页 */
+.kanbanTab {
+  padding: 0;
+  min-height: 600px;
+}
+
+/* 里程碑标签页 */
+.milestonesTab {
+  padding: 0;
+}
+
+.milestoneToolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* 成员标签页 */
+.membersTab {
+  padding: 0;
+}
+
+.memberToolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.memberGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.memberCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--card-bg, #fff);
+  border: 1px solid var(--border-color, #e8e8e8);
+  border-radius: 8px;
+  transition: box-shadow 0.2s;
+}
+
+.memberCard:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.memberCardInfo {
+  flex: 1;
+}
+
+.memberCardName {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-color, #333);
+}
+
+.memberCardRole {
+  font-size: 13px;
+  color: var(--text-secondary, #666);
+  margin-top: 2px;
+}
+
+.memberCardDept {
+  font-size: 12px;
+  color: var(--text-tertiary, #999);
+  margin-top: 4px;
+}
+
+.memberCardActions {
+  display: flex;
+  gap: 8px;
+}
+
+/* AI 助手标签页 */
+.aiTab {
+  padding: 0;
+}
+
+/* Wiki 标签页 */
+.wikiTab {
+  padding: 0;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .headerLeft {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .projectMeta {
+    flex-wrap: wrap;
+  }
+
+  .taskStatusGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .memberGrid {
+    grid-template-columns: 1fr;
+  }
+}

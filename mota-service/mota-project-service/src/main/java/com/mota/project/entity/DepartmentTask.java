@@ -21,6 +21,11 @@ public class DepartmentTask extends BaseEntityDO {
     private Long projectId;
 
     /**
+     * 关联里程碑ID（可选）
+     */
+    private Long milestoneId;
+
+    /**
      * 负责部门ID
      */
     private Long departmentId;
@@ -74,6 +79,11 @@ public class DepartmentTask extends BaseEntityDO {
      * 工作计划是否需要审批(0-否,1-是)
      */
     private Integer requireApproval;
+
+    /**
+     * 关联的日历事件ID
+     */
+    private Long calendarEventId;
 
     /**
      * 部门任务状态枚举

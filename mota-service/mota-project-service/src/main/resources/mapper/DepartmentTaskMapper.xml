@@ -2,10 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.mota.project.mapper.DepartmentTaskMapper">
 
-    <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.mota.project.entity.DepartmentTask">
+    <!-- 部门任务结果映射 -->
+    <resultMap id="DepartmentTaskResultMap" type="com.mota.project.entity.DepartmentTask">
         <id column="id" property="id"/>
         <result column="project_id" property="projectId"/>
+        <result column="milestone_id" property="milestoneId"/>
         <result column="department_id" property="departmentId"/>
         <result column="manager_id" property="managerId"/>
         <result column="name" property="name"/>
@@ -17,78 +18,108 @@
         <result column="progress" property="progress"/>
         <result column="require_plan" property="requirePlan"/>
         <result column="require_approval" property="requireApproval"/>
+        <result column="calendar_event_id" property="calendarEventId"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
         <result column="deleted" property="deleted"/>
+        <result column="version" property="version"/>
     </resultMap>
 
-    <!-- 通用查询结果列 -->
-    <sql id="Base_Column_List">
-        id, project_id, department_id, manager_id, name, description, status, priority,
-        start_date, end_date, progress, require_plan, require_approval, created_at, updated_at, deleted
-    </sql>
-
     <!-- 根据项目ID查询部门任务列表 -->
-    <select id="selectByProjectId" resultMap="BaseResultMap">
-        SELECT <include refid="Base_Column_List"/>
-        FROM department_task
-        WHERE project_id = #{projectId}
-        AND deleted = 0
-        ORDER BY created_at ASC
+    <select id="selectByProjectId" resultMap="DepartmentTaskResultMap">
+        SELECT dt.*
+        FROM department_task dt
+        WHERE dt.project_id = #{projectId}
+          AND dt.deleted = 0
+        ORDER BY dt.created_at DESC
     </select>
 
     <!-- 根据部门ID查询部门任务列表 -->
-    <select id="selectByDepartmentId" resultMap="BaseResultMap">
-        SELECT <include refid="Base_Column_List"/>
-        FROM department_task
-        WHERE department_id = #{departmentId}
-        AND deleted = 0
-        ORDER BY created_at DESC
+    <select id="selectByDepartmentId" resultMap="DepartmentTaskResultMap">
+        SELECT dt.*
+        FROM department_task dt
+        WHERE dt.department_id = #{departmentId}
+          AND dt.deleted = 0
+        ORDER BY dt.created_at DESC
     </select>
 
     <!-- 根据负责人ID查询部门任务列表 -->
-    <select id="selectByManagerId" resultMap="BaseResultMap">
-        SELECT <include refid="Base_Column_List"/>
-        FROM department_task
-        WHERE manager_id = #{managerId}
-        AND deleted = 0
-        ORDER BY created_at DESC
+    <select id="selectByManagerId" resultMap="DepartmentTaskResultMap">
+        SELECT dt.*
+        FROM department_task dt
+        WHERE dt.manager_id = #{managerId}
+          AND dt.deleted = 0
+        ORDER BY dt.created_at DESC
+    </select>
+
+    <!-- 根据里程碑ID查询部门任务列表 -->
+    <select id="selectByMilestoneId" resultMap="DepartmentTaskResultMap">
+        SELECT dt.*
+        FROM department_task dt
+        WHERE dt.milestone_id = #{milestoneId}
+          AND dt.deleted = 0
+        ORDER BY dt.created_at DESC
     </select>
 
     <!-- 分页查询部门任务 -->
-    <select id="selectPageByCondition" resultMap="BaseResultMap">
-        SELECT <include refid="Base_Column_List"/>
-        FROM department_task
-        WHERE deleted = 0
+    <select id="selectPageByCondition" resultMap="DepartmentTaskResultMap">
+        SELECT dt.*
+        FROM department_task dt
+        WHERE dt.deleted = 0
         <if test="projectId != null">
-            AND project_id = #{projectId}
+            AND dt.project_id = #{projectId}
         </if>
         <if test="departmentId != null">
-            AND department_id = #{departmentId}
+            AND dt.department_id = #{departmentId}
         </if>
         <if test="status != null and status != ''">
-            AND status = #{status}
+            AND dt.status = #{status}
         </if>
         <if test="priority != null and priority != ''">
-            AND priority = #{priority}
+            AND dt.priority = #{priority}
         </if>
-        ORDER BY created_at DESC
+        ORDER BY dt.created_at DESC
     </select>
 
     <!-- 统计项目下各状态的部门任务数量 -->
-    <select id="countByProjectIdGroupByStatus" resultType="java.util.Map">
-        SELECT status, COUNT(*) as count
-        FROM department_task
-        WHERE project_id = #{projectId}
-        AND deleted = 0
-        GROUP BY status
+    <select id="countByProjectIdGroupByStatus" resultType="map">
+        SELECT dt.status, COUNT(*) as count
+        FROM department_task dt
+        WHERE dt.project_id = #{projectId}
+          AND dt.deleted = 0
+        GROUP BY dt.status
     </select>
 
     <!-- 更新部门任务进度 -->
     <update id="updateProgress">
-        UPDATE department_task
+        UPDATE department_task 
         SET progress = #{progress}, updated_at = NOW()
-        WHERE id = #{id}
+        WHERE id = #{id} AND deleted = 0
     </update>
+
+    <!-- 计算里程碑下所有部门任务的平均进度 -->
+    <select id="calculateAverageProgressByMilestone" resultType="java.lang.Integer">
+        SELECT COALESCE(AVG(progress), 0)
+        FROM department_task
+        WHERE milestone_id = #{milestoneId} AND deleted = 0
+    </select>
+
+    <!-- 统计里程碑下已完成的部门任务数量 -->
+    <select id="countCompletedByMilestone" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM department_task
+        WHERE milestone_id = #{milestoneId} 
+          AND deleted = 0 
+          AND status = 'completed'
+    </select>
+
+    <!-- 统计里程碑下的部门任务总数 -->
+    <select id="countByMilestone" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM department_task
+        WHERE milestone_id = #{milestoneId} AND deleted = 0
+    </select>
 
 </mapper>

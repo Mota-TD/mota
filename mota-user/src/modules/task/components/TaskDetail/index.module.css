@@ -1,0 +1,625 @@
+/* TaskDetail 组件样式 */
+
+.taskDetail {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #fff;
+}
+
+.taskDetailDrawer {
+  height: 100%;
+}
+
+/* 头部 */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.headerLeft {
+  flex: 1;
+  min-width: 0;
+}
+
+.taskTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.titleText {
+  font-size: 20px;
+  font-weight: 600;
+  color: #262626;
+  margin: 0;
+  word-break: break-word;
+}
+
+.statusTag {
+  flex-shrink: 0;
+}
+
+.taskMeta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 13px;
+  color: #8c8c8c;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* 内容区 */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.tabContent {
+  padding: 20px 24px;
+}
+
+/* 概览 Tab */
+.overviewSection {
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #262626;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sectionIcon {
+  color: #1890ff;
+}
+
+.description {
+  font-size: 14px;
+  color: #595959;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.emptyDescription {
+  color: #bfbfbf;
+  font-style: italic;
+}
+
+/* 信息网格 */
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.infoLabel {
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.infoValue {
+  font-size: 14px;
+  color: #262626;
+}
+
+/* 进度条 */
+.progressSection {
+  margin-bottom: 24px;
+}
+
+.progressHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.progressLabel {
+  font-size: 14px;
+  color: #595959;
+}
+
+.progressValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1890ff;
+}
+
+/* 子任务 Tab */
+.subtaskList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.subtaskItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.subtaskItem:hover {
+  background: #f0f0f0;
+}
+
+.subtaskCheckbox {
+  flex-shrink: 0;
+}
+
+.subtaskName {
+  flex: 1;
+  font-size: 14px;
+  color: #262626;
+}
+
+.subtaskName.completed {
+  color: #8c8c8c;
+  text-decoration: line-through;
+}
+
+.subtaskActions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.subtaskItem:hover .subtaskActions {
+  opacity: 1;
+}
+
+.addSubtask {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  color: #8c8c8c;
+  cursor: pointer;
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.addSubtask:hover {
+  color: #1890ff;
+  border-color: #1890ff;
+  background: #e6f7ff;
+}
+
+/* 评论 Tab */
+.commentList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.commentItem {
+  display: flex;
+  gap: 12px;
+}
+
+.commentAvatar {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #1890ff;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.commentContent {
+  flex: 1;
+}
+
+.commentHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.commentAuthor {
+  font-size: 14px;
+  font-weight: 500;
+  color: #262626;
+}
+
+.commentTime {
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.commentText {
+  font-size: 14px;
+  color: #595959;
+  line-height: 1.5;
+}
+
+.commentInput {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* 附件 Tab */
+.attachmentList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.attachmentItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.attachmentItem:hover {
+  background: #f0f0f0;
+}
+
+.attachmentIcon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e6f7ff;
+  border-radius: 6px;
+  color: #1890ff;
+  font-size: 20px;
+}
+
+.attachmentInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.attachmentName {
+  font-size: 14px;
+  color: #262626;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.attachmentMeta {
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.attachmentActions {
+  display: flex;
+  gap: 4px;
+}
+
+.uploadArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  border: 2px dashed #d9d9d9;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.uploadArea:hover {
+  border-color: #1890ff;
+  background: #e6f7ff;
+}
+
+.uploadIcon {
+  font-size: 32px;
+  color: #8c8c8c;
+  margin-bottom: 8px;
+}
+
+.uploadText {
+  font-size: 14px;
+  color: #595959;
+}
+
+/* 工时 Tab */
+.timeLogList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.timeLogItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 6px;
+}
+
+.timeLogIcon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e6f7ff;
+  border-radius: 50%;
+  color: #1890ff;
+}
+
+.timeLogContent {
+  flex: 1;
+}
+
+.timeLogHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.timeLogDuration {
+  font-size: 14px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.timeLogDate {
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.timeLogDescription {
+  font-size: 13px;
+  color: #595959;
+}
+
+.timeLogSummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: #f6ffed;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.summaryLabel {
+  font-size: 14px;
+  color: #595959;
+}
+
+.summaryValue {
+  font-size: 18px;
+  font-weight: 600;
+  color: #52c41a;
+}
+
+/* 历史 Tab */
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.historyItem {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.historyItem:last-child {
+  border-bottom: none;
+}
+
+.historyIcon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+  border-radius: 50%;
+  color: #8c8c8c;
+  font-size: 12px;
+}
+
+.historyContent {
+  flex: 1;
+}
+
+.historyText {
+  font-size: 14px;
+  color: #595959;
+}
+
+.historyText strong {
+  color: #262626;
+}
+
+.historyTime {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin-top: 4px;
+}
+
+/* 空状态 */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  color: #bfbfbf;
+}
+
+.emptyIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.emptyText {
+  font-size: 14px;
+}
+
+/* 加载状态 */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .headerRight {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .tabContent {
+    padding: 16px;
+  }
+}
+
+/* 暗色主题 */
+:global(.dark) .taskDetail {
+  background: #1f1f1f;
+}
+
+:global(.dark) .header {
+  border-color: #303030;
+}
+
+:global(.dark) .titleText {
+  color: #fff;
+}
+
+:global(.dark) .taskMeta {
+  color: #8c8c8c;
+}
+
+:global(.dark) .sectionTitle {
+  color: #fff;
+}
+
+:global(.dark) .description {
+  color: #a6a6a6;
+}
+
+:global(.dark) .infoLabel {
+  color: #8c8c8c;
+}
+
+:global(.dark) .infoValue {
+  color: #fff;
+}
+
+:global(.dark) .subtaskItem {
+  background: #262626;
+}
+
+:global(.dark) .subtaskItem:hover {
+  background: #303030;
+}
+
+:global(.dark) .subtaskName {
+  color: #fff;
+}
+
+:global(.dark) .commentAuthor {
+  color: #fff;
+}
+
+:global(.dark) .commentText {
+  color: #a6a6a6;
+}
+
+:global(.dark) .attachmentItem {
+  background: #262626;
+}
+
+:global(.dark) .attachmentItem:hover {
+  background: #303030;
+}
+
+:global(.dark) .attachmentName {
+  color: #fff;
+}
+
+:global(.dark) .timeLogItem {
+  background: #262626;
+}
+
+:global(.dark) .timeLogDuration {
+  color: #fff;
+}
+
+:global(.dark) .historyItem {
+  border-color: #303030;
+}
+
+:global(.dark) .historyText {
+  color: #a6a6a6;
+}
+
+:global(.dark) .historyText strong {
+  color: #fff;
+}

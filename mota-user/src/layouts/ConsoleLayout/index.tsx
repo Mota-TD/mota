@@ -479,10 +479,6 @@ const ConsoleLayout = () => {
               onClick={() => setCollapsed(!collapsed)}
               className={styles.collapseBtn}
             />
-            <Breadcrumb
-              items={breadcrumbItems}
-              className={styles.breadcrumb}
-            />
           </div>
           <div className={styles.headerCenter}>
             <div className={styles.searchWrapper}>

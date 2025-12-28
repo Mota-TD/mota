@@ -3,6 +3,7 @@ package com.mota.project.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mota.common.core.result.Result;
+import com.mota.common.security.util.SecurityUtils;
 import com.mota.project.dto.request.ProgressUpdateRequest;
 import com.mota.project.dto.request.StatusUpdateRequest;
 import com.mota.project.entity.DepartmentTask;
@@ -50,6 +51,32 @@ public class DepartmentTaskController {
         Page<DepartmentTask> pageParam = new Page<>(page, pageSize);
         IPage<DepartmentTask> result = departmentTaskService.pageDepartmentTasks(
                 pageParam, projectId, departmentId, status, priority
+        );
+        return Result.success(result);
+    }
+
+    /**
+     * 获取当前用户的部门任务列表（我负责的部门任务）
+     */
+    @Operation(summary = "获取我的部门任务", description = "获取当前登录用户负责的部门任务列表")
+    @ApiResponse(responseCode = "200", description = "查询成功")
+    @GetMapping("/my")
+    public Result<IPage<DepartmentTask>> getMyDepartmentTasks(
+            @Parameter(description = "页码") @RequestParam(defaultValue = "1") Integer page,
+            @Parameter(description = "每页数量") @RequestParam(defaultValue = "10") Integer pageSize,
+            @Parameter(description = "任务状态") @RequestParam(required = false) String status,
+            @Parameter(description = "优先级") @RequestParam(required = false) String priority
+    ) {
+        Long currentUserId = null;
+        try {
+            currentUserId = SecurityUtils.getUserId();
+        } catch (Exception e) {
+            // 如果未登录，默认使用用户ID 1（开发环境）
+            currentUserId = 1L;
+        }
+        Page<DepartmentTask> pageParam = new Page<>(page, pageSize);
+        IPage<DepartmentTask> result = departmentTaskService.pageDepartmentTasksByManagerId(
+                pageParam, currentUserId, status, priority
         );
         return Result.success(result);
     }

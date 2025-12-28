@@ -93,5 +93,61 @@ public class CreateProjectRequest {
          * 里程碑负责人ID列表（支持多负责人）
          */
         private List<Long> assigneeIds;
+        
+        /**
+         * 里程碑下的部门任务分配列表
+         */
+        private List<DepartmentTaskAssignment> departmentTasks;
+    }
+    
+    /**
+     * 部门任务分配请求
+     */
+    @Data
+    public static class DepartmentTaskAssignment {
+        /**
+         * 负责部门ID
+         */
+        private Long departmentId;
+        
+        /**
+         * 部门负责人ID
+         */
+        private Long managerId;
+        
+        /**
+         * 任务名称（可选，默认使用里程碑名称+部门名称）
+         */
+        private String name;
+        
+        /**
+         * 任务描述
+         */
+        private String description;
+        
+        /**
+         * 优先级(low/medium/high/urgent)
+         */
+        private String priority;
+        
+        /**
+         * 开始日期
+         */
+        private LocalDate startDate;
+        
+        /**
+         * 截止日期
+         */
+        private LocalDate endDate;
+        
+        /**
+         * 是否需要提交工作计划(默认true)
+         */
+        private Boolean requirePlan;
+        
+        /**
+         * 工作计划是否需要审批(默认true)
+         */
+        private Boolean requireApproval;
     }
 }

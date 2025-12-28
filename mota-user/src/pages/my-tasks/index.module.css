@@ -74,6 +74,29 @@
   margin: 0;
 }
 
+/* Task Type Switch */
+.taskTypeSwitch {
+  margin-bottom: 16px;
+  padding: 0 24px;
+}
+
+.taskTypeSwitch :global(.ant-segmented) {
+  background: #fff;
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.taskTypeSwitch :global(.ant-segmented-item) {
+  border-radius: 6px;
+  padding: 8px 16px;
+}
+
+.taskTypeSwitch :global(.ant-segmented-item-selected) {
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  color: #fff;
+}
+
 /* Stats Row */
 .statsRow {
   margin-bottom: 24px;
@@ -216,12 +239,32 @@
   gap: 16px;
   font-size: 13px;
   color: #8c8c8c;
+  flex-wrap: wrap;
+  margin-top: 4px;
 }
 
 .taskDate {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.taskProject {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #1890ff;
+}
+
+.taskMilestone {
+  color: #722ed1;
+}
+
+.taskDepartment {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #13c2c2;
 }
 
 .taskDeadline {
@@ -266,6 +309,10 @@
     width: 48px;
     height: 48px;
     font-size: 24px;
+  }
+  
+  .taskTypeSwitch {
+    padding: 0 16px;
   }
   
   .statsRow {
@@ -397,4 +444,24 @@
 
 :global([data-theme='dark']) .taskStatus {
   background: #1f1f1f;
+}
+
+:global([data-theme='dark']) .taskTypeSwitch :global(.ant-segmented) {
+  background: #1f1f1f;
+}
+
+:global([data-theme='dark']) .taskTypeSwitch :global(.ant-segmented-item-selected) {
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+}
+
+:global([data-theme='dark']) .taskProject {
+  color: #40a9ff;
+}
+
+:global([data-theme='dark']) .taskMilestone {
+  color: #b37feb;
+}
+
+:global([data-theme='dark']) .taskDepartment {
+  color: #36cfc9;
 }

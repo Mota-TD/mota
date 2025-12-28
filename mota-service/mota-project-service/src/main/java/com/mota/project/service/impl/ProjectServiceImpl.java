@@ -8,17 +8,21 @@ import com.mota.project.dto.request.ProjectQueryRequest;
 import com.mota.project.dto.request.UpdateProjectRequest;
 import com.mota.project.dto.response.ProjectDetailResponse;
 import com.mota.project.dto.response.ProjectListResponse;
+import com.mota.project.entity.DepartmentTask;
 import com.mota.project.entity.Milestone;
 import com.mota.project.entity.Project;
 import com.mota.project.entity.MilestoneAssignee;
 import com.mota.project.entity.ProjectDepartment;
 import com.mota.project.entity.ProjectMember;
+import com.mota.project.mapper.DepartmentTaskMapper;
 import com.mota.project.mapper.MilestoneAssigneeMapper;
 import com.mota.project.mapper.MilestoneMapper;
 import com.mota.project.mapper.ProjectMapper;
 import com.mota.project.mapper.ProjectMemberMapper;
 import com.mota.project.service.ProjectService;
+import com.mota.project.service.TaskCalendarSyncService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +38,7 @@ import java.util.stream.Collectors;
 /**
  * 项目服务实现
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> implements ProjectService {
@@ -41,6 +46,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
     private final ProjectMemberMapper projectMemberMapper;
     private final MilestoneMapper milestoneMapper;
     private final MilestoneAssigneeMapper milestoneAssigneeMapper;
+    private final DepartmentTaskMapper departmentTaskMapper;
+    private final TaskCalendarSyncService taskCalendarSyncService;
 
     // ==================== 项目基础操作 ====================
 
@@ -212,6 +219,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
                 milestone.setTargetDate(milestoneReq.getTargetDate());
                 milestone.setStatus(Milestone.Status.PENDING);
                 milestone.setSortOrder(sortOrder++);
+                milestone.setDepartmentTaskCount(0);
+                milestone.setCompletedDepartmentTaskCount(0);
                 milestoneMapper.insert(milestone);
                 
                 // 添加里程碑负责人
@@ -226,6 +235,61 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
                         assignee.setAssignedBy(project.getOwnerId());
                         milestoneAssigneeMapper.insert(assignee);
                         isFirst = false;
+                    }
+                }
+                
+                // 创建部门任务分配
+                if (!CollectionUtils.isEmpty(milestoneReq.getDepartmentTasks())) {
+                    int departmentTaskCount = 0;
+                    for (CreateProjectRequest.DepartmentTaskAssignment taskAssignment : milestoneReq.getDepartmentTasks()) {
+                        DepartmentTask departmentTask = new DepartmentTask();
+                        departmentTask.setProjectId(project.getId());
+                        departmentTask.setMilestoneId(milestone.getId());
+                        departmentTask.setDepartmentId(taskAssignment.getDepartmentId());
+                        departmentTask.setManagerId(taskAssignment.getManagerId());
+                        
+                        // 任务名称：如果未指定，使用里程碑名称
+                        String taskName = StringUtils.hasText(taskAssignment.getName())
+                            ? taskAssignment.getName()
+                            : milestone.getName();
+                        departmentTask.setName(taskName);
+                        
+                        departmentTask.setDescription(taskAssignment.getDescription());
+                        departmentTask.setStatus(DepartmentTask.Status.PENDING);
+                        departmentTask.setPriority(StringUtils.hasText(taskAssignment.getPriority())
+                            ? taskAssignment.getPriority()
+                            : DepartmentTask.Priority.MEDIUM);
+                        
+                        // 日期：如果未指定，使用项目日期或里程碑目标日期
+                        departmentTask.setStartDate(taskAssignment.getStartDate() != null
+                            ? taskAssignment.getStartDate()
+                            : project.getStartDate());
+                        departmentTask.setEndDate(taskAssignment.getEndDate() != null
+                            ? taskAssignment.getEndDate()
+                            : (milestone.getTargetDate() != null ? milestone.getTargetDate() : project.getEndDate()));
+                        
+                        departmentTask.setProgress(0);
+                        departmentTask.setRequirePlan(taskAssignment.getRequirePlan() != null && taskAssignment.getRequirePlan() ? 1 : 0);
+                        departmentTask.setRequireApproval(taskAssignment.getRequireApproval() != null && taskAssignment.getRequireApproval() ? 1 : 0);
+                        
+                        departmentTaskMapper.insert(departmentTask);
+                        departmentTaskCount++;
+                        
+                        // 为部门任务创建日历事件（如果有负责人）
+                        if (departmentTask.getManagerId() != null) {
+                            try {
+                                taskCalendarSyncService.createEventForDepartmentTask(departmentTask);
+                            } catch (Exception e) {
+                                // 日历事件创建失败不影响主流程
+                                log.warn("创建部门任务日历事件失败: {}", e.getMessage());
+                            }
+                        }
+                    }
+                    
+                    // 更新里程碑的部门任务计数
+                    if (departmentTaskCount > 0) {
+                        milestone.setDepartmentTaskCount(departmentTaskCount);
+                        milestoneMapper.updateById(milestone);
                     }
                 }
             }

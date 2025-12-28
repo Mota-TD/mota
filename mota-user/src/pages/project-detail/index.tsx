@@ -513,6 +513,22 @@ const ProjectDetail = () => {
       )
     },
     {
+      title: '关联里程碑',
+      dataIndex: 'milestoneId',
+      key: 'milestoneId',
+      width: 140,
+      render: (milestoneId: string, record: DepartmentTask) => {
+        const milestone = projectMilestones.find(m => String(m.id) === String(milestoneId))
+        return milestone ? (
+          <Tag color="purple" icon={<FlagOutlined />}>
+            {milestone.name}
+          </Tag>
+        ) : (
+          <span style={{ color: '#999' }}>-</span>
+        )
+      }
+    },
+    {
       title: '负责部门',
       dataIndex: 'departmentName',
       key: 'departmentName',
@@ -679,6 +695,7 @@ const ProjectDetail = () => {
     try {
       await departmentTaskApi.createDepartmentTask({
         projectId: id!,
+        milestoneId: values.milestoneId,
         departmentId: values.departmentId,
         managerId: values.managerId,
         name: values.name,
@@ -1428,6 +1445,28 @@ const ProjectDetail = () => {
             requireApproval: false
           }}
         >
+          <Form.Item
+            name="milestoneId"
+            label="关联里程碑"
+            extra="选择此任务关联的里程碑，任务进度将自动汇总到里程碑"
+          >
+            <Select placeholder="请选择关联里程碑（可选）" allowClear>
+              {projectMilestones.map(milestone => (
+                <Select.Option key={milestone.id} value={milestone.id}>
+                  <Space>
+                    <FlagOutlined style={{ color: '#722ed1' }} />
+                    {milestone.name}
+                    {milestone.targetDate && (
+                      <span style={{ color: '#999', fontSize: 12 }}>
+                        ({dayjs(milestone.targetDate).format('YYYY-MM-DD')})
+                      </span>
+                    )}
+                  </Space>
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+
           <Form.Item
             name="name"
             label="任务名称"

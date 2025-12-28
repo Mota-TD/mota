@@ -46,7 +46,12 @@ import {
   getMockModels,
   getMockRoutingRules,
   getMockFallbackStrategies,
-  getMockCostStatistics
+  getMockCostStatistics,
+  Provider,
+  Model,
+  RoutingRule,
+  FallbackStrategy,
+  CostStatistics
 } from '@/services/api/multiModel';
 import styles from './index.module.css';
 
@@ -480,7 +485,7 @@ const ModelManagementPage: React.FC = () => {
           </Button>
           <Select defaultValue="all" style={{ width: 150 }}>
             <Option value="all">全部提供商</Option>
-            {providers.map(p => (
+            {providers.map((p: Provider) => (
               <Option key={p.id} value={p.id}>{p.providerName}</Option>
             ))}
           </Select>
@@ -649,7 +654,7 @@ const ModelManagementPage: React.FC = () => {
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
         <Col xs={24} md={12}>
           <Card title="成本分布" size="small">
-            {costStats.byProvider.map(item => (
+            {costStats.byProvider.map((item: { providerId: number; providerName: string; cost: number; percent: number }) => (
               <div key={item.providerId} className={styles.costItem}>
                 <div className={styles.costItemHeader}>
                   <span>{item.providerName}</span>
@@ -821,7 +826,7 @@ const ModelManagementPage: React.FC = () => {
             <Col span={12}>
               <Form.Item name="providerId" label="提供商" rules={[{ required: true }]}>
                 <Select placeholder="请选择提供商">
-                  {providers.map(p => (
+                  {providers.map((p: Provider) => (
                     <Option key={p.id} value={p.id}>{p.providerName}</Option>
                   ))}
                 </Select>
@@ -878,7 +883,7 @@ const ModelManagementPage: React.FC = () => {
           </Form.Item>
           <Form.Item name="targetModelId" label="目标模型" rules={[{ required: true }]}>
             <Select placeholder="请选择目标模型">
-              {models.map(m => (
+              {models.map((m: Model) => (
                 <Option key={m.id} value={m.id}>{m.modelName}</Option>
               ))}
             </Select>
@@ -907,14 +912,14 @@ const ModelManagementPage: React.FC = () => {
           </Form.Item>
           <Form.Item name="primaryModelId" label="主模型" rules={[{ required: true }]}>
             <Select placeholder="请选择主模型">
-              {models.map(m => (
+              {models.map((m: Model) => (
                 <Option key={m.id} value={m.id}>{m.modelName}</Option>
               ))}
             </Select>
           </Form.Item>
           <Form.Item name="fallbackModelIds" label="降级模型" rules={[{ required: true }]}>
             <Select mode="multiple" placeholder="请选择降级模型（按顺序）">
-              {models.map(m => (
+              {models.map((m: Model) => (
                 <Option key={m.id} value={m.id}>{m.modelName}</Option>
               ))}
             </Select>

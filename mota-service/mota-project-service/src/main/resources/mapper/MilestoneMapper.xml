@@ -13,6 +13,8 @@
         <result column="progress" property="progress"/>
         <result column="task_count" property="taskCount"/>
         <result column="completed_task_count" property="completedTaskCount"/>
+        <result column="department_task_count" property="departmentTaskCount"/>
+        <result column="completed_department_task_count" property="completedDepartmentTaskCount"/>
         <result column="completed_at" property="completedAt"/>
         <result column="sort_order" property="sortOrder"/>
         <result column="created_at" property="createdAt"/>
@@ -50,6 +52,44 @@
           AND m.status = 'pending'
           AND m.target_date &lt; CURDATE()
         ORDER BY m.target_date ASC
+    </select>
+
+    <!-- 更新里程碑进度 -->
+    <update id="updateProgress">
+        UPDATE milestone
+        SET progress = #{progress}, updated_at = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <!-- 更新里程碑已完成任务数 -->
+    <update id="updateCompletedTaskCount">
+        UPDATE milestone
+        SET completed_task_count = #{completedTaskCount}, updated_at = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <!-- 更新里程碑部门任务统计 -->
+    <update id="updateDepartmentTaskStats">
+        UPDATE milestone
+        SET department_task_count = #{departmentTaskCount},
+            completed_department_task_count = #{completedDepartmentTaskCount},
+            updated_at = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <!-- 增加里程碑部门任务计数 -->
+    <update id="incrementDepartmentTaskCount">
+        UPDATE milestone
+        SET department_task_count = COALESCE(department_task_count, 0) + 1,
+            updated_at = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <!-- 计算项目下所有里程碑的平均进度 -->
+    <select id="calculateAverageProgressByProject" resultType="java.lang.Integer">
+        SELECT COALESCE(AVG(progress), 0)
+        FROM milestone
+        WHERE project_id = #{projectId} AND deleted = 0
     </select>
 
 </mapper>

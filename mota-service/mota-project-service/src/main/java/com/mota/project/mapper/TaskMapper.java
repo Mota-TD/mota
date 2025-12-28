@@ -77,4 +77,29 @@ public interface TaskMapper extends BaseMapper<Task> {
      * 查询已逾期的任务
      */
     List<Task> selectOverdueTasks();
+
+    /**
+     * 根据里程碑ID查询任务列表
+     */
+    List<Task> selectByMilestoneId(@Param("milestoneId") Long milestoneId);
+
+    /**
+     * 计算部门任务下所有执行任务的平均进度
+     */
+    Integer calculateAverageProgress(@Param("departmentTaskId") Long departmentTaskId);
+
+    /**
+     * 计算里程碑下所有执行任务的平均进度
+     */
+    Integer calculateAverageProgressByMilestone(@Param("milestoneId") Long milestoneId);
+
+    /**
+     * 统计部门任务下已完成的执行任务数量
+     */
+    Integer countCompletedByDepartmentTask(@Param("departmentTaskId") Long departmentTaskId);
+
+    /**
+     * 统计部门任务下的执行任务总数
+     */
+    Integer countByDepartmentTask(@Param("departmentTaskId") Long departmentTaskId);
 }

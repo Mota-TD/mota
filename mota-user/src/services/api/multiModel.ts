@@ -5,6 +5,305 @@ import { get, post, put, del } from '../request';
  * 实现 MM-001 到 MM-008 功能
  */
 
+// ==================== 类型定义 ====================
+
+export interface Provider {
+  id: number;
+  providerName: string;
+  providerCode: string;
+  providerType: 'international' | 'domestic';
+  apiBaseUrl: string;
+  priority: number;
+  healthStatus: 'healthy' | 'degraded' | 'unhealthy';
+  isEnabled: boolean;
+}
+
+export interface Model {
+  id: number;
+  modelName: string;
+  modelCode: string;
+  providerId: number;
+  providerName: string;
+  contextWindow: number;
+  inputPrice: number;
+  outputPrice: number;
+  supportsStreaming: boolean;
+  supportsFunctionCall: boolean;
+  supportsVision: boolean;
+  isDefault: boolean;
+  isEnabled: boolean;
+}
+
+export interface RoutingRule {
+  id: number;
+  ruleName: string;
+  ruleType: 'default' | 'user_level' | 'cost' | 'load_balance' | 'task_type';
+  priority: number;
+  targetModelId: number;
+  targetModelName: string;
+  weight: number;
+  isEnabled: boolean;
+}
+
+export interface FallbackStrategy {
+  id: number;
+  strategyName: string;
+  primaryModelId: number;
+  primaryModelName: string;
+  fallbackModelIds: number[];
+  fallbackModelNames: string[];
+  maxRetries: number;
+  retryDelayMs: number;
+  circuitBreakerEnabled: boolean;
+  circuitBreakerThreshold: number;
+  isEnabled: boolean;
+}
+
+export interface CostStatistics {
+  totalCalls: number;
+  totalCost: number;
+  avgResponseTime: number;
+  successRate: number;
+  byProvider: {
+    providerId: number;
+    providerName: string;
+    cost: number;
+    percent: number;
+  }[];
+}
+
+// ==================== Mock 数据函数 ====================
+
+/**
+ * 获取Mock提供商数据
+ */
+export function getMockProviders(): Provider[] {
+  return [
+    {
+      id: 1,
+      providerName: 'OpenAI',
+      providerCode: 'openai',
+      providerType: 'international',
+      apiBaseUrl: 'https://api.openai.com/v1',
+      priority: 100,
+      healthStatus: 'healthy',
+      isEnabled: true
+    },
+    {
+      id: 2,
+      providerName: 'Anthropic',
+      providerCode: 'anthropic',
+      providerType: 'international',
+      apiBaseUrl: 'https://api.anthropic.com/v1',
+      priority: 90,
+      healthStatus: 'healthy',
+      isEnabled: true
+    },
+    {
+      id: 3,
+      providerName: '阿里云通义',
+      providerCode: 'aliyun',
+      providerType: 'domestic',
+      apiBaseUrl: 'https://dashscope.aliyuncs.com/api/v1',
+      priority: 80,
+      healthStatus: 'healthy',
+      isEnabled: true
+    },
+    {
+      id: 4,
+      providerName: '百度文心',
+      providerCode: 'baidu',
+      providerType: 'domestic',
+      apiBaseUrl: 'https://aip.baidubce.com/rpc/2.0/ai_custom',
+      priority: 70,
+      healthStatus: 'degraded',
+      isEnabled: true
+    }
+  ];
+}
+
+/**
+ * 获取Mock模型数据
+ */
+export function getMockModels(): Model[] {
+  return [
+    {
+      id: 1,
+      modelName: 'GPT-4',
+      modelCode: 'gpt-4',
+      providerId: 1,
+      providerName: 'OpenAI',
+      contextWindow: 128000,
+      inputPrice: 0.03,
+      outputPrice: 0.06,
+      supportsStreaming: true,
+      supportsFunctionCall: true,
+      supportsVision: true,
+      isDefault: true,
+      isEnabled: true
+    },
+    {
+      id: 2,
+      modelName: 'GPT-3.5 Turbo',
+      modelCode: 'gpt-3.5-turbo',
+      providerId: 1,
+      providerName: 'OpenAI',
+      contextWindow: 16000,
+      inputPrice: 0.001,
+      outputPrice: 0.002,
+      supportsStreaming: true,
+      supportsFunctionCall: true,
+      supportsVision: false,
+      isDefault: false,
+      isEnabled: true
+    },
+    {
+      id: 3,
+      modelName: 'Claude 3 Opus',
+      modelCode: 'claude-3-opus',
+      providerId: 2,
+      providerName: 'Anthropic',
+      contextWindow: 200000,
+      inputPrice: 0.015,
+      outputPrice: 0.075,
+      supportsStreaming: true,
+      supportsFunctionCall: true,
+      supportsVision: true,
+      isDefault: false,
+      isEnabled: true
+    },
+    {
+      id: 4,
+      modelName: '通义千问-Turbo',
+      modelCode: 'qwen-turbo',
+      providerId: 3,
+      providerName: '阿里云通义',
+      contextWindow: 8000,
+      inputPrice: 0.008,
+      outputPrice: 0.012,
+      supportsStreaming: true,
+      supportsFunctionCall: true,
+      supportsVision: false,
+      isDefault: false,
+      isEnabled: true
+    },
+    {
+      id: 5,
+      modelName: '文心一言4.0',
+      modelCode: 'ernie-4.0',
+      providerId: 4,
+      providerName: '百度文心',
+      contextWindow: 8000,
+      inputPrice: 0.012,
+      outputPrice: 0.012,
+      supportsStreaming: true,
+      supportsFunctionCall: false,
+      supportsVision: false,
+      isDefault: false,
+      isEnabled: true
+    }
+  ];
+}
+
+/**
+ * 获取Mock路由规则数据
+ */
+export function getMockRoutingRules(): RoutingRule[] {
+  return [
+    {
+      id: 1,
+      ruleName: '默认路由',
+      ruleType: 'default',
+      priority: 0,
+      targetModelId: 1,
+      targetModelName: 'GPT-4',
+      weight: 100,
+      isEnabled: true
+    },
+    {
+      id: 2,
+      ruleName: 'VIP用户路由',
+      ruleType: 'user_level',
+      priority: 100,
+      targetModelId: 1,
+      targetModelName: 'GPT-4',
+      weight: 100,
+      isEnabled: true
+    },
+    {
+      id: 3,
+      ruleName: '成本优先路由',
+      ruleType: 'cost',
+      priority: 50,
+      targetModelId: 2,
+      targetModelName: 'GPT-3.5 Turbo',
+      weight: 80,
+      isEnabled: true
+    },
+    {
+      id: 4,
+      ruleName: '负载均衡路由',
+      ruleType: 'load_balance',
+      priority: 30,
+      targetModelId: 4,
+      targetModelName: '通义千问-Turbo',
+      weight: 50,
+      isEnabled: false
+    }
+  ];
+}
+
+/**
+ * 获取Mock降级策略数据
+ */
+export function getMockFallbackStrategies(): FallbackStrategy[] {
+  return [
+    {
+      id: 1,
+      strategyName: 'GPT-4降级策略',
+      primaryModelId: 1,
+      primaryModelName: 'GPT-4',
+      fallbackModelIds: [3, 2],
+      fallbackModelNames: ['Claude 3 Opus', 'GPT-3.5 Turbo'],
+      maxRetries: 3,
+      retryDelayMs: 1000,
+      circuitBreakerEnabled: true,
+      circuitBreakerThreshold: 5,
+      isEnabled: true
+    },
+    {
+      id: 2,
+      strategyName: '国内模型降级策略',
+      primaryModelId: 4,
+      primaryModelName: '通义千问-Turbo',
+      fallbackModelIds: [5],
+      fallbackModelNames: ['文心一言4.0'],
+      maxRetries: 2,
+      retryDelayMs: 500,
+      circuitBreakerEnabled: true,
+      circuitBreakerThreshold: 3,
+      isEnabled: true
+    }
+  ];
+}
+
+/**
+ * 获取Mock成本统计数据
+ */
+export function getMockCostStatistics(): CostStatistics {
+  return {
+    totalCalls: 15680,
+    totalCost: 3520.50,
+    avgResponseTime: 1250,
+    successRate: 99.2,
+    byProvider: [
+      { providerId: 1, providerName: 'OpenAI', cost: 2100.30, percent: 60 },
+      { providerId: 2, providerName: 'Anthropic', cost: 880.15, percent: 25 },
+      { providerId: 3, providerName: '阿里云通义', cost: 540.05, percent: 15 }
+    ]
+  };
+}
+
 // ==================== 提供商管理 ====================
 
 /**

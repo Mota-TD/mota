@@ -23,6 +23,7 @@ const Settings = lazy(() => import('@/pages/settings'))
 const Profile = lazy(() => import('@/pages/profile'))
 const Notifications = lazy(() => import('@/pages/notifications'))
 const ProjectDetail = lazy(() => import('@/pages/project-detail'))
+const ProjectDetailV2 = lazy(() => import('@/pages/project-detail-v2'))
 const DepartmentTaskDetail = lazy(() => import('@/pages/department-task-detail'))
 const TaskDetail = lazy(() => import('@/pages/task-detail'))
 const MyTasks = lazy(() => import('@/pages/my-tasks'))
@@ -267,6 +268,14 @@ export const routes: RouteObject[] = [
       },
       {
         path: ':id',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <ProjectDetailV2 />
+          </Suspense>
+        )
+      },
+      {
+        path: ':id/legacy',
         element: (
           <Suspense fallback={<Loading />}>
             <ProjectDetail />

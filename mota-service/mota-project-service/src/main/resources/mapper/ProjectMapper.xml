@@ -174,9 +174,16 @@
 
     <!-- 更新项目进度 -->
     <update id="updateProjectProgress">
-        UPDATE project 
+        UPDATE project
         SET progress = #{progress}, updated_at = NOW()
         WHERE id = #{projectId} AND deleted = 0
+    </update>
+
+    <!-- 更新项目进度（别名方法，用于进度同步服务） -->
+    <update id="updateProgress">
+        UPDATE project
+        SET progress = #{progress}, updated_at = NOW()
+        WHERE id = #{id} AND deleted = 0
     </update>
 
     <!-- 更新项目成员数量 -->

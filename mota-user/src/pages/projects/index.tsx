@@ -2489,7 +2489,6 @@ const Projects = () => {
           <Title level={4} className={styles.headerTitle}>项目管理</Title>
         </div>
         <Button
-          type="primary"
           icon={<PlusOutlined />}
           onClick={openCreateDrawer}
           className={styles.createBtn}

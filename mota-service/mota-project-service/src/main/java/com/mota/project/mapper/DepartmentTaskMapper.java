@@ -50,4 +50,24 @@ public interface DepartmentTaskMapper extends BaseMapper<DepartmentTask> {
      * 更新部门任务进度
      */
     int updateProgress(@Param("id") Long id, @Param("progress") Integer progress);
+
+    /**
+     * 根据里程碑ID查询部门任务列表
+     */
+    List<DepartmentTask> selectByMilestoneId(@Param("milestoneId") Long milestoneId);
+
+    /**
+     * 计算里程碑下所有部门任务的平均进度
+     */
+    Integer calculateAverageProgressByMilestone(@Param("milestoneId") Long milestoneId);
+
+    /**
+     * 统计里程碑下已完成的部门任务数量
+     */
+    Integer countCompletedByMilestone(@Param("milestoneId") Long milestoneId);
+
+    /**
+     * 统计里程碑下的部门任务总数
+     */
+    Integer countByMilestone(@Param("milestoneId") Long milestoneId);
 }

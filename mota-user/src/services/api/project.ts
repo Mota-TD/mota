@@ -55,11 +55,26 @@ export interface ProjectQueryRequest {
   sortOrder?: 'asc' | 'desc'
 }
 
+// 部门任务分配请求
+export interface DepartmentTaskAssignment {
+  departmentId: string
+  managerId?: string
+  name?: string
+  description?: string
+  priority?: string
+  startDate?: string
+  endDate?: string
+  requirePlan?: boolean
+  requireApproval?: boolean
+}
+
 // 里程碑请求
 export interface MilestoneRequest {
   name: string
   targetDate: string
   description?: string
+  assigneeIds?: string[]
+  departmentTasks?: DepartmentTaskAssignment[]
 }
 
 // 里程碑信息

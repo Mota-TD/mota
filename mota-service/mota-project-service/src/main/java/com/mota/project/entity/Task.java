@@ -27,6 +27,11 @@ public class Task extends BaseEntityDO {
     private Long projectId;
 
     /**
+     * 关联里程碑ID（可选，冗余字段便于查询）
+     */
+    private Long milestoneId;
+
+    /**
      * 任务名称
      */
     private String name;
@@ -80,6 +85,11 @@ public class Task extends BaseEntityDO {
      * 完成时间
      */
     private LocalDateTime completedAt;
+
+    /**
+     * 关联的日历事件ID
+     */
+    private Long calendarEventId;
 
     /**
      * 任务状态枚举

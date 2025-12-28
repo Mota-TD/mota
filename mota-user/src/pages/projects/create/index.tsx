@@ -51,12 +51,22 @@ const projectColors = [
   '#13c2c2', '#eb2f96', '#f5222d', '#faad14'
 ]
 
+// 部门任务分配接口
+interface DepartmentTaskItem {
+  departmentId: string | number
+  managerId?: string | number
+  name?: string
+  description?: string
+  priority?: string
+}
+
 // 里程碑接口
 interface MilestoneItem {
   id: string
   name: string
   targetDate: string
   description?: string
+  departmentTasks?: DepartmentTaskItem[]
 }
 
 /**
@@ -82,6 +92,11 @@ const CreateProject = () => {
   // 里程碑
   const [milestones, setMilestones] = useState<MilestoneItem[]>([])
   const [newMilestone, setNewMilestone] = useState({ name: '', targetDate: '', description: '' })
+  
+  // 里程碑部门任务分配弹窗
+  const [assignModalVisible, setAssignModalVisible] = useState(false)
+  const [currentMilestoneId, setCurrentMilestoneId] = useState<string | null>(null)
+  const [tempDepartmentTasks, setTempDepartmentTasks] = useState<DepartmentTaskItem[]>([])
   
   // 表单数据
   const [formData, setFormData] = useState<any>({})
@@ -216,7 +231,15 @@ const CreateProject = () => {
         milestones: milestones.map(m => ({
           name: m.name,
           targetDate: m.targetDate,
-          description: m.description
+          description: m.description,
+          departmentTasks: m.departmentTasks?.map(dt => ({
+            departmentId: String(dt.departmentId),
+            managerId: dt.managerId ? String(dt.managerId) : undefined,
+            name: dt.name,
+            description: dt.description,
+            priority: dt.priority || 'medium',
+            endDate: m.targetDate
+          }))
         }))
       })
       
@@ -292,6 +315,79 @@ const CreateProject = () => {
   // 删除里程碑
   const handleDeleteMilestone = (id: string) => {
     setMilestones(milestones.filter(m => m.id !== id))
+  }
+
+  // 打开部门任务分配弹窗
+  const handleOpenAssignModal = (milestoneId: string) => {
+    const milestone = milestones.find(m => m.id === milestoneId)
+    setCurrentMilestoneId(milestoneId)
+    setTempDepartmentTasks(milestone?.departmentTasks || [])
+    setAssignModalVisible(true)
+  }
+
+  // 切换部门任务分配
+  const handleToggleDepartmentTask = (deptId: string | number) => {
+    const exists = tempDepartmentTasks.find(dt => String(dt.departmentId) === String(deptId))
+    if (exists) {
+      setTempDepartmentTasks(tempDepartmentTasks.filter(dt => String(dt.departmentId) !== String(deptId)))
+    } else {
+      const dept = departments.find(d => String(d.id) === String(deptId))
+      setTempDepartmentTasks([...tempDepartmentTasks, {
+        departmentId: deptId,
+        managerId: dept?.managerId,
+        name: undefined,
+        priority: 'medium'
+      }])
+    }
+  }
+
+  // 更新部门任务详情
+  const handleUpdateDepartmentTask = (deptId: string | number, field: string, value: any) => {
+    setTempDepartmentTasks(tempDepartmentTasks.map(dt => {
+      if (String(dt.departmentId) === String(deptId)) {
+        return { ...dt, [field]: value }
+      }
+      return dt
+    }))
+  }
+
+  // 保存部门任务分配
+  const handleSaveAssignment = () => {
+    if (currentMilestoneId) {
+      setMilestones(milestones.map(m => {
+        if (m.id === currentMilestoneId) {
+          return { ...m, departmentTasks: tempDepartmentTasks }
+        }
+        return m
+      }))
+    }
+    setAssignModalVisible(false)
+    setCurrentMilestoneId(null)
+    setTempDepartmentTasks([])
+    message.success('部门任务分配已保存')
+  }
+
+  // 为所有里程碑快速分配所有已选部门
+  const handleQuickAssignAllDepartments = () => {
+    if (selectedDepartments.length === 0) {
+      message.warning('请先选择参与部门')
+      return
+    }
+    
+    const updatedMilestones = milestones.map(m => ({
+      ...m,
+      departmentTasks: selectedDepartments.map(deptId => {
+        const dept = departments.find(d => String(d.id) === String(deptId))
+        return {
+          departmentId: deptId,
+          managerId: dept?.managerId,
+          name: undefined,
+          priority: 'medium' as string
+        }
+      })
+    }))
+    setMilestones(updatedMilestones)
+    message.success('已为所有里程碑分配部门任务')
   }
 
   // AI生成里程碑建议
@@ -615,7 +711,7 @@ const CreateProject = () => {
               <span style={{ fontSize: 12, color: '#999', marginLeft: 8 }}>(可选)</span>
             </div>
             <p style={{ color: '#666', marginBottom: 16 }}>
-              设置项目的关键节点，帮助跟踪项目进度
+              设置项目的关键节点，并为每个里程碑分配负责部门
             </p>
             
             <div className={styles.milestoneForm}>
@@ -651,12 +747,22 @@ const CreateProject = () => {
             </div>
             
             <div style={{ marginTop: 16, marginBottom: 16 }}>
-              <Button 
-                icon={<RobotOutlined />} 
-                onClick={handleAIGenerateMilestones}
-              >
-                AI智能生成里程碑建议
-              </Button>
+              <Space>
+                <Button
+                  icon={<RobotOutlined />}
+                  onClick={handleAIGenerateMilestones}
+                >
+                  AI智能生成里程碑建议
+                </Button>
+                {milestones.length > 0 && selectedDepartments.length > 0 && (
+                  <Button
+                    icon={<ApartmentOutlined />}
+                    onClick={handleQuickAssignAllDepartments}
+                  >
+                    快速分配所有部门
+                  </Button>
+                )}
+              </Space>
             </div>
             
             {milestones.length === 0 ? (
@@ -668,9 +774,18 @@ const CreateProject = () => {
                 renderItem={(item) => (
                   <List.Item
                     actions={[
-                      <Button 
-                        type="text" 
-                        danger 
+                      <Tooltip title="分配部门任务" key="assign">
+                        <Button
+                          type="text"
+                          icon={<ApartmentOutlined />}
+                          onClick={() => handleOpenAssignModal(item.id)}
+                          style={{ color: item.departmentTasks && item.departmentTasks.length > 0 ? '#52c41a' : undefined }}
+                        />
+                      </Tooltip>,
+                      <Button
+                        key="delete"
+                        type="text"
+                        danger
                         icon={<DeleteOutlined />}
                         onClick={() => handleDeleteMilestone(item.id)}
                       />
@@ -682,19 +797,151 @@ const CreateProject = () => {
                           <FlagOutlined />
                         </div>
                       }
-                      title={item.name}
-                      description={
+                      title={
                         <Space>
-                          <CalendarOutlined />
-                          {item.targetDate}
-                          {item.description && <span>· {item.description}</span>}
+                          {item.name}
+                          {item.departmentTasks && item.departmentTasks.length > 0 && (
+                            <Tag color="blue" style={{ marginLeft: 8 }}>
+                              {item.departmentTasks.length} 个部门
+                            </Tag>
+                          )}
                         </Space>
+                      }
+                      description={
+                        <div>
+                          <Space>
+                            <CalendarOutlined />
+                            {item.targetDate}
+                            {item.description && <span>· {item.description}</span>}
+                          </Space>
+                          {item.departmentTasks && item.departmentTasks.length > 0 && (
+                            <div style={{ marginTop: 4 }}>
+                              <Space size={4} wrap>
+                                {item.departmentTasks.map(dt => {
+                                  const dept = departments.find(d => String(d.id) === String(dt.departmentId))
+                                  return (
+                                    <Tag key={String(dt.departmentId)} style={{ margin: 0 }}>
+                                      {dept?.name || '未知部门'}
+                                    </Tag>
+                                  )
+                                })}
+                              </Space>
+                            </div>
+                          )}
+                        </div>
                       }
                     />
                   </List.Item>
                 )}
               />
             )}
+            
+            {/* 部门任务分配弹窗 */}
+            <Modal
+              title="分配部门任务"
+              open={assignModalVisible}
+              onOk={handleSaveAssignment}
+              onCancel={() => {
+                setAssignModalVisible(false)
+                setCurrentMilestoneId(null)
+                setTempDepartmentTasks([])
+              }}
+              width={700}
+              okText="保存"
+              cancelText="取消"
+            >
+              <div style={{ marginBottom: 16 }}>
+                <p style={{ color: '#666' }}>
+                  选择需要参与此里程碑的部门，系统将自动为每个部门创建任务
+                </p>
+              </div>
+              
+              {selectedDepartments.length === 0 ? (
+                <Empty description="请先在第二步选择参与部门" />
+              ) : (
+                <div className={styles.departmentAssignList}>
+                  {selectedDepartments.map(deptId => {
+                    const dept = departments.find(d => String(d.id) === String(deptId))
+                    const isAssigned = tempDepartmentTasks.some(dt => String(dt.departmentId) === String(deptId))
+                    const taskDetail = tempDepartmentTasks.find(dt => String(dt.departmentId) === String(deptId))
+                    const deptUsers = users.filter(u => String(u.departmentId) === String(deptId))
+                    
+                    return (
+                      <div key={String(deptId)} className={styles.departmentAssignItem}>
+                        <div className={styles.departmentAssignHeader}>
+                          <Checkbox
+                            checked={isAssigned}
+                            onChange={() => handleToggleDepartmentTask(deptId)}
+                          >
+                            <strong>{dept?.name}</strong>
+                          </Checkbox>
+                          {dept?.managerName && (
+                            <span style={{ color: '#999', fontSize: 12 }}>
+                              负责人: {dept.managerName}
+                            </span>
+                          )}
+                        </div>
+                        
+                        {isAssigned && (
+                          <div className={styles.departmentAssignDetail}>
+                            <Row gutter={12}>
+                              <Col span={12}>
+                                <div style={{ marginBottom: 8 }}>
+                                  <span style={{ fontSize: 12, color: '#666' }}>任务负责人</span>
+                                </div>
+                                <Select
+                                  size="small"
+                                  style={{ width: '100%' }}
+                                  placeholder="选择负责人"
+                                  value={taskDetail?.managerId}
+                                  onChange={(value) => handleUpdateDepartmentTask(deptId, 'managerId', value)}
+                                  allowClear
+                                >
+                                  {deptUsers.map(user => (
+                                    <Select.Option key={user.id} value={user.id}>
+                                      {user.nickname || user.username}
+                                    </Select.Option>
+                                  ))}
+                                </Select>
+                              </Col>
+                              <Col span={12}>
+                                <div style={{ marginBottom: 8 }}>
+                                  <span style={{ fontSize: 12, color: '#666' }}>优先级</span>
+                                </div>
+                                <Select
+                                  size="small"
+                                  style={{ width: '100%' }}
+                                  value={taskDetail?.priority || 'medium'}
+                                  onChange={(value) => handleUpdateDepartmentTask(deptId, 'priority', value)}
+                                >
+                                  <Select.Option value="low">低</Select.Option>
+                                  <Select.Option value="medium">中</Select.Option>
+                                  <Select.Option value="high">高</Select.Option>
+                                  <Select.Option value="urgent">紧急</Select.Option>
+                                </Select>
+                              </Col>
+                            </Row>
+                            <Row gutter={12} style={{ marginTop: 8 }}>
+                              <Col span={24}>
+                                <div style={{ marginBottom: 8 }}>
+                                  <span style={{ fontSize: 12, color: '#666' }}>任务名称（可选，默认使用里程碑名称）</span>
+                                </div>
+                                <Input
+                                  size="small"
+                                  placeholder="自定义任务名称"
+                                  value={taskDetail?.name}
+                                  onChange={(e) => handleUpdateDepartmentTask(deptId, 'name', e.target.value)}
+                                />
+                              </Col>
+                            </Row>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </Modal>
           </div>
         )
       

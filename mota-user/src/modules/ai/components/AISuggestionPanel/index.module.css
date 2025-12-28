@@ -1,0 +1,97 @@
+/**
+ * AI 建议展示面板样式
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.suggestionCard {
+  border-radius: 8px;
+}
+
+.suggestionCard :global(.ant-card-head) {
+  border-bottom: 1px solid var(--ant-border-color-split, #f0f0f0);
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 32px 0;
+}
+
+/* 进度预测样式 */
+.predictionContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.progressRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.progressItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.progressArrow {
+  font-size: 24px;
+  color: var(--ant-text-color-secondary, #8c8c8c);
+}
+
+.predictionInfo {
+  padding: 16px;
+  background: var(--ant-background-color-light, #fafafa);
+  border-radius: 8px;
+}
+
+.factors {
+  margin-top: 12px;
+}
+
+.factorTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* 列表项样式 */
+.container :global(.ant-list-item) {
+  padding: 12px 0;
+}
+
+.container :global(.ant-list-item-meta-title) {
+  margin-bottom: 4px;
+}
+
+/* 折叠面板样式 */
+.container :global(.ant-collapse-ghost > .ant-collapse-item) {
+  border-bottom: 1px solid var(--ant-border-color-split, #f0f0f0);
+}
+
+.container :global(.ant-collapse-ghost > .ant-collapse-item:last-child) {
+  border-bottom: none;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .progressRow {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .progressArrow {
+    transform: rotate(90deg);
+  }
+}

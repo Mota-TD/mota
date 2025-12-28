@@ -1,0 +1,455 @@
+/* TaskKanban 组件样式 */
+
+.kanbanContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 500px;
+  background: var(--bg-color, #f5f5f5);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.kanbanHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #fff;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.kanbanTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.kanbanActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kanbanBody {
+  display: flex;
+  flex: 1;
+  overflow-x: auto;
+  padding: 16px;
+  gap: 16px;
+}
+
+/* 看板列 */
+.column {
+  display: flex;
+  flex-direction: column;
+  min-width: 280px;
+  max-width: 320px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.columnHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.columnTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.columnIndicator {
+  width: 4px;
+  height: 16px;
+  border-radius: 2px;
+}
+
+.columnName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.columnCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #8c8c8c;
+  background: #f5f5f5;
+  border-radius: 10px;
+}
+
+.columnCount.exceeded {
+  color: #ff4d4f;
+  background: #fff1f0;
+}
+
+.columnActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.columnBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  min-height: 200px;
+}
+
+.columnBody.dragOver {
+  background: #e6f7ff;
+}
+
+.columnFooter {
+  padding: 8px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.addTaskBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 8px;
+  color: #8c8c8c;
+  background: transparent;
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.addTaskBtn:hover {
+  color: #1890ff;
+  border-color: #1890ff;
+  background: #e6f7ff;
+}
+
+/* 看板卡片 */
+.card {
+  padding: 12px;
+  margin-bottom: 8px;
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.card:hover {
+  border-color: #1890ff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.15);
+}
+
+.card.dragging {
+  opacity: 0.5;
+  transform: rotate(3deg);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.cardTitle {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  color: #262626;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.cardPriority {
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.priorityDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.priorityDot.urgent {
+  background: #ff4d4f;
+}
+
+.priorityDot.high {
+  background: #fa8c16;
+}
+
+.priorityDot.medium {
+  background: #1890ff;
+}
+
+.priorityDot.low {
+  background: #52c41a;
+}
+
+.cardBody {
+  margin-bottom: 8px;
+}
+
+.cardDescription {
+  font-size: 12px;
+  color: #8c8c8c;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cardProgress {
+  margin-bottom: 8px;
+}
+
+.progressBar {
+  height: 4px;
+  background: #f0f0f0;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: #1890ff;
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+
+.progressText {
+  font-size: 11px;
+  color: #8c8c8c;
+  margin-top: 4px;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cardAssignee {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.assigneeAvatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #1890ff;
+  color: #fff;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.assigneeName {
+  font-size: 12px;
+  color: #595959;
+}
+
+.cardDueDate {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.cardDueDate.overdue {
+  color: #ff4d4f;
+}
+
+.cardDueDate.soon {
+  color: #fa8c16;
+}
+
+.cardTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.cardTag {
+  padding: 2px 6px;
+  font-size: 11px;
+  color: #595959;
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+/* 空状态 */
+.emptyColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  color: #bfbfbf;
+}
+
+.emptyIcon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.emptyText {
+  font-size: 12px;
+}
+
+/* 加载状态 */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 300px;
+}
+
+/* WIP 限制警告 */
+.wipWarning {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  margin: 8px;
+  font-size: 12px;
+  color: #fa8c16;
+  background: #fffbe6;
+  border: 1px solid #ffe58f;
+  border-radius: 4px;
+}
+
+/* 折叠状态 */
+.columnCollapsed {
+  min-width: 48px;
+  max-width: 48px;
+}
+
+.columnCollapsed .columnHeader {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  padding: 16px 8px;
+}
+
+.columnCollapsed .columnBody,
+.columnCollapsed .columnFooter {
+  display: none;
+}
+
+/* 拖拽占位符 */
+.dropPlaceholder {
+  height: 80px;
+  margin-bottom: 8px;
+  background: #e6f7ff;
+  border: 2px dashed #1890ff;
+  border-radius: 6px;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .kanbanBody {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .column {
+    min-width: 260px;
+    max-width: 280px;
+  }
+
+  .card {
+    padding: 10px;
+  }
+}
+
+/* 暗色主题 */
+:global(.dark) .kanbanContainer {
+  background: #1f1f1f;
+}
+
+:global(.dark) .kanbanHeader {
+  background: #262626;
+  border-color: #303030;
+}
+
+:global(.dark) .kanbanTitle {
+  color: #fff;
+}
+
+:global(.dark) .column {
+  background: #262626;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+:global(.dark) .columnHeader {
+  border-color: #303030;
+}
+
+:global(.dark) .columnName {
+  color: #fff;
+}
+
+:global(.dark) .columnCount {
+  color: #8c8c8c;
+  background: #303030;
+}
+
+:global(.dark) .card {
+  background: #1f1f1f;
+  border-color: #303030;
+}
+
+:global(.dark) .card:hover {
+  border-color: #177ddc;
+}
+
+:global(.dark) .cardTitle {
+  color: #fff;
+}
+
+:global(.dark) .cardDescription {
+  color: #8c8c8c;
+}
+
+:global(.dark) .progressBar {
+  background: #303030;
+}
+
+:global(.dark) .addTaskBtn {
+  color: #8c8c8c;
+  border-color: #434343;
+}
+
+:global(.dark) .addTaskBtn:hover {
+  color: #177ddc;
+  border-color: #177ddc;
+  background: rgba(23, 125, 220, 0.1);
+}

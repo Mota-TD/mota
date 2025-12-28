@@ -1,10 +1,10 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Card, Typography, Spin, Button, Modal, Form, Input, Select, message, Tabs, List, Tag, Tooltip, Popconfirm, Badge, Switch, Empty } from 'antd'
-import { 
-  CalendarOutlined, 
-  PlusOutlined, 
-  SettingOutlined, 
-  SyncOutlined, 
+import { Card, Typography, Spin, Button, Modal, Form, Input, Select, message, Tabs, List, Tag, Tooltip, Popconfirm, Badge, Switch, Empty, Progress } from 'antd'
+import {
+  CalendarOutlined,
+  PlusOutlined,
+  SettingOutlined,
+  SyncOutlined,
   LinkOutlined,
   DeleteOutlined,
   EditOutlined,
@@ -17,14 +17,20 @@ import {
   UserOutlined,
   TeamOutlined,
   ProjectOutlined,
-  CheckSquareOutlined
+  CheckSquareOutlined,
+  ClockCircleOutlined,
+  FlagOutlined,
+  RightOutlined
 } from '@ant-design/icons'
+import { useNavigate } from 'react-router-dom'
+import dayjs from 'dayjs'
 import { useAuthStore } from '@/store/auth'
 import Calendar from '@/components/Calendar'
 import styles from './index.module.css'
 import {
   CalendarType,
   CalendarConfig,
+  CalendarEvent,
   CalendarSubscription,
   CreateSubscriptionRequest,
   getUserCalendarConfigs,
@@ -38,9 +44,11 @@ import {
   syncSubscription,
   exportCalendarAsICal,
   getCalendarSubscriptionUrl,
+  getTaskCalendarEvents,
   CALENDAR_TYPE_COLORS,
   CALENDAR_TYPE_LABELS,
-  COLOR_PRESETS
+  COLOR_PRESETS,
+  EVENT_TYPE_LABELS
 } from '@/services/api/calendarEvent'
 
 const { Title, Text, Paragraph } = Typography
@@ -54,6 +62,7 @@ const { Option } = Select
  */
 const CalendarPage = () => {
   const { user } = useAuthStore()
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [settingsVisible, setSettingsVisible] = useState(false)
   const [subscriptionModalVisible, setSubscriptionModalVisible] = useState(false)
@@ -61,6 +70,7 @@ const CalendarPage = () => {
   const [subscriptions, setSubscriptions] = useState<CalendarSubscription[]>([])
   const [editingSubscription, setEditingSubscription] = useState<CalendarSubscription | null>(null)
   const [subscriptionUrl, setSubscriptionUrl] = useState<string>('')
+  const [upcomingTasks, setUpcomingTasks] = useState<CalendarEvent[]>([])
   const [form] = Form.useForm()
 
   // 加载日历配置
@@ -101,13 +111,33 @@ const CalendarPage = () => {
     }
   }, [user?.id])
 
+  // 加载即将到来的任务
+  const loadUpcomingTasks = useCallback(async () => {
+    if (!user?.id) return
+    try {
+      const now = new Date()
+      const endDate = new Date()
+      endDate.setDate(endDate.getDate() + 7) // 获取未来7天的任务
+      const tasks = await getTaskCalendarEvents(user.id, now.toISOString(), endDate.toISOString())
+      // 按截止日期排序
+      const sortedTasks = tasks.sort((a, b) =>
+        new Date(a.endTime).getTime() - new Date(b.endTime).getTime()
+      )
+      setUpcomingTasks(sortedTasks.slice(0, 5)) // 只显示前5个
+    } catch (error) {
+      console.error('Failed to load upcoming tasks:', error)
+      setUpcomingTasks([])
+    }
+  }, [user?.id])
+
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 500)
     loadCalendarConfigs()
     loadSubscriptions()
     loadSubscriptionUrl()
+    loadUpcomingTasks()
     return () => clearTimeout(timer)
-  }, [loadCalendarConfigs, loadSubscriptions, loadSubscriptionUrl])
+  }, [loadCalendarConfigs, loadSubscriptions, loadSubscriptionUrl, loadUpcomingTasks])
 
   // 切换日历可见性
   const handleToggleCalendarVisibility = async (config: CalendarConfig) => {
@@ -236,6 +266,34 @@ const CalendarPage = () => {
     }
   }
 
+  // 获取任务优先级颜色
+  const getPriorityColor = (event: CalendarEvent) => {
+    // 根据事件类型或颜色判断优先级
+    if (event.color === '#ef4444') return 'red' // 高优先级
+    if (event.color === '#f59e0b') return 'orange' // 中优先级
+    return 'blue' // 低优先级
+  }
+
+  // 计算剩余天数
+  const getDaysRemaining = (endTime: string) => {
+    const end = dayjs(endTime)
+    const now = dayjs()
+    const days = end.diff(now, 'day')
+    if (days < 0) return { text: '已逾期', color: 'red' }
+    if (days === 0) return { text: '今天截止', color: 'orange' }
+    if (days === 1) return { text: '明天截止', color: 'gold' }
+    return { text: `${days}天后`, color: 'blue' }
+  }
+
+  // 处理任务点击
+  const handleTaskClick = (event: CalendarEvent) => {
+    if (event.taskId) {
+      navigate(`/task/${event.taskId}`)
+    } else if (event.projectId) {
+      navigate(`/projects/${event.projectId}`)
+    }
+  }
+
   // 获取订阅状态标签
   const getSubscriptionStatusTag = (status: string) => {
     switch (status) {
@@ -357,16 +415,65 @@ const CalendarPage = () => {
               )}
             </div>
 
+            {/* 即将到来的任务截止日期 */}
+            <div className={styles.sidebarSection}>
+              <div className={styles.sectionTitle}>
+                <span><ClockCircleOutlined style={{ marginRight: 4 }} />任务截止日期</span>
+              </div>
+              {upcomingTasks.length > 0 ? (
+                <List
+                  size="small"
+                  dataSource={upcomingTasks}
+                  renderItem={task => {
+                    const remaining = getDaysRemaining(task.endTime)
+                    return (
+                      <List.Item
+                        className={styles.taskItem}
+                        onClick={() => handleTaskClick(task)}
+                      >
+                        <div className={styles.taskItemContent}>
+                          <div className={styles.taskInfo}>
+                            <div className={styles.taskTitle}>
+                              <FlagOutlined style={{ color: CALENDAR_TYPE_COLORS.task, marginRight: 4 }} />
+                              {task.title}
+                            </div>
+                            <div className={styles.taskMeta}>
+                              {task.projectName && (
+                                <span className={styles.projectTag}>
+                                  <ProjectOutlined style={{ marginRight: 2 }} />
+                                  {task.projectName}
+                                </span>
+                              )}
+                              <Tag color={remaining.color} style={{ marginLeft: 4 }}>
+                                {remaining.text}
+                              </Tag>
+                            </div>
+                          </div>
+                          <RightOutlined className={styles.taskArrow} />
+                        </div>
+                      </List.Item>
+                    )
+                  }}
+                />
+              ) : (
+                <Empty
+                  image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  description="暂无即将到期的任务"
+                  className={styles.emptyTasks}
+                />
+              )}
+            </div>
+
             <div className={styles.sidebarSection}>
               <div className={styles.sectionTitle}>订阅我的日历</div>
               <div className={styles.subscriptionUrlBox}>
-                <Input 
-                  value={subscriptionUrl} 
-                  readOnly 
+                <Input
+                  value={subscriptionUrl}
+                  readOnly
                   size="small"
                   suffix={
                     <Tooltip title="复制链接">
-                      <CopyOutlined 
+                      <CopyOutlined
                         className={styles.copyIcon}
                         onClick={handleCopySubscriptionUrl}
                       />

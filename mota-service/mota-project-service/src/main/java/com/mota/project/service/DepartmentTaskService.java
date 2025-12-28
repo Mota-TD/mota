@@ -50,6 +50,16 @@ public interface DepartmentTaskService extends IService<DepartmentTask> {
     );
 
     /**
+     * 根据负责人ID分页查询部门任务
+     */
+    IPage<DepartmentTask> pageDepartmentTasksByManagerId(
+            Page<DepartmentTask> page,
+            Long managerId,
+            String status,
+            String priority
+    );
+
+    /**
      * 更新部门任务状态
      */
     boolean updateStatus(Long id, String status);

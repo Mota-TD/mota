@@ -2,11 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.mota.project.mapper.TaskMapper">
 
-    <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.mota.project.entity.Task">
+    <!-- 执行任务结果映射 -->
+    <resultMap id="TaskResultMap" type="com.mota.project.entity.Task">
         <id column="id" property="id"/>
         <result column="department_task_id" property="departmentTaskId"/>
         <result column="project_id" property="projectId"/>
+        <result column="milestone_id" property="milestoneId"/>
         <result column="name" property="name"/>
         <result column="description" property="description"/>
         <result column="assignee_id" property="assigneeId"/>
@@ -18,132 +19,166 @@
         <result column="progress_note" property="progressNote"/>
         <result column="sort_order" property="sortOrder"/>
         <result column="completed_at" property="completedAt"/>
+        <result column="calendar_event_id" property="calendarEventId"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
         <result column="deleted" property="deleted"/>
+        <result column="version" property="version"/>
     </resultMap>
 
-    <!-- 通用查询结果列 -->
-    <sql id="Base_Column_List">
-        id, department_task_id, project_id, name, description, assignee_id, status, priority,
-        start_date, end_date, progress, progress_note, sort_order, completed_at, created_at, updated_at, deleted
-    </sql>
-
     <!-- 根据部门任务ID查询执行任务列表 -->
-    <select id="selectByDepartmentTaskId" resultMap="BaseResultMap">
-        SELECT <include refid="Base_Column_List"/>
-        FROM task
-        WHERE department_task_id = #{departmentTaskId}
-        AND deleted = 0
-        ORDER BY sort_order ASC, created_at ASC
+    <select id="selectByDepartmentTaskId" resultMap="TaskResultMap">
+        SELECT t.*
+        FROM task t
+        WHERE t.department_task_id = #{departmentTaskId}
+          AND t.deleted = 0
+        ORDER BY t.sort_order ASC, t.created_at DESC
     </select>
 
     <!-- 根据项目ID查询执行任务列表 -->
-    <select id="selectByProjectId" resultMap="BaseResultMap">
-        SELECT <include refid="Base_Column_List"/>
-        FROM task
-        WHERE project_id = #{projectId}
-        AND deleted = 0
-        ORDER BY created_at DESC
+    <select id="selectByProjectId" resultMap="TaskResultMap">
+        SELECT t.*
+        FROM task t
+        WHERE t.project_id = #{projectId}
+          AND t.deleted = 0
+        ORDER BY t.created_at DESC
+    </select>
+
+    <!-- 根据里程碑ID查询任务列表 -->
+    <select id="selectByMilestoneId" resultMap="TaskResultMap">
+        SELECT t.*
+        FROM task t
+        WHERE t.milestone_id = #{milestoneId}
+          AND t.deleted = 0
+        ORDER BY t.created_at DESC
     </select>
 
     <!-- 根据执行人ID查询任务列表 -->
-    <select id="selectByAssigneeId" resultMap="BaseResultMap">
-        SELECT <include refid="Base_Column_List"/>
-        FROM task
-        WHERE assignee_id = #{assigneeId}
-        AND deleted = 0
-        ORDER BY created_at DESC
+    <select id="selectByAssigneeId" resultMap="TaskResultMap">
+        SELECT t.*
+        FROM task t
+        WHERE t.assignee_id = #{assigneeId}
+          AND t.deleted = 0
+        ORDER BY t.end_date ASC, t.priority DESC
     </select>
 
     <!-- 分页查询执行任务 -->
-    <select id="selectPageByCondition" resultMap="BaseResultMap">
-        SELECT <include refid="Base_Column_List"/>
-        FROM task
-        WHERE deleted = 0
+    <select id="selectPageByCondition" resultMap="TaskResultMap">
+        SELECT t.*
+        FROM task t
+        WHERE t.deleted = 0
         <if test="projectId != null">
-            AND project_id = #{projectId}
+            AND t.project_id = #{projectId}
         </if>
         <if test="departmentTaskId != null">
-            AND department_task_id = #{departmentTaskId}
+            AND t.department_task_id = #{departmentTaskId}
         </if>
         <if test="assigneeId != null">
-            AND assignee_id = #{assigneeId}
+            AND t.assignee_id = #{assigneeId}
         </if>
         <if test="status != null and status != ''">
-            AND status = #{status}
+            AND t.status = #{status}
         </if>
         <if test="priority != null and priority != ''">
-            AND priority = #{priority}
+            AND t.priority = #{priority}
         </if>
-        ORDER BY created_at DESC
+        ORDER BY t.created_at DESC
     </select>
 
     <!-- 统计部门任务下各状态的执行任务数量 -->
-    <select id="countByDepartmentTaskIdGroupByStatus" resultType="java.util.Map">
-        SELECT status, COUNT(*) as count
-        FROM task
-        WHERE department_task_id = #{departmentTaskId}
-        AND deleted = 0
-        GROUP BY status
+    <select id="countByDepartmentTaskIdGroupByStatus" resultType="map">
+        SELECT t.status, COUNT(*) as count
+        FROM task t
+        WHERE t.department_task_id = #{departmentTaskId}
+          AND t.deleted = 0
+        GROUP BY t.status
     </select>
 
     <!-- 统计项目下各状态的执行任务数量 -->
-    <select id="countByProjectIdGroupByStatus" resultType="java.util.Map">
-        SELECT status, COUNT(*) as count
-        FROM task
-        WHERE project_id = #{projectId}
-        AND deleted = 0
-        GROUP BY status
+    <select id="countByProjectIdGroupByStatus" resultType="map">
+        SELECT t.status, COUNT(*) as count
+        FROM task t
+        WHERE t.project_id = #{projectId}
+          AND t.deleted = 0
+        GROUP BY t.status
     </select>
 
     <!-- 更新任务进度 -->
     <update id="updateProgress">
-        UPDATE task
-        SET progress = #{progress}
-        <if test="progressNote != null">
-            , progress_note = #{progressNote}
-        </if>
-        , updated_at = NOW()
-        WHERE id = #{id}
+        UPDATE task 
+        SET progress = #{progress}, 
+            progress_note = #{progressNote},
+            updated_at = NOW()
+        WHERE id = #{id} AND deleted = 0
     </update>
 
     <!-- 更新任务状态 -->
     <update id="updateStatus">
-        UPDATE task
+        UPDATE task 
         SET status = #{status}, updated_at = NOW()
-        WHERE id = #{id}
+        WHERE id = #{id} AND deleted = 0
     </update>
 
     <!-- 查询用户待办任务列表 -->
-    <select id="selectTodoListByUserId" resultMap="BaseResultMap">
-        SELECT <include refid="Base_Column_List"/>
-        FROM task
-        WHERE assignee_id = #{userId}
-        AND deleted = 0
-        AND status IN ('pending', 'in_progress')
-        ORDER BY end_date ASC, priority DESC
+    <select id="selectTodoListByUserId" resultMap="TaskResultMap">
+        SELECT t.*
+        FROM task t
+        WHERE t.assignee_id = #{userId}
+          AND t.deleted = 0
+          AND t.status IN ('pending', 'in_progress')
+        ORDER BY t.end_date ASC, t.priority DESC
     </select>
 
     <!-- 查询即将到期的任务 -->
-    <select id="selectUpcomingTasks" resultMap="BaseResultMap">
-        SELECT <include refid="Base_Column_List"/>
-        FROM task
-        WHERE deleted = 0
-        AND status IN ('pending', 'in_progress')
-        AND end_date >= CURDATE()
-        AND end_date &lt;= DATE_ADD(CURDATE(), INTERVAL #{days} DAY)
-        ORDER BY end_date ASC
+    <select id="selectUpcomingTasks" resultMap="TaskResultMap">
+        SELECT t.*
+        FROM task t
+        WHERE t.deleted = 0
+          AND t.status IN ('pending', 'in_progress')
+          AND t.end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL #{days} DAY)
+        ORDER BY t.end_date ASC
     </select>
 
     <!-- 查询已逾期的任务 -->
-    <select id="selectOverdueTasks" resultMap="BaseResultMap">
-        SELECT <include refid="Base_Column_List"/>
+    <select id="selectOverdueTasks" resultMap="TaskResultMap">
+        SELECT t.*
+        FROM task t
+        WHERE t.deleted = 0
+          AND t.status IN ('pending', 'in_progress')
+          AND t.end_date &lt; CURDATE()
+        ORDER BY t.end_date ASC
+    </select>
+
+    <!-- 计算部门任务下所有执行任务的平均进度 -->
+    <select id="calculateAverageProgress" resultType="java.lang.Integer">
+        SELECT COALESCE(AVG(progress), 0)
         FROM task
-        WHERE deleted = 0
-        AND status IN ('pending', 'in_progress')
-        AND end_date &lt; CURDATE()
-        ORDER BY end_date ASC
+        WHERE department_task_id = #{departmentTaskId} AND deleted = 0
+    </select>
+
+    <!-- 计算里程碑下所有执行任务的平均进度 -->
+    <select id="calculateAverageProgressByMilestone" resultType="java.lang.Integer">
+        SELECT COALESCE(AVG(progress), 0)
+        FROM task
+        WHERE milestone_id = #{milestoneId} AND deleted = 0
+    </select>
+
+    <!-- 统计部门任务下已完成的执行任务数量 -->
+    <select id="countCompletedByDepartmentTask" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM task
+        WHERE department_task_id = #{departmentTaskId} 
+          AND deleted = 0 
+          AND status = 'completed'
+    </select>
+
+    <!-- 统计部门任务下的执行任务总数 -->
+    <select id="countByDepartmentTask" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM task
+        WHERE department_task_id = #{departmentTaskId} AND deleted = 0
     </select>
 
 </mapper>

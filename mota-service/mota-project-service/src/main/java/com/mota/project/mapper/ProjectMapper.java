@@ -51,6 +51,11 @@ public interface ProjectMapper extends BaseMapper<Project> {
     int updateProjectProgress(@Param("projectId") Long projectId, @Param("progress") Integer progress);
 
     /**
+     * 更新项目进度（别名方法，用于进度同步服务）
+     */
+    int updateProgress(@Param("id") Long id, @Param("progress") Integer progress);
+
+    /**
      * 更新项目成员数量
      */
     int updateMemberCount(@Param("projectId") Long projectId);

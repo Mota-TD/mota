@@ -26,6 +26,7 @@ export enum Priority {
 export interface DepartmentTask {
   id: string
   projectId: string
+  milestoneId?: string
   departmentId: string
   managerId: string
   name: string
@@ -37,12 +38,14 @@ export interface DepartmentTask {
   progress: number
   requirePlan: boolean
   requireApproval: boolean
+  calendarEventId?: string
   createdAt?: string
   updatedAt?: string
   // 关联信息
   departmentName?: string
   managerName?: string
   projectName?: string
+  milestoneName?: string
   taskCount?: number
   completedTaskCount?: number
 }
@@ -56,6 +59,7 @@ export interface DepartmentTaskListResponse {
 // 创建部门任务请求
 export interface CreateDepartmentTaskRequest {
   projectId: string
+  milestoneId?: string
   departmentId: string
   managerId: string
   name: string
@@ -177,6 +181,17 @@ export function updateDepartmentTaskProgress(id: string | number, progress: numb
  */
 export function getDepartmentTaskStatsByProject(projectId: number | string): Promise<StatusCount[]> {
   return get<StatusCount[]>(`/api/v1/department-tasks/stats/project/${projectId}`)
+}
+
+/**
+ * 获取当前用户的部门任务（我的部门任务）
+ */
+export async function getMyDepartmentTasks(): Promise<DepartmentTaskListResponse> {
+  const response = await get<{ records: DepartmentTask[]; total: number }>('/api/v1/department-tasks/my')
+  return {
+    list: response?.records || [],
+    total: response?.total || 0
+  }
 }
 
 /**
