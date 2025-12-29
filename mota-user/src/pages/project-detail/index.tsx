@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   Button,
@@ -25,7 +25,10 @@ import {
   Card,
   Popconfirm,
   List,
-  Typography
+  Typography,
+  Badge,
+  notification,
+  FloatButton
 } from 'antd'
 import {
   SettingOutlined,
@@ -56,7 +59,11 @@ import {
   CheckOutlined,
   LineChartOutlined,
   AppstoreOutlined,
-  AuditOutlined
+  AuditOutlined,
+  MessageOutlined,
+  BellOutlined,
+  WifiOutlined,
+  CommentOutlined
 } from '@ant-design/icons'
 import { RobotOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
@@ -76,7 +83,14 @@ import type { GanttTask, GanttDependency } from '@/components/GanttChart'
 import BurndownChart from '@/components/BurndownChart'
 import KanbanBoard from '@/components/KanbanBoard'
 import WorkPlanApproval from '@/components/WorkPlanApproval'
+import RealTimeCollaboration from '@/components/RealTimeCollaboration'
 import * as taskDependencyApi from '@/services/api/taskDependency'
+import { useAssignmentRecommendation, assignmentUtils } from '@/modules/ai/hooks/useAssignmentRecommendation'
+import type { AssignmentRecommendation } from '@/modules/ai/types'
+// 实时协作服务
+import wsClient from '@/services/websocket/wsClient'
+import notificationService from '@/services/notification/notificationService'
+import messageStorage from '@/services/storage/messageStorage'
 import styles from './index.module.css'
 
 const { TextArea } = Input
@@ -108,8 +122,9 @@ const PROJECT_COLORS = [
 ]
 
 /**
- * 项目详情页面 - V2.0
+ * 项目详情页面 - V3.0
  * 支持完整项目生命周期管理：创建、修改、删除、详情、管理、归档
+ * 集成实时协作功能：WebSocket通信、实时通知、消息存储
  */
 const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>()
@@ -127,6 +142,14 @@ const ProjectDetail = () => {
   const [activities, setActivities] = useState<any[]>([])
   const [taskDependencies, setTaskDependencies] = useState<any[]>([])
   const [criticalPath, setCriticalPath] = useState<number[]>([])
+  
+  // 实时协作相关状态
+  const [isCollaborationVisible, setIsCollaborationVisible] = useState(false)
+  const [onlineUsers, setOnlineUsers] = useState<any[]>([])
+  const [wsConnected, setWsConnected] = useState(false)
+  const [notifications, setNotifications] = useState<any[]>([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const currentUserRef = useRef<any>(null)
   
   // 创建部门任务抽屉
   const [createDeptTaskDrawerVisible, setCreateDeptTaskDrawerVisible] = useState(false)
@@ -149,12 +172,135 @@ const ProjectDetail = () => {
   const [editLoading, setEditLoading] = useState(false)
   const [editForm] = Form.useForm()
   const [editProjectColor, setEditProjectColor] = useState<string>('#2b7de9')
+  
+  // AI智能分工推荐
+  const [aiRecommendModalVisible, setAiRecommendModalVisible] = useState(false)
+  const [currentDeptTaskId, setCurrentDeptTaskId] = useState<string | null>(null)
+  const [selectedRecommendation, setSelectedRecommendation] = useState<AssignmentRecommendation | null>(null)
+  
+  // 初始化AI分工推荐Hook
+  const assignmentRecommendation = useAssignmentRecommendation({
+    onSuccess: (recommendations) => {
+      console.log('AI推荐获取成功:', recommendations)
+    },
+    onError: (error) => {
+      console.error('AI推荐获取失败:', error)
+    }
+  })
+  
+  // 计算分类后的推荐结果
+  const sortedRecommendations = assignmentUtils.sortByMatchScore(assignmentRecommendation.recommendations)
+  const availableRecommendations = assignmentUtils.filterAvailableMembers(sortedRecommendations)
+  const busyRecommendations = sortedRecommendations.filter(r => r.availability === 'busy')
+  const overloadedRecommendations = sortedRecommendations.filter(r => r.availability === 'overloaded')
+  const bestMatch = availableRecommendations.length > 0 ? availableRecommendations[0] : sortedRecommendations[0]
 
   useEffect(() => {
     if (id) {
       loadProjectData(id)
+      initializeRealTimeCollaboration(id)
+    }
+    
+    return () => {
+      cleanupRealTimeCollaboration()
     }
   }, [id])
+  
+  /**
+   * 初始化实时协作功能
+   */
+  const initializeRealTimeCollaboration = useCallback((projectId: string) => {
+    const currentUser = {
+      id: 'current_user_id',
+      name: '当前用户',
+      avatar: '/avatar.jpg',
+      status: 'online' as const
+    }
+    currentUserRef.current = currentUser
+    
+    notificationService.setCurrentUser(currentUser.id)
+    
+    const handleWsConnected = () => {
+      setWsConnected(true)
+      wsClient.userOnline(currentUser)
+    }
+    
+    const handleWsDisconnected = () => {
+      setWsConnected(false)
+    }
+    
+    const handleUserOnline = (user: any) => {
+      setOnlineUsers(prev => {
+        const existing = prev.find(u => u.id === user.id)
+        if (existing) {
+          return prev.map(u => u.id === user.id ? { ...u, ...user } : u)
+        }
+        return [...prev, user]
+      })
+    }
+    
+    const handleUserOffline = (user: any) => {
+      setOnlineUsers(prev => prev.filter(u => u.id !== user.userId))
+    }
+    
+    const handleNewMessage = async (message: any) => {
+      await messageStorage.storeMessage({
+        id: message.id || `msg_${Date.now()}_${Math.random()}`,
+        content: message.content,
+        senderId: message.sender.id,
+        senderName: message.sender.name,
+        senderAvatar: message.sender.avatar,
+        projectId: projectId,
+        timestamp: message.timestamp,
+        type: 'text',
+        mentions: message.mentions
+      })
+    }
+    
+    const handleActivityUpdate = async (activity: any) => {
+      await messageStorage.storeActivity({
+        id: `activity_${Date.now()}_${Math.random()}`,
+        userId: activity.user.id,
+        userName: activity.user.name,
+        userAvatar: activity.user.avatar,
+        projectId: projectId,
+        action: activity.action,
+        target: activity.target,
+        targetId: activity.targetId,
+        targetName: activity.metadata?.taskName || activity.metadata?.projectName,
+        timestamp: activity.timestamp,
+        description: `${activity.user.name} ${activity.action} ${activity.target}`,
+        metadata: activity.metadata
+      })
+      
+      setActivities(prev => [activity, ...prev.slice(0, 19)])
+    }
+    
+    wsClient.on('connected', handleWsConnected)
+    wsClient.on('disconnected', handleWsDisconnected)
+    wsClient.on('userOnline', handleUserOnline)
+    wsClient.on('userOffline', handleUserOffline)
+    wsClient.on('newMessage', handleNewMessage)
+    wsClient.on('activityUpdate', handleActivityUpdate)
+    
+    if (wsClient.getConnectionState().isConnected) {
+      handleWsConnected()
+    }
+  }, [project?.name])
+  
+  /**
+   * 清理实时协作功能
+   */
+  const cleanupRealTimeCollaboration = useCallback(() => {
+    wsClient.userOffline()
+    wsClient.removeAllListeners()
+    notificationService.removeAllListeners()
+    
+    setOnlineUsers([])
+    setWsConnected(false)
+    setNotifications([])
+    setUnreadCount(0)
+  }, [])
 
   const loadProjectData = useCallback(async (projectId: string) => {
     setLoading(true)
@@ -591,30 +737,42 @@ const ProjectDetail = () => {
     {
       title: '操作',
       key: 'action',
-      width: 120,
+      width: 180,
       render: (_: any, record: DepartmentTask) => (
         <Space>
+          <Tooltip title="AI智能分工">
+            <Button
+              type="text"
+              size="small"
+              icon={<RobotOutlined />}
+              onClick={() => handleOpenAiRecommend(record.id)}
+              disabled={isArchived}
+              style={{ color: '#52c41a' }}
+            />
+          </Tooltip>
           <Tooltip title="查看详情">
-            <Button 
-              type="text" 
-              size="small" 
+            <Button
+              type="text"
+              size="small"
               icon={<EyeOutlined />}
               onClick={() => navigate(`/department-tasks/${record.id}`)}
             />
           </Tooltip>
           <Tooltip title="编辑">
-            <Button 
-              type="text" 
-              size="small" 
+            <Button
+              type="text"
+              size="small"
               icon={<EditOutlined />}
+              disabled={isArchived}
             />
           </Tooltip>
           <Tooltip title="删除">
-            <Button 
-              type="text" 
-              size="small" 
+            <Button
+              type="text"
+              size="small"
               danger
               icon={<DeleteOutlined />}
+              disabled={isArchived}
             />
           </Tooltip>
         </Space>
@@ -715,6 +873,65 @@ const ProjectDetail = () => {
       message.error('创建失败，请重试')
     } finally {
       setCreateDeptTaskLoading(false)
+    }
+  }
+  
+  // 打开AI分工推荐弹窗
+  const handleOpenAiRecommend = async (taskId: string) => {
+    setCurrentDeptTaskId(taskId)
+    setAiRecommendModalVisible(true)
+    
+    try {
+      // 获取当前部门任务信息
+      const deptTask = departmentTasks.find(t => t.id === taskId)
+      if (!deptTask) {
+        message.error('任务信息不存在')
+        return
+      }
+      
+      // 构造团队成员信息
+      const teamMembers = users.map(user => ({
+        id: user.id.toString(),
+        name: user.name,
+        department: departments.find(d => d.id === user.departmentId)?.name || '未分配',
+        currentWorkload: Math.floor(Math.random() * 100), // 模拟工作负载
+        skills: user.skills || ['通用技能'], // 如果用户有技能信息
+      }))
+      
+      // 获取AI推荐
+      await assignmentRecommendation.generateRecommendations({
+        taskId: Number(taskId),
+        taskName: deptTask.name,
+        taskDescription: deptTask.description || '',
+        teamMembers
+      })
+    } catch (error) {
+      console.error('获取AI分工推荐失败:', error)
+    }
+  }
+  
+  // 应用AI推荐分配
+  const handleApplyAiRecommendation = async () => {
+    if (!selectedRecommendation || !currentDeptTaskId) {
+      message.warning('请选择一个推荐人员')
+      return
+    }
+    
+    try {
+      // 更新部门任务负责人
+      await departmentTaskApi.updateDepartmentTask(Number(currentDeptTaskId), {
+        managerId: selectedRecommendation.userId
+      })
+      
+      message.success(`已分配给 ${selectedRecommendation.userName}`)
+      setAiRecommendModalVisible(false)
+      setCurrentDeptTaskId(null)
+      setSelectedRecommendation(null)
+      assignmentRecommendation.clearRecommendations()
+      loadProjectData(id!)
+    } catch (error) {
+      console.error('分配任务失败:', error)
+      message.error('分配失败，请重试')
     }
   }
 
@@ -1814,6 +2031,330 @@ const ProjectDetail = () => {
           已选择 <Text strong>{selectedMemberIds.length}</Text> 名成员
         </div>
       </Drawer>
+      
+      {/* AI智能分工推荐弹窗 */}
+      <Modal
+        title={
+          <Space>
+            <RobotOutlined style={{ color: '#52c41a' }} />
+            AI智能分工推荐
+          </Space>
+        }
+        open={aiRecommendModalVisible}
+        onCancel={() => {
+          setAiRecommendModalVisible(false)
+          setCurrentDeptTaskId(null)
+          setSelectedRecommendation(null)
+          assignmentRecommendation.clearRecommendations()
+        }}
+        width={800}
+        footer={[
+          <Button key="cancel" onClick={() => {
+            setAiRecommendModalVisible(false)
+            setCurrentDeptTaskId(null)
+            setSelectedRecommendation(null)
+            assignmentRecommendation.clearRecommendations()
+          }}>
+            取消
+          </Button>,
+          <Button
+            key="apply"
+            type="primary"
+            disabled={!selectedRecommendation}
+            onClick={handleApplyAiRecommendation}
+          >
+            应用推荐（{selectedRecommendation?.userName || '请选择'}）
+          </Button>
+        ]}
+      >
+        {assignmentRecommendation.loading ? (
+          <div style={{ textAlign: 'center', padding: '40px 0' }}>
+            <Spin size="large" />
+            <p style={{ marginTop: 16, color: '#666' }}>AI正在分析团队成员的工作负载和技能匹配度...</p>
+          </div>
+        ) : assignmentRecommendation.error ? (
+          <div style={{ textAlign: 'center', padding: '40px 0' }}>
+            <Empty
+              description={assignmentRecommendation.error}
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+            />
+          </div>
+        ) : assignmentRecommendation.recommendations.length > 0 ? (
+          <div>
+            {bestMatch && (
+              <div style={{
+                marginBottom: 24,
+                padding: 16,
+                backgroundColor: '#f6ffed',
+                border: '1px solid #b7eb8f',
+                borderRadius: 8
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+                  <CheckCircleOutlined style={{ color: '#52c41a', marginRight: 8 }} />
+                  <strong>最佳匹配推荐</strong>
+                  <Tag color="green" style={{ marginLeft: 8 }}>
+                    匹配度 {bestMatch.matchScore}%
+                  </Tag>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <Avatar
+                    src={bestMatch.userAvatar}
+                    style={{ marginRight: 12 }}
+                  >
+                    {bestMatch.userName.charAt(0)}
+                  </Avatar>
+                  <div>
+                    <div style={{ fontWeight: 600 }}>{bestMatch.userName}</div>
+                    <div style={{ color: '#666', fontSize: 12 }}>
+                      当前工作负载: {bestMatch.currentWorkload}%
+                    </div>
+                  </div>
+                </div>
+                <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
+                  推荐理由: {bestMatch.reason}
+                </div>
+              </div>
+            )}
+            
+            <div style={{ marginBottom: 16 }}>
+              <h4>所有推荐人员</h4>
+              <p style={{ color: '#666', fontSize: 12 }}>点击选择要分配的人员</p>
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {availableRecommendations.map(recommendation => (
+                <div
+                  key={recommendation.userId}
+                  style={{
+                    padding: 16,
+                    border: selectedRecommendation?.userId === recommendation.userId ? '2px solid #1890ff' : '1px solid #d9d9d9',
+                    borderRadius: 8,
+                    cursor: 'pointer',
+                    backgroundColor: selectedRecommendation?.userId === recommendation.userId ? '#f6ffed' : '#fff'
+                  }}
+                  onClick={() => setSelectedRecommendation(recommendation)}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+                      <Avatar src={recommendation.userAvatar} style={{ marginRight: 12 }}>
+                        {recommendation.userName.charAt(0)}
+                      </Avatar>
+                      <div>
+                        <div style={{ fontWeight: 600, marginBottom: 4 }}>
+                          {recommendation.userName}
+                          {recommendation === bestMatch && (
+                            <Tag color="gold" style={{ marginLeft: 8 }}>最佳匹配</Tag>
+                          )}
+                        </div>
+                        <div style={{ fontSize: 12, color: '#666', marginBottom: 4 }}>
+                          匹配度: {recommendation.matchScore}% | 工作负载: {recommendation.currentWorkload}%
+                        </div>
+                        <div style={{ fontSize: 12, color: '#666' }}>
+                          {recommendation.reason}
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <Tag color={
+                        recommendation.availability === 'available' ? 'green' :
+                        recommendation.availability === 'busy' ? 'orange' : 'red'
+                      }>
+                        {recommendation.availability === 'available' ? '空闲' :
+                         recommendation.availability === 'busy' ? '忙碌' : '超负荷'}
+                      </Tag>
+                      <Progress
+                        type="circle"
+                        percent={recommendation.currentWorkload}
+                        size={40}
+                        strokeColor={
+                          recommendation.currentWorkload < 50 ? '#52c41a' :
+                          recommendation.currentWorkload < 80 ? '#faad14' : '#ff4d4f'
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              {busyRecommendations.length > 0 && (
+                <>
+                  <div style={{ marginTop: 16, marginBottom: 8, color: '#faad14', fontWeight: 600 }}>
+                    忙碌人员（不推荐分配）
+                  </div>
+                  {busyRecommendations.map(recommendation => (
+                    <div
+                      key={recommendation.userId}
+                      style={{
+                        padding: 12,
+                        border: '1px solid #ffe7ba',
+                        borderRadius: 8,
+                        backgroundColor: '#fffbe6',
+                        opacity: 0.7
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <Avatar src={recommendation.userAvatar} size="small" style={{ marginRight: 8 }}>
+                            {recommendation.userName.charAt(0)}
+                          </Avatar>
+                          <span>{recommendation.userName}</span>
+                          <Tag color="orange" style={{ marginLeft: 8 }}>忙碌</Tag>
+                        </div>
+                        <span style={{ fontSize: 12, color: '#999' }}>
+                          工作负载: {recommendation.currentWorkload}%
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+              
+              {overloadedRecommendations.length > 0 && (
+                <>
+                  <div style={{ marginTop: 16, marginBottom: 8, color: '#ff4d4f', fontWeight: 600 }}>
+                    超负荷人员（强烈不推荐）
+                  </div>
+                  {overloadedRecommendations.map(recommendation => (
+                    <div
+                      key={recommendation.userId}
+                      style={{
+                        padding: 12,
+                        border: '1px solid #ffccc7',
+                        borderRadius: 8,
+                        backgroundColor: '#fff2f0',
+                        opacity: 0.5
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <Avatar src={recommendation.userAvatar} size="small" style={{ marginRight: 8 }}>
+                            {recommendation.userName.charAt(0)}
+                          </Avatar>
+                          <span>{recommendation.userName}</span>
+                          <Tag color="red" style={{ marginLeft: 8 }}>超负荷</Tag>
+                        </div>
+                        <span style={{ fontSize: 12, color: '#999' }}>
+                          工作负载: {recommendation.currentWorkload}%
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+          </div>
+        ) : (
+          <Empty description="暂无AI推荐" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+        )}
+      </Modal>
+
+      {/* 实时协作浮动按钮组 */}
+      <div style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 1000 }}>
+        <Space direction="vertical" size="middle">
+          {/* 连接状态指示器 */}
+          <Tooltip title={wsConnected ? '实时连接已建立' : '连接已断开'}>
+            <div
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: '50%',
+                backgroundColor: wsConnected ? '#52c41a' : '#ff4d4f',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+              }}
+            >
+              <WifiOutlined style={{ color: 'white', fontSize: 16 }} />
+            </div>
+          </Tooltip>
+
+          {/* 在线用户数量 */}
+          {onlineUsers.length > 0 && (
+            <Tooltip title={`${onlineUsers.length} 人在线`}>
+              <Badge count={onlineUsers.length} showZero>
+                <div
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: '50%',
+                    backgroundColor: '#1890ff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <UserOutlined style={{ color: 'white', fontSize: 16 }} />
+                </div>
+              </Badge>
+            </Tooltip>
+          )}
+
+          {/* 通知按钮 */}
+          <Tooltip title="通知中心">
+            <Badge count={unreadCount} showZero={false}>
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: '50%',
+                  backgroundColor: '#fa8c16',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                  cursor: 'pointer'
+                }}
+                onClick={() => setUnreadCount(0)}
+              >
+                <BellOutlined style={{ color: 'white', fontSize: 16 }} />
+              </div>
+            </Badge>
+          </Tooltip>
+
+          {/* 实时协作面板按钮 */}
+          <Tooltip title="打开协作面板">
+            <FloatButton
+              icon={<CommentOutlined />}
+              type="primary"
+              style={{
+                position: 'static',
+                width: 48,
+                height: 48
+              }}
+              onClick={() => setIsCollaborationVisible(!isCollaborationVisible)}
+            />
+          </Tooltip>
+        </Space>
+      </div>
+
+      {/* 实时协作面板 */}
+      {isCollaborationVisible && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: 100,
+            right: 24,
+            width: 380,
+            height: 500,
+            backgroundColor: 'white',
+            borderRadius: 8,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+            border: '1px solid #d9d9d9',
+            zIndex: 1001,
+            overflow: 'hidden'
+          }}
+        >
+          <RealTimeCollaboration
+            projectId={Number(id!)}
+            visible={isCollaborationVisible}
+            onClose={() => setIsCollaborationVisible(false)}
+            currentUserId={Number(currentUserRef.current?.id || 1)}
+          />
+        </div>
+      )}
     </div>
   )
 }

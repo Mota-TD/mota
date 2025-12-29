@@ -1,0 +1,425 @@
+/* Wiki协作编辑器样式 */
+.container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f5f5f5;
+}
+
+.toolbar {
+  flex: 0 0 auto;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.titleInput {
+  font-size: 18px;
+  font-weight: 600;
+  min-width: 300px;
+}
+
+.titleInput input {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.titleInput input:focus {
+  border: 1px solid #1890ff !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+.editorArea {
+  flex: 1;
+  overflow: hidden;
+}
+
+.editorCard {
+  height: 100%;
+  position: relative;
+}
+
+.editorCard .ant-card-body {
+  height: 100%;
+  padding: 16px;
+  position: relative;
+}
+
+.editor {
+  width: 100%;
+  height: 100%;
+  border: none;
+  resize: none;
+  font-size: 14px;
+  line-height: 1.6;
+  font-family: 'SF Mono', 'Consolas', 'Liberation Mono', 'Menlo', monospace;
+}
+
+.editor:focus {
+  border: none;
+  box-shadow: none;
+}
+
+/* 协作光标 */
+.collaboratorCursor {
+  position: absolute;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.cursorLine {
+  width: 2px;
+  height: 20px;
+  background: #1890ff;
+  border-radius: 1px;
+  animation: blink 1s infinite;
+}
+
+.cursorLabel {
+  position: absolute;
+  top: -24px;
+  left: -5px;
+  background: #1890ff;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.cursorLabel::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 8px;
+  border: 4px solid transparent;
+  border-top-color: #1890ff;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* 推荐面板 */
+.recommendationItem {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.recommendationItem:hover {
+  background: #f0f8ff;
+  transform: translateY(-1px);
+}
+
+.recommendationItem .ant-list-item-meta-title {
+  margin-bottom: 4px;
+}
+
+.recommendationItem .ant-progress {
+  margin: 0;
+}
+
+/* 评论系统 */
+.commentItem {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 12px 0;
+}
+
+.commentItem:last-child {
+  border-bottom: none;
+}
+
+.commentSelection {
+  background: #f6f8fa;
+  border-left: 3px solid #1890ff;
+  padding: 4px 8px;
+  margin-top: 6px;
+  border-radius: 0 4px 4px 0;
+  font-style: italic;
+  font-size: 12px;
+  color: #666;
+}
+
+.addComment {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* 协作者状态 */
+.collaboratorStatus {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.statusIndicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.statusIndicator.online {
+  background: #52c41a;
+  box-shadow: 0 0 4px rgba(82, 196, 26, 0.5);
+}
+
+.statusIndicator.away {
+  background: #faad14;
+}
+
+.statusIndicator.offline {
+  background: #d9d9d9;
+}
+
+/* 同步状态 */
+.syncStatus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.syncStatus.synced {
+  color: #52c41a;
+}
+
+.syncStatus.syncing {
+  color: #1890ff;
+}
+
+.syncStatus.conflict {
+  color: #faad14;
+}
+
+.syncStatus.offline {
+  color: #ff4d4f;
+}
+
+/* 版本历史 */
+.versionItem {
+  padding: 12px;
+  border-radius: 6px;
+  transition: background 0.3s ease;
+}
+
+.versionItem:hover {
+  background: #f5f5f5;
+}
+
+.versionMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.versionActions {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.versionItem:hover .versionActions {
+  opacity: 1;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .toolbar {
+    padding: 8px;
+  }
+  
+  .toolbar .ant-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .titleInput {
+    min-width: 100%;
+  }
+  
+  .editorArea .ant-row {
+    flex-direction: column;
+  }
+  
+  .editorArea .ant-col {
+    width: 100% !important;
+  }
+  
+  .editor {
+    min-height: 300px;
+  }
+  
+  .cursorLabel {
+    display: none; /* 移动端隐藏光标标签 */
+  }
+}
+
+/* 暗色主题适配 */
+@media (prefers-color-scheme: dark) {
+  .container {
+    background: #1f1f1f;
+  }
+  
+  .titleInput input {
+    background: transparent;
+    color: #fff;
+  }
+  
+  .editor {
+    background: #1e1e1e;
+    color: #d4d4d4;
+  }
+  
+  .collaboratorCursor .cursorLine {
+    background: #569cd6;
+  }
+  
+  .collaboratorCursor .cursorLabel {
+    background: #569cd6;
+  }
+  
+  .recommendationItem:hover {
+    background: #2d2d30;
+  }
+  
+  .commentSelection {
+    background: #2d2d30;
+    border-left-color: #569cd6;
+    color: #cccccc;
+  }
+  
+  .syncStatus {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  .versionItem:hover {
+    background: #2d2d30;
+  }
+}
+
+/* 滚动条美化 */
+.editor::-webkit-scrollbar {
+  width: 8px;
+}
+
+.editor::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.editor::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.editor::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 协作高亮效果 */
+.collaborationHighlight {
+  position: relative;
+  background: rgba(24, 144, 255, 0.1);
+  border-radius: 2px;
+  animation: highlight 2s ease-out;
+}
+
+@keyframes highlight {
+  0% {
+    background: rgba(24, 144, 255, 0.3);
+  }
+  100% {
+    background: rgba(24, 144, 255, 0.1);
+  }
+}
+
+/* 加载状态 */
+.loadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.savingIndicator {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+/* 文档大纲 */
+.documentOutline {
+  position: sticky;
+  top: 0;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.outlineItem {
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  margin: 2px 0;
+}
+
+.outlineItem:hover {
+  background: #f0f8ff;
+}
+
+.outlineItem.active {
+  background: #e6f7ff;
+  border-left: 3px solid #1890ff;
+}
+
+.outlineLevel1 { margin-left: 0; font-weight: 600; }
+.outlineLevel2 { margin-left: 16px; }
+.outlineLevel3 { margin-left: 32px; }
+.outlineLevel4 { margin-left: 48px; }
+
+/* 快捷工具栏 */
+.quickToolbar {
+  position: fixed;
+  top: 50%;
+  right: 24px;
+  transform: translateY(-50%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.quickToolbar:hover {
+  opacity: 1;
+}
+
+.quickToolbar .ant-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}

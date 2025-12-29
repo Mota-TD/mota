@@ -8,6 +8,8 @@ import { devtools } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
 import * as taskApi from '@/services/api/task'
 import * as departmentTaskApi from '@/services/api/departmentTask'
+import * as projectApi from '@/services/api/project'
+import * as milestoneApi from '@/services/api/milestone'
 import type {
   Task,
   DepartmentTask,
@@ -23,6 +25,7 @@ import {
   TaskPriority,
   DepartmentTaskStatus,
 } from '../types'
+import { emitSyncEvent } from '@/store/syncManager'
 
 // 本地筛选状态接口
 interface TaskFilters {
@@ -82,6 +85,12 @@ interface TaskState {
   updateTaskProgress: (id: string, progress: number, note?: string) => Promise<void>
   completeTask: (id: string) => Promise<void>
   assignTask: (id: string, assigneeId: string) => Promise<void>
+  batchUpdateTaskStatus: (taskIds: string[], status: TaskStatus) => Promise<void>
+  
+  // 级联更新
+  updateCascadingProgress: (departmentTaskId: string) => Promise<void>
+  updateMilestoneProgressCascade: (milestoneId: string, projectId: string) => Promise<void>
+  updateProjectProgressCascade: (projectId: string) => Promise<void>
   
   // 我的任务
   fetchMyTasks: () => Promise<void>
@@ -257,6 +266,9 @@ export const useTaskStore = create<TaskState>()(
             const task = state.departmentTasks.find((t: DepartmentTask) => t.id === id)
             if (task) {
               task.progress = progress
+              
+              // 触发同步事件
+              emitSyncEvent.departmentTaskUpdated(id, task.projectId, task.milestoneId)
             }
             if (state.currentDepartmentTask?.id === id) {
               state.currentDepartmentTask.progress = progress
@@ -388,11 +400,31 @@ export const useTaskStore = create<TaskState>()(
           const task = state.tasks.find((t: Task) => t.id === id)
           if (task) {
             task.status = status
+            // 如果完成任务，自动设置进度为100%
+            if (status === TaskStatus.COMPLETED) {
+              task.progress = 100
+              task.completedAt = new Date().toISOString()
+            }
           }
         })
         
         try {
           await taskApi.updateTaskStatus(id, status as taskApi.TaskStatus)
+          
+          // 触发同步事件
+          if (originalTask) {
+            await emitSyncEvent.taskStatusChanged(
+              id,
+              status,
+              originalTask.departmentTaskId,
+              originalTask.projectId
+            )
+          }
+          
+          // 级联更新：更新部门任务进度
+          if (originalTask?.departmentTaskId) {
+            await get().updateCascadingProgress(originalTask.departmentTaskId)
+          }
         } catch (error: unknown) {
           // 回滚
           if (originalTask) {
@@ -400,6 +432,8 @@ export const useTaskStore = create<TaskState>()(
               const task = state.tasks.find((t: Task) => t.id === id)
               if (task) {
                 task.status = originalTask.status
+                task.progress = originalTask.progress
+                task.completedAt = originalTask.completedAt
               }
             })
           }
@@ -562,6 +596,166 @@ export const useTaskStore = create<TaskState>()(
       
       reset: () => {
         set(initialState)
+      },
+      
+      // ==================== 级联更新机制 ====================
+      
+      /**
+       * 级联更新进度：执行任务 → 部门任务 → 里程碑 → 项目
+       */
+      updateCascadingProgress: async (departmentTaskId: string) => {
+        try {
+          const { tasks, departmentTasks } = get()
+          
+          // 1. 计算部门任务进度
+          const relatedTasks = tasks.filter((t: Task) => t.departmentTaskId === departmentTaskId)
+          if (relatedTasks.length > 0) {
+            const totalProgress = relatedTasks.reduce((sum, task) => sum + (task.progress || 0), 0)
+            const avgProgress = Math.round(totalProgress / relatedTasks.length)
+            
+            // 更新部门任务进度
+            await get().updateDepartmentTaskProgress(departmentTaskId, avgProgress)
+            
+            // 2. 获取部门任务信息，继续级联更新
+            const departmentTask = departmentTasks.find((dt: DepartmentTask) => dt.id === departmentTaskId)
+            if (departmentTask?.milestoneId) {
+              await get().updateMilestoneProgressCascade(departmentTask.milestoneId, departmentTask.projectId)
+            } else if (departmentTask?.projectId) {
+              await get().updateProjectProgressCascade(departmentTask.projectId)
+            }
+          }
+        } catch (error) {
+          console.error('级联更新进度失败:', error)
+        }
+      },
+      
+      /**
+       * 更新里程碑进度并级联到项目
+       */
+      updateMilestoneProgressCascade: async (milestoneId: string, projectId: string) => {
+        try {
+          const { departmentTasks } = get()
+          
+          // 计算里程碑下所有部门任务的平均进度
+          const milestoneTasks = departmentTasks.filter((dt: DepartmentTask) => dt.milestoneId === milestoneId)
+          if (milestoneTasks.length > 0) {
+            const totalProgress = milestoneTasks.reduce((sum, task) => sum + (task.progress || 0), 0)
+            const avgProgress = Math.round(totalProgress / milestoneTasks.length)
+            
+            // 更新里程碑进度
+            await milestoneApi.updateMilestoneProgress(milestoneId, avgProgress)
+            
+            // 如果进度达到100%，自动完成里程碑
+            if (avgProgress >= 100) {
+              await milestoneApi.completeMilestone(milestoneId)
+              
+              // 触发里程碑完成同步事件
+              await emitSyncEvent.milestoneCompleted(milestoneId, projectId)
+            }
+            
+            // 继续级联更新项目进度
+            await get().updateProjectProgressCascade(projectId)
+          }
+        } catch (error) {
+          console.error('更新里程碑进度失败:', error)
+        }
+      },
+      
+      /**
+       * 更新项目整体进度
+       */
+      updateProjectProgressCascade: async (projectId: string) => {
+        try {
+          const { departmentTasks } = get()
+          
+          // 计算项目下所有部门任务的平均进度
+          const projectTasks = departmentTasks.filter((dt: DepartmentTask) => dt.projectId === projectId)
+          if (projectTasks.length > 0) {
+            const totalProgress = projectTasks.reduce((sum, task) => sum + (task.progress || 0), 0)
+            const avgProgress = Math.round(totalProgress / projectTasks.length)
+            
+            // 更新项目进度
+            await projectApi.updateProjectProgress(projectId, avgProgress)
+            
+            // 如果项目进度达到100%，可以考虑自动完成项目（需要业务规则确认）
+            if (avgProgress >= 100) {
+              // 检查是否所有关键里程碑都已完成
+              const projectMilestones = await projectApi.getProjectMilestones(projectId)
+              const allMilestonesCompleted = projectMilestones.every((m: any) => m.status === 'completed')
+              
+              if (allMilestonesCompleted && projectTasks.every((dt: DepartmentTask) => dt.status === 'completed')) {
+                // 如果所有里程碑和部门任务都完成，可以考虑自动完成项目
+                await projectApi.updateProjectStatus(projectId, 'completed')
+              }
+            }
+          }
+        } catch (error) {
+          console.error('更新项目进度失败:', error)
+        }
+      },
+      
+      /**
+       * 批量更新任务状态（带级联更新）
+       */
+      batchUpdateTaskStatus: async (taskIds: string[], status: TaskStatus) => {
+        const { tasks } = get()
+        const originalTasks = new Map()
+        
+        // 保存原始状态
+        taskIds.forEach(id => {
+          const task = tasks.find((t: Task) => t.id === id)
+          if (task) {
+            originalTasks.set(id, { ...task })
+          }
+        })
+        
+        // 乐观更新所有任务
+        set((state) => {
+          taskIds.forEach(id => {
+            const task = state.tasks.find((t: Task) => t.id === id)
+            if (task) {
+              task.status = status
+              if (status === TaskStatus.COMPLETED) {
+                task.progress = 100
+                task.completedAt = new Date().toISOString()
+              }
+            }
+          })
+        })
+        
+        try {
+          // 批量更新API调用
+          await Promise.all(taskIds.map(id => taskApi.updateTaskStatus(id, status as taskApi.TaskStatus)))
+          
+          // 收集需要级联更新的部门任务ID
+          const departmentTaskIds = new Set<string>()
+          taskIds.forEach(id => {
+            const originalTask = originalTasks.get(id)
+            if (originalTask?.departmentTaskId) {
+              departmentTaskIds.add(originalTask.departmentTaskId)
+            }
+          })
+          
+          // 级联更新所有相关部门任务
+          for (const deptTaskId of departmentTaskIds) {
+            await get().updateCascadingProgress(deptTaskId)
+          }
+          
+        } catch (error: unknown) {
+          // 批量回滚
+          set((state) => {
+            taskIds.forEach(id => {
+              const task = state.tasks.find((t: Task) => t.id === id)
+              const originalTask = originalTasks.get(id)
+              if (task && originalTask) {
+                Object.assign(task, originalTask)
+              }
+            })
+          })
+          const errorMessage = error instanceof Error ? error.message : '批量更新状态失败'
+          set({ error: errorMessage })
+          throw error
+        }
       }
     })),
     { name: 'TaskStore' }

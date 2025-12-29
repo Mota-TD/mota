@@ -1,0 +1,441 @@
+/* 知识管理控制面板样式 */
+.container {
+  padding: 24px;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+.header {
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.header .ant-card-body {
+  padding: 32px;
+}
+
+.header h3 {
+  color: #fff !important;
+  margin-bottom: 8px;
+}
+
+.header .ant-typography {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.tabs {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.tabs .ant-tabs-tab {
+  padding: 16px 24px;
+  font-weight: 500;
+}
+
+.tabs .ant-tabs-content-holder {
+  padding: 24px;
+}
+
+/* 概览页面样式 */
+.overview {
+  padding: 0;
+}
+
+.statsRow {
+  margin-bottom: 24px;
+}
+
+.statsRow .ant-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.statsRow .ant-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.statsRow .ant-statistic {
+  text-align: center;
+}
+
+.statsRow .ant-statistic-title {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.statsRow .ant-statistic-content {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.categoryItem {
+  margin-bottom: 16px;
+}
+
+.categoryHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.categoryHeader span:first-child {
+  color: #333;
+}
+
+.categoryHeader span:last-child {
+  color: #666;
+  font-size: 12px;
+}
+
+/* 文档管理页面样式 */
+.documents {
+  padding: 0;
+}
+
+.filterCard {
+  margin-bottom: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.filterCard .ant-card-body {
+  padding: 16px 24px;
+}
+
+.documentTitle {
+  font-weight: 500;
+  color: #1890ff;
+  cursor: pointer;
+}
+
+.documentTitle:hover {
+  text-decoration: underline;
+}
+
+/* 知识图谱样式 */
+.knowledgeGraph {
+  padding: 0;
+}
+
+.graphContainer {
+  height: 400px;
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+  
+  .header .ant-card-body {
+    padding: 24px 16px;
+  }
+  
+  .tabs .ant-tabs-content-holder {
+    padding: 16px;
+  }
+  
+  .filterCard .ant-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .filterCard .ant-col {
+    width: 100% !important;
+  }
+  
+  .statsRow .ant-col {
+    margin-bottom: 16px;
+  }
+  
+  .tabs .ant-tabs-tab {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 576px) {
+  .container {
+    padding: 12px;
+  }
+  
+  .header .ant-card-body {
+    padding: 20px 12px;
+  }
+  
+  .tabs .ant-tabs-content-holder {
+    padding: 12px;
+  }
+  
+  .statsRow .ant-statistic-content {
+    font-size: 20px;
+  }
+}
+
+/* 暗色主题适配 */
+@media (prefers-color-scheme: dark) {
+  .container {
+    background: #1f1f1f;
+  }
+  
+  .tabs {
+    background: #2f2f2f;
+  }
+  
+  .filterCard {
+    background: #2f2f2f;
+    border-color: #404040;
+  }
+  
+  .statsRow .ant-card {
+    background: #2f2f2f;
+    border-color: #404040;
+  }
+  
+  .graphContainer {
+    background: #2a2a2a;
+    border-color: #404040;
+  }
+  
+  .categoryHeader span:first-child {
+    color: #fff;
+  }
+  
+  .categoryHeader span:last-child {
+    color: #ccc;
+  }
+  
+  .documentTitle {
+    color: #69c0ff;
+  }
+}
+
+/* 加载状态 */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+}
+
+/* 空状态 */
+.empty {
+  padding: 48px;
+  text-align: center;
+}
+
+.empty .ant-empty-description {
+  color: #999;
+  font-size: 14px;
+}
+
+/* 动画效果 */
+.fadeIn {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 表格样式 */
+.documents .ant-table {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.documents .ant-table-thead > tr > th {
+  background: #fafafa;
+  border-bottom: 1px solid #f0f0f0;
+  font-weight: 600;
+  color: #333;
+}
+
+.documents .ant-table-tbody > tr:hover > td {
+  background: #f5f5f5;
+}
+
+.documents .ant-table-tbody > tr > td {
+  border-bottom: 1px solid #f5f5f5;
+  padding: 16px;
+}
+
+/* 标签样式优化 */
+.ant-tag {
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 20px;
+  margin: 2px;
+}
+
+/* 统计卡片图标颜色 */
+.statsRow .ant-statistic-content-prefix {
+  margin-right: 8px;
+}
+
+/* 操作按钮样式 */
+.filterCard .ant-btn {
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.filterCard .ant-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.filterCard .ant-btn-primary:hover {
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  transform: translateY(-1px);
+}
+
+/* 活动列表样式 */
+.overview .ant-list-item {
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.overview .ant-list-item:last-child {
+  border-bottom: none;
+}
+
+.overview .ant-list-item-meta-title {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.overview .ant-list-item-meta-description {
+  color: #666;
+  font-size: 12px;
+}
+
+/* 进度条样式 */
+.categoryItem .ant-progress-bg {
+  border-radius: 4px;
+}
+
+.categoryItem .ant-progress-outer {
+  margin-bottom: 0;
+}
+
+/* 知识图谱节点样式 */
+.knowledgeGraph .ant-list-item {
+  padding: 16px;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.knowledgeGraph .ant-list-item:hover {
+  border-color: #1890ff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);
+}
+
+.knowledgeGraph .ant-list-item-meta-title {
+  font-weight: 600;
+  color: #1890ff;
+}
+
+.knowledgeGraph .ant-list-item-meta-description {
+  margin-top: 8px;
+}
+
+/* 搜索框样式 */
+.filterCard .ant-input-search {
+  border-radius: 8px;
+}
+
+.filterCard .ant-input-search-button {
+  border-radius: 0 8px 8px 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
+}
+
+/* 选择器样式 */
+.filterCard .ant-select {
+  border-radius: 6px;
+}
+
+.filterCard .ant-select-selector {
+  border-radius: 6px;
+}
+
+/* 模态框样式调整 */
+.ant-modal-content {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.ant-modal-header {
+  background: #fafafa;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 20px 24px;
+}
+
+.ant-modal-title {
+  font-weight: 600;
+  color: #333;
+}
+
+.ant-modal-body {
+  padding: 24px;
+}
+
+/* 表单样式 */
+.ant-form-item-label > label {
+  font-weight: 500;
+  color: #333;
+}
+
+.ant-input,
+.ant-select-selector {
+  border-radius: 6px;
+  border: 1px solid #d9d9d9;
+}
+
+.ant-input:focus,
+.ant-input-focused,
+.ant-select-focused .ant-select-selector {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+/* 头像组样式 */
+.documents .ant-avatar-group {
+  display: flex;
+  align-items: center;
+}
+
+.documents .ant-avatar {
+  border: 2px solid white;
+  margin-left: -8px;
+}
+
+.documents .ant-avatar:first-child {
+  margin-left: 0;
+}

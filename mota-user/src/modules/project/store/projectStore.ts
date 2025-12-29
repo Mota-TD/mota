@@ -17,6 +17,7 @@ import type {
   CreateProjectRequest,
   UpdateProjectRequest
 } from '../types'
+import { emitSyncEvent } from '@/store/syncManager'
 
 // ==================== 状态接口 ====================
 
@@ -237,6 +238,10 @@ export const useProjectStore = create<ProjectState>()(
           
           try {
             await projectApi.updateProject(id, data)
+            
+            // 触发同步事件
+            await emitSyncEvent.projectUpdated(id, data)
+            
             // 更新成功后刷新列表
             await get().fetchProjects()
           } catch (error: unknown) {
@@ -253,6 +258,10 @@ export const useProjectStore = create<ProjectState>()(
         deleteProject: async (id) => {
           try {
             await projectApi.deleteProject(id)
+            
+            // 触发同步事件
+            await emitSyncEvent.projectDeleted(id)
+            
             set((state) => {
               state.projects = state.projects.filter((p: Project) => p.id !== id)
               if (state.currentProject?.id === id) {
@@ -407,6 +416,12 @@ export const useProjectStore = create<ProjectState>()(
         addMembers: async (projectId, userIds, role) => {
           try {
             await projectApi.addProjectMembers(projectId, userIds, role)
+            
+            // 触发同步事件
+            userIds.forEach(userId => {
+              emitSyncEvent.memberAdded(projectId, userId)
+            })
+            
             await get().fetchProjectMembers(projectId)
           } catch (error: unknown) {
             const errorMessage = error instanceof Error ? error.message : '批量添加成员失败'
@@ -418,6 +433,10 @@ export const useProjectStore = create<ProjectState>()(
         removeMember: async (projectId, userId) => {
           try {
             await projectApi.removeProjectMember(projectId, userId)
+            
+            // 触发同步事件
+            await emitSyncEvent.memberRemoved(projectId, userId)
+            
             set((state) => {
               state.projectMembers = state.projectMembers.filter((m: ProjectMember) => m.userId !== userId)
             })

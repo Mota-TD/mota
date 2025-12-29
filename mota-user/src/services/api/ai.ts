@@ -360,6 +360,7 @@ export interface TaskDecompositionResponse {
   suggestions: TaskDecompositionSuggestion[]
   totalEstimatedDays: number
   riskAssessment: string
+  generatedAt: string
 }
 
 // AI 进度预测

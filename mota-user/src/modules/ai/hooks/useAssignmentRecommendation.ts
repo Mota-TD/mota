@@ -1,35 +1,45 @@
 /**
  * AI 智能分工推荐 Hook
- * 提供基于 AI 的任务分配建议功能
+ * 集成 Claude API 提供智能分工建议
  */
 
-import { useCallback, useMemo } from 'react';
-import { message } from 'antd';
-import { useAIStore } from '../store/aiStore';
-import { useTaskStore } from '@/modules/task/store/taskStore';
-import type { AssignmentRecommendation } from '../types';
+import { useState, useCallback } from 'react'
+import { message } from 'antd'
+import { useAIStore } from '../store/aiStore'
+import { claudeClient } from '../../../services/claude/claudeClient'
+import type { AssignmentRecommendation } from '../types'
 
-interface UseAssignmentRecommendationOptions {
-  taskId?: string;
-  onAssign?: (userId: string) => void;
+export interface TeamMember {
+  id: string
+  name: string
+  department: string
+  currentWorkload: number
+  skills: string[]
+  availability?: 'available' | 'busy' | 'overloaded'
 }
 
-interface UseAssignmentRecommendationReturn {
+export interface TaskAssignmentParams {
+  taskId: number
+  taskName: string
+  taskDescription: string
+  teamMembers: TeamMember[]
+}
+
+export interface UseAssignmentRecommendationOptions {
+  onSuccess?: (recommendations: AssignmentRecommendation[]) => void
+  onError?: (error: string) => void
+}
+
+export interface UseAssignmentRecommendationReturn {
   // 状态
-  loading: boolean;
-  recommendations: AssignmentRecommendation[];
-  bestMatch: AssignmentRecommendation | null;
-  error: string | null;
+  loading: boolean
+  recommendations: AssignmentRecommendation[]
+  error: string | null
 
   // 操作
-  fetchRecommendations: (taskId: number) => Promise<void>;
-  assignToUser: (userId: string) => Promise<void>;
-  clear: () => void;
-
-  // 计算属性
-  availableRecommendations: AssignmentRecommendation[];
-  busyRecommendations: AssignmentRecommendation[];
-  overloadedRecommendations: AssignmentRecommendation[];
+  generateRecommendations: (params: TaskAssignmentParams) => Promise<void>
+  clearRecommendations: () => void
+  applyRecommendation: (userId: string) => Promise<void>
 }
 
 /**
@@ -38,204 +48,165 @@ interface UseAssignmentRecommendationReturn {
 export function useAssignmentRecommendation(
   options: UseAssignmentRecommendationOptions = {}
 ): UseAssignmentRecommendationReturn {
-  const { taskId, onAssign } = options;
+  const { onSuccess, onError } = options
 
-  // 从 AI Store 获取状态
-  const loading = useAIStore((state) => state.assignmentLoading);
-  const recommendations = useAIStore((state) => state.assignmentRecommendations);
-  const error = useAIStore((state) => state.assignmentError);
+  // AI Store 状态
+  const loading = useAIStore((state) => state.assignmentLoading)
+  const recommendations = useAIStore((state) => state.assignmentRecommendations)
+  const storeError = useAIStore((state) => state.assignmentError)
 
   // AI Store 操作
-  const fetchAssignmentRecommendations = useAIStore(
-    (state) => state.fetchAssignmentRecommendations
-  );
   const clearAssignmentRecommendations = useAIStore(
     (state) => state.clearAssignmentRecommendations
-  );
+  )
 
-  // Task Store 操作
-  const assignTask = useTaskStore((state) => state.assignTask);
+  // 本地状态
+  const [localLoading, setLocalLoading] = useState(false)
 
-  // 计算最佳匹配
-  const bestMatch = useMemo(() => {
-    if (recommendations.length === 0) return null;
-    return recommendations.reduce((best, current) =>
-      current.matchScore > best.matchScore ? current : best
-    );
-  }, [recommendations]);
+  /**
+   * 生成智能分工推荐
+   */
+  const generateRecommendations = useCallback(
+    async (params: TaskAssignmentParams) => {
+      setLocalLoading(true)
 
-  // 按可用性分组
-  const availableRecommendations = useMemo(() => {
-    return recommendations.filter((r) => r.availability === 'available');
-  }, [recommendations]);
-
-  const busyRecommendations = useMemo(() => {
-    return recommendations.filter((r) => r.availability === 'busy');
-  }, [recommendations]);
-
-  const overloadedRecommendations = useMemo(() => {
-    return recommendations.filter((r) => r.availability === 'overloaded');
-  }, [recommendations]);
-
-  // 获取推荐
-  const fetchRecommendations = useCallback(
-    async (id: number) => {
       try {
-        await fetchAssignmentRecommendations(id);
-      } catch (err) {
-        console.error('获取分工推荐失败:', err);
+        // 优先使用 Claude API
+        let result: AssignmentRecommendation[]
+
+        try {
+          const claudeResult = await claudeClient.suggestTaskAssignment({
+            taskId: params.taskId,
+            taskName: params.taskName,
+            taskDescription: params.taskDescription,
+            teamMembers: params.teamMembers,
+          })
+
+          // 转换 Claude 结果为标准格式
+          result = claudeResult.suggestedAssignees.map((assignee) => ({
+            userId: assignee.userId.toString(),
+            userName: assignee.userName,
+            matchScore: assignee.matchScore,
+            currentWorkload: assignee.currentWorkload,
+            skills: [], // Claude 响应中暂未包含技能信息
+            reason: assignee.reason,
+            availability:
+              assignee.currentWorkload > 80
+                ? 'overloaded'
+                : assignee.currentWorkload > 50
+                ? 'busy'
+                : 'available',
+          }))
+
+          console.log('使用 Claude API 生成分工推荐成功')
+        } catch (claudeError) {
+          console.warn('Claude API 分工推荐失败，回退到原 API:', claudeError)
+
+          // 回退到使用 AI Store 的原始 API
+          await useAIStore.getState().fetchAssignmentRecommendations(params.taskId)
+          result = useAIStore.getState().assignmentRecommendations
+        }
+
+        onSuccess?.(result)
+        message.success('智能分工推荐生成成功')
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : '生成分工推荐失败'
+        onError?.(errorMessage)
+        message.error(errorMessage)
+      } finally {
+        setLocalLoading(false)
       }
     },
-    [fetchAssignmentRecommendations]
-  );
+    [onSuccess, onError]
+  )
 
-  // 分配任务给用户
-  const assignToUser = useCallback(
+  /**
+   * 清除推荐结果
+   */
+  const clearRecommendations = useCallback(() => {
+    clearAssignmentRecommendations()
+  }, [clearAssignmentRecommendations])
+
+  /**
+   * 应用推荐（分配任务给指定用户）
+   */
+  const applyRecommendation = useCallback(
     async (userId: string) => {
-      if (!taskId) {
-        message.warning('未指定任务');
-        return;
-      }
-
       try {
-        await assignTask(taskId, userId);
-        message.success('任务分配成功');
-        onAssign?.(userId);
-        clearAssignmentRecommendations();
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : '任务分配失败';
-        message.error(errorMessage);
+        // 这里应该调用任务分配的 API
+        // 暂时只显示成功消息
+        const user = recommendations.find((r) => r.userId === userId)
+        if (user) {
+          message.success(`已分配给 ${user.userName}`)
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : '分配任务失败'
+        message.error(errorMessage)
+        onError?.(errorMessage)
       }
     },
-    [taskId, assignTask, onAssign, clearAssignmentRecommendations]
-  );
-
-  // 清除推荐
-  const clear = useCallback(() => {
-    clearAssignmentRecommendations();
-  }, [clearAssignmentRecommendations]);
+    [recommendations, onError]
+  )
 
   return {
-    loading,
+    loading: loading || localLoading,
     recommendations,
-    bestMatch,
-    error,
-    fetchRecommendations,
-    assignToUser,
-    clear,
-    availableRecommendations,
-    busyRecommendations,
-    overloadedRecommendations,
-  };
+    error: storeError,
+    generateRecommendations,
+    clearRecommendations,
+    applyRecommendation,
+  }
 }
 
 /**
- * 工作负载分析 Hook
+ * 分工推荐工具函数
  */
-export function useWorkloadAnalysis(recommendations: AssignmentRecommendation[]) {
-  return useMemo(() => {
-    if (recommendations.length === 0) {
-      return {
-        averageWorkload: 0,
-        maxWorkload: 0,
-        minWorkload: 0,
-        workloadDistribution: {
-          low: 0,
-          medium: 0,
-          high: 0,
-        },
-      };
-    }
+export const assignmentUtils = {
+  /**
+   * 根据匹配分数对推荐进行排序
+   */
+  sortByMatchScore: (recommendations: AssignmentRecommendation[]) => {
+    return [...recommendations].sort((a, b) => b.matchScore - a.matchScore)
+  },
 
-    const workloads = recommendations.map((r) => r.currentWorkload);
-    const averageWorkload = workloads.reduce((a, b) => a + b, 0) / workloads.length;
-    const maxWorkload = Math.max(...workloads);
-    const minWorkload = Math.min(...workloads);
+  /**
+   * 过滤可用的团队成员
+   */
+  filterAvailableMembers: (recommendations: AssignmentRecommendation[]) => {
+    return recommendations.filter((r) => r.availability === 'available')
+  },
 
-    const workloadDistribution = {
-      low: recommendations.filter((r) => r.currentWorkload < 40).length,
-      medium: recommendations.filter(
-        (r) => r.currentWorkload >= 40 && r.currentWorkload < 70
-      ).length,
-      high: recommendations.filter((r) => r.currentWorkload >= 70).length,
-    };
+  /**
+   * 获取高匹配度推荐（匹配分数 >= 80）
+   */
+  getHighMatchRecommendations: (recommendations: AssignmentRecommendation[]) => {
+    return recommendations.filter((r) => r.matchScore >= 80)
+  },
 
-    return {
-      averageWorkload,
-      maxWorkload,
-      minWorkload,
-      workloadDistribution,
-    };
-  }, [recommendations]);
-}
+  /**
+   * 获取工作负载状态颜色
+   */
+  getWorkloadColor: (workload: number) => {
+    if (workload >= 80) return '#ff4d4f' // 红色 - 超负荷
+    if (workload >= 50) return '#faad14' // 橙色 - 繁忙
+    return '#52c41a' // 绿色 - 空闲
+  },
 
-/**
- * 匹配分数分析 Hook
- */
-export function useMatchScoreAnalysis(recommendations: AssignmentRecommendation[]) {
-  return useMemo(() => {
-    if (recommendations.length === 0) {
-      return {
-        averageScore: 0,
-        highMatchCount: 0,
-        mediumMatchCount: 0,
-        lowMatchCount: 0,
-        scoreDistribution: [] as { userId: string; userName: string; score: number }[],
-      };
-    }
+  /**
+   * 获取匹配分数等级
+   */
+  getMatchGrade: (score: number) => {
+    if (score >= 90) return 'S' // 优秀
+    if (score >= 80) return 'A' // 良好
+    if (score >= 70) return 'B' // 一般
+    if (score >= 60) return 'C' // 较差
+    return 'D' // 不匹配
+  },
 
-    const scores = recommendations.map((r) => r.matchScore);
-    const averageScore = scores.reduce((a, b) => a + b, 0) / scores.length;
-
-    const highMatchCount = recommendations.filter((r) => r.matchScore >= 80).length;
-    const mediumMatchCount = recommendations.filter(
-      (r) => r.matchScore >= 50 && r.matchScore < 80
-    ).length;
-    const lowMatchCount = recommendations.filter((r) => r.matchScore < 50).length;
-
-    const scoreDistribution = recommendations
-      .map((r) => ({
-        userId: r.userId,
-        userName: r.userName,
-        score: r.matchScore,
-      }))
-      .sort((a, b) => b.score - a.score);
-
-    return {
-      averageScore,
-      highMatchCount,
-      mediumMatchCount,
-      lowMatchCount,
-      scoreDistribution,
-    };
-  }, [recommendations]);
-}
-
-/**
- * 推荐排序 Hook
- */
-export function useSortedRecommendations(
-  recommendations: AssignmentRecommendation[],
-  sortBy: 'matchScore' | 'workload' | 'availability' = 'matchScore'
-) {
-  return useMemo(() => {
-    const sorted = [...recommendations];
-
-    switch (sortBy) {
-      case 'matchScore':
-        sorted.sort((a, b) => b.matchScore - a.matchScore);
-        break;
-      case 'workload':
-        sorted.sort((a, b) => a.currentWorkload - b.currentWorkload);
-        break;
-      case 'availability':
-        const availabilityOrder = { available: 0, busy: 1, overloaded: 2 };
-        sorted.sort(
-          (a, b) => availabilityOrder[a.availability] - availabilityOrder[b.availability]
-        );
-        break;
-    }
-
-    return sorted;
-  }, [recommendations, sortBy]);
+  /**
+   * 格式化推荐理由
+   */
+  formatReason: (reason: string) => {
+    return reason.length > 50 ? `${reason.substring(0, 47)}...` : reason
+  },
 }

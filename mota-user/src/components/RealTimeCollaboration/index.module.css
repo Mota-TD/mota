@@ -1,0 +1,293 @@
+.collaborationCard {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 380px;
+  height: 600px;
+  z-index: 1000;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.collaborationCard :global(.ant-card-body) {
+  padding: 12px;
+  height: calc(100% - 57px);
+  display: flex;
+  flex-direction: column;
+}
+
+/* 在线用户区域 */
+.onlineUsers {
+  margin-bottom: 12px;
+}
+
+.sectionTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: #262626;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.userList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.userItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: #fafafa;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.userItem:hover {
+  background: #f0f0f0;
+}
+
+.userName {
+  font-size: 12px;
+  color: #595959;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60px;
+}
+
+/* 标签切换 */
+.tabContainer {
+  margin-bottom: 12px;
+}
+
+/* 内容区域 */
+.contentArea {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 聊天容器 */
+.chatContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.commentsList {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 12px;
+  padding-right: 4px;
+}
+
+.commentsList::-webkit-scrollbar {
+  width: 4px;
+}
+
+.commentsList::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 2px;
+}
+
+.commentsList::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 2px;
+}
+
+.commentsList::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+.commentItem {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  align-items: flex-start;
+}
+
+.commentContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.commentHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.commentUser {
+  font-size: 12px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.commentTime {
+  font-size: 11px;
+  color: #8c8c8c;
+}
+
+.commentText {
+  font-size: 13px;
+  color: #595959;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+/* 正在输入提示 */
+.typingIndicator {
+  padding: 8px;
+  background: #f6f8ff;
+  border: 1px solid #d6e4ff;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #1890ff;
+}
+
+/* 评论输入 */
+.commentInput {
+  margin-top: auto;
+}
+
+.inputActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 提及列表 */
+.mentionList {
+  max-width: 200px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.mentionItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-radius: 4px;
+}
+
+.mentionItem:hover {
+  background: #f0f0f0;
+}
+
+.mentionItem span {
+  font-size: 13px;
+  color: #262626;
+}
+
+/* 活动容器 */
+.activityContainer {
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.activityContainer::-webkit-scrollbar {
+  width: 4px;
+}
+
+.activityContainer::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 2px;
+}
+
+.activityContainer::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 2px;
+}
+
+.activityContainer::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+.activityItem {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 8px 0;
+}
+
+.activityItem:last-child {
+  border-bottom: none;
+}
+
+.activityUser {
+  font-weight: 600;
+  color: #262626;
+  font-size: 12px;
+}
+
+.activityAction {
+  color: #595959;
+  font-size: 12px;
+}
+
+.activityTarget {
+  color: #1890ff;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+  .collaborationCard {
+    right: 12px;
+    bottom: 12px;
+    width: calc(100vw - 24px);
+    max-width: 380px;
+    height: calc(100vh - 120px);
+    max-height: 600px;
+  }
+}
+
+/* 暗色主题适配 */
+@media (prefers-color-scheme: dark) {
+  .userItem {
+    background: #1f1f1f;
+  }
+  
+  .userItem:hover {
+    background: #262626;
+  }
+  
+  .userName {
+    color: #d9d9d9;
+  }
+  
+  .commentUser {
+    color: #f0f0f0;
+  }
+  
+  .commentText {
+    color: #d9d9d9;
+  }
+  
+  .typingIndicator {
+    background: #111b26;
+    border-color: #1d39c4;
+    color: #4096ff;
+  }
+  
+  .mentionItem:hover {
+    background: #262626;
+  }
+  
+  .activityItem {
+    border-bottom-color: #303030;
+  }
+}

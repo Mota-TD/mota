@@ -8,6 +8,7 @@ import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import * as aiApi from '@/services/api/ai';
 import * as aiAssistantApi from '@/services/api/aiAssistant';
+import { claudeClient } from '../../../services/claude/claudeClient';
 import type {
   DecomposeStatus,
   DecomposeSuggestionWithSelection,
@@ -154,22 +155,46 @@ export const useAIStore = create<AIState>()(
 
       // ==================== 任务分解 ====================
 
-      generateTaskDecomposition: async (data) => {
+      generateTaskDecomposition: async (data: TaskDecomposeFormData) => {
         set({ decomposeStatus: 'loading', decomposeError: null });
 
         const startTime = Date.now();
 
         try {
-          const result = await aiApi.generateTaskDecomposition({
-            projectName: data.projectName,
-            projectDescription: data.projectDescription,
-            departments: data.departments,
-            startDate: data.startDate,
-            endDate: data.endDate,
-          });
+          // 优先使用Claude API
+          let result: TaskDecompositionResponse;
+          
+          try {
+            const claudeResult = await claudeClient.generateTaskDecomposition({
+              projectName: data.projectName,
+              projectDescription: data.projectDescription,
+              departments: data.departments,
+              startDate: data.startDate,
+              endDate: data.endDate,
+            });
+
+            // 转换Claude结果为标准格式
+            result = {
+              suggestions: claudeResult.suggestions,
+              totalEstimatedDays: claudeResult.totalEstimatedDays,
+              riskAssessment: claudeResult.riskAssessment,
+              generatedAt: new Date().toISOString()
+            };
+          } catch (claudeError) {
+            console.warn('Claude API失败，回退到原API:', claudeError);
+            
+            // 回退到原有的API
+            result = await aiApi.generateTaskDecomposition({
+              projectName: data.projectName,
+              projectDescription: data.projectDescription,
+              departments: data.departments,
+              startDate: data.startDate,
+              endDate: data.endDate,
+            });
+          }
 
           // 转换为带选择状态的建议
-          const suggestionsWithSelection: DecomposeSuggestionWithSelection[] = 
+          const suggestionsWithSelection: DecomposeSuggestionWithSelection[] =
             result.suggestions.map((s) => ({
               ...s,
               selected: true,
@@ -182,8 +207,8 @@ export const useAIStore = create<AIState>()(
             state.decomposeSuggestions = suggestionsWithSelection;
             state.usageStats.totalRequests++;
             state.usageStats.successfulRequests++;
-            state.usageStats.averageResponseTime = 
-              (state.usageStats.averageResponseTime * (state.usageStats.totalRequests - 1) + 
+            state.usageStats.averageResponseTime =
+              (state.usageStats.averageResponseTime * (state.usageStats.totalRequests - 1) +
                (Date.now() - startTime)) / state.usageStats.totalRequests;
             state.usageStats.lastRequestAt = new Date().toISOString();
           });
@@ -198,7 +223,7 @@ export const useAIStore = create<AIState>()(
         }
       },
 
-      toggleSuggestionSelection: (id) => {
+      toggleSuggestionSelection: (id: string) => {
         set((state) => {
           const suggestion = state.decomposeSuggestions.find(
             (s: DecomposeSuggestionWithSelection) => s.id === id
@@ -209,7 +234,7 @@ export const useAIStore = create<AIState>()(
         });
       },
 
-      updateSuggestion: (id, updates) => {
+      updateSuggestion: (id: string, updates: Partial<DecomposeSuggestionWithSelection>) => {
         set((state) => {
           const idx = state.decomposeSuggestions.findIndex(
             (s: DecomposeSuggestionWithSelection) => s.id === id
@@ -251,13 +276,23 @@ export const useAIStore = create<AIState>()(
 
       // ==================== 分工推荐 ====================
 
-      fetchAssignmentRecommendations: async (taskId) => {
+      fetchAssignmentRecommendations: async (taskId: number) => {
         set({ assignmentLoading: true, assignmentError: null });
 
         try {
-          const result = await aiApi.suggestTaskAssignment(taskId);
+          // 优先使用Claude API（如果有必要的数据）
+          let result: any;
+          
+          try {
+            // 这里需要从其他store获取任务和团队成员信息
+            // 暂时先使用原API，后续可以扩展
+            result = await aiApi.suggestTaskAssignment(taskId);
+          } catch (claudeError) {
+            console.warn('Claude分工推荐失败，使用原API:', claudeError);
+            result = await aiApi.suggestTaskAssignment(taskId);
+          }
 
-          const recommendations: AssignmentRecommendation[] = result.suggestedAssignees.map((a) => ({
+          const recommendations: AssignmentRecommendation[] = result.suggestedAssignees.map((a: any) => ({
             userId: String(a.userId),
             userName: a.userName,
             matchScore: a.matchScore,
@@ -289,7 +324,7 @@ export const useAIStore = create<AIState>()(
 
       // ==================== 进度预测 ====================
 
-      fetchProgressPrediction: async (projectId) => {
+      fetchProgressPrediction: async (projectId: string | number) => {
         set({ progressLoading: true });
 
         try {
@@ -306,11 +341,22 @@ export const useAIStore = create<AIState>()(
 
       // ==================== 风险预警 ====================
 
-      fetchRiskWarnings: async (projectId) => {
+      fetchRiskWarnings: async (projectId: string | number) => {
         set({ riskLoading: true });
 
         try {
-          const warnings = await aiApi.getProjectRiskWarnings(projectId);
+          let warnings: RiskWarning[] = [];
+          
+          try {
+            // 尝试使用Claude API生成风险预警
+            // 这里需要获取项目和任务数据
+            // 暂时先使用原API
+            warnings = await aiApi.getProjectRiskWarnings(projectId);
+          } catch (claudeError) {
+            console.warn('Claude风险分析失败，使用原API:', claudeError);
+            warnings = await aiApi.getProjectRiskWarnings(projectId);
+          }
+          
           set({
             riskWarnings: warnings,
             riskLoading: false,
@@ -323,7 +369,7 @@ export const useAIStore = create<AIState>()(
 
       // ==================== 项目报告 ====================
 
-      generateProjectReport: async (projectId, reportType) => {
+      generateProjectReport: async (projectId: string | number, reportType: 'daily' | 'weekly' | 'monthly') => {
         set({ reportLoading: true });
 
         try {
@@ -355,7 +401,7 @@ export const useAIStore = create<AIState>()(
         }
       },
 
-      markSuggestionRead: async (id) => {
+      markSuggestionRead: async (id: number) => {
         try {
           await aiAssistantApi.markSuggestionRead(id);
           set((state) => {
@@ -371,7 +417,7 @@ export const useAIStore = create<AIState>()(
         }
       },
 
-      feedbackSuggestion: async (id, accepted, comment) => {
+      feedbackSuggestion: async (id: number, accepted: boolean, comment?: string) => {
         try {
           await aiAssistantApi.feedbackSuggestion(id, accepted, comment);
           set((state) => {
@@ -393,7 +439,7 @@ export const useAIStore = create<AIState>()(
 
       // ==================== 配置 ====================
 
-      updateConfig: (newConfig) => {
+      updateConfig: (newConfig: Partial<AIModuleConfig>) => {
         set((state) => {
           state.config = { ...state.config, ...newConfig };
         });

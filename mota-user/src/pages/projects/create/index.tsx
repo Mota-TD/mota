@@ -33,13 +33,17 @@ import {
   DeleteOutlined,
   UserOutlined,
   CalendarOutlined,
-  RobotOutlined
+  RobotOutlined,
+  CheckOutlined,
+  EditOutlined
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import * as projectApi from '@/services/api/project'
 import { departmentApi } from '@/services/api'
 import { getUsers } from '@/services/api/user'
 import type { Department } from '@/services/api/department'
+import { useTaskDecompose } from '@/modules/ai/hooks/useTaskDecompose'
+import type { TaskDecomposeFormData } from '@/modules/ai/types'
 import styles from './index.module.css'
 
 const { TextArea } = Input
@@ -104,6 +108,23 @@ const CreateProject = () => {
   // 项目标识（系统自动生成）
   const [projectKey, setProjectKey] = useState<string>('')
   const [loadingKey, setLoadingKey] = useState(false)
+  
+  // AI任务分解
+  const [aiDecomposeModalVisible, setAiDecomposeModalVisible] = useState(false)
+  const [aiGeneratingMilestones, setAiGeneratingMilestones] = useState(false)
+  
+  // 初始化AI任务分解Hook
+  const taskDecompose = useTaskDecompose({
+    projectId: 'temp', // 临时项目ID，实际项目创建后会替换
+    onSuccess: () => {
+      message.success('AI里程碑分解完成')
+      setAiDecomposeModalVisible(false)
+    },
+    onError: (error) => {
+      message.error(error)
+      setAiGeneratingMilestones(false)
+    }
+  })
 
 
   useEffect(() => {
@@ -391,63 +412,96 @@ const CreateProject = () => {
   }
 
   // AI生成里程碑建议
-  const handleAIGenerateMilestones = () => {
-    const dateRange = formData.dateRange
+  const handleAIGenerateMilestones = async () => {
+    const projectName = formData.name || form.getFieldValue('name')
+    const projectDescription = formData.description || form.getFieldValue('description')
+    const dateRange = formData.dateRange || form.getFieldValue('dateRange')
+    
+    if (!projectName) {
+      message.warning('请先输入项目名称')
+      return
+    }
+    
+    if (!projectDescription || projectDescription.length < 20) {
+      message.warning('请先输入项目描述（至少20个字符），以便AI更好地理解项目需求')
+      return
+    }
+    
+    if (selectedDepartments.length === 0) {
+      message.warning('请先选择参与部门')
+      return
+    }
+    
     if (!dateRange || !dateRange[0] || !dateRange[1]) {
       message.warning('请先设置项目周期')
       return
     }
     
+    setAiGeneratingMilestones(true)
+    setAiDecomposeModalVisible(true)
+    
+    // 准备AI任务分解数据
+    const decomposeData: TaskDecomposeFormData = {
+      projectName,
+      projectDescription,
+      departments: selectedDepartments.map(deptId => {
+        const dept = departments.find(d => String(d.id) === String(deptId))
+        return dept?.name || String(deptId)
+      }),
+      startDate: dateRange[0].format('YYYY-MM-DD'),
+      endDate: dateRange[1].format('YYYY-MM-DD')
+    }
+    
+    try {
+      // 调用AI任务分解
+      await taskDecompose.generateDecomposition(decomposeData)
+    } catch (error) {
+      console.error('AI任务分解失败:', error)
+      setAiGeneratingMilestones(false)
+      setAiDecomposeModalVisible(false)
+    }
+  }
+  
+  // 应用AI分解结果为里程碑
+  const handleApplyAIDecomposition = () => {
+    const selectedSuggestions = taskDecompose.selectedSuggestions
+    if (selectedSuggestions.length === 0) {
+      message.warning('请至少选择一个任务建议')
+      return
+    }
+    
+    const dateRange = formData.dateRange || form.getFieldValue('dateRange')
     const startDate = dateRange[0]
-    const endDate = dateRange[1]
-    const duration = endDate.diff(startDate, 'day')
+    const duration = dateRange[1].diff(startDate, 'day')
     
-    // 根据项目周期生成建议里程碑
-    const suggestedMilestones: MilestoneItem[] = []
-    
-    if (duration >= 30) {
-      suggestedMilestones.push({
-        id: Date.now().toString() + '_1',
-        name: '需求确认',
-        targetDate: startDate.add(Math.floor(duration * 0.15), 'day').format('YYYY-MM-DD'),
-        description: '完成需求分析和确认'
-      })
-    }
-    
-    if (duration >= 60) {
-      suggestedMilestones.push({
-        id: Date.now().toString() + '_2',
-        name: '方案设计完成',
-        targetDate: startDate.add(Math.floor(duration * 0.3), 'day').format('YYYY-MM-DD'),
-        description: '完成整体方案设计'
-      })
-    }
-    
-    suggestedMilestones.push({
-      id: Date.now().toString() + '_3',
-      name: '中期检查',
-      targetDate: startDate.add(Math.floor(duration * 0.5), 'day').format('YYYY-MM-DD'),
-      description: '项目中期进度检查'
+    // 将AI建议转换为里程碑格式
+    const aiGeneratedMilestones: MilestoneItem[] = selectedSuggestions.map((suggestion, index) => {
+      // 根据估算天数和项目周期计算目标日期
+      const progressRatio = (suggestion.estimatedDays * (index + 1)) / taskDecompose.totalEstimatedDays
+      const targetDate = startDate.add(Math.floor(duration * Math.min(progressRatio, 0.9)), 'day')
+      
+      return {
+        id: Date.now().toString() + '_' + index,
+        name: suggestion.name,
+        targetDate: targetDate.format('YYYY-MM-DD'),
+        description: suggestion.description,
+        departmentTasks: suggestion.suggestedDepartment ? [{
+          departmentId: selectedDepartments.find(deptId => {
+            const dept = departments.find(d => String(d.id) === String(deptId))
+            return dept?.name === suggestion.suggestedDepartment
+          }) || selectedDepartments[0],
+          name: suggestion.name,
+          description: suggestion.description,
+          priority: suggestion.suggestedPriority
+        }] : []
+      }
     })
     
-    if (duration >= 45) {
-      suggestedMilestones.push({
-        id: Date.now().toString() + '_4',
-        name: '测试验收',
-        targetDate: startDate.add(Math.floor(duration * 0.85), 'day').format('YYYY-MM-DD'),
-        description: '完成测试和验收'
-      })
-    }
-    
-    suggestedMilestones.push({
-      id: Date.now().toString() + '_5',
-      name: '项目完成',
-      targetDate: endDate.format('YYYY-MM-DD'),
-      description: '项目交付和总结'
-    })
-    
-    setMilestones(suggestedMilestones)
-    message.success('已生成里程碑建议')
+    setMilestones(aiGeneratedMilestones)
+    setAiDecomposeModalVisible(false)
+    setAiGeneratingMilestones(false)
+    taskDecompose.clear() // 清理AI分解结果
+    message.success(`已应用AI建议，生成${aiGeneratedMilestones.length}个里程碑`)
   }
 
   // 步骤内容
@@ -941,14 +995,146 @@ const CreateProject = () => {
                   })}
                 </div>
               )}
-            </Modal>
-          </div>
-        )
-      
-      default:
-        return null
+              </Modal>
+              
+              {/* AI任务分解结果弹窗 */}
+              <Modal
+                title={
+                  <Space>
+                    <RobotOutlined />
+                    AI智能任务分解
+                  </Space>
+                }
+                open={aiDecomposeModalVisible}
+                onCancel={() => {
+                  setAiDecomposeModalVisible(false)
+                  setAiGeneratingMilestones(false)
+                  taskDecompose.clear()
+                }}
+                width={800}
+                footer={[
+                  <Button key="cancel" onClick={() => {
+                    setAiDecomposeModalVisible(false)
+                    setAiGeneratingMilestones(false)
+                    taskDecompose.clear()
+                  }}>
+                    取消
+                  </Button>,
+                  <Button
+                    key="apply"
+                    type="primary"
+                    disabled={taskDecompose.status !== 'success' || taskDecompose.selectedSuggestions.length === 0}
+                    onClick={handleApplyAIDecomposition}
+                  >
+                    应用选中的建议（{taskDecompose.selectedSuggestions.length}项）
+                  </Button>
+                ]}
+              >
+                {taskDecompose.status === 'loading' || aiGeneratingMilestones ? (
+                  <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                    <Spin size="large" />
+                    <p style={{ marginTop: 16, color: '#666' }}>AI正在分析项目需求，生成任务建议...</p>
+                  </div>
+                ) : taskDecompose.status === 'error' ? (
+                  <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                    <Empty
+                      description={taskDecompose.error || 'AI任务分解失败'}
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    />
+                  </div>
+                ) : taskDecompose.status === 'success' && taskDecompose.suggestions.length > 0 ? (
+                  <div>
+                    <div style={{ marginBottom: 16, padding: 12, backgroundColor: '#f6ffed', border: '1px solid #b7eb8f', borderRadius: 6 }}>
+                      <p style={{ margin: 0, fontSize: 14 }}>
+                        <strong>AI分析结果：</strong>预计总工期 <Tag color="blue">{taskDecompose.totalEstimatedDays} 天</Tag>
+                      </p>
+                      {taskDecompose.riskAssessment && (
+                        <p style={{ margin: '8px 0 0', fontSize: 12, color: '#666' }}>
+                          风险评估：{taskDecompose.riskAssessment}
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div style={{ marginBottom: 16 }}>
+                      <Space>
+                        <Button
+                          size="small"
+                          onClick={taskDecompose.selectAll}
+                          disabled={taskDecompose.suggestions.every(s => s.selected)}
+                        >
+                          <CheckOutlined /> 全选
+                        </Button>
+                        <Button
+                          size="small"
+                          onClick={taskDecompose.deselectAll}
+                          disabled={taskDecompose.suggestions.every(s => !s.selected)}
+                        >
+                          取消全选
+                        </Button>
+                      </Space>
+                    </div>
+                    
+                    <List
+                      dataSource={taskDecompose.suggestions}
+                      renderItem={(suggestion) => (
+                        <List.Item
+                          style={{
+                            border: suggestion.selected ? '1px solid #1890ff' : '1px solid #d9d9d9',
+                            borderRadius: 6,
+                            marginBottom: 8,
+                            backgroundColor: suggestion.selected ? '#f6ffed' : '#fff'
+                          }}
+                          actions={[
+                            <Checkbox
+                              key="select"
+                              checked={suggestion.selected}
+                              onChange={() => taskDecompose.toggleSelection(suggestion.id)}
+                            >
+                              选择
+                            </Checkbox>
+                          ]}
+                        >
+                          <List.Item.Meta
+                            avatar={
+                              <Avatar
+                                style={{ backgroundColor: suggestion.selected ? '#52c41a' : '#d9d9d9' }}
+                                icon={suggestion.selected ? <CheckOutlined /> : <EditOutlined />}
+                              />
+                            }
+                            title={
+                              <Space>
+                                {suggestion.name}
+                                <Tag color={
+                                  suggestion.suggestedPriority === 'high' || suggestion.suggestedPriority === 'urgent' ? 'red' :
+                                  suggestion.suggestedPriority === 'medium' ? 'orange' : 'blue'
+                                }>
+                                  {suggestion.suggestedPriority === 'low' ? '低优先级' :
+                                   suggestion.suggestedPriority === 'medium' ? '中优先级' :
+                                   suggestion.suggestedPriority === 'high' ? '高优先级' : '紧急'}
+                                </Tag>
+                                <Tag color="cyan">{suggestion.estimatedDays} 天</Tag>
+                                {suggestion.suggestedDepartment && (
+                                  <Tag color="geekblue">{suggestion.suggestedDepartment}</Tag>
+                                )}
+                              </Space>
+                            }
+                            description={suggestion.description}
+                          />
+                        </List.Item>
+                      )}
+                    />
+                  </div>
+                ) : (
+                  <Empty description="暂无AI分解结果" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                )}
+              </Modal>
+            </div>
+          )
+        
+        default:
+          return null
+      }
     }
-  }
 
   return (
     <div className={styles.container}>
