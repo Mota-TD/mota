@@ -357,9 +357,17 @@ export interface TaskDecompositionRequest {
 
 // AI 任务分解响应
 export interface TaskDecompositionResponse {
+  /** 任务分解建议列表 */
   suggestions: TaskDecompositionSuggestion[]
+  /** 预估总工期（天） */
   totalEstimatedDays: number
+  /** 风险评估 */
   riskAssessment: string
+  /** 数据来源：ai（真实AI生成）或 mock（模拟数据） */
+  source: 'ai' | 'mock'
+  /** 使用的AI模型名称（仅当source为ai时有值） */
+  model?: string
+  /** 生成时间 */
   generatedAt: string
 }
 

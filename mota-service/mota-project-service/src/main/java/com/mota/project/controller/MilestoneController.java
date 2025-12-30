@@ -3,20 +3,27 @@ package com.mota.project.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mota.common.core.result.Result;
+import com.mota.common.security.util.SecurityUtils;
+import com.mota.project.dto.ai.ProgressDescriptionRequest;
+import com.mota.project.dto.ai.ProgressDescriptionResponse;
+import com.mota.project.dto.request.MilestoneTaskProgressUpdateRequest;
 import com.mota.project.entity.Milestone;
 import com.mota.project.entity.MilestoneAssignee;
 import com.mota.project.entity.MilestoneComment;
 import com.mota.project.entity.MilestoneTask;
 import com.mota.project.entity.MilestoneTaskAttachment;
+import com.mota.project.entity.MilestoneTaskProgressRecord;
 import com.mota.project.service.MilestoneCommentService;
 import com.mota.project.service.MilestoneService;
 import com.mota.project.service.MilestoneTaskService;
+import com.mota.project.service.ai.ClaudeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +32,7 @@ import java.util.Map;
 /**
  * 里程碑控制器
  */
+@Slf4j
 @Tag(name = "里程碑管理", description = "项目里程碑的增删改查和状态管理")
 @RestController
 @RequestMapping("/api/v1/milestones")
@@ -34,6 +42,7 @@ public class MilestoneController {
     private final MilestoneService milestoneService;
     private final MilestoneTaskService milestoneTaskService;
     private final MilestoneCommentService milestoneCommentService;
+    private final ClaudeService claudeService;
 
     /**
      * 获取里程碑列表（分页）
@@ -52,6 +61,58 @@ public class MilestoneController {
         Page<Milestone> pageParam = new Page<>(page, pageSize);
         IPage<Milestone> result = milestoneService.pageMilestones(pageParam, projectId, status);
         return Result.success(result);
+    }
+
+    /**
+     * 获取当前用户负责的里程碑
+     */
+    @Operation(summary = "获取我的里程碑", description = "获取当前登录用户负责的里程碑列表")
+    @ApiResponse(responseCode = "200", description = "查询成功")
+    @GetMapping("/my")
+    public Result<List<Milestone>> getMyMilestones(
+            @RequestHeader(value = "X-User-Id", required = false) Long headerUserId) {
+        log.info("getMyMilestones called, X-User-Id header: {}", headerUserId);
+        Long currentUserId = headerUserId;
+        if (currentUserId == null) {
+            try {
+                currentUserId = SecurityUtils.getUserId();
+                log.info("Got userId from SecurityUtils: {}", currentUserId);
+            } catch (Exception e) {
+                // 如果未登录，默认使用用户ID 1（开发环境）
+                log.warn("Failed to get userId from SecurityUtils, using default 1L", e);
+                currentUserId = 1L;
+            }
+        }
+        log.info("Querying milestones for userId: {}", currentUserId);
+        List<Milestone> milestones = milestoneService.getMilestonesByAssignee(currentUserId);
+        log.info("Found {} milestones for userId: {}", milestones.size(), currentUserId);
+        return Result.success(milestones);
+    }
+
+    /**
+     * 获取当前用户负责的里程碑任务
+     */
+    @Operation(summary = "获取我的里程碑任务", description = "获取当前登录用户负责的里程碑任务列表")
+    @ApiResponse(responseCode = "200", description = "查询成功")
+    @GetMapping("/my-tasks")
+    public Result<List<MilestoneTask>> getMyMilestoneTasks(
+            @RequestHeader(value = "X-User-Id", required = false) Long headerUserId) {
+        log.info("getMyMilestoneTasks called, X-User-Id header: {}", headerUserId);
+        Long currentUserId = headerUserId;
+        if (currentUserId == null) {
+            try {
+                currentUserId = SecurityUtils.getUserId();
+                log.info("Got userId from SecurityUtils: {}", currentUserId);
+            } catch (Exception e) {
+                // 如果未登录，默认使用用户ID 1（开发环境）
+                log.warn("Failed to get userId from SecurityUtils, using default 1L", e);
+                currentUserId = 1L;
+            }
+        }
+        log.info("Querying milestone tasks for userId: {}", currentUserId);
+        List<MilestoneTask> tasks = milestoneTaskService.getByAssigneeId(currentUserId);
+        log.info("Found {} milestone tasks for userId: {}", tasks.size(), currentUserId);
+        return Result.success(tasks);
     }
 
     /**
@@ -95,15 +156,35 @@ public class MilestoneController {
 
     /**
      * 创建里程碑
+     * 自动将当前用户添加为主负责人
      */
-    @Operation(summary = "创建里程碑", description = "创建一个新的里程碑")
+    @Operation(summary = "创建里程碑", description = "创建一个新的里程碑，自动将当前用户添加为主负责人")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "创建成功"),
         @ApiResponse(responseCode = "400", description = "请求参数错误")
     })
     @PostMapping
-    public Result<Milestone> create(@RequestBody Milestone milestone) {
-        Milestone created = milestoneService.createMilestone(milestone);
+    public Result<Milestone> create(
+            @RequestBody Milestone milestone,
+            @RequestHeader(value = "X-User-Id", required = false) Long headerUserId) {
+        // 获取当前用户ID
+        Long currentUserId = headerUserId;
+        if (currentUserId == null) {
+            try {
+                currentUserId = SecurityUtils.getUserId();
+            } catch (Exception e) {
+                log.warn("Failed to get userId for auto-assign milestone, milestone will have no assignee", e);
+            }
+        }
+        
+        // 创建里程碑并自动添加当前用户为主负责人
+        Milestone created;
+        if (currentUserId != null) {
+            log.info("Auto-assigning milestone to userId: {}", currentUserId);
+            created = milestoneService.createMilestoneWithAssignees(milestone, List.of(currentUserId));
+        } else {
+            created = milestoneService.createMilestone(milestone);
+        }
         return Result.success(created);
     }
 
@@ -337,8 +418,26 @@ public class MilestoneController {
     @PostMapping("/{id}/tasks")
     public Result<MilestoneTask> createTask(
             @Parameter(description = "里程碑ID", required = true) @PathVariable Long id,
-            @RequestBody MilestoneTask task) {
+            @RequestBody MilestoneTask task,
+            @RequestHeader(value = "X-User-Id", required = false) Long headerUserId) {
         task.setMilestoneId(id);
+        
+        // 如果没有指定负责人，自动分配给当前用户
+        if (task.getAssigneeId() == null) {
+            Long currentUserId = headerUserId;
+            if (currentUserId == null) {
+                try {
+                    currentUserId = SecurityUtils.getUserId();
+                } catch (Exception e) {
+                    log.warn("Failed to get userId for auto-assign, task will have no assignee", e);
+                }
+            }
+            if (currentUserId != null) {
+                task.setAssigneeId(currentUserId);
+                log.info("Auto-assigned task to userId: {}", currentUserId);
+            }
+        }
+        
         MilestoneTask created = milestoneTaskService.createTask(task);
         return Result.success(created);
     }
@@ -351,7 +450,24 @@ public class MilestoneController {
     @PostMapping("/tasks/{taskId}/subtasks")
     public Result<MilestoneTask> createSubTask(
             @Parameter(description = "父任务ID", required = true) @PathVariable Long taskId,
-            @RequestBody MilestoneTask task) {
+            @RequestBody MilestoneTask task,
+            @RequestHeader(value = "X-User-Id", required = false) Long headerUserId) {
+        // 如果没有指定负责人，自动分配给当前用户
+        if (task.getAssigneeId() == null) {
+            Long currentUserId = headerUserId;
+            if (currentUserId == null) {
+                try {
+                    currentUserId = SecurityUtils.getUserId();
+                } catch (Exception e) {
+                    log.warn("Failed to get userId for auto-assign, subtask will have no assignee", e);
+                }
+            }
+            if (currentUserId != null) {
+                task.setAssigneeId(currentUserId);
+                log.info("Auto-assigned subtask to userId: {}", currentUserId);
+            }
+        }
+        
         MilestoneTask created = milestoneTaskService.createSubTask(taskId, task);
         return Result.success(created);
     }
@@ -371,7 +487,7 @@ public class MilestoneController {
     }
 
     /**
-     * 更新任务进度
+     * 更新任务进度（简单版本）
      */
     @Operation(summary = "更新任务进度", description = "更新任务的完成进度")
     @ApiResponse(responseCode = "200", description = "更新成功")
@@ -382,6 +498,63 @@ public class MilestoneController {
         Integer progress = body.get("progress");
         boolean result = milestoneTaskService.updateTaskProgress(taskId, progress);
         return Result.success(result);
+    }
+
+    /**
+     * 更新任务进度（增强版本，支持描述和附件）
+     */
+    @Operation(summary = "更新任务进度（增强版）", description = "更新任务进度，支持富文本描述和附件上传")
+    @ApiResponse(responseCode = "200", description = "更新成功")
+    @PostMapping("/tasks/{taskId}/progress-update")
+    public Result<MilestoneTaskProgressRecord> updateTaskProgressEnhanced(
+            @Parameter(description = "任务ID", required = true) @PathVariable Long taskId,
+            @RequestBody MilestoneTaskProgressUpdateRequest request,
+            @RequestHeader(value = "X-User-Id", required = false) Long headerUserId) {
+        // 获取当前用户ID
+        Long currentUserId = headerUserId;
+        if (currentUserId == null) {
+            try {
+                currentUserId = SecurityUtils.getUserId();
+            } catch (Exception e) {
+                log.warn("Failed to get userId for progress update", e);
+            }
+        }
+        
+        MilestoneTaskProgressRecord record = milestoneTaskService.updateTaskProgressEnhanced(
+                taskId, request, currentUserId);
+        return Result.success(record);
+    }
+
+    /**
+     * 获取任务进度更新历史
+     */
+    @Operation(summary = "获取进度更新历史", description = "获取任务的进度更新历史记录")
+    @ApiResponse(responseCode = "200", description = "查询成功")
+    @GetMapping("/tasks/{taskId}/progress-history")
+    public Result<List<MilestoneTaskProgressRecord>> getProgressHistory(
+            @Parameter(description = "任务ID", required = true) @PathVariable Long taskId) {
+        List<MilestoneTaskProgressRecord> records = milestoneTaskService.getProgressHistory(taskId);
+        return Result.success(records);
+    }
+
+    /**
+     * AI 生成/润色进度描述
+     */
+    @Operation(summary = "AI进度描述", description = "使用AI生成或润色进度更新描述")
+    @ApiResponse(responseCode = "200", description = "生成成功")
+    @PostMapping("/tasks/{taskId}/ai-progress-description")
+    public Result<ProgressDescriptionResponse> generateProgressDescription(
+            @Parameter(description = "任务ID", required = true) @PathVariable Long taskId,
+            @RequestBody ProgressDescriptionRequest request) {
+        // 获取任务信息
+        MilestoneTask task = milestoneTaskService.getDetailById(taskId);
+        request.setTaskId(taskId);
+        request.setTaskName(task.getName());
+        request.setTaskDescription(task.getDescription());
+        request.setCurrentProgress(task.getProgress());
+        
+        ProgressDescriptionResponse response = claudeService.generateProgressDescription(request);
+        return Result.success(response);
     }
 
     /**

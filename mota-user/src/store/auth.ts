@@ -2,8 +2,9 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 // 用户类型定义
+// 注意：id 使用 string 类型，因为后端返回的 Long 类型会被序列化为字符串以避免 JavaScript 精度问题
 export interface User {
-  id: number
+  id: string | number
   name: string
   email: string
   avatar?: string

@@ -36,13 +36,16 @@ import {
   PlusOutlined,
   UnorderedListOutlined,
   TeamOutlined,
-  UserOutlined
+  UserOutlined,
+  FlagOutlined
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { taskApi } from '@/services/api'
-import { getMyDepartmentTasks, getStatusText as getDeptStatusText, getStatusColor as getDeptStatusColor, getPriorityText as getDeptPriorityText, getPriorityColor as getDeptPriorityColor } from '@/services/api/departmentTask'
+import { getMyDepartmentTasks, getStatusText as getDeptStatusText, getStatusColor as getDeptStatusColor } from '@/services/api/departmentTask'
+import { getMyMilestoneTasks, getTaskStatusText as getMilestoneStatusText, getTaskStatusColor as getMilestoneStatusColor } from '@/services/api/milestone'
 import type { Task, TaskStatus } from '@/services/api/task'
 import type { DepartmentTask, DepartmentTaskStatus } from '@/services/api/departmentTask'
+import type { MilestoneTask, TaskStatus as MilestoneTaskStatus } from '@/services/api/milestone'
 import styles from './index.module.css'
 
 const { RangePicker } = DatePicker
@@ -62,10 +65,11 @@ interface UnifiedTask {
   startDate?: string
   endDate?: string
   progress: number
-  type: 'task' | 'department_task'  // 区分任务类型
+  type: 'task' | 'department_task' | 'milestone_task'  // 区分任务类型
   projectName?: string
   milestoneName?: string
   departmentName?: string
+  milestoneId?: string
 }
 
 const MyTasks = () => {
@@ -73,7 +77,8 @@ const MyTasks = () => {
   const [loading, setLoading] = useState(true)
   const [tasks, setTasks] = useState<Task[]>([])
   const [departmentTasks, setDepartmentTasks] = useState<DepartmentTask[]>([])
-  const [taskType, setTaskType] = useState<'all' | 'department' | 'execution'>('all')
+  const [milestoneTasks, setMilestoneTasks] = useState<MilestoneTask[]>([])
+  const [taskType, setTaskType] = useState<'all' | 'department' | 'execution' | 'milestone'>('all')
   const [activeTab, setActiveTab] = useState('all')
   const [searchText, setSearchText] = useState('')
   const [priorityFilter, setPriorityFilter] = useState<string | undefined>()
@@ -86,18 +91,21 @@ const MyTasks = () => {
   const loadAllTasks = async () => {
     setLoading(true)
     try {
-      // 同时加载执行任务和部门任务
-      const [taskRes, deptTaskRes] = await Promise.all([
+      // 同时加载执行任务、部门任务和里程碑任务
+      const [taskRes, deptTaskRes, milestoneTaskRes] = await Promise.all([
         taskApi.getMyTasks(),
-        getMyDepartmentTasks()
+        getMyDepartmentTasks(),
+        getMyMilestoneTasks()
       ])
       setTasks(taskRes.list || [])
       setDepartmentTasks(deptTaskRes.list || [])
+      setMilestoneTasks(milestoneTaskRes || [])
     } catch (error) {
       console.error('Failed to load tasks:', error)
       message.error('加载任务失败，请稍后重试')
       setTasks([])
       setDepartmentTasks([])
+      setMilestoneTasks([])
     } finally {
       setLoading(false)
     }
@@ -133,6 +141,21 @@ const MyTasks = () => {
     projectName: t.projectName
   })
 
+  // 将里程碑任务转换为统一格式
+  const convertMilestoneTask = (mt: MilestoneTask): UnifiedTask => ({
+    id: mt.id,
+    name: mt.name,
+    description: mt.description,
+    status: mt.status,
+    priority: mt.priority,
+    startDate: mt.startDate,
+    endDate: mt.dueDate,
+    progress: mt.progress,
+    type: 'milestone_task',
+    milestoneId: mt.milestoneId,
+    milestoneName: mt.milestoneName
+  })
+
   // 获取统一的任务列表
   const getUnifiedTasks = (): UnifiedTask[] => {
     let unified: UnifiedTask[] = []
@@ -142,6 +165,9 @@ const MyTasks = () => {
     }
     if (taskType === 'all' || taskType === 'execution') {
       unified = [...unified, ...tasks.map(convertTask)]
+    }
+    if (taskType === 'all' || taskType === 'milestone') {
+      unified = [...unified, ...milestoneTasks.map(convertMilestoneTask)]
     }
     
     return unified
@@ -202,8 +228,9 @@ const MyTasks = () => {
     ).length
     const deptTaskCount = departmentTasks.length
     const execTaskCount = tasks.length
+    const milestoneTaskCount = milestoneTasks.length
 
-    return { total, completed, inProgress, overdue, deptTaskCount, execTaskCount }
+    return { total, completed, inProgress, overdue, deptTaskCount, execTaskCount, milestoneTaskCount }
   }
 
   const stats = getStatistics()
@@ -252,6 +279,9 @@ const MyTasks = () => {
     if (task.type === 'department_task') {
       return getDeptStatusText(task.status as DepartmentTaskStatus)
     }
+    if (task.type === 'milestone_task') {
+      return getMilestoneStatusText(task.status as MilestoneTaskStatus)
+    }
     return taskApi.getStatusText(task.status as TaskStatus)
   }
 
@@ -260,6 +290,9 @@ const MyTasks = () => {
     if (task.type === 'department_task') {
       return getDeptStatusColor(task.status as DepartmentTaskStatus)
     }
+    if (task.type === 'milestone_task') {
+      return getMilestoneStatusColor(task.status as MilestoneTaskStatus)
+    }
     return taskApi.getStatusColor(task.status as TaskStatus)
   }
 
@@ -267,6 +300,9 @@ const MyTasks = () => {
   const handleTaskClick = (task: UnifiedTask) => {
     if (task.type === 'department_task') {
       navigate(`/department-tasks/${task.id}`)
+    } else if (task.type === 'milestone_task') {
+      // 里程碑任务跳转到里程碑详情页
+      navigate(`/milestones/tasks/${task.id}`)
     } else {
       navigate(`/tasks/${task.id}`)
     }
@@ -377,11 +413,12 @@ const MyTasks = () => {
       <div className={styles.taskTypeSwitch}>
         <Segmented
           value={taskType}
-          onChange={(value) => setTaskType(value as 'all' | 'department' | 'execution')}
+          onChange={(value) => setTaskType(value as 'all' | 'department' | 'execution' | 'milestone')}
           options={[
             { value: 'all', label: '全部', icon: <ProjectOutlined /> },
             { value: 'department', label: `部门任务 (${stats.deptTaskCount})`, icon: <TeamOutlined /> },
-            { value: 'execution', label: `执行任务 (${stats.execTaskCount})`, icon: <UserOutlined /> }
+            { value: 'execution', label: `执行任务 (${stats.execTaskCount})`, icon: <UserOutlined /> },
+            { value: 'milestone', label: `里程碑任务 (${stats.milestoneTaskCount})`, icon: <FlagOutlined /> }
           ]}
         />
       </div>
@@ -462,6 +499,9 @@ const MyTasks = () => {
                         )}
                         {task.type === 'task' && (
                           <Tag color="cyan" style={{ marginLeft: 8, fontSize: 10 }}>执行任务</Tag>
+                        )}
+                        {task.type === 'milestone_task' && (
+                          <Tag color="orange" style={{ marginLeft: 8, fontSize: 10 }}>里程碑任务</Tag>
                         )}
                       </h3>
                       <Space size={8}>

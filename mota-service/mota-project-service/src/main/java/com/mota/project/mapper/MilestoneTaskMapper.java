@@ -34,18 +34,21 @@ public interface MilestoneTaskMapper extends BaseMapper<MilestoneTask> {
     List<MilestoneTask> selectByMilestoneId(@Param("milestoneId") Long milestoneId);
 
     /**
-     * 根据负责人ID查询任务列表（包含负责人信息）
+     * 根据负责人ID查询任务列表（包含负责人信息和里程碑名称）
      */
     @Select("SELECT mt.*, " +
             "COALESCE(u.nickname, u.username) as assignee_name, " +
-            "u.avatar as assignee_avatar " +
+            "u.avatar as assignee_avatar, " +
+            "m.name as milestone_name " +
             "FROM milestone_task mt " +
             "LEFT JOIN sys_user u ON mt.assignee_id = u.id " +
+            "LEFT JOIN milestone m ON mt.milestone_id = m.id " +
             "WHERE mt.assignee_id = #{assigneeId} AND mt.deleted = 0 " +
             "ORDER BY mt.due_date")
     @Results({
             @Result(property = "assigneeName", column = "assignee_name"),
-            @Result(property = "assigneeAvatar", column = "assignee_avatar")
+            @Result(property = "assigneeAvatar", column = "assignee_avatar"),
+            @Result(property = "milestoneName", column = "milestone_name")
     })
     List<MilestoneTask> selectByAssigneeId(@Param("assigneeId") Long assigneeId);
 

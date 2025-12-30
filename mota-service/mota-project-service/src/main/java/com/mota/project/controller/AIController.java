@@ -2,12 +2,14 @@ package com.mota.project.controller;
 
 import com.mota.common.core.result.Result;
 import com.mota.project.dto.ai.*;
+import com.mota.project.service.ai.ClaudeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,6 +20,7 @@ import java.util.*;
 /**
  * AI 智能功能控制器
  */
+@Slf4j
 @Tag(name = "AI 智能功能", description = "AI 方案生成、PPT生成、任务分解、风险预警等智能功能")
 @RestController
 @RequestMapping("/api/v1/ai")
@@ -25,6 +28,8 @@ import java.util.*;
 public class AIController {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    
+    private final ClaudeService claudeService;
 
     // ============ AI 历史记录 API ============
 
@@ -458,56 +463,19 @@ public class AIController {
     // ============ 项目协同 AI 功能 ============
 
     /**
-     * AI 任务分解
+     * AI 任务分解 - 调用 Claude 大模型进行智能任务分解
      */
-    @Operation(summary = "AI任务分解", description = "使用AI智能分解项目任务")
+    @Operation(summary = "AI任务分解", description = "使用Claude大模型智能分解项目任务，根据项目描述自动生成任务列表")
     @ApiResponse(responseCode = "200", description = "分解成功")
     @PostMapping("/project/decompose")
     public Result<TaskDecompositionResponse> generateTaskDecomposition(@RequestBody TaskDecompositionRequest request) {
-        List<TaskDecompositionSuggestion> suggestions = Arrays.asList(
-                TaskDecompositionSuggestion.builder()
-                        .id("1")
-                        .name("需求分析")
-                        .description("收集和分析项目需求，编写需求文档")
-                        .suggestedDepartment("产品部")
-                        .suggestedPriority("high")
-                        .estimatedDays(5)
-                        .dependencies(Collections.emptyList())
-                        .build(),
-                TaskDecompositionSuggestion.builder()
-                        .id("2")
-                        .name("技术方案设计")
-                        .description("根据需求设计技术架构和实现方案")
-                        .suggestedDepartment("技术部")
-                        .suggestedPriority("high")
-                        .estimatedDays(3)
-                        .dependencies(Arrays.asList("1"))
-                        .build(),
-                TaskDecompositionSuggestion.builder()
-                        .id("3")
-                        .name("开发实现")
-                        .description("按照技术方案进行编码开发")
-                        .suggestedDepartment("技术部")
-                        .suggestedPriority("medium")
-                        .estimatedDays(15)
-                        .dependencies(Arrays.asList("2"))
-                        .build(),
-                TaskDecompositionSuggestion.builder()
-                        .id("4")
-                        .name("测试验收")
-                        .description("进行功能测试和用户验收测试")
-                        .suggestedDepartment("测试部")
-                        .suggestedPriority("medium")
-                        .estimatedDays(5)
-                        .dependencies(Arrays.asList("3"))
-                        .build()
-        );
+        log.info("收到AI任务分解请求, 项目名称: {}", request.getProjectName());
         
-        return Result.success(TaskDecompositionResponse.builder()
-                .suggestions(suggestions)
-                .totalEstimatedDays(28)
-                .riskAssessment("项目整体风险较低，建议关注需求变更和技术难点")
-                .build());
+        // 调用 Claude 服务进行任务分解
+        TaskDecompositionResponse response = claudeService.decomposeTask(request);
+        
+        log.info("AI任务分解完成, 生成 {} 个任务建议", response.getSuggestions().size());
+        return Result.success(response);
     }
 
     /**

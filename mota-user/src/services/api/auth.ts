@@ -14,12 +14,13 @@ export interface LoginRequest {
 }
 
 // 登录响应
+// 注意：userId 使用 string 类型，因为后端返回的 Long 类型会被序列化为字符串以避免 JavaScript 精度问题
 export interface LoginResponse {
   accessToken: string
   refreshToken: string
   tokenType: string
   expiresIn: number
-  userId: number
+  userId: string | number
   username: string
   nickname: string
   avatar: string
@@ -42,11 +43,12 @@ export interface RegisterRequest {
 }
 
 // 注册响应
+// 注意：userId 和 enterpriseId 使用 string 类型，因为后端返回的 Long 类型会被序列化为字符串以避免 JavaScript 精度问题
 export interface RegisterResponse {
-  userId: number
+  userId: string | number
   username: string
   email?: string
-  enterpriseId: number
+  enterpriseId: string | number
   enterpriseName: string
   orgId: string
   industryId: number
@@ -84,8 +86,9 @@ export interface InvitationValidateResult {
 }
 
 // 用户信息
+// 注意：id 和 enterpriseId 使用 string 类型，因为后端返回的 Long 类型会被序列化为字符串以避免 JavaScript 精度问题
 export interface UserInfo {
-  id: number
+  id: string | number
   username: string
   email: string
   phone?: string
@@ -94,7 +97,7 @@ export interface UserInfo {
   status: number
   orgId?: string
   orgName?: string
-  enterpriseId?: number
+  enterpriseId?: string | number
   enterpriseRole?: string
   lastLoginAt?: string
   createdAt?: string

@@ -103,21 +103,52 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
 
     @Override
     public ProjectDetailResponse getProjectDetailFull(Long id) {
+        log.debug("获取项目详情, projectId: {}", id);
+        
         Project project = getProjectDetail(id);
         
         ProjectDetailResponse response = new ProjectDetailResponse();
         BeanUtils.copyProperties(project, response);
         
         // 获取项目成员
-        List<ProjectMember> members = projectMemberMapper.selectByProjectId(id);
-        response.setMembers(convertToMemberInfoList(members));
+        try {
+            List<ProjectMember> members = projectMemberMapper.selectByProjectId(id);
+            response.setMembers(convertToMemberInfoList(members));
+            log.debug("获取项目成员成功, count: {}", members != null ? members.size() : 0);
+        } catch (Exception e) {
+            log.error("获取项目成员失败, projectId: {}, error: {}", id, e.getMessage(), e);
+            response.setMembers(new ArrayList<>());
+        }
         
         // 获取里程碑
-        List<Milestone> milestones = milestoneMapper.selectByProjectId(id);
-        response.setMilestones(convertToMilestoneInfoList(milestones));
+        try {
+            List<Milestone> milestones = milestoneMapper.selectByProjectId(id);
+            response.setMilestones(convertToMilestoneInfoList(milestones));
+            log.debug("获取里程碑成功, count: {}", milestones != null ? milestones.size() : 0);
+        } catch (Exception e) {
+            log.error("获取里程碑失败, projectId: {}, error: {}", id, e.getMessage(), e);
+            response.setMilestones(new ArrayList<>());
+        }
         
         // 获取统计信息
-        response.setStatistics(getProjectStatistics(id));
+        try {
+            response.setStatistics(getProjectStatistics(id));
+            log.debug("获取统计信息成功");
+        } catch (Exception e) {
+            log.error("获取统计信息失败, projectId: {}, error: {}", id, e.getMessage(), e);
+            // 返回默认统计信息
+            ProjectDetailResponse.ProjectStatistics defaultStats = new ProjectDetailResponse.ProjectStatistics();
+            defaultStats.setTotalTasks(0);
+            defaultStats.setCompletedTasks(0);
+            defaultStats.setInProgressTasks(0);
+            defaultStats.setPendingTasks(0);
+            defaultStats.setOverdueTasks(0);
+            defaultStats.setDepartmentTaskCount(0);
+            defaultStats.setTotalMilestones(0);
+            defaultStats.setCompletedMilestones(0);
+            defaultStats.setCompletionRate(0.0);
+            response.setStatistics(defaultStats);
+        }
         
         return response;
     }
@@ -605,12 +636,16 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
 
     @Override
     public ProjectDetailResponse.ProjectStatistics getProjectStatistics(Long projectId) {
+        log.debug("获取项目统计信息, projectId: {}", projectId);
+        
         Map<String, Object> stats = baseMapper.getProjectStatistics(projectId);
+        log.debug("统计信息原始数据: {}", stats);
         
         ProjectDetailResponse.ProjectStatistics statistics = new ProjectDetailResponse.ProjectStatistics();
         
         // 处理空值情况
-        if (stats == null) {
+        if (stats == null || stats.isEmpty()) {
+            log.warn("项目统计信息为空, projectId: {}", projectId);
             statistics.setTotalTasks(0);
             statistics.setCompletedTasks(0);
             statistics.setInProgressTasks(0);
@@ -713,7 +748,24 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
     }
 
     private Integer getIntValue(Map<String, Object> map, String key) {
+        // 首先尝试直接获取
         Object value = map.get(key);
+        
+        // 如果为空，尝试小写键名（MySQL可能返回小写的列别名）
+        if (value == null) {
+            value = map.get(key.toLowerCase());
+        }
+        
+        // 如果还是为空，遍历查找（大小写不敏感）
+        if (value == null) {
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                if (entry.getKey().equalsIgnoreCase(key)) {
+                    value = entry.getValue();
+                    break;
+                }
+            }
+        }
+        
         if (value == null) {
             return 0;
         }

@@ -1,6 +1,6 @@
 /**
  * 里程碑详情抽屉组件
- * 支持查看和编辑里程碑详情、负责人管理、任务分解
+ * 支持查看和编辑里程碑详情、负责人管理、任务分解、AI智能分解
  */
 
 import { useState, useEffect, useCallback } from 'react'
@@ -22,7 +22,9 @@ import {
   Spin,
   Empty,
   Popconfirm,
-  Divider
+  Divider,
+  List,
+  Card
 } from 'antd'
 import {
   ClockCircleOutlined,
@@ -34,10 +36,14 @@ import {
   CloseOutlined,
   FlagOutlined,
   CalendarOutlined,
-  UnorderedListOutlined
+  UnorderedListOutlined,
+  RobotOutlined,
+  ThunderboltOutlined,
+  BulbOutlined
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
-import { milestoneApi, userApi } from '@/services/api'
+import { milestoneApi, userApi, aiApi } from '@/services/api'
+import type { TaskDecompositionSuggestion } from '@/services/api/ai'
 import type {
   Milestone,
   MilestoneAssignee,
@@ -74,6 +80,12 @@ const MilestoneDetailDrawer: React.FC<MilestoneDetailDrawerProps> = ({
   const [taskForm] = Form.useForm()
   const [editingTask, setEditingTask] = useState<MilestoneTask | null>(null)
   const [taskModalVisible, setTaskModalVisible] = useState(false)
+  
+  // AI 智能分解相关状态
+  const [aiModalVisible, setAiModalVisible] = useState(false)
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiSuggestions, setAiSuggestions] = useState<TaskDecompositionSuggestion[]>([])
+  const [selectedSuggestions, setSelectedSuggestions] = useState<string[]>([])
 
   // 加载任务列表
   const loadTasks = useCallback(async () => {
@@ -231,6 +243,86 @@ const MilestoneDetailDrawer: React.FC<MilestoneDetailDrawerProps> = ({
     } catch (error) {
       console.error('Delete task error:', error)
       message.error('删除任务失败')
+    }
+  }
+
+  // AI 智能分解任务
+  const handleAIDecompose = async () => {
+    if (!milestone) return
+    
+    setAiLoading(true)
+    setAiModalVisible(true)
+    setAiSuggestions([])
+    setSelectedSuggestions([])
+    
+    try {
+      const response = await aiApi.generateTaskDecomposition({
+        projectName: milestone.name,
+        projectDescription: milestone.description || `里程碑：${milestone.name}，目标日期：${milestone.targetDate}`,
+        departments: [],
+        startDate: dayjs().format('YYYY-MM-DD'),
+        endDate: milestone.targetDate
+      })
+      
+      setAiSuggestions(response.suggestions || [])
+      // 默认全选
+      setSelectedSuggestions(response.suggestions?.map(s => s.id) || [])
+    } catch (error) {
+      console.error('AI decompose error:', error)
+      message.error('AI分解失败，请稍后重试')
+    } finally {
+      setAiLoading(false)
+    }
+  }
+
+  // 应用AI建议的任务
+  const handleApplyAISuggestions = async () => {
+    if (!milestone || selectedSuggestions.length === 0) {
+      message.warning('请至少选择一个任务')
+      return
+    }
+    
+    const tasksToCreate = aiSuggestions.filter(s => selectedSuggestions.includes(s.id))
+    
+    try {
+      setAiLoading(true)
+      
+      for (const suggestion of tasksToCreate) {
+        await milestoneApi.createMilestoneTask(milestone.id, {
+          name: suggestion.name,
+          description: suggestion.description,
+          priority: suggestion.suggestedPriority as TaskPriority || 'medium',
+          dueDate: milestone.targetDate
+        })
+      }
+      
+      message.success(`成功创建 ${tasksToCreate.length} 个任务`)
+      setAiModalVisible(false)
+      loadTasks()
+      onUpdate?.()
+    } catch (error) {
+      console.error('Apply AI suggestions error:', error)
+      message.error('创建任务失败')
+    } finally {
+      setAiLoading(false)
+    }
+  }
+
+  // 切换选择AI建议
+  const toggleSuggestionSelection = (id: string) => {
+    setSelectedSuggestions(prev =>
+      prev.includes(id)
+        ? prev.filter(s => s !== id)
+        : [...prev, id]
+    )
+  }
+
+  // 全选/取消全选AI建议
+  const toggleSelectAll = () => {
+    if (selectedSuggestions.length === aiSuggestions.length) {
+      setSelectedSuggestions([])
+    } else {
+      setSelectedSuggestions(aiSuggestions.map(s => s.id))
     }
   }
 
@@ -434,16 +526,29 @@ const MilestoneDetailDrawer: React.FC<MilestoneDetailDrawerProps> = ({
                 />
               )}
             </span>
-            {editable && (
-              <Button
-                type="link"
-                size="small"
-                icon={<PlusOutlined />}
-                onClick={() => setShowAddTask(!showAddTask)}
-              >
-                添加任务
-              </Button>
-            )}
+            <Space>
+              {editable && (
+                <Button
+                  type="link"
+                  size="small"
+                  icon={<RobotOutlined />}
+                  onClick={handleAIDecompose}
+                  style={{ color: '#722ed1' }}
+                >
+                  AI智能分解
+                </Button>
+              )}
+              {editable && (
+                <Button
+                  type="link"
+                  size="small"
+                  icon={<PlusOutlined />}
+                  onClick={() => setShowAddTask(!showAddTask)}
+                >
+                  添加任务
+                </Button>
+              )}
+            </Space>
           </div>
 
           {/* 任务列表 */}
@@ -640,6 +745,105 @@ const MilestoneDetailDrawer: React.FC<MilestoneDetailDrawerProps> = ({
             </Select>
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* AI 智能分解弹窗 */}
+      <Modal
+        title={
+          <Space>
+            <RobotOutlined style={{ color: '#722ed1' }} />
+            <span>AI 智能分解任务</span>
+          </Space>
+        }
+        open={aiModalVisible}
+        onCancel={() => setAiModalVisible(false)}
+        width={700}
+        footer={
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              {aiSuggestions.length > 0 && (
+                <Checkbox
+                  checked={selectedSuggestions.length === aiSuggestions.length}
+                  indeterminate={selectedSuggestions.length > 0 && selectedSuggestions.length < aiSuggestions.length}
+                  onChange={toggleSelectAll}
+                >
+                  全选 ({selectedSuggestions.length}/{aiSuggestions.length})
+                </Checkbox>
+              )}
+            </div>
+            <Space>
+              <Button onClick={() => setAiModalVisible(false)}>取消</Button>
+              <Button
+                type="primary"
+                icon={<ThunderboltOutlined />}
+                loading={aiLoading}
+                disabled={selectedSuggestions.length === 0}
+                onClick={handleApplyAISuggestions}
+              >
+                应用选中的任务 ({selectedSuggestions.length})
+              </Button>
+            </Space>
+          </div>
+        }
+      >
+        <Spin spinning={aiLoading}>
+          {aiSuggestions.length > 0 ? (
+            <div className={styles.aiSuggestionList}>
+              <div className={styles.aiTip}>
+                <BulbOutlined style={{ color: '#faad14', marginRight: 8 }} />
+                AI 根据里程碑「{milestone?.name}」智能生成了以下任务建议，请选择需要创建的任务：
+              </div>
+              <List
+                dataSource={aiSuggestions}
+                renderItem={(item) => (
+                  <Card
+                    size="small"
+                    className={`${styles.aiSuggestionCard} ${selectedSuggestions.includes(item.id) ? styles.selected : ''}`}
+                    onClick={() => toggleSuggestionSelection(item.id)}
+                    style={{ marginBottom: 8, cursor: 'pointer' }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                      <Checkbox
+                        checked={selectedSuggestions.includes(item.id)}
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={() => toggleSuggestionSelection(item.id)}
+                      />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                          <span style={{ fontWeight: 500 }}>{item.name}</span>
+                          <Tag color={getPriorityColor(item.suggestedPriority)}>
+                            {getPriorityText(item.suggestedPriority)}
+                          </Tag>
+                          {item.estimatedDays && (
+                            <Tag color="blue">预计 {item.estimatedDays} 天</Tag>
+                          )}
+                        </div>
+                        {item.description && (
+                          <div style={{ fontSize: 13, color: '#666' }}>{item.description}</div>
+                        )}
+                        {item.suggestedDepartment && (
+                          <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>
+                            建议部门：{item.suggestedDepartment}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                )}
+              />
+            </div>
+          ) : !aiLoading ? (
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description="暂无AI建议，请稍后重试"
+            />
+          ) : (
+            <div style={{ textAlign: 'center', padding: '40px 0' }}>
+              <RobotOutlined style={{ fontSize: 48, color: '#722ed1', marginBottom: 16 }} />
+              <div style={{ color: '#666' }}>AI 正在分析里程碑内容，智能生成任务建议...</div>
+            </div>
+          )}
+        </Spin>
       </Modal>
     </Drawer>
   )

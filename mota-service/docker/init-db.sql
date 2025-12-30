@@ -117,6 +117,12 @@ CREATE TABLE IF NOT EXISTS project (
     progress INT DEFAULT 0,
     member_count INT DEFAULT 1,
     issue_count INT DEFAULT 0,
+    start_date DATE COMMENT '项目开始日期',
+    end_date DATE COMMENT '项目结束日期',
+    priority VARCHAR(20) DEFAULT 'medium' COMMENT '优先级(low/medium/high/urgent)',
+    visibility VARCHAR(20) DEFAULT 'private' COMMENT '可见性(private/internal/public)',
+    archived_at DATETIME COMMENT '归档时间',
+    archived_by BIGINT COMMENT '归档人ID',
     settings JSON,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -126,7 +132,8 @@ CREATE TABLE IF NOT EXISTS project (
     version INT DEFAULT 0,
     UNIQUE KEY uk_org_key (org_id, `key`),
     INDEX idx_project_org_id (org_id),
-    INDEX idx_project_owner_id (owner_id)
+    INDEX idx_project_owner_id (owner_id),
+    INDEX idx_project_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='项目表';
 
 -- 项目成员表
@@ -134,14 +141,19 @@ CREATE TABLE IF NOT EXISTS project_member (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     project_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
-    role VARCHAR(20) NOT NULL DEFAULT 'member',
+    role VARCHAR(30) NOT NULL DEFAULT 'member',
+    department_id BIGINT COMMENT '所属部门ID',
     joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_by BIGINT COMMENT '创建人ID',
+    updated_by BIGINT COMMENT '更新人ID',
     deleted TINYINT DEFAULT 0,
+    version INT DEFAULT 0 COMMENT '乐观锁版本号',
     UNIQUE KEY uk_project_user (project_id, user_id),
     INDEX idx_project_member_project_id (project_id),
-    INDEX idx_project_member_user_id (user_id)
+    INDEX idx_project_member_user_id (user_id),
+    INDEX idx_project_member_department_id (department_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='项目成员表';
 
 -- 迭代表

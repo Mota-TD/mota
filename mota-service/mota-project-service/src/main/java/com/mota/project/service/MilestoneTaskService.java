@@ -1,8 +1,10 @@
 package com.mota.project.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.mota.project.dto.request.MilestoneTaskProgressUpdateRequest;
 import com.mota.project.entity.MilestoneTask;
 import com.mota.project.entity.MilestoneTaskAttachment;
+import com.mota.project.entity.MilestoneTaskProgressRecord;
 
 import java.util.List;
 
@@ -90,4 +92,14 @@ public interface MilestoneTaskService extends IService<MilestoneTask> {
      * 删除任务附件
      */
     boolean deleteAttachment(Long attachmentId);
+
+    /**
+     * 更新任务进度（增强版本，支持描述和附件）
+     */
+    MilestoneTaskProgressRecord updateTaskProgressEnhanced(Long taskId, MilestoneTaskProgressUpdateRequest request, Long userId);
+
+    /**
+     * 获取任务进度更新历史
+     */
+    List<MilestoneTaskProgressRecord> getProgressHistory(Long taskId);
 }

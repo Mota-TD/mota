@@ -79,8 +79,8 @@ async function request<T>(url: string, config: RequestConfig = {}): Promise<T> {
   // 构建完整 URL
   const fullUrl = buildUrl(`${API_BASE_URL}${url}`, params)
   
-  // 获取 token
-  const token = useAuthStore.getState().token
+  // 获取 token 和用户信息
+  const { token, user } = useAuthStore.getState()
   
   // 默认请求头
   const headers: HeadersInit = {
@@ -91,6 +91,11 @@ async function request<T>(url: string, config: RequestConfig = {}): Promise<T> {
   // 添加认证头
   if (token) {
     (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`
+  }
+  
+  // 添加用户 ID 请求头（模拟网关行为，因为开发环境直接代理到微服务）
+  if (user?.id) {
+    (headers as Record<string, string>)['X-User-Id'] = String(user.id)
   }
   
   // 创建 AbortController 用于超时控制

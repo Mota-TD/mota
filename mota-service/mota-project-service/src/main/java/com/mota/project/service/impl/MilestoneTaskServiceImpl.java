@@ -2,30 +2,41 @@ package com.mota.project.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mota.common.core.exception.BusinessException;
+import com.mota.project.dto.request.MilestoneTaskProgressUpdateRequest;
 import com.mota.project.entity.MilestoneTask;
 import com.mota.project.entity.MilestoneTaskAttachment;
+import com.mota.project.entity.MilestoneTaskProgressRecord;
 import com.mota.project.mapper.MilestoneTaskAttachmentMapper;
 import com.mota.project.mapper.MilestoneTaskMapper;
+import com.mota.project.mapper.MilestoneTaskProgressRecordMapper;
 import com.mota.project.service.MilestoneService;
 import com.mota.project.service.MilestoneTaskService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * 里程碑任务服务实现
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MilestoneTaskServiceImpl extends ServiceImpl<MilestoneTaskMapper, MilestoneTask> implements MilestoneTaskService {
 
     private final MilestoneTaskAttachmentMapper attachmentMapper;
+    private final MilestoneTaskProgressRecordMapper progressRecordMapper;
+    private final ObjectMapper objectMapper;
     
     @Lazy
     private final MilestoneService milestoneService;
@@ -48,12 +59,22 @@ public class MilestoneTaskServiceImpl extends ServiceImpl<MilestoneTaskMapper, M
         }
         
         // 加载子任务
-        List<MilestoneTask> subTasks = baseMapper.selectByParentTaskId(id);
-        task.setSubTasks(subTasks);
+        try {
+            List<MilestoneTask> subTasks = baseMapper.selectByParentTaskId(id);
+            task.setSubTasks(subTasks);
+        } catch (Exception e) {
+            log.warn("Failed to load subtasks for task {}: {}", id, e.getMessage());
+            task.setSubTasks(List.of());
+        }
         
-        // 加载附件
-        List<MilestoneTaskAttachment> attachments = attachmentMapper.selectByTaskId(id);
-        task.setAttachments(attachments);
+        // 加载附件（可能表不存在，忽略错误）
+        try {
+            List<MilestoneTaskAttachment> attachments = attachmentMapper.selectByTaskId(id);
+            task.setAttachments(attachments);
+        } catch (Exception e) {
+            log.warn("Failed to load attachments for task {}: {}", id, e.getMessage());
+            task.setAttachments(List.of());
+        }
         
         return task;
     }
@@ -328,6 +349,76 @@ public class MilestoneTaskServiceImpl extends ServiceImpl<MilestoneTaskMapper, M
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteAttachment(Long attachmentId) {
         return attachmentMapper.deleteById(attachmentId) > 0;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public MilestoneTaskProgressRecord updateTaskProgressEnhanced(Long taskId, MilestoneTaskProgressUpdateRequest request, Long userId) {
+        MilestoneTask task = getById(taskId);
+        if (task == null) {
+            throw new BusinessException("任务不存在");
+        }
+        
+        Integer previousProgress = task.getProgress() != null ? task.getProgress() : 0;
+        Integer currentProgress = request.getProgress();
+        
+        // 创建进度记录
+        MilestoneTaskProgressRecord record = new MilestoneTaskProgressRecord();
+        record.setTaskId(taskId);
+        record.setPreviousProgress(previousProgress);
+        record.setCurrentProgress(currentProgress);
+        record.setDescription(request.getDescription());
+        record.setUpdatedBy(userId);
+        
+        // 处理附件列表，转换为JSON
+        if (!CollectionUtils.isEmpty(request.getAttachments())) {
+            try {
+                record.setAttachments(objectMapper.writeValueAsString(request.getAttachments()));
+            } catch (JsonProcessingException e) {
+                log.error("Failed to serialize attachments", e);
+                record.setAttachments("[]");
+            }
+        }
+        
+        progressRecordMapper.insert(record);
+        
+        // 更新任务进度
+        task.setProgress(currentProgress);
+        
+        // 如果进度为100，自动完成任务
+        if (currentProgress >= 100) {
+            task.setStatus(MilestoneTask.Status.COMPLETED);
+            task.setCompletedAt(LocalDateTime.now());
+        } else if (currentProgress > 0) {
+            task.setStatus(MilestoneTask.Status.IN_PROGRESS);
+        }
+        
+        updateById(task);
+        
+        // 更新父任务进度
+        if (task.getParentTaskId() != null) {
+            updateParentTaskProgress(task.getParentTaskId());
+        }
+        
+        // 更新里程碑进度
+        milestoneService.updateMilestoneProgress(task.getMilestoneId());
+        
+        return record;
+    }
+
+    @Override
+    public List<MilestoneTaskProgressRecord> getProgressHistory(Long taskId) {
+        MilestoneTask task = getById(taskId);
+        if (task == null) {
+            throw new BusinessException("任务不存在");
+        }
+        
+        try {
+            return progressRecordMapper.selectByTaskId(taskId);
+        } catch (Exception e) {
+            log.warn("Failed to load progress history for task {}: {}", taskId, e.getMessage());
+            return Collections.emptyList();
+        }
     }
 
     /**

@@ -26,6 +26,7 @@ const ProjectDetail = lazy(() => import('@/pages/project-detail'))
 const ProjectDetailV2 = lazy(() => import('@/pages/project-detail-v2'))
 const DepartmentTaskDetail = lazy(() => import('@/pages/department-task-detail'))
 const TaskDetail = lazy(() => import('@/pages/task-detail'))
+const MilestoneTaskDetail = lazy(() => import('@/pages/milestone-task-detail'))
 const MyTasks = lazy(() => import('@/pages/my-tasks'))
 const NotFound = lazy(() => import('@/pages/NotFound'))
 const Help = lazy(() => import('@/pages/help'))
@@ -325,6 +326,25 @@ export const routes: RouteObject[] = [
         element: (
           <Suspense fallback={<Loading />}>
             <TaskDetail />
+          </Suspense>
+        )
+      },
+    ]
+  },
+  // 里程碑任务详情路由
+  {
+    path: '/milestones/tasks',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        path: ':id',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <MilestoneTaskDetail />
           </Suspense>
         )
       },

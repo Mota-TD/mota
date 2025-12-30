@@ -61,6 +61,8 @@ export interface MilestoneTask {
   sortOrder?: number
   createdAt?: string
   updatedAt?: string
+  // 里程碑名称（非数据库字段）
+  milestoneName?: string
   // 子任务
   subTasks?: MilestoneTask[]
 }
@@ -266,6 +268,34 @@ export function isOverdue(milestone: Milestone): boolean {
 // ==================== 负责人管理 API ====================
 
 /**
+ * 获取当前用户负责的里程碑
+ */
+export function getMyMilestones(): Promise<Milestone[]> {
+  return get<Milestone[]>('/api/v1/milestones/my')
+}
+
+/**
+ * 获取当前用户负责的里程碑任务
+ */
+export function getMyMilestoneTasks(): Promise<MilestoneTask[]> {
+  return get<MilestoneTask[]>('/api/v1/milestones/my-tasks')
+}
+
+/**
+ * 根据用户ID获取负责的里程碑
+ */
+export function getMilestonesByAssignee(userId: string | number): Promise<Milestone[]> {
+  return get<Milestone[]>(`/api/v1/milestones/assignee/${userId}`)
+}
+
+/**
+ * 根据用户ID获取负责的里程碑任务
+ */
+export function getMilestoneTasksByAssignee(userId: string | number): Promise<MilestoneTask[]> {
+  return get<MilestoneTask[]>(`/api/v1/milestones/tasks/assignee/${userId}`)
+}
+
+/**
  * 获取里程碑负责人列表
  */
 export function getMilestoneAssignees(milestoneId: string | number): Promise<MilestoneAssignee[]> {
@@ -335,6 +365,84 @@ export function updateTask(taskId: string | number, task: Partial<MilestoneTask>
  */
 export function updateTaskProgress(taskId: string | number, progress: number): Promise<boolean> {
   return put<boolean>(`/api/v1/milestones/tasks/${taskId}/progress`, { progress })
+}
+
+// ==================== 增强进度更新 API ====================
+
+/**
+ * 进度附件信息
+ */
+export interface ProgressAttachment {
+  fileName: string
+  fileUrl: string
+  fileType: string
+  fileSize?: number
+}
+
+/**
+ * 增强进度更新请求
+ */
+export interface EnhancedProgressUpdateRequest {
+  progress: number
+  description?: string
+  attachments?: ProgressAttachment[]
+}
+
+/**
+ * 进度记录
+ */
+export interface ProgressRecord {
+  id: string
+  taskId: string
+  previousProgress: number
+  currentProgress: number
+  description?: string
+  attachments?: string  // JSON string
+  updatedBy?: string
+  createdAt?: string
+  updatedAt?: string
+}
+
+/**
+ * AI进度描述请求
+ */
+export interface AIProgressDescriptionRequest {
+  taskName: string
+  taskDescription?: string
+  currentProgress: number
+  previousProgress?: number
+  userInput?: string
+  actionType: 'polish' | 'generate'
+}
+
+/**
+ * AI进度描述响应
+ */
+export interface AIProgressDescriptionResponse {
+  description: string
+  success: boolean
+  errorMessage?: string
+}
+
+/**
+ * 增强进度更新（带描述和附件）
+ */
+export function updateTaskProgressEnhanced(taskId: string | number, request: EnhancedProgressUpdateRequest): Promise<ProgressRecord> {
+  return post<ProgressRecord>(`/api/v1/milestones/tasks/${taskId}/progress-update`, request)
+}
+
+/**
+ * 获取任务进度历史
+ */
+export function getTaskProgressHistory(taskId: string | number): Promise<ProgressRecord[]> {
+  return get<ProgressRecord[]>(`/api/v1/milestones/tasks/${taskId}/progress-history`)
+}
+
+/**
+ * AI生成/润色进度描述
+ */
+export function generateAIProgressDescription(taskId: string | number, request: AIProgressDescriptionRequest): Promise<AIProgressDescriptionResponse> {
+  return post<AIProgressDescriptionResponse>(`/api/v1/milestones/tasks/${taskId}/ai-progress-description`, request)
 }
 
 /**

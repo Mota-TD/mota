@@ -268,3 +268,54 @@
 :global([data-theme='dark']) .addTaskForm {
   background: rgba(255, 255, 255, 0.04);
 }
+
+/* AI 智能分解样式 */
+.aiSuggestionList {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.aiTip {
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #fff7e6 0%, #fffbe6 100%);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: #8c6d1f;
+  display: flex;
+  align-items: center;
+}
+
+.aiSuggestionCard {
+  transition: all 0.2s ease;
+  border: 1px solid #f0f0f0;
+}
+
+.aiSuggestionCard:hover {
+  border-color: #722ed1;
+  box-shadow: 0 2px 8px rgba(114, 46, 209, 0.15);
+}
+
+.aiSuggestionCard.selected {
+  border-color: #722ed1;
+  background: linear-gradient(135deg, #f9f0ff 0%, #fff 100%);
+}
+
+:global([data-theme='dark']) .aiTip {
+  background: rgba(250, 173, 20, 0.1);
+  color: #faad14;
+}
+
+:global([data-theme='dark']) .aiSuggestionCard {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+:global([data-theme='dark']) .aiSuggestionCard:hover {
+  border-color: #722ed1;
+  box-shadow: 0 2px 8px rgba(114, 46, 209, 0.3);
+}
+
+:global([data-theme='dark']) .aiSuggestionCard.selected {
+  border-color: #722ed1;
+  background: rgba(114, 46, 209, 0.1);
+}
