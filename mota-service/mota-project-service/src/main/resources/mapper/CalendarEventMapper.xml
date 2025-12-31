@@ -50,11 +50,9 @@
     <!-- 根据用户ID查询事件列表 -->
     <select id="selectByUserId" resultMap="BaseResultMap">
         SELECT <include refid="Base_Column_List"/>,
-               u.name as creator_name,
-               p.name as project_name
+               NULL as creator_name,
+               NULL as project_name
         FROM calendar_event e
-        LEFT JOIN user u ON e.creator_id = u.id
-        LEFT JOIN project p ON e.project_id = p.id
         WHERE e.creator_id = #{userId}
           AND e.status = 'active'
         <if test="startTime != null">
@@ -69,11 +67,9 @@
     <!-- 根据项目ID查询事件列表 -->
     <select id="selectByProjectId" resultMap="BaseResultMap">
         SELECT <include refid="Base_Column_List"/>,
-               u.name as creator_name,
-               p.name as project_name
+               NULL as creator_name,
+               NULL as project_name
         FROM calendar_event e
-        LEFT JOIN user u ON e.creator_id = u.id
-        LEFT JOIN project p ON e.project_id = p.id
         WHERE e.project_id = #{projectId}
           AND e.status = 'active'
         <if test="startTime != null">
@@ -88,11 +84,9 @@
     <!-- 查询用户在指定时间范围内的所有事件(包括参与的事件) -->
     <select id="selectUserEventsInRange" resultMap="BaseResultMap">
         SELECT DISTINCT <include refid="Base_Column_List"/>,
-               u.name as creator_name,
-               p.name as project_name
+               NULL as creator_name,
+               NULL as project_name
         FROM calendar_event e
-        LEFT JOIN user u ON e.creator_id = u.id
-        LEFT JOIN project p ON e.project_id = p.id
         LEFT JOIN calendar_event_attendee a ON e.id = a.event_id
         WHERE e.status = 'active'
           AND (e.creator_id = #{userId} OR a.user_id = #{userId})
@@ -108,30 +102,26 @@
     <!-- 查询事件详情(包含参与者信息) -->
     <select id="selectWithAttendees" resultMap="WithAttendeesResultMap">
         SELECT <include refid="Base_Column_List"/>,
-               u.name as creator_name,
-               p.name as project_name,
+               NULL as creator_name,
+               NULL as project_name,
                a.id as attendee_id,
                a.event_id as attendee_event_id,
                a.user_id as attendee_user_id,
                a.response_status as attendee_response_status,
                a.required as attendee_required,
                a.responded_at as attendee_responded_at,
-               au.name as attendee_user_name,
-               au.avatar as attendee_user_avatar
+               NULL as attendee_user_name,
+               NULL as attendee_user_avatar
         FROM calendar_event e
-        LEFT JOIN user u ON e.creator_id = u.id
-        LEFT JOIN project p ON e.project_id = p.id
         LEFT JOIN calendar_event_attendee a ON e.id = a.event_id
-        LEFT JOIN user au ON a.user_id = au.id
         WHERE e.id = #{id}
     </select>
     
     <!-- 查询即将到来的事件(用于提醒) -->
     <select id="selectUpcomingEvents" resultMap="BaseResultMap">
         SELECT <include refid="Base_Column_List"/>,
-               u.name as creator_name
+               NULL as creator_name
         FROM calendar_event e
-        LEFT JOIN user u ON e.creator_id = u.id
         LEFT JOIN calendar_event_attendee a ON e.id = a.event_id
         WHERE e.status = 'active'
           AND e.reminder_minutes IS NOT NULL

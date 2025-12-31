@@ -40,34 +40,9 @@ public class TaskCalendarSyncService {
      */
     @Transactional
     public CalendarEvent createEventForDepartmentTask(DepartmentTask task) {
-        if (task.getManagerId() == null || task.getEndDate() == null) {
-            log.debug("Cannot create calendar event for department task {}: missing manager or end date", task.getId());
-            return null;
-        }
-
-        CalendarEvent event = new CalendarEvent();
-        event.setTitle("[部门任务] " + task.getName());
-        event.setDescription(task.getDescription());
-        event.setEventType(CalendarEvent.TYPE_TASK);
-        event.setStartTime(task.getStartDate() != null ?
-                task.getStartDate().atStartOfDay() :
-                task.getEndDate().atStartOfDay());
-        event.setEndTime(task.getEndDate().atTime(23, 59, 59));
-        event.setAllDay(true);
-        event.setColor(COLOR_DEPARTMENT_TASK);
-        event.setCreatorId(task.getCreatedBy());
-        event.setProjectId(task.getProjectId());
-        event.setVisibility(CalendarEvent.VISIBILITY_PROJECT);
-
-        CalendarEvent created = calendarEventService.createEvent(event,
-                Collections.singletonList(task.getManagerId()));
-
-        // 更新任务的日历事件ID
-        task.setCalendarEventId(created.getId());
-        departmentTaskMapper.updateById(task);
-
-        log.info("Created calendar event {} for department task {}", created.getId(), task.getId());
-        return created;
+        // 不再创建独立的日历事件，任务会直接在日历中显示
+        log.debug("Department task {} will be displayed directly in calendar", task.getId());
+        return null;
     }
 
     /**
@@ -78,35 +53,9 @@ public class TaskCalendarSyncService {
      */
     @Transactional
     public CalendarEvent createEventForTask(Task task) {
-        if (task.getAssigneeId() == null || task.getEndDate() == null) {
-            log.debug("Cannot create calendar event for task {}: missing assignee or end date", task.getId());
-            return null;
-        }
-
-        CalendarEvent event = new CalendarEvent();
-        event.setTitle("[任务] " + task.getName());
-        event.setDescription(task.getDescription());
-        event.setEventType(CalendarEvent.TYPE_TASK);
-        event.setStartTime(task.getStartDate() != null ?
-                task.getStartDate().atStartOfDay() :
-                task.getEndDate().atStartOfDay());
-        event.setEndTime(task.getEndDate().atTime(23, 59, 59));
-        event.setAllDay(true);
-        event.setColor(COLOR_TASK);
-        event.setCreatorId(task.getCreatedBy());
-        event.setProjectId(task.getProjectId());
-        event.setTaskId(task.getId());
-        event.setVisibility(CalendarEvent.VISIBILITY_PROJECT);
-
-        CalendarEvent created = calendarEventService.createEvent(event,
-                Collections.singletonList(task.getAssigneeId()));
-
-        // 更新任务的日历事件ID
-        task.setCalendarEventId(created.getId());
-        taskMapper.updateById(task);
-
-        log.info("Created calendar event {} for task {}", created.getId(), task.getId());
-        return created;
+        // 不再创建独立的日历事件，任务会直接在日历中显示
+        log.debug("Task {} will be displayed directly in calendar", task.getId());
+        return null;
     }
 
     /**
@@ -116,27 +65,8 @@ public class TaskCalendarSyncService {
      */
     @Transactional
     public void syncTaskCalendarEvent(Task task) {
-        if (task.getCalendarEventId() != null) {
-            // 更新现有事件
-            CalendarEvent event = calendarEventService.getEventById(task.getCalendarEventId());
-            if (event != null) {
-                event.setTitle("[任务] " + task.getName());
-                event.setDescription(task.getDescription());
-                if (task.getStartDate() != null) {
-                    event.setStartTime(task.getStartDate().atStartOfDay());
-                }
-                if (task.getEndDate() != null) {
-                    event.setEndTime(task.getEndDate().atTime(23, 59, 59));
-                }
-                calendarEventService.updateEvent(event.getId(), event,
-                        task.getAssigneeId() != null ?
-                                Collections.singletonList(task.getAssigneeId()) : null);
-                log.info("Updated calendar event {} for task {}", event.getId(), task.getId());
-            }
-        } else if (task.getAssigneeId() != null && task.getEndDate() != null) {
-            // 创建新事件
-            createEventForTask(task);
-        }
+        // 不再需要同步，任务会直接在日历中显示
+        log.debug("Task {} calendar sync skipped - direct display mode", task.getId());
     }
 
     /**
@@ -146,27 +76,8 @@ public class TaskCalendarSyncService {
      */
     @Transactional
     public void syncDepartmentTaskCalendarEvent(DepartmentTask task) {
-        if (task.getCalendarEventId() != null) {
-            // 更新现有事件
-            CalendarEvent event = calendarEventService.getEventById(task.getCalendarEventId());
-            if (event != null) {
-                event.setTitle("[部门任务] " + task.getName());
-                event.setDescription(task.getDescription());
-                if (task.getStartDate() != null) {
-                    event.setStartTime(task.getStartDate().atStartOfDay());
-                }
-                if (task.getEndDate() != null) {
-                    event.setEndTime(task.getEndDate().atTime(23, 59, 59));
-                }
-                calendarEventService.updateEvent(event.getId(), event,
-                        task.getManagerId() != null ?
-                                Collections.singletonList(task.getManagerId()) : null);
-                log.info("Updated calendar event {} for department task {}", event.getId(), task.getId());
-            }
-        } else if (task.getManagerId() != null && task.getEndDate() != null) {
-            // 创建新事件
-            createEventForDepartmentTask(task);
-        }
+        // 不再需要同步，部门任务会直接在日历中显示
+        log.debug("Department task {} calendar sync skipped - direct display mode", task.getId());
     }
 
     /**
@@ -176,10 +87,8 @@ public class TaskCalendarSyncService {
      */
     @Transactional
     public void markTaskEventCompleted(Task task) {
-        if (task.getCalendarEventId() != null) {
-            calendarEventService.cancelEvent(task.getCalendarEventId());
-            log.info("Marked calendar event {} as completed for task {}", task.getCalendarEventId(), task.getId());
-        }
+        // 不再需要标记完成，任务状态会直接反映在日历显示中
+        log.debug("Task {} completion marked - direct display mode", task.getId());
     }
 
     /**
@@ -189,10 +98,8 @@ public class TaskCalendarSyncService {
      */
     @Transactional
     public void markDepartmentTaskEventCompleted(DepartmentTask task) {
-        if (task.getCalendarEventId() != null) {
-            calendarEventService.cancelEvent(task.getCalendarEventId());
-            log.info("Marked calendar event {} as completed for department task {}", task.getCalendarEventId(), task.getId());
-        }
+        // 不再需要标记完成，部门任务状态会直接反映在日历显示中
+        log.debug("Department task {} completion marked - direct display mode", task.getId());
     }
 
     /**
@@ -228,10 +135,8 @@ public class TaskCalendarSyncService {
      */
     @Transactional
     public void deleteTaskCalendarEvent(Task task) {
-        if (task.getCalendarEventId() != null) {
-            calendarEventService.deleteEvent(task.getCalendarEventId());
-            log.info("Deleted calendar event {} for task {}", task.getCalendarEventId(), task.getId());
-        }
+        // 不再需要删除日历事件，任务删除后自然不会在日历中显示
+        log.debug("Task {} deleted - direct display mode", task.getId());
     }
 
     /**
@@ -241,10 +146,8 @@ public class TaskCalendarSyncService {
      */
     @Transactional
     public void deleteDepartmentTaskCalendarEvent(DepartmentTask task) {
-        if (task.getCalendarEventId() != null) {
-            calendarEventService.deleteEvent(task.getCalendarEventId());
-            log.info("Deleted calendar event {} for department task {}", task.getCalendarEventId(), task.getId());
-        }
+        // 不再需要删除日历事件，部门任务删除后自然不会在日历中显示
+        log.debug("Department task {} deleted - direct display mode", task.getId());
     }
 
     /**
@@ -256,22 +159,9 @@ public class TaskCalendarSyncService {
      */
     @Transactional
     public void updateTaskAssignee(Task task, Long oldAssigneeId, Long newAssigneeId) {
-        if (task.getCalendarEventId() != null) {
-            // 移除旧负责人
-            if (oldAssigneeId != null) {
-                calendarEventService.removeAttendee(task.getCalendarEventId(), oldAssigneeId);
-            }
-            // 添加新负责人
-            if (newAssigneeId != null) {
-                calendarEventService.addAttendees(task.getCalendarEventId(),
-                        Collections.singletonList(newAssigneeId));
-            }
-            log.info("Updated assignee for calendar event {} from {} to {}", 
-                    task.getCalendarEventId(), oldAssigneeId, newAssigneeId);
-        } else if (newAssigneeId != null && task.getEndDate() != null) {
-            // 如果之前没有日历事件，现在创建
-            createEventForTask(task);
-        }
+        // 不再需要更新日历事件，任务负责人变更会直接反映在日历显示中
+        log.debug("Task {} assignee updated from {} to {} - direct display mode",
+                task.getId(), oldAssigneeId, newAssigneeId);
     }
 
     /**
@@ -283,21 +173,8 @@ public class TaskCalendarSyncService {
      */
     @Transactional
     public void updateDepartmentTaskManager(DepartmentTask task, Long oldManagerId, Long newManagerId) {
-        if (task.getCalendarEventId() != null) {
-            // 移除旧负责人
-            if (oldManagerId != null) {
-                calendarEventService.removeAttendee(task.getCalendarEventId(), oldManagerId);
-            }
-            // 添加新负责人
-            if (newManagerId != null) {
-                calendarEventService.addAttendees(task.getCalendarEventId(),
-                        Collections.singletonList(newManagerId));
-            }
-            log.info("Updated manager for calendar event {} from {} to {}", 
-                    task.getCalendarEventId(), oldManagerId, newManagerId);
-        } else if (newManagerId != null && task.getEndDate() != null) {
-            // 如果之前没有日历事件，现在创建
-            createEventForDepartmentTask(task);
-        }
+        // 不再需要更新日历事件，部门任务负责人变更会直接反映在日历显示中
+        log.debug("Department task {} manager updated from {} to {} - direct display mode",
+                task.getId(), oldManagerId, newManagerId);
     }
 }

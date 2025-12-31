@@ -40,7 +40,7 @@ import type { ColumnsType } from 'antd/es/table'
 import { useMilestoneStore } from '../../store/milestoneStore'
 import { useTaskStore } from '@/modules/task/store/taskStore'
 import { useProjectStore } from '@/modules/project/store/projectStore'
-import { claudeClient } from '@/services/claude/claudeClient'
+import { doubaoClient } from '@/services/doubao/doubaoClient'
 import TaskDecomposeWizard from '@/modules/task/components/TaskDecomposeWizard'
 import type { Milestone, MilestoneTask } from '../../types'
 import type { Task } from '@/modules/task/types'
@@ -190,7 +190,7 @@ const MilestoneTaskManager: React.FC<MilestoneTaskManagerProps> = ({
 
     setLoading(true)
     try {
-      const analysisResult = await claudeClient.generateRiskWarnings({
+      const analysisResult = await doubaoClient.generateRiskWarnings({
         projectId: currentProject.id,
         projectName: currentProject.name,
         departmentTasks: departmentTasks.map(t => ({

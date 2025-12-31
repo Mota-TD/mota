@@ -34,7 +34,7 @@ import {
   ExperimentOutlined,
 } from '@ant-design/icons'
 import { useTaskDecompose } from '@/modules/ai/hooks/useTaskDecompose'
-import { claudeClient } from '@/services/claude/claudeClient'
+import { doubaoClient } from '@/services/doubao/doubaoClient'
 import { useMilestoneStore } from '@/modules/milestone/store/milestoneStore'
 import { useProjectStore } from '@/modules/project/store/projectStore'
 import { useTaskStore } from '@/modules/task/store/taskStore'
@@ -460,7 +460,7 @@ const TaskDecomposeWizard: React.FC<TaskDecomposeWizardProps> = ({
       }
 
       // 调用AI分解
-      const result = await claudeClient.generateTaskDecomposition({
+      const result = await doubaoClient.generateTaskDecomposition({
         projectName: currentProject.name,
         projectDescription: `${currentProject.description}\n\n里程碑：${milestone.name}\n${milestone.description}`,
         departments: formData.departments,

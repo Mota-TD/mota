@@ -87,11 +87,6 @@ public class Task extends BaseEntityDO {
     private LocalDateTime completedAt;
 
     /**
-     * 关联的日历事件ID
-     */
-    private Long calendarEventId;
-
-    /**
      * 任务状态枚举
      */
     public static class Status {

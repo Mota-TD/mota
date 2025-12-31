@@ -3,7 +3,7 @@
  * 基于用户行为、项目上下文和AI分析提供个性化知识推荐
  */
 
-import { claudeClient } from '@/services/claude/claudeClient'
+import { doubaoClient } from '@/services/doubao/doubaoClient'
 import request from '@/services/request'
 
 // 推荐类型
@@ -335,7 +335,7 @@ export class IntelligentRecommendationEngine {
       // 使用Claude API进行智能评分
       const prompt = this.buildRankingPrompt(recommendations, context, userProfile)
       
-      const response = await claudeClient.sendMessage([{
+      const response = await doubaoClient.sendMessage([{
         role: 'user',
         content: prompt
       }])

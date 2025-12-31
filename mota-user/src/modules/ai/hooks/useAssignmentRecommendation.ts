@@ -6,7 +6,7 @@
 import { useState, useCallback } from 'react'
 import { message } from 'antd'
 import { useAIStore } from '../store/aiStore'
-import { claudeClient } from '../../../services/claude/claudeClient'
+import { doubaoClient } from '../../../services/doubao/doubaoClient'
 import type { AssignmentRecommendation } from '../types'
 
 export interface TeamMember {
@@ -75,15 +75,15 @@ export function useAssignmentRecommendation(
         let result: AssignmentRecommendation[]
 
         try {
-          const claudeResult = await claudeClient.suggestTaskAssignment({
+          const doubaoResult = await doubaoClient.suggestTaskAssignment({
             taskId: params.taskId,
             taskName: params.taskName,
             taskDescription: params.taskDescription,
             teamMembers: params.teamMembers,
           })
 
-          // 转换 Claude 结果为标准格式
-          result = claudeResult.suggestedAssignees.map((assignee) => ({
+          // 转换 Doubao 结果为标准格式
+          result = doubaoResult.suggestedAssignees.map((assignee) => ({
             userId: assignee.userId.toString(),
             userName: assignee.userName,
             matchScore: assignee.matchScore,
@@ -98,9 +98,9 @@ export function useAssignmentRecommendation(
                 : 'available',
           }))
 
-          console.log('使用 Claude API 生成分工推荐成功')
-        } catch (claudeError) {
-          console.warn('Claude API 分工推荐失败，回退到原 API:', claudeError)
+          console.log('使用 Doubao API 生成分工推荐成功')
+        } catch (doubaoError) {
+          console.warn('Doubao API 分工推荐失败，回退到原 API:', doubaoError)
 
           // 回退到使用 AI Store 的原始 API
           await useAIStore.getState().fetchAssignmentRecommendations(params.taskId)

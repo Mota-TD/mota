@@ -951,9 +951,20 @@ const AIAssistantPage: React.FC = () => {
           
           <Form.Item name="defaultModel" label="默认模型">
             <Select>
-              <Select.Option value="gpt-4">GPT-4</Select.Option>
-              <Select.Option value="gpt-3.5-turbo">GPT-3.5 Turbo</Select.Option>
-              <Select.Option value="claude-3">Claude 3</Select.Option>
+              <Select.OptGroup label="豆包 (推荐)">
+                <Select.Option value="doubao-pro-32k">豆包Pro 32K</Select.Option>
+                <Select.Option value="doubao-pro-128k">豆包Pro 128K</Select.Option>
+                <Select.Option value="doubao-lite-32k">豆包Lite 32K</Select.Option>
+                <Select.Option value="doubao-lite-128k">豆包Lite 128K</Select.Option>
+              </Select.OptGroup>
+              <Select.OptGroup label="Claude">
+                <Select.Option value="claude-3-sonnet">Claude 3 Sonnet</Select.Option>
+                <Select.Option value="claude-3-opus">Claude 3 Opus</Select.Option>
+              </Select.OptGroup>
+              <Select.OptGroup label="OpenAI">
+                <Select.Option value="gpt-4">GPT-4</Select.Option>
+                <Select.Option value="gpt-3.5-turbo">GPT-3.5 Turbo</Select.Option>
+              </Select.OptGroup>
             </Select>
           </Form.Item>
           

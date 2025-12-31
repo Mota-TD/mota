@@ -81,26 +81,36 @@ export function getMockProviders(): Provider[] {
   return [
     {
       id: 1,
-      providerName: 'OpenAI',
-      providerCode: 'openai',
-      providerType: 'international',
-      apiBaseUrl: 'https://api.openai.com/v1',
+      providerName: '豆包 (火山引擎)',
+      providerCode: 'doubao',
+      providerType: 'domestic',
+      apiBaseUrl: 'https://ark.cn-beijing.volces.com/api/v3',
       priority: 100,
       healthStatus: 'healthy',
       isEnabled: true
     },
     {
       id: 2,
-      providerName: 'Anthropic',
-      providerCode: 'anthropic',
+      providerName: 'OpenAI',
+      providerCode: 'openai',
       providerType: 'international',
-      apiBaseUrl: 'https://api.anthropic.com/v1',
+      apiBaseUrl: 'https://api.openai.com/v1',
       priority: 90,
       healthStatus: 'healthy',
       isEnabled: true
     },
     {
       id: 3,
+      providerName: 'Anthropic',
+      providerCode: 'anthropic',
+      providerType: 'international',
+      apiBaseUrl: 'https://api.anthropic.com/v1',
+      priority: 85,
+      healthStatus: 'healthy',
+      isEnabled: true
+    },
+    {
+      id: 4,
       providerName: '阿里云通义',
       providerCode: 'aliyun',
       providerType: 'domestic',
@@ -110,7 +120,7 @@ export function getMockProviders(): Provider[] {
       isEnabled: true
     },
     {
-      id: 4,
+      id: 5,
       providerName: '百度文心',
       providerCode: 'baidu',
       providerType: 'domestic',
@@ -129,9 +139,54 @@ export function getMockModels(): Model[] {
   return [
     {
       id: 1,
+      modelName: '豆包Pro 32K',
+      modelCode: 'doubao-pro-32k',
+      providerId: 1,
+      providerName: '豆包 (火山引擎)',
+      contextWindow: 32768,
+      inputPrice: 0.008,
+      outputPrice: 0.012,
+      supportsStreaming: true,
+      supportsFunctionCall: true,
+      supportsVision: false,
+      isDefault: true,
+      isEnabled: true
+    },
+    {
+      id: 2,
+      modelName: '豆包Pro 128K',
+      modelCode: 'doubao-pro-128k',
+      providerId: 1,
+      providerName: '豆包 (火山引擎)',
+      contextWindow: 131072,
+      inputPrice: 0.012,
+      outputPrice: 0.018,
+      supportsStreaming: true,
+      supportsFunctionCall: true,
+      supportsVision: false,
+      isDefault: false,
+      isEnabled: true
+    },
+    {
+      id: 3,
+      modelName: '豆包Lite 32K',
+      modelCode: 'doubao-lite-32k',
+      providerId: 1,
+      providerName: '豆包 (火山引擎)',
+      contextWindow: 32768,
+      inputPrice: 0.003,
+      outputPrice: 0.006,
+      supportsStreaming: true,
+      supportsFunctionCall: true,
+      supportsVision: false,
+      isDefault: false,
+      isEnabled: true
+    },
+    {
+      id: 4,
       modelName: 'GPT-4',
       modelCode: 'gpt-4',
-      providerId: 1,
+      providerId: 2,
       providerName: 'OpenAI',
       contextWindow: 128000,
       inputPrice: 0.03,
@@ -139,14 +194,14 @@ export function getMockModels(): Model[] {
       supportsStreaming: true,
       supportsFunctionCall: true,
       supportsVision: true,
-      isDefault: true,
+      isDefault: false,
       isEnabled: true
     },
     {
-      id: 2,
+      id: 5,
       modelName: 'GPT-3.5 Turbo',
       modelCode: 'gpt-3.5-turbo',
-      providerId: 1,
+      providerId: 2,
       providerName: 'OpenAI',
       contextWindow: 16000,
       inputPrice: 0.001,
@@ -158,10 +213,25 @@ export function getMockModels(): Model[] {
       isEnabled: true
     },
     {
-      id: 3,
+      id: 6,
+      modelName: 'Claude 3 Sonnet',
+      modelCode: 'claude-3-sonnet',
+      providerId: 3,
+      providerName: 'Anthropic',
+      contextWindow: 200000,
+      inputPrice: 0.003,
+      outputPrice: 0.015,
+      supportsStreaming: true,
+      supportsFunctionCall: true,
+      supportsVision: true,
+      isDefault: false,
+      isEnabled: true
+    },
+    {
+      id: 7,
       modelName: 'Claude 3 Opus',
       modelCode: 'claude-3-opus',
-      providerId: 2,
+      providerId: 3,
       providerName: 'Anthropic',
       contextWindow: 200000,
       inputPrice: 0.015,
@@ -173,10 +243,10 @@ export function getMockModels(): Model[] {
       isEnabled: true
     },
     {
-      id: 4,
+      id: 8,
       modelName: '通义千问-Turbo',
       modelCode: 'qwen-turbo',
-      providerId: 3,
+      providerId: 4,
       providerName: '阿里云通义',
       contextWindow: 8000,
       inputPrice: 0.008,
@@ -188,10 +258,10 @@ export function getMockModels(): Model[] {
       isEnabled: true
     },
     {
-      id: 5,
+      id: 9,
       modelName: '文心一言4.0',
       modelCode: 'ernie-4.0',
-      providerId: 4,
+      providerId: 5,
       providerName: '百度文心',
       contextWindow: 8000,
       inputPrice: 0.012,
@@ -212,11 +282,11 @@ export function getMockRoutingRules(): RoutingRule[] {
   return [
     {
       id: 1,
-      ruleName: '默认路由',
+      ruleName: '默认路由 (豆包)',
       ruleType: 'default',
       priority: 0,
       targetModelId: 1,
-      targetModelName: 'GPT-4',
+      targetModelName: '豆包Pro 32K',
       weight: 100,
       isEnabled: true
     },
@@ -225,7 +295,7 @@ export function getMockRoutingRules(): RoutingRule[] {
       ruleName: 'VIP用户路由',
       ruleType: 'user_level',
       priority: 100,
-      targetModelId: 1,
+      targetModelId: 4,
       targetModelName: 'GPT-4',
       weight: 100,
       isEnabled: true
@@ -235,8 +305,8 @@ export function getMockRoutingRules(): RoutingRule[] {
       ruleName: '成本优先路由',
       ruleType: 'cost',
       priority: 50,
-      targetModelId: 2,
-      targetModelName: 'GPT-3.5 Turbo',
+      targetModelId: 3,
+      targetModelName: '豆包Lite 32K',
       weight: 80,
       isEnabled: true
     },
@@ -245,7 +315,7 @@ export function getMockRoutingRules(): RoutingRule[] {
       ruleName: '负载均衡路由',
       ruleType: 'load_balance',
       priority: 30,
-      targetModelId: 4,
+      targetModelId: 8,
       targetModelName: '通义千问-Turbo',
       weight: 50,
       isEnabled: false
@@ -260,11 +330,11 @@ export function getMockFallbackStrategies(): FallbackStrategy[] {
   return [
     {
       id: 1,
-      strategyName: 'GPT-4降级策略',
+      strategyName: '豆包Pro降级策略',
       primaryModelId: 1,
-      primaryModelName: 'GPT-4',
-      fallbackModelIds: [3, 2],
-      fallbackModelNames: ['Claude 3 Opus', 'GPT-3.5 Turbo'],
+      primaryModelName: '豆包Pro 32K',
+      fallbackModelIds: [3, 6],
+      fallbackModelNames: ['豆包Lite 32K', 'Claude 3 Sonnet'],
       maxRetries: 3,
       retryDelayMs: 1000,
       circuitBreakerEnabled: true,
@@ -273,11 +343,24 @@ export function getMockFallbackStrategies(): FallbackStrategy[] {
     },
     {
       id: 2,
-      strategyName: '国内模型降级策略',
+      strategyName: 'GPT-4降级策略',
       primaryModelId: 4,
+      primaryModelName: 'GPT-4',
+      fallbackModelIds: [7, 5],
+      fallbackModelNames: ['Claude 3 Opus', 'GPT-3.5 Turbo'],
+      maxRetries: 3,
+      retryDelayMs: 1000,
+      circuitBreakerEnabled: true,
+      circuitBreakerThreshold: 5,
+      isEnabled: true
+    },
+    {
+      id: 3,
+      strategyName: '国内模型降级策略',
+      primaryModelId: 8,
       primaryModelName: '通义千问-Turbo',
-      fallbackModelIds: [5],
-      fallbackModelNames: ['文心一言4.0'],
+      fallbackModelIds: [9, 1],
+      fallbackModelNames: ['文心一言4.0', '豆包Pro 32K'],
       maxRetries: 2,
       retryDelayMs: 500,
       circuitBreakerEnabled: true,
@@ -294,12 +377,13 @@ export function getMockCostStatistics(): CostStatistics {
   return {
     totalCalls: 15680,
     totalCost: 3520.50,
-    avgResponseTime: 1250,
-    successRate: 99.2,
+    avgResponseTime: 850,
+    successRate: 99.5,
     byProvider: [
-      { providerId: 1, providerName: 'OpenAI', cost: 2100.30, percent: 60 },
-      { providerId: 2, providerName: 'Anthropic', cost: 880.15, percent: 25 },
-      { providerId: 3, providerName: '阿里云通义', cost: 540.05, percent: 15 }
+      { providerId: 1, providerName: '豆包 (火山引擎)', cost: 1760.25, percent: 50 },
+      { providerId: 2, providerName: 'OpenAI', cost: 880.15, percent: 25 },
+      { providerId: 3, providerName: 'Anthropic', cost: 528.08, percent: 15 },
+      { providerId: 4, providerName: '阿里云通义', cost: 352.02, percent: 10 }
     ]
   };
 }

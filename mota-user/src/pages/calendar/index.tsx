@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Card, Typography, Spin, Button, Modal, Form, Input, Select, message, Tabs, List, Tag, Tooltip, Popconfirm, Badge, Switch, Empty, Progress } from 'antd'
+import { Card, Typography, Spin, Button, Modal, Form, Input, Select, message, Tabs, List, Tag, Tooltip, Popconfirm, Badge, Switch, Empty, Progress, Divider, Statistic, Row, Col } from 'antd'
 import {
   CalendarOutlined,
   PlusOutlined,
@@ -20,7 +20,9 @@ import {
   CheckSquareOutlined,
   ClockCircleOutlined,
   FlagOutlined,
-  RightOutlined
+  RightOutlined,
+  TrophyOutlined,
+  ReloadOutlined
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
@@ -45,6 +47,9 @@ import {
   exportCalendarAsICal,
   getCalendarSubscriptionUrl,
   getTaskCalendarEvents,
+  getMilestoneCalendarEvents,
+  getAllWorkItemEvents,
+  syncUserTasksToCalendar,
   CALENDAR_TYPE_COLORS,
   CALENDAR_TYPE_LABELS,
   COLOR_PRESETS,
@@ -71,6 +76,9 @@ const CalendarPage = () => {
   const [editingSubscription, setEditingSubscription] = useState<CalendarSubscription | null>(null)
   const [subscriptionUrl, setSubscriptionUrl] = useState<string>('')
   const [upcomingTasks, setUpcomingTasks] = useState<CalendarEvent[]>([])
+  const [upcomingMilestones, setUpcomingMilestones] = useState<CalendarEvent[]>([])
+  const [workItemStats, setWorkItemStats] = useState({ taskCount: 0, milestoneCount: 0, meetingCount: 0, otherCount: 0 })
+  const [syncing, setSyncing] = useState(false)
   const [form] = Form.useForm()
 
   // 加载日历配置
@@ -130,14 +138,49 @@ const CalendarPage = () => {
     }
   }, [user?.id])
 
+  // 加载即将到来的里程碑
+  const loadUpcomingMilestones = useCallback(async () => {
+    if (!user?.id) return
+    try {
+      const now = new Date()
+      const endDate = new Date()
+      endDate.setDate(endDate.getDate() + 30) // 获取未来30天的里程碑
+      const milestones = await getMilestoneCalendarEvents(user.id, now.toISOString(), endDate.toISOString())
+      // 按目标日期排序
+      const sortedMilestones = milestones.sort((a, b) =>
+        new Date(a.endTime).getTime() - new Date(b.endTime).getTime()
+      )
+      setUpcomingMilestones(sortedMilestones.slice(0, 5)) // 只显示前5个
+    } catch (error) {
+      console.error('Failed to load upcoming milestones:', error)
+      setUpcomingMilestones([])
+    }
+  }, [user?.id])
+
+  // 加载工作项统计
+  const loadWorkItemStats = useCallback(async () => {
+    if (!user?.id) return
+    try {
+      const now = new Date()
+      const endDate = new Date()
+      endDate.setMonth(endDate.getMonth() + 1) // 获取未来1个月的统计
+      const result = await getAllWorkItemEvents(user.id, now.toISOString(), endDate.toISOString())
+      setWorkItemStats(result.stats)
+    } catch (error) {
+      console.error('Failed to load work item stats:', error)
+    }
+  }, [user?.id])
+
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 500)
     loadCalendarConfigs()
     loadSubscriptions()
     loadSubscriptionUrl()
     loadUpcomingTasks()
+    loadUpcomingMilestones()
+    loadWorkItemStats()
     return () => clearTimeout(timer)
-  }, [loadCalendarConfigs, loadSubscriptions, loadSubscriptionUrl, loadUpcomingTasks])
+  }, [loadCalendarConfigs, loadSubscriptions, loadSubscriptionUrl, loadUpcomingTasks, loadUpcomingMilestones, loadWorkItemStats])
 
   // 切换日历可见性
   const handleToggleCalendarVisibility = async (config: CalendarConfig) => {
@@ -289,8 +332,28 @@ const CalendarPage = () => {
   const handleTaskClick = (event: CalendarEvent) => {
     if (event.taskId) {
       navigate(`/task/${event.taskId}`)
+    } else if (event.milestoneId) {
+      navigate(`/projects/${event.projectId}?milestone=${event.milestoneId}`)
     } else if (event.projectId) {
       navigate(`/projects/${event.projectId}`)
+    }
+  }
+
+  // 同步任务到日历
+  const handleSyncTasks = async () => {
+    if (!user?.id) return
+    setSyncing(true)
+    try {
+      const result = await syncUserTasksToCalendar(user.id)
+      message.success(`同步完成：${result.synced} 个任务已同步到日历`)
+      // 重新加载数据
+      loadUpcomingTasks()
+      loadWorkItemStats()
+    } catch (error) {
+      console.error('Failed to sync tasks:', error)
+      message.error('同步失败')
+    } finally {
+      setSyncing(false)
     }
   }
 
@@ -415,10 +478,42 @@ const CalendarPage = () => {
               )}
             </div>
 
+            {/* 工作项统计 */}
+            <div className={styles.sidebarSection}>
+              <div className={styles.sectionTitle}>
+                <span>📊 本月工作项</span>
+                <Tooltip title="同步任务到日历">
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<ReloadOutlined spin={syncing} />}
+                    onClick={handleSyncTasks}
+                    loading={syncing}
+                  >
+                    同步
+                  </Button>
+                </Tooltip>
+              </div>
+              <Row gutter={8} style={{ marginBottom: 8 }}>
+                <Col span={12}>
+                  <div style={{ textAlign: 'center', padding: '8px', background: '#f0f9ff', borderRadius: 8 }}>
+                    <div style={{ fontSize: 20, fontWeight: 'bold', color: '#52c41a' }}>{workItemStats.taskCount}</div>
+                    <div style={{ fontSize: 12, color: '#666' }}>任务</div>
+                  </div>
+                </Col>
+                <Col span={12}>
+                  <div style={{ textAlign: 'center', padding: '8px', background: '#f9f0ff', borderRadius: 8 }}>
+                    <div style={{ fontSize: 20, fontWeight: 'bold', color: '#722ed1' }}>{workItemStats.milestoneCount}</div>
+                    <div style={{ fontSize: 12, color: '#666' }}>里程碑</div>
+                  </div>
+                </Col>
+              </Row>
+            </div>
+
             {/* 即将到来的任务截止日期 */}
             <div className={styles.sidebarSection}>
               <div className={styles.sectionTitle}>
-                <span><ClockCircleOutlined style={{ marginRight: 4 }} />任务截止日期</span>
+                <span><CheckSquareOutlined style={{ marginRight: 4 }} />任务截止日期</span>
               </div>
               {upcomingTasks.length > 0 ? (
                 <List
@@ -459,6 +554,55 @@ const CalendarPage = () => {
                 <Empty
                   image={Empty.PRESENTED_IMAGE_SIMPLE}
                   description="暂无即将到期的任务"
+                  className={styles.emptyTasks}
+                />
+              )}
+            </div>
+
+            {/* 即将到来的里程碑 */}
+            <div className={styles.sidebarSection}>
+              <div className={styles.sectionTitle}>
+                <span><TrophyOutlined style={{ marginRight: 4, color: '#722ed1' }} />里程碑</span>
+              </div>
+              {upcomingMilestones.length > 0 ? (
+                <List
+                  size="small"
+                  dataSource={upcomingMilestones}
+                  renderItem={milestone => {
+                    const remaining = getDaysRemaining(milestone.endTime)
+                    return (
+                      <List.Item
+                        className={styles.taskItem}
+                        onClick={() => handleTaskClick(milestone)}
+                      >
+                        <div className={styles.taskItemContent}>
+                          <div className={styles.taskInfo}>
+                            <div className={styles.taskTitle}>
+                              <TrophyOutlined style={{ color: '#722ed1', marginRight: 4 }} />
+                              {milestone.title.replace('🎯 里程碑: ', '')}
+                            </div>
+                            <div className={styles.taskMeta}>
+                              {milestone.projectName && (
+                                <span className={styles.projectTag}>
+                                  <ProjectOutlined style={{ marginRight: 2 }} />
+                                  {milestone.projectName}
+                                </span>
+                              )}
+                              <Tag color={remaining.color} style={{ marginLeft: 4 }}>
+                                {remaining.text}
+                              </Tag>
+                            </div>
+                          </div>
+                          <RightOutlined className={styles.taskArrow} />
+                        </div>
+                      </List.Item>
+                    )
+                  }}
+                />
+              ) : (
+                <Empty
+                  image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  description="暂无即将到来的里程碑"
                   className={styles.emptyTasks}
                 />
               )}

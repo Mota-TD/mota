@@ -220,6 +220,65 @@ export const getTaskCalendarEvents = (
   });
 };
 
+// 获取里程碑关联的日历事件
+export const getMilestoneCalendarEvents = (
+  userId: number,
+  startTime?: string,
+  endTime?: string
+) => {
+  return request.get<CalendarEvent[]>(`/api/v1/calendar-events/user/${userId}/milestones`, {
+    startTime,
+    endTime
+  });
+};
+
+// 工作项统计信息
+export interface WorkItemStats {
+  taskCount: number;
+  milestoneCount: number;
+  meetingCount: number;
+  otherCount: number;
+}
+
+// 所有工作项事件响应
+export interface AllWorkItemEventsResponse {
+  tasks: CalendarEvent[];
+  milestones: CalendarEvent[];
+  meetings: CalendarEvent[];
+  others: CalendarEvent[];
+  total: number;
+  stats: WorkItemStats;
+}
+
+// 获取用户的所有任务和里程碑日历事件（综合视图）
+export const getAllWorkItemEvents = (
+  userId: number,
+  startTime?: string,
+  endTime?: string
+) => {
+  return request.get<AllWorkItemEventsResponse>(`/api/v1/calendar-events/user/${userId}/all-work-items`, {
+    startTime,
+    endTime
+  });
+};
+
+// 同步结果
+export interface SyncResult {
+  synced: number;
+  skipped: number;
+  total: number;
+}
+
+// 同步用户的所有任务到日历
+export const syncUserTasksToCalendar = (userId: number) => {
+  return request.post<SyncResult>(`/api/v1/calendar-events/user/${userId}/sync-tasks`);
+};
+
+// 同步项目的所有里程碑到日历
+export const syncProjectMilestonesToCalendar = (projectId: number, creatorId: number) => {
+  return request.post<SyncResult>(`/api/v1/calendar-events/project/${projectId}/sync-milestones?creatorId=${creatorId}`);
+};
+
 // 综合查询日历事件
 export const queryCalendarEvents = (
   userId: number,

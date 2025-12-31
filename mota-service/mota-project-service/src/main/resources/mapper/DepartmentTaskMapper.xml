@@ -18,7 +18,6 @@
         <result column="progress" property="progress"/>
         <result column="require_plan" property="requirePlan"/>
         <result column="require_approval" property="requireApproval"/>
-        <result column="calendar_event_id" property="calendarEventId"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
         <result column="created_by" property="createdBy"/>

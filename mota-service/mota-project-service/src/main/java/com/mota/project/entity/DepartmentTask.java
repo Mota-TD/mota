@@ -81,11 +81,6 @@ public class DepartmentTask extends BaseEntityDO {
     private Integer requireApproval;
 
     /**
-     * 关联的日历事件ID
-     */
-    private Long calendarEventId;
-
-    /**
      * 部门任务状态枚举
      */
     public static class Status {

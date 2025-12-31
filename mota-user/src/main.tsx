@@ -6,6 +6,10 @@ import zhCN from 'antd/locale/zh_CN'
 import App from './App'
 import './styles/index.css'
 
+// 初始化AI客户端（默认使用豆包）
+import { initializeAIClient } from '@/services/ai/aiClient'
+initializeAIClient()
+
 // Ant Design 主题配置 - 使用薄荷绿作为主色
 const theme = {
   token: {

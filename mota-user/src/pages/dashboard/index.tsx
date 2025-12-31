@@ -23,6 +23,7 @@ import {
 import { useNavigate } from 'react-router-dom'
 import * as projectApi from '@/services/api/project'
 import * as taskApi from '@/services/api/task'
+import * as milestoneApi from '@/services/api/milestone'
 import * as activityApi from '@/services/api/activity'
 import * as aiApi from '@/services/api/ai'
 import { useAuthStore } from '@/store/auth'
@@ -161,14 +162,44 @@ const Dashboard = () => {
       console.warn('Failed to load projects:', e)
     }
     
-    // 加载我的任务（API可能未实现，静默处理错误）
+    // 加载我的任务（包括执行任务和里程碑任务）
     try {
-      const tasksRes = await taskApi.getTasks()
-      tasks = tasksRes.list || []
+      // 同时加载执行任务和里程碑任务
+      const [tasksRes, milestoneTasksRes] = await Promise.all([
+        taskApi.getMyTasks().catch(() => ({ list: [] })),
+        milestoneApi.getMyMilestoneTasks().catch(() => [])
+      ])
+      
+      const executionTasks = tasksRes.list || []
+      const milestoneTasks = milestoneTasksRes || []
+      
+      // 将里程碑任务转换为统一格式
+      const convertedMilestoneTasks = milestoneTasks.map((mt: any) => ({
+        id: mt.id,
+        title: mt.name,
+        taskNo: `MT-${mt.id}`,
+        status: mt.status,
+        priority: mt.priority,
+        type: 'milestone_task',
+        milestoneName: mt.milestoneName
+      }))
+      
+      // 将执行任务转换为统一格式
+      const convertedExecutionTasks = executionTasks.map((t: any) => ({
+        id: t.id,
+        title: t.name,
+        taskNo: t.taskNo || `T-${t.id}`,
+        status: t.status,
+        priority: t.priority,
+        type: 'task',
+        projectName: t.projectName
+      }))
+      
+      // 合并所有任务
+      tasks = [...convertedExecutionTasks, ...convertedMilestoneTasks]
       setMyTasks(tasks.slice(0, 5))
     } catch (e) {
       console.warn('Failed to load tasks:', e)
-      // 任务API未实现时使用空数组
       tasks = []
       setMyTasks([])
     }

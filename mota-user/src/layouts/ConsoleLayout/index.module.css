@@ -1,6 +1,8 @@
 /* 控制台布局样式 - 摩塔 Mota - 清爽愉悦主题 */
 .layout {
   min-height: 100vh;
+  /* 最小宽度限制 - 小于 1440px 时出现水平滚动条，布局不缩放 */
+  min-width: 1440px;
   /* 统一使用薄荷绿主题色 */
   --theme-color: #10B981;
   --theme-color-light: rgba(16, 185, 129, 0.1);
@@ -608,51 +610,8 @@
   background: #F8FAFC;
 }
 
-/* 响应式设计 */
-@media (max-width: 992px) {
-  .mainLayout {
-    margin-left: 0;
-  }
-  
-  .sider {
-    transform: translateX(-100%);
-    transition: transform 0.2s;
-  }
-  
-  .sider:not(:global(.ant-layout-sider-collapsed)) {
-    transform: translateX(0);
-  }
-  
-  .searchInput {
-    width: 200px;
-  }
-  
-  .userMeta {
-    display: none;
-  }
-}
-
-@media (max-width: 576px) {
-  .header {
-    padding: 0 16px;
-  }
-  
-  .content {
-    padding: 16px;
-  }
-  
-  .searchInput {
-    width: 160px;
-  }
-  
-  .createBtn span:not(.anticon) {
-    display: none;
-  }
-  
-  .breadcrumb {
-    display: none;
-  }
-}
+/* 响应式设计已禁用 - 布局固定在 1440px 最小宽度 */
+/* 小于 1440px 时通过水平滚动条查看内容 */
 
 /* 快捷键提示样式 */
 .shortcutHint {

@@ -46,7 +46,7 @@ import {
   SearchOutlined,
   QuestionCircleOutlined,
 } from '@ant-design/icons'
-import { claudeClient } from '@/services/claude/claudeClient'
+import { doubaoClient } from '@/services/doubao/doubaoClient'
 import { useProjectStore } from '@/modules/project/store/projectStore'
 import { useTaskStore } from '@/modules/task/store/taskStore'
 import { useMilestoneStore } from '@/modules/milestone/store/milestoneStore'
@@ -173,7 +173,7 @@ const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
       const contextInfo = buildContextInfo()
       
       // 调用Claude API
-      const response = await claudeClient.sendMessage([
+      const response = await doubaoClient.sendMessage([
         {
           role: 'user',
           content: `${contextInfo}\n\n用户问题: ${userInput.trim()}`
@@ -257,7 +257,7 @@ const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
   // 分析项目健康度
   const analyzeProjectHealth = async (): Promise<ProjectAnalysis> => {
     try {
-      const result = await claudeClient.generateRiskWarnings({
+      const result = await doubaoClient.generateRiskWarnings({
         projectId: currentProject!.id,
         projectName: currentProject!.name,
         departmentTasks: departmentTasks.map(t => ({

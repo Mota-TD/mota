@@ -4,7 +4,7 @@
  */
 
 import { businessWorkflowManager } from '@/workflows/projectWorkflow'
-import { initializeClaudeClient } from '@/services/claude/claudeClient'
+import { initializeDoubaoClient } from '@/services/doubao/doubaoClient'
 import { initializeDataSync } from '@/store/syncManager'
 
 /**
@@ -60,10 +60,10 @@ export class E2EWorkflowTest {
    */
   private async initializeTestEnvironment(): Promise<void> {
     try {
-      // 初始化Claude API（如果有Key的话）
-      const claudeApiKey = import.meta.env.VITE_CLAUDE_API_KEY
-      if (claudeApiKey) {
-        initializeClaudeClient(claudeApiKey)
+      // 初始化Doubao API（如果有Key的话）
+      const doubaoApiKey = import.meta.env.VITE_DOUBAO_API_KEY
+      if (doubaoApiKey) {
+        initializeDoubaoClient(doubaoApiKey)
       }
       
       // 初始化数据同步

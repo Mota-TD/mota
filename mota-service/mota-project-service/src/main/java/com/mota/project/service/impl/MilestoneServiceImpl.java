@@ -13,6 +13,7 @@ import com.mota.project.mapper.MilestoneMapper;
 import com.mota.project.mapper.MilestoneTaskMapper;
 import com.mota.project.service.MilestoneService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 /**
  * 里程碑服务实现
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MilestoneServiceImpl extends ServiceImpl<MilestoneMapper, Milestone> implements MilestoneService {
@@ -115,6 +117,7 @@ public class MilestoneServiceImpl extends ServiceImpl<MilestoneMapper, Milestone
         }
         
         save(milestone);
+        
         return milestone;
     }
 
@@ -164,6 +167,7 @@ public class MilestoneServiceImpl extends ServiceImpl<MilestoneMapper, Milestone
         }
         
         updateById(existing);
+        
         return existing;
     }
 
@@ -212,6 +216,7 @@ public class MilestoneServiceImpl extends ServiceImpl<MilestoneMapper, Milestone
         existing.setProgress(100);
         
         updateById(existing);
+        
         return existing;
     }
 

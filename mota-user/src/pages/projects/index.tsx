@@ -563,9 +563,20 @@ const Projects = () => {
     setDraggedMilestone(null)
   }
 
+  // AI生成里程碑建议状态
+  const [aiGeneratingMilestones, setAiGeneratingMilestones] = useState(false)
+  
   // AI生成里程碑建议
-  const handleAIGenerateMilestones = () => {
-    const dateRange = formData.dateRange
+  const handleAIGenerateMilestones = async () => {
+    const projectName = formData.name || form.getFieldValue('name')
+    const projectDescription = formData.description || form.getFieldValue('description')
+    const dateRange = formData.dateRange || form.getFieldValue('dateRange')
+    
+    if (!projectName) {
+      message.warning('请先输入项目名称')
+      return
+    }
+    
     if (!dateRange || !dateRange[0] || !dateRange[1]) {
       message.warning('请先设置项目周期')
       return
@@ -573,61 +584,86 @@ const Projects = () => {
     
     const startDate = dateRange[0]
     const endDate = dateRange[1]
-    const duration = endDate.diff(startDate, 'day')
     
-    // 根据项目周期生成建议里程碑
-    const suggestedMilestones: MilestoneItem[] = []
+    setAiGeneratingMilestones(true)
+    message.loading({ content: 'AI正在分析项目需求，生成里程碑建议...', key: 'ai-milestone' })
     
-    if (duration >= 30) {
-      suggestedMilestones.push({
-        id: Date.now().toString() + '_1',
-        name: '需求确认',
-        targetDate: startDate.add(Math.floor(duration * 0.15), 'day').format('YYYY-MM-DD'),
-        description: '完成需求分析和确认'
+    try {
+      // 导入豆包客户端
+      const { doubaoClient } = await import('@/services/doubao/doubaoClient')
+      
+      // 调用豆包API生成任务分解
+      const result = await doubaoClient.generateTaskDecomposition({
+        projectName,
+        projectDescription: projectDescription || `${projectName}项目`,
+        departments: selectedDepartments.length > 0
+          ? selectedDepartments.map(deptId => {
+              const dept = departments.find(d => String(d.id) === String(deptId))
+              return dept?.name || String(deptId)
+            })
+          : ['默认部门'],
+        startDate: startDate.format('YYYY-MM-DD'),
+        endDate: endDate.format('YYYY-MM-DD')
       })
-    }
-    
-    if (duration >= 60) {
-      suggestedMilestones.push({
-        id: Date.now().toString() + '_2',
-        name: '方案设计完成',
-        targetDate: startDate.add(Math.floor(duration * 0.3), 'day').format('YYYY-MM-DD'),
-        description: '完成整体方案设计'
+      
+      console.log('豆包API返回结果:', result)
+      
+      // 将AI建议转换为里程碑格式
+      const duration = endDate.diff(startDate, 'day')
+      const aiGeneratedMilestones: MilestoneItem[] = result.suggestions.map((suggestion, index) => {
+        // 根据估算天数和项目周期计算目标日期
+        const progressRatio = (suggestion.estimatedDays * (index + 1)) / result.totalEstimatedDays
+        const targetDate = startDate.add(Math.floor(duration * Math.min(progressRatio, 0.95)), 'day')
+        
+        return {
+          id: suggestion.id || `ai_${Date.now()}_${index}`,
+          name: suggestion.name,
+          targetDate: targetDate.format('YYYY-MM-DD'),
+          description: suggestion.description,
+          assigneeIds: formData.ownerId ? [formData.ownerId] : []
+        }
       })
+      
+      setMilestones(aiGeneratedMilestones)
+      message.success({ content: `AI已生成${aiGeneratedMilestones.length}个里程碑建议`, key: 'ai-milestone' })
+      
+      // 显示风险评估
+      if (result.riskAssessment) {
+        message.info(`风险评估: ${result.riskAssessment}`, 5)
+      }
+    } catch (error) {
+      console.error('AI生成里程碑失败:', error)
+      message.error({ content: 'AI生成失败，使用默认里程碑', key: 'ai-milestone' })
+      
+      // 回退到默认里程碑
+      const duration = endDate.diff(startDate, 'day')
+      const fallbackMilestones: MilestoneItem[] = [
+        {
+          id: Date.now().toString() + '_1',
+          name: '需求确认',
+          targetDate: startDate.add(Math.floor(duration * 0.15), 'day').format('YYYY-MM-DD'),
+          description: '完成需求分析和确认',
+          assigneeIds: formData.ownerId ? [formData.ownerId] : []
+        },
+        {
+          id: Date.now().toString() + '_2',
+          name: '中期检查',
+          targetDate: startDate.add(Math.floor(duration * 0.5), 'day').format('YYYY-MM-DD'),
+          description: '项目中期进度检查',
+          assigneeIds: formData.ownerId ? [formData.ownerId] : []
+        },
+        {
+          id: Date.now().toString() + '_3',
+          name: '项目完成',
+          targetDate: endDate.format('YYYY-MM-DD'),
+          description: '项目交付和总结',
+          assigneeIds: formData.ownerId ? [formData.ownerId] : []
+        }
+      ]
+      setMilestones(fallbackMilestones)
+    } finally {
+      setAiGeneratingMilestones(false)
     }
-    
-    suggestedMilestones.push({
-      id: Date.now().toString() + '_3',
-      name: '中期检查',
-      targetDate: startDate.add(Math.floor(duration * 0.5), 'day').format('YYYY-MM-DD'),
-      description: '项目中期进度检查'
-    })
-    
-    if (duration >= 45) {
-      suggestedMilestones.push({
-        id: Date.now().toString() + '_4',
-        name: '测试验收',
-        targetDate: startDate.add(Math.floor(duration * 0.85), 'day').format('YYYY-MM-DD'),
-        description: '完成测试和验收'
-      })
-    }
-    
-    suggestedMilestones.push({
-      id: Date.now().toString() + '_5',
-      name: '项目完成',
-      targetDate: endDate.format('YYYY-MM-DD'),
-      description: '项目交付和总结',
-      assigneeIds: formData.ownerId ? [formData.ownerId] : []
-    })
-    
-    // 为所有建议的里程碑设置默认负责人为项目负责人
-    const milestonesWithAssignees = suggestedMilestones.map(m => ({
-      ...m,
-      assigneeIds: formData.ownerId ? [formData.ownerId] : []
-    }))
-    
-    setMilestones(milestonesWithAssignees)
-    message.success('已生成里程碑建议，默认负责人为项目总负责人')
   }
 
   // 打开编辑项目抽屉
@@ -1236,8 +1272,9 @@ const Projects = () => {
               <Button
                 icon={<RobotOutlined />}
                 onClick={handleAIGenerateMilestones}
+                loading={aiGeneratingMilestones}
               >
-                AI智能生成里程碑建议
+                {aiGeneratingMilestones ? 'AI正在生成...' : 'AI智能生成里程碑建议'}
               </Button>
             </div>
             

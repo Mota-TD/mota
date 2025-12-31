@@ -99,6 +99,8 @@ html {
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* 最小宽度限制 - 小于 1440px 时出现水平滚动条 */
+  min-width: 1440px;
 }
 
 body {
@@ -107,6 +109,8 @@ body {
   line-height: 1.6;
   color: var(--text-primary);
   background-color: var(--bg-primary);
+  /* 最小宽度限制 - 小于 1440px 时出现水平滚动条 */
+  min-width: 1440px;
 }
 
 a {
@@ -551,36 +555,12 @@ select {
   font-size: 24px;
 }
 
-/* 响应式隐藏 */
-@media (max-width: 576px) {
-  .hidden-xs {
-    display: none !important;
-  }
-}
+/* 响应式隐藏类已禁用 - 布局固定在 1440px 最小宽度 */
+/* 小于 1440px 时通过水平滚动条查看内容，布局不做缩放 */
 
-@media (max-width: 768px) {
-  .hidden-sm {
-    display: none !important;
-  }
-}
-
-@media (max-width: 992px) {
-  .hidden-md {
-    display: none !important;
-  }
-}
-
-@media (max-width: 1200px) {
-  .hidden-lg {
-    display: none !important;
-  }
-}
-
-@media (min-width: 769px) {
-  .hidden-desktop {
-    display: none !important;
-  }
-}
+/* 工作区最小宽度限制 - 1440px */
+/* 小于 1440px 时出现水平滚动条，布局保持不变 */
+/* 具体实现在 ConsoleLayout/index.module.css 中 */
 
 /* 动画 */
 @keyframes fadeIn {

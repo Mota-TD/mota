@@ -315,7 +315,7 @@ RAG 架构 + 多模型支持
 
 <div align="center">
 
-**摩塔 Mota** - 让团队协作更智能
+**摩塔 Mota** - 让协作更智能
 
 Copyright © 2024 Mota Team. All rights reserved.
 

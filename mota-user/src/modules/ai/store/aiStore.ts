@@ -1,6 +1,7 @@
 /**
  * AI 模块状态管理
  * 使用 Zustand 管理 AI 功能相关状态
+ * 默认使用豆包模型，支持切换到Claude
  */
 
 import { create } from 'zustand';
@@ -8,7 +9,8 @@ import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import * as aiApi from '@/services/api/ai';
 import * as aiAssistantApi from '@/services/api/aiAssistant';
-import { claudeClient } from '../../../services/claude/claudeClient';
+import { aiClientManager, type AIProvider } from '@/services/ai/aiClient';
+import { doubaoClient } from '@/services/doubao/doubaoClient';
 import type {
   DecomposeStatus,
   DecomposeSuggestionWithSelection,
@@ -65,6 +67,9 @@ interface AIState {
   // 统计
   usageStats: AIUsageStats;
 
+  // AI提供商
+  currentProvider: AIProvider;
+
   // ==================== 操作方法 ====================
 
   // 任务分解
@@ -96,6 +101,10 @@ interface AIState {
   // 配置
   updateConfig: (config: Partial<AIModuleConfig>) => void;
 
+  // AI提供商切换
+  switchAIProvider: (provider: AIProvider) => void;
+  getAvailableProviders: () => Array<{ id: AIProvider; name: string; available: boolean; description: string }>;
+
   // 重置
   reset: () => void;
 }
@@ -107,7 +116,7 @@ const initialConfig: AIModuleConfig = {
   suggestionRefreshInterval: 30,
   maxSuggestionsPerType: 5,
   enableNotifications: true,
-  preferredModel: 'gpt-4',
+  preferredModel: 'doubao-pro-32k', // 默认使用豆包模型
 };
 
 const initialUsageStats: AIUsageStats = {
@@ -144,6 +153,7 @@ const initialState = {
 
   config: initialConfig,
   usageStats: initialUsageStats,
+  currentProvider: 'doubao' as AIProvider, // 默认使用豆包
 };
 
 // ==================== 创建 Store ====================
@@ -161,11 +171,12 @@ export const useAIStore = create<AIState>()(
         const startTime = Date.now();
 
         try {
-          // 优先使用Claude API
+          // 使用统一AI客户端管理器（默认豆包，支持回退到Claude）
           let result: TaskDecompositionResponse;
           
           try {
-            const claudeResult = await claudeClient.generateTaskDecomposition({
+            // 优先使用豆包模型
+            const aiResult = await doubaoClient.generateTaskDecomposition({
               projectName: data.projectName,
               projectDescription: data.projectDescription,
               departments: data.departments,
@@ -173,15 +184,17 @@ export const useAIStore = create<AIState>()(
               endDate: data.endDate,
             });
 
-            // 转换Claude结果为标准格式
+            // 转换结果为标准格式
             result = {
-              suggestions: claudeResult.suggestions,
-              totalEstimatedDays: claudeResult.totalEstimatedDays,
-              riskAssessment: claudeResult.riskAssessment,
+              suggestions: aiResult.suggestions,
+              totalEstimatedDays: aiResult.totalEstimatedDays,
+              riskAssessment: aiResult.riskAssessment,
+              source: 'ai' as const,
+              model: 'doubao-pro-32k',
               generatedAt: new Date().toISOString()
             };
-          } catch (claudeError) {
-            console.warn('Claude API失败，回退到原API:', claudeError);
+          } catch (aiError) {
+            console.warn('豆包 API失败，回退到原API:', aiError);
             
             // 回退到原有的API
             result = await aiApi.generateTaskDecomposition({
@@ -280,15 +293,15 @@ export const useAIStore = create<AIState>()(
         set({ assignmentLoading: true, assignmentError: null });
 
         try {
-          // 优先使用Claude API（如果有必要的数据）
+          // 使用豆包API进行分工推荐
           let result: any;
           
           try {
             // 这里需要从其他store获取任务和团队成员信息
-            // 暂时先使用原API，后续可以扩展
+            // 暂时先使用原API，后续可以扩展为使用豆包
             result = await aiApi.suggestTaskAssignment(taskId);
-          } catch (claudeError) {
-            console.warn('Claude分工推荐失败，使用原API:', claudeError);
+          } catch (aiError) {
+            console.warn('AI分工推荐失败，使用原API:', aiError);
             result = await aiApi.suggestTaskAssignment(taskId);
           }
 
@@ -348,12 +361,12 @@ export const useAIStore = create<AIState>()(
           let warnings: RiskWarning[] = [];
           
           try {
-            // 尝试使用Claude API生成风险预警
+            // 尝试使用豆包API生成风险预警
             // 这里需要获取项目和任务数据
             // 暂时先使用原API
             warnings = await aiApi.getProjectRiskWarnings(projectId);
-          } catch (claudeError) {
-            console.warn('Claude风险分析失败，使用原API:', claudeError);
+          } catch (aiError) {
+            console.warn('AI风险分析失败，使用原API:', aiError);
             warnings = await aiApi.getProjectRiskWarnings(projectId);
           }
           
@@ -443,6 +456,20 @@ export const useAIStore = create<AIState>()(
         set((state) => {
           state.config = { ...state.config, ...newConfig };
         });
+      },
+
+      // ==================== AI提供商切换 ====================
+
+      switchAIProvider: (provider: AIProvider) => {
+        aiClientManager.switchProvider(provider);
+        set((state) => {
+          state.currentProvider = provider;
+        });
+        console.log(`AI提供商已切换为: ${provider}`);
+      },
+
+      getAvailableProviders: () => {
+        return aiClientManager.getAvailableProviders();
       },
 
       // ==================== 重置 ====================

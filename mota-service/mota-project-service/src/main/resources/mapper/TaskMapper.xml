@@ -19,7 +19,6 @@
         <result column="progress_note" property="progressNote"/>
         <result column="sort_order" property="sortOrder"/>
         <result column="completed_at" property="completedAt"/>
-        <result column="calendar_event_id" property="calendarEventId"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
         <result column="created_by" property="createdBy"/>

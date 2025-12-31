@@ -1,10 +1,11 @@
 /**
  * 项目协同端到端业务流程管理
  * 统一管理从项目创建到完成的完整业务流程
+ * 默认使用豆包AI模型
  */
 
 import { message } from 'antd'
-import { claudeClient } from '@/services/claude/claudeClient'
+import { doubaoClient } from '@/services/doubao/doubaoClient'
 import { useProjectStore } from '@/modules/project/store/projectStore'
 import { useTaskStore } from '@/modules/task/store/taskStore'
 import { useAIStore } from '@/modules/ai/store/aiStore'
@@ -272,10 +273,10 @@ export class TaskExecutionWorkflow {
     error?: string
   }> {
     try {
-      console.log('🧠 开始智能任务分配...')
+      console.log('🧠 开始智能任务分配（使用豆包AI）...')
 
-      // 获取AI推荐
-      const recommendations = await claudeClient.suggestTaskAssignment({
+      // 获取AI推荐（使用豆包模型）
+      const recommendations = await doubaoClient.suggestTaskAssignment({
         taskId: params.taskId,
         taskName: params.taskName,
         taskDescription: params.taskDescription,
