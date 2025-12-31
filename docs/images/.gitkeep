@@ -1,0 +1,22 @@
+# 功能截图目录
+
+此目录用于存放摩塔 Mota 平台的功能截图。
+
+## 建议的截图命名规范
+
+- dashboard.png - 仪表盘/工作台
+- project-list.png - 项目列表
+- task-board.png - 任务看板
+- gantt-chart.png - 甘特图
+- ai-assistant.png - AI 助手
+- knowledge-base.png - 知识库
+- calendar.png - 日历视图
+- team-collaboration.png - 团队协作
+- data-analytics.png - 数据分析
+
+## 截图要求
+
+- 分辨率：建议 1920x1080 或更高
+- 格式：PNG 或 WebP
+- 大小：单张图片建议不超过 500KB
+- 内容：请确保截图中不包含敏感信息
