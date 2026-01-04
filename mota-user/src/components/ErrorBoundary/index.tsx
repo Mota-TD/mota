@@ -55,10 +55,10 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   /**
-   * 返回首页
+   * 返回首页（工作台）
    */
   handleGoHome = () => {
-    window.location.href = '/'
+    window.location.href = '/dashboard'
   }
 
   /**
