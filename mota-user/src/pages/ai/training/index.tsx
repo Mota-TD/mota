@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { 
   Card, 
   Form, 
@@ -69,12 +69,20 @@ const AITraining = () => {
   const [trainingHistory, setTrainingHistory] = useState<TrainingHistory[]>([])
   const [knowledgeDocuments, setKnowledgeDocuments] = useState<KnowledgeDocument[]>([])
 
+  // 防止重复请求的 ref
+  const dataLoadedRef = useRef(false)
+  const loadingDataRef = useRef(false)
+
   // 加载数据
   useEffect(() => {
+    if (dataLoadedRef.current || loadingDataRef.current) {
+      return
+    }
     loadData()
   }, [])
 
   const loadData = async () => {
+    loadingDataRef.current = true
     setLoading(true)
     try {
       const [statsRes, historyRes, docsRes] = await Promise.all([
@@ -105,6 +113,8 @@ const AITraining = () => {
       console.error('Failed to load data:', error)
     } finally {
       setLoading(false)
+      loadingDataRef.current = false
+      dataLoadedRef.current = true
     }
   }
 

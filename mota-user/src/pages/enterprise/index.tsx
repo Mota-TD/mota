@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { 
   Card, 
   Tabs, 
@@ -68,11 +68,19 @@ const EnterpriseManagement = () => {
   const [creatingInvite, setCreatingInvite] = useState(false)
   const [newInvitation, setNewInvitation] = useState<Invitation | null>(null)
 
+  // 防止重复请求的 ref
+  const enterpriseLoadedRef = useRef(false)
+  const loadingEnterpriseRef = useRef(false)
+
   useEffect(() => {
+    if (enterpriseLoadedRef.current || loadingEnterpriseRef.current) {
+      return
+    }
     loadEnterprise()
   }, [])
 
   const loadEnterprise = async () => {
+    loadingEnterpriseRef.current = true
     setLoading(true)
     try {
       const data = await getCurrentEnterprise()
@@ -85,6 +93,8 @@ const EnterpriseManagement = () => {
       console.error('加载企业信息失败:', error)
     } finally {
       setLoading(false)
+      loadingEnterpriseRef.current = false
+      enterpriseLoadedRef.current = true
     }
   }
 

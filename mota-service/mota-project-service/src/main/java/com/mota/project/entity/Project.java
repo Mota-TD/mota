@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.mota.common.mybatis.base.BaseEntityDO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -48,8 +50,10 @@ public class Project extends BaseEntityDO {
 
     /**
      * 负责人ID
+     * 使用 ToStringSerializer 将 Long 序列化为字符串，解决 JavaScript 数字精度丢失问题
      */
     @TableField(value = "owner_id", insertStrategy = FieldStrategy.NOT_NULL)
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long ownerId;
 
     /**
@@ -102,7 +106,9 @@ public class Project extends BaseEntityDO {
 
     /**
      * 归档人ID
+     * 使用 ToStringSerializer 将 Long 序列化为字符串
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long archivedBy;
 
     /**

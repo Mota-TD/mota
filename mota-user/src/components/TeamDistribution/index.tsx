@@ -12,7 +12,7 @@ import { getTeamDistribution } from '@/services/api/resourceManagement'
 import styles from './index.module.css'
 
 interface TeamDistributionProps {
-  teamId: number
+  teamId?: string | number
   startDate: string
   endDate: string
 }
@@ -26,10 +26,15 @@ const TeamDistribution: React.FC<TeamDistributionProps> = ({
   const [data, setData] = useState<TeamDistributionData | null>(null)
 
   useEffect(() => {
-    fetchData()
+    if (teamId) {
+      fetchData()
+    } else {
+      setData(null)
+    }
   }, [teamId, startDate, endDate])
 
   const fetchData = async () => {
+    if (!teamId) return
     setLoading(true)
     try {
       const result = await getTeamDistribution(teamId, startDate, endDate)
@@ -107,20 +112,20 @@ const TeamDistribution: React.FC<TeamDistributionProps> = ({
         {
           name: '任务数',
           type: 'bar',
-          data: members.map(m => m.taskCount),
+          data: members.map(m => Number(m.taskCount) || 0),
           itemStyle: { color: '#1890ff' }
         },
         {
           name: '工时',
           type: 'bar',
-          data: members.map(m => m.hours?.toFixed(1)),
+          data: members.map(m => Number(m.hours) || 0),
           itemStyle: { color: '#52c41a' }
         },
         {
           name: '完成率',
           type: 'line',
           yAxisIndex: 1,
-          data: members.map(m => m.completionRate?.toFixed(1)),
+          data: members.map(m => Number(m.completionRate) || 0),
           itemStyle: { color: '#faad14' }
         }
       ]
@@ -211,28 +216,28 @@ const TeamDistribution: React.FC<TeamDistributionProps> = ({
       title: '任务数',
       dataIndex: 'taskCount',
       key: 'taskCount',
-      sorter: (a: MemberWorkload, b: MemberWorkload) => a.taskCount - b.taskCount
+      sorter: (a: MemberWorkload, b: MemberWorkload) => Number(a.taskCount) - Number(b.taskCount)
     },
     {
       title: '工时',
       dataIndex: 'hours',
       key: 'hours',
-      render: (val: number) => `${val?.toFixed(1)}h`,
-      sorter: (a: MemberWorkload, b: MemberWorkload) => a.hours - b.hours
+      render: (val: number) => `${Number(val || 0).toFixed(1)}h`,
+      sorter: (a: MemberWorkload, b: MemberWorkload) => Number(a.hours) - Number(b.hours)
     },
     {
       title: '负载',
       dataIndex: 'workloadPercentage',
       key: 'workloadPercentage',
       render: (val: number, record: MemberWorkload) => (
-        <Progress 
-          percent={val} 
-          size="small" 
+        <Progress
+          percent={Number(val) || 0}
+          size="small"
           strokeColor={getStatusColor(record.workloadStatus)}
-          format={() => `${val?.toFixed(0)}%`}
+          format={() => `${Number(val || 0).toFixed(0)}%`}
         />
       ),
-      sorter: (a: MemberWorkload, b: MemberWorkload) => a.workloadPercentage - b.workloadPercentage
+      sorter: (a: MemberWorkload, b: MemberWorkload) => Number(a.workloadPercentage) - Number(b.workloadPercentage)
     },
     {
       title: '状态',
@@ -246,8 +251,8 @@ const TeamDistribution: React.FC<TeamDistributionProps> = ({
       title: '完成率',
       dataIndex: 'completionRate',
       key: 'completionRate',
-      render: (val: number) => `${val?.toFixed(1)}%`,
-      sorter: (a: MemberWorkload, b: MemberWorkload) => a.completionRate - b.completionRate
+      render: (val: number) => `${Number(val || 0).toFixed(1)}%`,
+      sorter: (a: MemberWorkload, b: MemberWorkload) => Number(a.completionRate) - Number(b.completionRate)
     }
   ]
 
@@ -257,6 +262,10 @@ const TeamDistribution: React.FC<TeamDistributionProps> = ({
         <Spin size="large" />
       </div>
     )
+  }
+
+  if (!teamId) {
+    return <Empty description="请选择一个团队查看分布数据" />
   }
 
   if (!data) {
@@ -290,20 +299,20 @@ const TeamDistribution: React.FC<TeamDistributionProps> = ({
             />
           </Col>
           <Col span={5}>
-            <Statistic 
-              title="总工时" 
-              value={data.totalHours?.toFixed(0)}
+            <Statistic
+              title="总工时"
+              value={Number(data.totalHours || 0).toFixed(0)}
               suffix="h"
             />
           </Col>
           <Col span={5}>
-            <Statistic 
-              title="平均负载" 
-              value={data.averageWorkload?.toFixed(1)}
+            <Statistic
+              title="平均负载"
+              value={Number(data.averageWorkload || 0).toFixed(1)}
               suffix="%"
-              valueStyle={{ 
-                color: data.averageWorkload > 80 ? '#ff4d4f' : 
-                       data.averageWorkload > 60 ? '#faad14' : '#52c41a'
+              valueStyle={{
+                color: Number(data.averageWorkload) > 80 ? '#ff4d4f' :
+                       Number(data.averageWorkload) > 60 ? '#faad14' : '#52c41a'
               }}
             />
           </Col>

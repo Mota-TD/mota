@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Card,
   Input,
@@ -108,11 +108,28 @@ const AIAssistantPage: React.FC = () => {
   const [reportForm] = Form.useForm();
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // 防止重复请求的 ref
+  const dataLoadedRef = useRef(false);
+  const loadingDataRef = useRef(false);
 
   // 初始化加载
   useEffect(() => {
-    loadSessions();
-    loadConfig();
+    if (dataLoadedRef.current || loadingDataRef.current) {
+      return;
+    }
+    loadingDataRef.current = true;
+    
+    const loadInitialData = async () => {
+      try {
+        await Promise.all([loadSessions(), loadConfig()]);
+        dataLoadedRef.current = true;
+      } finally {
+        loadingDataRef.current = false;
+      }
+    };
+    
+    loadInitialData();
   }, []);
 
   // 滚动到底部

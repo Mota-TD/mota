@@ -1,5 +1,7 @@
 package com.mota.project.dto.resource;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 import java.util.List;
 
@@ -94,6 +96,7 @@ public class ResourceUtilizationData {
         /**
          * 用户ID
          */
+        @JsonSerialize(using = ToStringSerializer.class)
         private Long userId;
         
         /**
@@ -155,6 +158,7 @@ public class ResourceUtilizationData {
         /**
          * 项目ID
          */
+        @JsonSerialize(using = ToStringSerializer.class)
         private Long projectId;
         
         /**

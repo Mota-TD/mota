@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Card,
   Row,
@@ -74,12 +74,25 @@ const KnowledgeStatisticsPage: React.FC = () => {
   const [gapModalVisible, setGapModalVisible] = useState(false);
   const [gapForm] = Form.useForm();
 
+  // 防止重复请求的 ref
+  const loadingDataRef = useRef(false);
+  const lastParamsRef = useRef<string>('');
+
   // 加载数据
   useEffect(() => {
+    const paramsKey = `${dateRange[0].format('YYYY-MM-DD')}-${dateRange[1].format('YYYY-MM-DD')}-${projectId}`;
+    if (loadingDataRef.current && lastParamsRef.current === paramsKey) {
+      return;
+    }
+    lastParamsRef.current = paramsKey;
     loadData();
   }, [dateRange, projectId]);
 
   const loadData = async () => {
+    if (loadingDataRef.current) {
+      return;
+    }
+    loadingDataRef.current = true;
     setLoading(true);
     try {
       const startDate = dateRange[0].format('YYYY-MM-DD');
@@ -122,6 +135,7 @@ const KnowledgeStatisticsPage: React.FC = () => {
       message.error('加载数据失败');
     } finally {
       setLoading(false);
+      loadingDataRef.current = false;
     }
   };
 

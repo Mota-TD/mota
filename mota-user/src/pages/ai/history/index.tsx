@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { 
   Card, 
   Table, 
@@ -49,13 +49,36 @@ const AIHistory = () => {
   const [searchText, setSearchText] = useState('')
   const [typeFilter, setTypeFilter] = useState<string | null>(null)
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10 })
+  
+  // 防止重复请求的 ref
+  const initialLoadDoneRef = useRef(false)
+  const loadingRef = useRef(false)
+  const lastParamsRef = useRef<string>('')
 
   // 加载数据
   useEffect(() => {
+    const paramsKey = `${pagination.current}-${pagination.pageSize}-${typeFilter || ''}`
+    
+    // 如果参数没变且已加载过，跳过
+    if (lastParamsRef.current === paramsKey && initialLoadDoneRef.current) {
+      return
+    }
+    
+    // 如果正在加载且参数相同，跳过
+    if (loadingRef.current && lastParamsRef.current === paramsKey) {
+      return
+    }
+    
+    lastParamsRef.current = paramsKey
     loadHistory()
   }, [pagination.current, pagination.pageSize, typeFilter])
 
-  const loadHistory = async () => {
+  const loadHistory = async (forceReload = false) => {
+    const paramsKey = `${pagination.current}-${pagination.pageSize}-${typeFilter || ''}`
+    if (!forceReload && loadingRef.current && lastParamsRef.current === paramsKey) {
+      return
+    }
+    loadingRef.current = true
     setLoading(true)
     try {
       const res = await getAIHistory({
@@ -66,18 +89,20 @@ const AIHistory = () => {
       })
       setHistoryData(res.list || [])
       setTotal(res.total || 0)
+      initialLoadDoneRef.current = true
     } catch (error) {
       console.error('Failed to load AI history:', error)
       message.error('加载历史记录失败')
     } finally {
       setLoading(false)
+      loadingRef.current = false
     }
   }
 
   // 搜索
   const handleSearch = () => {
     setPagination({ ...pagination, current: 1 })
-    loadHistory()
+    loadHistory(true)
   }
 
   // 类型配置

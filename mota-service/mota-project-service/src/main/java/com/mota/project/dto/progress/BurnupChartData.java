@@ -1,5 +1,7 @@
 package com.mota.project.dto.progress;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,6 +22,7 @@ public class BurnupChartData {
     /**
      * 项目ID
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long projectId;
     
     /**

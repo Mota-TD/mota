@@ -179,7 +179,7 @@ export const progressTrackingApi = {
   /**
    * 获取燃尽图数据
    */
-  getBurndownChart: (projectId: number, sprintId?: number): Promise<BurndownChartData> => {
+  getBurndownChart: (projectId: string | number, sprintId?: number): Promise<BurndownChartData> => {
     const params: Record<string, string | number | boolean | undefined> = sprintId ? { sprintId } : {}
     return request.get(`/api/v1/progress/burndown/${projectId}`, params)
   },
@@ -187,14 +187,14 @@ export const progressTrackingApi = {
   /**
    * 获取燃起图数据
    */
-  getBurnupChart: (projectId: number): Promise<BurnupChartData> => {
+  getBurnupChart: (projectId: string | number): Promise<BurnupChartData> => {
     return request.get(`/api/v1/progress/burnup/${projectId}`)
   },
 
   /**
    * 获取速度趋势数据
    */
-  getVelocityTrend: (projectId: number, sprintCount?: number): Promise<VelocityTrendData> => {
+  getVelocityTrend: (projectId: string | number, sprintCount?: number): Promise<VelocityTrendData> => {
     const params: Record<string, string | number | boolean | undefined> = sprintCount ? { sprintCount } : {}
     return request.get(`/api/v1/progress/velocity/${projectId}`, params)
   },
@@ -202,7 +202,7 @@ export const progressTrackingApi = {
   /**
    * 获取AI进度预测数据
    */
-  getAIProgressPrediction: (projectId: number): Promise<AIProgressPredictionData> => {
+  getAIProgressPrediction: (projectId: string | number): Promise<AIProgressPredictionData> => {
     return request.get(`/api/v1/progress/ai-prediction/${projectId}`)
   },
 

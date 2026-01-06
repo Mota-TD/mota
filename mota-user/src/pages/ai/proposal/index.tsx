@@ -61,12 +61,38 @@ const AIProposalPage = () => {
   const [activeToolTab, setActiveToolTab] = useState<ToolTab>('sections')
   const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null)
   
+  // 防止重复请求的 ref
+  const dataLoadedRef = useRef(false);
+  const loadingDataRef = useRef(false);
+  const lastUserIdRef = useRef<string | number | null>(null);
+
   // 加载会话列表
   useEffect(() => {
-    if (user?.id) {
-      loadSessions()
-      loadTemplates()
+    if (!user?.id) return;
+    
+    // 如果用户ID没变且已加载过，跳过
+    if (lastUserIdRef.current === user.id && dataLoadedRef.current) {
+      return;
     }
+    
+    // 如果正在加载且用户ID相同，跳过
+    if (loadingDataRef.current && lastUserIdRef.current === user.id) {
+      return;
+    }
+    
+    lastUserIdRef.current = user.id;
+    loadingDataRef.current = true;
+    
+    const loadInitialData = async () => {
+      try {
+        await Promise.all([loadSessions(), loadTemplates()]);
+        dataLoadedRef.current = true;
+      } finally {
+        loadingDataRef.current = false;
+      }
+    };
+    
+    loadInitialData();
   }, [user?.id])
   
   // 滚动到底部

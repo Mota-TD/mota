@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { Card, Typography, Spin, Button, Modal, Form, Input, Select, message, Tabs, List, Tag, Tooltip, Popconfirm, Badge, Switch, Empty, Progress, Divider, Statistic, Row, Col } from 'antd'
 import {
   CalendarOutlined,
@@ -171,14 +171,37 @@ const CalendarPage = () => {
     }
   }, [user?.id])
 
+  // 防止重复请求的 ref
+  const dataLoadedRef = useRef(false)
+  const loadingDataRef = useRef(false)
+
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 500)
-    loadCalendarConfigs()
-    loadSubscriptions()
-    loadSubscriptionUrl()
-    loadUpcomingTasks()
-    loadUpcomingMilestones()
-    loadWorkItemStats()
+    
+    if (dataLoadedRef.current || loadingDataRef.current) {
+      return () => clearTimeout(timer)
+    }
+    
+    loadingDataRef.current = true
+    
+    const loadAllData = async () => {
+      try {
+        await Promise.all([
+          loadCalendarConfigs(),
+          loadSubscriptions(),
+          loadSubscriptionUrl(),
+          loadUpcomingTasks(),
+          loadUpcomingMilestones(),
+          loadWorkItemStats()
+        ])
+      } finally {
+        loadingDataRef.current = false
+        dataLoadedRef.current = true
+      }
+    }
+    
+    loadAllData()
+    
     return () => clearTimeout(timer)
   }, [loadCalendarConfigs, loadSubscriptions, loadSubscriptionUrl, loadUpcomingTasks, loadUpcomingMilestones, loadWorkItemStats])
 

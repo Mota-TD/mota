@@ -3,7 +3,7 @@
  * 集成知识图谱、文件上传、缩略图、AI分类、版本控制等功能
  */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import {
   Typography,
   Spin,
@@ -96,9 +96,23 @@ const KnowledgePage = () => {
   const [showVersionModal, setShowVersionModal] = useState(false)
   const [versionFile, setVersionFile] = useState<KnowledgeFile | null>(null)
 
+  // 防止重复请求的 ref
+  const loadingDataRef = useRef(false)
+  const lastParamsRef = useRef<string>('')
+
   // 加载数据
   useEffect(() => {
+    const paramsKey = `${searchKeyword}-${selectedCategory}-${selectedTags.join(',')}-${pagination.current}-${pagination.pageSize}`
+    if (loadingDataRef.current && lastParamsRef.current === paramsKey) {
+      return
+    }
+    lastParamsRef.current = paramsKey
+    
     const loadData = async () => {
+      if (loadingDataRef.current) {
+        return
+      }
+      loadingDataRef.current = true
       setLoading(true)
       try {
         const [filesData, categoriesData, tagsData] = await Promise.all([
@@ -124,6 +138,7 @@ const KnowledgePage = () => {
         setTags([])
       } finally {
         setLoading(false)
+        loadingDataRef.current = false
       }
     }
     loadData()

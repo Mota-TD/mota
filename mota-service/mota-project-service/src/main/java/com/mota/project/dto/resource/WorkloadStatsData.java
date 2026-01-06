@@ -1,5 +1,7 @@
 package com.mota.project.dto.resource;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 import java.util.List;
 
@@ -12,7 +14,9 @@ public class WorkloadStatsData {
     
     /**
      * 用户ID
+     * 使用 ToStringSerializer 将 Long 序列化为字符串，解决 JavaScript 数字精度丢失问题
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long userId;
     
     /**
@@ -113,7 +117,9 @@ public class WorkloadStatsData {
     public static class ProjectWorkload {
         /**
          * 项目ID
+         * 使用 ToStringSerializer 将 Long 序列化为字符串
          */
+        @JsonSerialize(using = ToStringSerializer.class)
         private Long projectId;
         
         /**

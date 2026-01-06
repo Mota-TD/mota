@@ -12,10 +12,10 @@ import { getTeamWorkloadStats } from '@/services/api/resourceManagement'
 import styles from './index.module.css'
 
 interface WorkloadStatsProps {
-  teamId?: number
+  teamId?: string | number
   startDate: string
   endDate: string
-  onUserClick?: (userId: number) => void
+  onUserClick?: (userId: string | number) => void
 }
 
 const WorkloadStats: React.FC<WorkloadStatsProps> = ({
@@ -91,13 +91,13 @@ const WorkloadStats: React.FC<WorkloadStatsProps> = ({
         {
           name: '计划工时',
           type: 'bar',
-          data: dailyData.map(d => d.plannedHours),
+          data: dailyData.map(d => Number(d.plannedHours) || 0),
           itemStyle: { color: '#91d5ff' }
         },
         {
           name: '实际工时',
           type: 'bar',
-          data: dailyData.map(d => d.actualHours?.toFixed(1)),
+          data: dailyData.map(d => Number(d.actualHours) || 0),
           itemStyle: { color: '#1890ff' }
         }
       ]
@@ -121,7 +121,7 @@ const WorkloadStats: React.FC<WorkloadStatsProps> = ({
           },
           data: projectData.map(p => ({
             name: p.projectName,
-            value: p.totalHours?.toFixed(1)
+            value: Number(p.totalHours) || 0
           }))
         }
       ]
@@ -167,10 +167,10 @@ const WorkloadStats: React.FC<WorkloadStatsProps> = ({
               <div className={styles.workloadProgress}>
                 <div className={styles.progressLabel}>
                   <span>工作负载</span>
-                  <span>{item.workloadPercentage?.toFixed(1)}%</span>
+                  <span>{Number(item.workloadPercentage || 0).toFixed(1)}%</span>
                 </div>
-                <Progress 
-                  percent={item.workloadPercentage} 
+                <Progress
+                  percent={Number(item.workloadPercentage) || 0}
                   strokeColor={getStatusColor(item.workloadStatus)}
                   showInfo={false}
                 />
@@ -217,11 +217,11 @@ const WorkloadStats: React.FC<WorkloadStatsProps> = ({
               <div className={styles.hoursInfo}>
                 <div className={styles.hoursItem}>
                   <span className={styles.hoursLabel}>已用工时</span>
-                  <span className={styles.hoursValue}>{item.usedHours?.toFixed(1)}h</span>
+                  <span className={styles.hoursValue}>{Number(item.usedHours || 0).toFixed(1)}h</span>
                 </div>
                 <div className={styles.hoursItem}>
                   <span className={styles.hoursLabel}>剩余工时</span>
-                  <span className={styles.hoursValue}>{item.remainingHours?.toFixed(1)}h</span>
+                  <span className={styles.hoursValue}>{Number(item.remainingHours || 0).toFixed(1)}h</span>
                 </div>
               </div>
 
@@ -241,7 +241,7 @@ const WorkloadStats: React.FC<WorkloadStatsProps> = ({
                   {item.projectWorkloads.slice(0, 3).map(p => (
                     <div key={p.projectId} className={styles.projectItem}>
                       <span className={styles.projectName}>{p.projectName}</span>
-                      <span className={styles.projectHours}>{p.totalHours?.toFixed(1)}h ({p.hoursPercentage?.toFixed(0)}%)</span>
+                      <span className={styles.projectHours}>{Number(p.totalHours || 0).toFixed(1)}h ({Number(p.hoursPercentage || 0).toFixed(0)}%)</span>
                     </div>
                   ))}
                 </div>

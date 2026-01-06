@@ -86,12 +86,32 @@ const SmartSearchPage: React.FC = () => {
   
   const searchInputRef = useRef<any>(null);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+  
+  // 防止重复请求的 ref
+  const dataLoadedRef = useRef(false);
+  const loadingDataRef = useRef(false);
 
   // 加载热词
   useEffect(() => {
-    loadHotWords();
-    loadSearchHistory();
-    loadUserPreference();
+    if (dataLoadedRef.current || loadingDataRef.current) {
+      return;
+    }
+    loadingDataRef.current = true;
+    
+    const loadInitialData = async () => {
+      try {
+        await Promise.all([
+          loadHotWords(),
+          loadSearchHistory(),
+          loadUserPreference()
+        ]);
+        dataLoadedRef.current = true;
+      } finally {
+        loadingDataRef.current = false;
+      }
+    };
+    
+    loadInitialData();
   }, []);
 
   const loadHotWords = async () => {

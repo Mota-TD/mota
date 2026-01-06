@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Card, Table, Button, Input, Space, Tag, Avatar, Modal, Form, Select, Dropdown, Popconfirm, App, Divider, Empty } from 'antd'
 import {
   PlusOutlined,
@@ -55,13 +55,31 @@ const MembersPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingMember, setEditingMember] = useState<Member | null>(null)
   const [form] = Form.useForm()
+  
+  // 使用 ref 防止重复请求
+  const membersLoadedRef = useRef(false)
+  const deptsLoadedRef = useRef(false)
+  const loadingMembersRef = useRef(false)
+  const loadingDeptsRef = useRef(false)
 
   useEffect(() => {
-    loadMembers()
-    loadDepartments()
+    // 加载成员（只加载一次）
+    if (!membersLoadedRef.current && !loadingMembersRef.current) {
+      loadMembers()
+    }
+    // 加载部门（只加载一次）
+    if (!deptsLoadedRef.current && !loadingDeptsRef.current) {
+      loadDepartments()
+    }
   }, [])
 
-  const loadMembers = async () => {
+  const loadMembers = async (forceReload = false) => {
+    // 防止重复请求（除非是强制刷新）
+    if (!forceReload && (membersLoadedRef.current || loadingMembersRef.current)) {
+      return
+    }
+    
+    loadingMembersRef.current = true
     setLoading(true)
     try {
       const res = await userApi.getUsers()
@@ -74,24 +92,34 @@ const MembersPage = () => {
         role: user.role || 'member'
       }))
       setMembers(transformedList)
+      membersLoadedRef.current = true
     } catch (error) {
       console.error('Failed to load members:', error)
     } finally {
       setLoading(false)
+      loadingMembersRef.current = false
     }
   }
 
   const loadDepartments = async () => {
+    // 防止重复请求
+    if (deptsLoadedRef.current || loadingDeptsRef.current) {
+      return
+    }
+    
+    loadingDeptsRef.current = true
     setLoadingDepts(true)
     try {
       // 从API加载部门，与部门管理页面使用相同的 orgId
       const depts = await departmentApi.getDepartmentsByOrgId('default')
       setDepartments((depts || []).map(d => ({ id: d.id, name: d.name })))
+      deptsLoadedRef.current = true
     } catch (error) {
       console.error('加载部门列表失败:', error)
       setDepartments([])
     } finally {
       setLoadingDepts(false)
+      loadingDeptsRef.current = false
     }
   }
 
@@ -286,7 +314,7 @@ const MembersPage = () => {
             />
             <Button
               icon={<ReloadOutlined />}
-              onClick={loadMembers}
+              onClick={() => loadMembers(true)}
               disabled={loading}
             >
               刷新

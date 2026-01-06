@@ -19,8 +19,8 @@ import { getProjectConflicts, resolveConflict } from '@/services/api/resourceMan
 import styles from './index.module.css'
 
 interface ProjectConflictProps {
-  teamId?: number
-  userId?: number
+  teamId?: string | number
+  userId?: string | number
   startDate: string
   endDate: string
 }
@@ -350,7 +350,7 @@ const ProjectConflict: React.FC<ProjectConflictProps> = ({
                       <strong>涉及项目:</strong>
                       {conflict.projects?.map(p => (
                         <Tag key={p.projectId} icon={<ProjectOutlined />}>
-                          {p.projectName} ({p.allocatedHours?.toFixed(1)}h)
+                          {p.projectName} ({Number(p.allocatedHours || 0).toFixed(1)}h)
                         </Tag>
                       ))}
                     </div>
@@ -358,9 +358,9 @@ const ProjectConflict: React.FC<ProjectConflictProps> = ({
                     {/* 冲突详情 */}
                     <div className={styles.conflictMeta}>
                       <span>冲突时段: {conflict.conflictStartDate} ~ {conflict.conflictEndDate}</span>
-                      <span>冲突工时: <strong style={{ color: '#ff4d4f' }}>{conflict.conflictHours?.toFixed(1)}h</strong></span>
-                      <span>可用工时: {conflict.availableHours}h</span>
-                      <span>超出: <strong style={{ color: '#ff4d4f' }}>{conflict.excessHours?.toFixed(1)}h</strong></span>
+                      <span>冲突工时: <strong style={{ color: '#ff4d4f' }}>{Number(conflict.conflictHours || 0).toFixed(1)}h</strong></span>
+                      <span>可用工时: {Number(conflict.availableHours) || 0}h</span>
+                      <span>超出: <strong style={{ color: '#ff4d4f' }}>{Number(conflict.excessHours || 0).toFixed(1)}h</strong></span>
                     </div>
 
                     {/* 解决建议 */}

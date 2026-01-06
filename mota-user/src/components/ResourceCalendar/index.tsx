@@ -11,7 +11,7 @@ import { getResourceCalendar } from '@/services/api/resourceManagement'
 import styles from './index.module.css'
 
 interface ResourceCalendarProps {
-  teamId?: number
+  teamId?: string | number
   startDate: string
   endDate: string
 }
@@ -81,14 +81,14 @@ const ResourceCalendar: React.FC<ResourceCalendarProps> = ({
         title={
           <div className={styles.tooltipContent}>
             <div><strong>状态:</strong> {getStatusText(status)}</div>
-            <div><strong>已分配:</strong> {allocatedHours?.toFixed(1)}h / {availableHours}h</div>
-            <div><strong>利用率:</strong> {utilizationPercentage?.toFixed(1)}%</div>
+            <div><strong>已分配:</strong> {Number(allocatedHours || 0).toFixed(1)}h / {Number(availableHours) || 0}h</div>
+            <div><strong>利用率:</strong> {Number(utilizationPercentage || 0).toFixed(1)}%</div>
             {tasks && tasks.length > 0 && (
               <div className={styles.tooltipTasks}>
                 <strong>任务:</strong>
                 <ul>
                   {tasks.map(t => (
-                    <li key={t.taskId}>{t.taskName} ({t.hours?.toFixed(1)}h)</li>
+                    <li key={t.taskId}>{t.taskName} ({Number(t.hours || 0).toFixed(1)}h)</li>
                   ))}
                 </ul>
               </div>
@@ -96,20 +96,20 @@ const ResourceCalendar: React.FC<ResourceCalendarProps> = ({
           </div>
         }
       >
-        <div 
+        <div
           className={styles.allocationCell}
-          style={{ 
+          style={{
             backgroundColor: getStatusBgColor(status),
             borderColor: getStatusColor(status)
           }}
         >
           {status !== 'OFF' && (
             <>
-              <div className={styles.cellHours}>{allocatedHours?.toFixed(1)}h</div>
-              <div 
+              <div className={styles.cellHours}>{Number(allocatedHours || 0).toFixed(1)}h</div>
+              <div
                 className={styles.cellBar}
-                style={{ 
-                  width: `${Math.min(utilizationPercentage || 0, 100)}%`,
+                style={{
+                  width: `${Math.min(Number(utilizationPercentage) || 0, 100)}%`,
                   backgroundColor: getStatusColor(status)
                 }}
               />

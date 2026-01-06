@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { MenuInfo } from 'rc-menu/lib/interface'
 import {
@@ -109,9 +109,19 @@ const NotificationsPage = () => {
   // 用户ID（实际应从用户状态获取）
   const userId = 1
 
+  // 防止重复请求的 ref
+  const dataLoadedRef = useRef(false)
+  const loadingRef = useRef(false)
+
   useEffect(() => {
-    loadNotifications()
-    loadSettings()
+    if (dataLoadedRef.current || loadingRef.current) {
+      return
+    }
+    loadingRef.current = true
+    Promise.all([loadNotifications(), loadSettings()]).finally(() => {
+      loadingRef.current = false
+      dataLoadedRef.current = true
+    })
   }, [])
 
   const loadNotifications = async () => {

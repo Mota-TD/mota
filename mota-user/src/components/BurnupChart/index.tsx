@@ -28,7 +28,7 @@ import { progressTrackingApi, BurnupChartData } from '@/services/api/progressTra
 import styles from './index.module.css'
 
 interface BurnupChartProps {
-  projectId: number
+  projectId: string | number
 }
 
 const BurnupChart: React.FC<BurnupChartProps> = ({ projectId }) => {

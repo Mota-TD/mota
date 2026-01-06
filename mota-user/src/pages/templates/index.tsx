@@ -12,7 +12,7 @@
  * - TP-008: 模板统计 - 模板使用统计
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Typography, Breadcrumb, message, Card, Row, Col, Statistic, Button, Space, Tabs, Dropdown, Menu, Modal, Form, Input, Select, Tag, Tooltip } from 'antd'
 import { 
   HomeOutlined, 
@@ -50,20 +50,30 @@ const TemplatesPage = () => {
   // 从URL参数获取默认类型
   const defaultType = searchParams.get('type') as templateApi.TemplateType | null
 
+  // 防止重复请求的 ref
+  const statsLoadedRef = useRef(false)
+  const loadingRef = useRef(false)
+
   // 加载统计数据
   useEffect(() => {
+    if (statsLoadedRef.current || loadingRef.current) {
+      return
+    }
     loadStats()
   }, [])
 
   const loadStats = async () => {
+    loadingRef.current = true
     setLoading(true)
     try {
       const statsData = await templateApi.getTemplateStats()
       setStats(statsData)
+      statsLoadedRef.current = true
     } catch (error) {
       console.error('Failed to load template stats:', error)
     } finally {
       setLoading(false)
+      loadingRef.current = false
     }
   }
 

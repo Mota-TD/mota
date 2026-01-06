@@ -28,7 +28,7 @@ import styles from './index.module.css'
 
 interface BurndownChartProps {
   // API 模式 - 通过 projectId 加载数据
-  projectId?: number
+  projectId?: string | number
   sprintId?: number
   onSprintChange?: (sprintId: number) => void
   // 直接数据模式 - 直接传入数据

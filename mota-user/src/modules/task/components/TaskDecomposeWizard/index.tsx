@@ -3,7 +3,7 @@
  * 支持基于AI的智能任务分解和手动分解
  */
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import {
   Steps,
   Card,
@@ -21,6 +21,7 @@ import {
   Divider,
   Tooltip,
   Switch,
+  message,
 } from 'antd'
 import {
   RobotOutlined,
@@ -39,6 +40,7 @@ import { useMilestoneStore } from '@/modules/milestone/store/milestoneStore'
 import { useProjectStore } from '@/modules/project/store/projectStore'
 import { useTaskStore } from '@/modules/task/store/taskStore'
 import { Priority } from '@/services/api/task'
+import { getDepartmentsByOrgId, type Department } from '@/services/api/department'
 import type { Milestone } from '@/modules/milestone/types'
 import styles from './index.module.css'
 
@@ -87,6 +89,14 @@ const TaskDecomposeWizard: React.FC<TaskDecomposeWizardProps> = ({
   const [selectedTasks, setSelectedTasks] = useState<string[]>([])
   const [editingTask, setEditingTask] = useState<string | null>(null)
   
+  // 部门数据状态
+  const [departments, setDepartments] = useState<Department[]>([])
+  const [loadingDepts, setLoadingDepts] = useState(false)
+  
+  // 使用 ref 防止重复请求
+  const departmentsLoadedRef = useRef(false)
+  const loadingRef = useRef(false)
+  
   // Store hooks
   const { createTask } = useTaskStore()
   const { currentProject } = useProjectStore()
@@ -102,6 +112,33 @@ const TaskDecomposeWizard: React.FC<TaskDecomposeWizardProps> = ({
   })
   
   const aiLoading = status === 'loading'
+
+  // 组件挂载时加载部门数据
+  useEffect(() => {
+    // 防止重复请求
+    if (departmentsLoadedRef.current || loadingRef.current) {
+      return
+    }
+    
+    const loadDepartments = async () => {
+      loadingRef.current = true
+      setLoadingDepts(true)
+      try {
+        const data = await getDepartmentsByOrgId('default')
+        setDepartments(data || [])
+        departmentsLoadedRef.current = true
+      } catch (error) {
+        console.error('加载部门列表失败:', error)
+        message.error('加载部门列表失败')
+        setDepartments([])
+      } finally {
+        setLoadingDepts(false)
+        loadingRef.current = false
+      }
+    }
+    
+    loadDepartments()
+  }, [])
 
   // 表单初始值
   useEffect(() => {
@@ -175,12 +212,12 @@ const TaskDecomposeWizard: React.FC<TaskDecomposeWizardProps> = ({
           <Select
             mode="multiple"
             placeholder="选择将参与此里程碑的部门"
-            options={[
-              { label: '技术部', value: '技术部' },
-              { label: '产品部', value: '产品部' },
-              { label: '运营部', value: '运营部' },
-              { label: '设计部', value: '设计部' },
-            ]}
+            loading={loadingDepts}
+            notFoundContent={loadingDepts ? <Spin size="small" /> : '暂无部门数据'}
+            options={departments.map(dept => ({
+              label: dept.name,
+              value: dept.name
+            }))}
           />
         </Form.Item>
 

@@ -35,7 +35,7 @@ import styles from './index.module.css'
 const { Panel } = Collapse
 
 interface VelocityTrendProps {
-  projectId: number
+  projectId: string | number
   sprintCount?: number
   onSprintCountChange?: (count: number) => void
 }

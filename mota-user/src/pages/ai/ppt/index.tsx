@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { 
   Card, 
   Form, 
@@ -59,12 +59,23 @@ const AIPPT = () => {
   const [colorSchemes, setColorSchemes] = useState<PPTColorScheme[]>([])
   const [quickTemplates, setQuickTemplates] = useState<Array<{ label: string; value: string }>>([])
 
+  // 防止重复请求的 ref
+  const configLoadedRef = useRef(false)
+  const loadingConfigRef = useRef(false)
+
   // 加载配置数据
   useEffect(() => {
+    if (configLoadedRef.current || loadingConfigRef.current) {
+      return
+    }
     loadConfig()
   }, [])
 
-  const loadConfig = async () => {
+  const loadConfig = async (forceReload = false) => {
+    if (!forceReload && (configLoadedRef.current || loadingConfigRef.current)) {
+      return
+    }
+    loadingConfigRef.current = true
     try {
       const [templatesRes, colorSchemesRes, quickTemplatesRes] = await Promise.all([
         getPPTTemplates(),
@@ -75,12 +86,15 @@ const AIPPT = () => {
       setTemplates(templatesRes || [])
       setColorSchemes(colorSchemesRes || [])
       setQuickTemplates(quickTemplatesRes || [])
+      configLoadedRef.current = true
     } catch (error) {
       console.error('Failed to load config:', error)
       message.error('加载配置失败')
       setTemplates([])
       setColorSchemes([])
       setQuickTemplates([])
+    } finally {
+      loadingConfigRef.current = false
     }
   }
 

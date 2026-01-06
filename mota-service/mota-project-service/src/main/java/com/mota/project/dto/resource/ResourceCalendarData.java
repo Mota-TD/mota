@@ -1,5 +1,7 @@
 package com.mota.project.dto.resource;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -40,6 +42,7 @@ public class ResourceCalendarData {
         /**
          * 用户ID
          */
+        @JsonSerialize(using = ToStringSerializer.class)
         private Long userId;
         
         /**
@@ -143,6 +146,7 @@ public class ResourceCalendarData {
         /**
          * 任务ID
          */
+        @JsonSerialize(using = ToStringSerializer.class)
         private Long taskId;
         
         /**
@@ -153,6 +157,7 @@ public class ResourceCalendarData {
         /**
          * 项目ID
          */
+        @JsonSerialize(using = ToStringSerializer.class)
         private Long projectId;
         
         /**

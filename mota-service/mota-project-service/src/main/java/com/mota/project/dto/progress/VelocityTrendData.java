@@ -1,5 +1,7 @@
 package com.mota.project.dto.progress;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,6 +22,7 @@ public class VelocityTrendData {
     /**
      * 项目ID
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long projectId;
     
     /**
@@ -30,6 +33,7 @@ public class VelocityTrendData {
     /**
      * 团队ID
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long teamId;
     
     /**
@@ -103,6 +107,7 @@ public class VelocityTrendData {
         /**
          * Sprint ID
          */
+        @JsonSerialize(using = ToStringSerializer.class)
         private Long sprintId;
         
         /**

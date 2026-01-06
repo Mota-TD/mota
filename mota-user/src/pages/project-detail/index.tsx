@@ -151,6 +151,11 @@ const ProjectDetail = () => {
   const [unreadCount, setUnreadCount] = useState(0)
   const currentUserRef = useRef<any>(null)
   
+  // 防止重复请求的 ref
+  const dataLoadedRef = useRef(false)
+  const loadingDataRef = useRef(false)
+  const lastProjectIdRef = useRef<string>('')
+  
   // 创建部门任务抽屉
   const [createDeptTaskDrawerVisible, setCreateDeptTaskDrawerVisible] = useState(false)
   const [createDeptTaskLoading, setCreateDeptTaskLoading] = useState(false)
@@ -197,6 +202,15 @@ const ProjectDetail = () => {
 
   useEffect(() => {
     if (id) {
+      // 如果是同一个项目ID且已加载过，跳过
+      if (loadingDataRef.current && lastProjectIdRef.current === id) {
+        return
+      }
+      // 如果项目ID变化，重置加载状态
+      if (lastProjectIdRef.current !== id) {
+        dataLoadedRef.current = false
+      }
+      lastProjectIdRef.current = id
       loadProjectData(id)
       initializeRealTimeCollaboration(id)
     }
@@ -303,6 +317,10 @@ const ProjectDetail = () => {
   }, [])
 
   const loadProjectData = useCallback(async (projectId: string) => {
+    if (loadingDataRef.current) {
+      return
+    }
+    loadingDataRef.current = true
     setLoading(true)
     try {
       // 尝试加载完整项目详情
@@ -386,6 +404,8 @@ const ProjectDetail = () => {
       message.error('加载项目失败')
     } finally {
       setLoading(false)
+      loadingDataRef.current = false
+      dataLoadedRef.current = true
     }
   }, [])
 

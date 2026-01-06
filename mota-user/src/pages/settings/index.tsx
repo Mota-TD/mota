@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Card, Form, Input, Button, Select, Switch, Divider, Tabs, Popconfirm, ColorPicker, App, Spin } from 'antd'
 import {
   SaveOutlined,
@@ -51,7 +51,11 @@ const SettingsPage = () => {
   const [projectId, setProjectId] = useState<number | null>(null)
 
   // 加载项目设置
-  const loadSettings = async () => {
+  const loadSettings = async (forceReload = false) => {
+    if (!forceReload && (settingsLoadedRef.current || loadingSettingsRef.current)) {
+      return
+    }
+    loadingSettingsRef.current = true
     setPageLoading(true)
     try {
       // 获取当前项目ID（从URL或默认项目）
@@ -134,10 +138,19 @@ const SettingsPage = () => {
       })
     } finally {
       setPageLoading(false)
+      loadingSettingsRef.current = false
+      settingsLoadedRef.current = true
     }
   }
 
+  // 防止重复请求的 ref
+  const settingsLoadedRef = useRef(false)
+  const loadingSettingsRef = useRef(false)
+
   useEffect(() => {
+    if (settingsLoadedRef.current || loadingSettingsRef.current) {
+      return
+    }
     loadSettings()
   }, [])
 
@@ -549,7 +562,7 @@ const SettingsPage = () => {
           <div>
             <Button
               icon={<ReloadOutlined />}
-              onClick={loadSettings}
+              onClick={() => loadSettings(true)}
               style={{ marginRight: 8 }}
               disabled={loading}
             >

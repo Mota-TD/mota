@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Card,
@@ -240,13 +240,31 @@ const Projects = () => {
   // 当前激活的标签页
   const activeTab = searchParams.get('tab') || 'list'
 
+  // 使用 ref 防止重复请求
+  const projectsLoadedRef = useRef(false)
+  const deptsAndUsersLoadedRef = useRef(false)
+  const loadingProjectsRef = useRef(false)
+  const loadingDeptsAndUsersRef = useRef(false)
+
   useEffect(() => {
-    loadProjects()
-    loadDepartmentsAndUsers()
+    // 加载项目（只加载一次）
+    if (!projectsLoadedRef.current && !loadingProjectsRef.current) {
+      loadProjects()
+    }
+    // 加载部门和用户（只加载一次）
+    if (!deptsAndUsersLoadedRef.current && !loadingDeptsAndUsersRef.current) {
+      loadDepartmentsAndUsers()
+    }
   }, [])
   
   // 加载部门和用户数据
   const loadDepartmentsAndUsers = async () => {
+    // 防止重复请求
+    if (deptsAndUsersLoadedRef.current || loadingDeptsAndUsersRef.current) {
+      return
+    }
+    
+    loadingDeptsAndUsersRef.current = true
     setLoadingData(true)
     try {
       const [deptsRes, usersRes] = await Promise.all([
@@ -268,12 +286,14 @@ const Projects = () => {
       } else {
         setUsers([])
       }
+      deptsAndUsersLoadedRef.current = true
     } catch (error) {
       console.error('Failed to load data:', error)
       setDepartments([])
       setUsers([])
     } finally {
       setLoadingData(false)
+      loadingDeptsAndUsersRef.current = false
     }
   }
 
@@ -281,7 +301,13 @@ const Projects = () => {
     filterProjects()
   }, [projects, searchText, statusFilter])
 
-  const loadProjects = async () => {
+  const loadProjects = async (forceReload = false) => {
+    // 防止重复请求（除非是强制刷新）
+    if (!forceReload && (projectsLoadedRef.current || loadingProjectsRef.current)) {
+      return
+    }
+    
+    loadingProjectsRef.current = true
     setLoading(true)
     try {
       const res = await projectApi.getProjects()
@@ -292,10 +318,12 @@ const Projects = () => {
         endDate: `2024-0${(index % 3) + 4}-30`,
       }))
       setProjects(projectsWithDates)
+      projectsLoadedRef.current = true
     } catch (error) {
       console.error('Failed to load projects:', error)
     } finally {
       setLoading(false)
+      loadingProjectsRef.current = false
     }
   }
 
@@ -389,7 +417,7 @@ const Projects = () => {
       
       message.success('项目创建成功')
       closeCreateDrawer()
-      loadProjects()
+      loadProjects(true)
     } catch (error: unknown) {
       console.error('Create project error:', error)
       const errorMessage = error instanceof Error ? error.message : '创建失败，请重试'
@@ -703,7 +731,7 @@ const Projects = () => {
       
       message.success('项目更新成功')
       closeEditDrawer()
-      loadProjects()
+      loadProjects(true)
     } catch (error: unknown) {
       console.error('Update project error:', error)
       const errorMessage = error instanceof Error ? error.message : '更新失败，请重试'
@@ -764,7 +792,7 @@ const Projects = () => {
       
       message.success('设置已保存')
       closeSettingsDrawer()
-      loadProjects()
+      loadProjects(true)
     } catch (error) {
       console.error('Save settings error:', error)
       const errorMessage = error instanceof Error ? error.message : '保存失败，请重试'
@@ -786,7 +814,7 @@ const Projects = () => {
       await projectApi.archiveProject(settingsProject.id)
       message.success('项目已归档')
       closeSettingsDrawer()
-      loadProjects()
+      loadProjects(true)
     } catch {
       message.error('归档失败')
     }
@@ -797,7 +825,7 @@ const Projects = () => {
     try {
       await projectApi.restoreProject(projectId)
       message.success('项目已恢复')
-      loadProjects()
+      loadProjects(true)
     } catch {
       message.error('恢复失败')
     }
@@ -810,7 +838,7 @@ const Projects = () => {
       await projectApi.deleteProject(settingsProject.id)
       message.success('项目已删除')
       closeSettingsDrawer()
-      loadProjects()
+      loadProjects(true)
     } catch {
       message.error('删除失败')
     }
@@ -953,7 +981,7 @@ const Projects = () => {
         try {
           await projectApi.deleteProject(projectId)
           message.success('项目已删除')
-          loadProjects()
+          loadProjects(true)
         } catch {
           message.error('删除失败')
         }

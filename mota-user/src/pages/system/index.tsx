@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Card, Tabs, Row, Col, Statistic, Button, Space, Tag, Table, Switch, Modal, Form, Input, Select, message, Popconfirm, Tree, Avatar, Badge, Progress, Timeline, Alert } from 'antd'
+import { useState, useEffect, useRef } from 'react'
+import { Card, Tabs, Row, Col, Statistic, Button, Space, Tag, Table, Switch, Modal, Form, Input, Select, message, Popconfirm, Tree, Avatar, Badge, Progress, Timeline, Alert, Spin } from 'antd'
 import {
   UserOutlined,
   TeamOutlined,
@@ -27,6 +27,7 @@ import {
 } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import styles from './index.module.css'
+import { getDepartmentsByOrgId, type Department } from '@/services/api/department'
 
 const { TabPane } = Tabs
 const { Option } = Select
@@ -67,6 +68,40 @@ const SystemManagementPage = () => {
   const [auditReportModalVisible, setAuditReportModalVisible] = useState(false)
   const [complianceRuleModalVisible, setComplianceRuleModalVisible] = useState(false)
   const [form] = Form.useForm()
+  
+  // 部门数据状态
+  const [departments, setDepartments] = useState<Department[]>([])
+  const [loadingDepts, setLoadingDepts] = useState(false)
+  
+  // 使用 ref 防止重复请求
+  const departmentsLoadedRef = useRef(false)
+  const loadingRef = useRef(false)
+
+  // 加载部门数据
+  useEffect(() => {
+    // 防止重复请求
+    if (departmentsLoadedRef.current || loadingRef.current) {
+      return
+    }
+    
+    const loadDepartments = async () => {
+      loadingRef.current = true
+      setLoadingDepts(true)
+      try {
+        const data = await getDepartmentsByOrgId('default')
+        setDepartments(data || [])
+        departmentsLoadedRef.current = true
+      } catch (error) {
+        console.error('加载部门列表失败:', error)
+        setDepartments([])
+      } finally {
+        setLoadingDepts(false)
+        loadingRef.current = false
+      }
+    }
+    
+    loadDepartments()
+  }, [])
 
   // SSO提供商列
   const ssoColumns: ColumnsType<any> = [
@@ -1069,10 +1104,14 @@ const SystemManagementPage = () => {
             </Select>
           </Form.Item>
           <Form.Item name="toDepartmentId" label="目标部门">
-            <Select placeholder="请选择目标部门">
-              <Option value={1}>技术中心</Option>
-              <Option value={2}>产品中心</Option>
-              <Option value={3}>研发部</Option>
+            <Select
+              placeholder="请选择目标部门"
+              loading={loadingDepts}
+              notFoundContent={loadingDepts ? <Spin size="small" /> : '暂无部门数据'}
+            >
+              {departments.map(dept => (
+                <Option key={dept.id} value={dept.id}>{dept.name}</Option>
+              ))}
             </Select>
           </Form.Item>
           <Form.Item name="toPositionId" label="目标岗位">

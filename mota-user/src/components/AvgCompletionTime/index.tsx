@@ -85,7 +85,8 @@ const AvgCompletionTime: React.FC<AvgCompletionTimeProps> = ({
         axisPointer: { type: 'shadow' },
         formatter: (params: any) => {
           const item = params[0]
-          return `${item.name}<br/>任务数: ${item.value}<br/>占比: ${data.distribution.find(d => d.range === item.name)?.percentage?.toFixed(1)}%`
+          const percentage = data.distribution.find(d => d.range === item.name)?.percentage
+          return `${item.name}<br/>任务数: ${item.value}<br/>占比: ${percentage != null ? Number(percentage).toFixed(1) : '0.0'}%`
         }
       },
       grid: {
@@ -163,14 +164,14 @@ const AvgCompletionTime: React.FC<AvgCompletionTimeProps> = ({
         {
           name: '平均天数',
           type: 'line',
-          data: trends.map(t => t.avgDays?.toFixed(1)),
+          data: trends.map(t => t.avgDays != null ? Number(t.avgDays).toFixed(1) : null),
           itemStyle: { color: '#1890ff' },
           smooth: true
         },
         {
           name: '中位数',
           type: 'line',
-          data: trends.map(t => t.medianDays?.toFixed(1)),
+          data: trends.map(t => t.medianDays != null ? Number(t.medianDays).toFixed(1) : null),
           itemStyle: { color: '#52c41a' },
           smooth: true,
           lineStyle: { type: 'dashed' }
@@ -220,21 +221,21 @@ const AvgCompletionTime: React.FC<AvgCompletionTimeProps> = ({
           name: '平均天数',
           type: 'bar',
           data: data.byPriority.map(p => ({
-            value: p.avgDays?.toFixed(1),
+            value: p.avgDays != null ? Number(p.avgDays).toFixed(1) : null,
             itemStyle: { color: getPriorityColor(p.priority) }
           }))
         },
         {
           name: '最短',
           type: 'scatter',
-          data: data.byPriority.map(p => p.minDays?.toFixed(1)),
+          data: data.byPriority.map(p => p.minDays != null ? Number(p.minDays).toFixed(1) : null),
           itemStyle: { color: '#52c41a' },
           symbolSize: 10
         },
         {
           name: '最长',
           type: 'scatter',
-          data: data.byPriority.map(p => p.maxDays?.toFixed(1)),
+          data: data.byPriority.map(p => p.maxDays != null ? Number(p.maxDays).toFixed(1) : null),
           itemStyle: { color: '#ff4d4f' },
           symbolSize: 10
         }
@@ -253,8 +254,8 @@ const AvgCompletionTime: React.FC<AvgCompletionTimeProps> = ({
       title: '平均天数',
       dataIndex: 'avgDays',
       key: 'avgDays',
-      render: (val: number) => `${val?.toFixed(1)} 天`,
-      sorter: (a: any, b: any) => a.avgDays - b.avgDays
+      render: (val: number) => `${val != null ? Number(val).toFixed(1) : '0.0'} 天`,
+      sorter: (a: any, b: any) => (Number(a.avgDays) || 0) - (Number(b.avgDays) || 0)
     },
     {
       title: '任务数',
@@ -292,26 +293,26 @@ const AvgCompletionTime: React.FC<AvgCompletionTimeProps> = ({
         </Col>
         <Col span={5}>
           <Card className={styles.statCard}>
-            <Statistic 
-              title="平均完成天数" 
-              value={data.avgCompletionDays?.toFixed(1)}
+            <Statistic
+              title="平均完成天数"
+              value={data.avgCompletionDays != null ? Number(data.avgCompletionDays).toFixed(1) : '0.0'}
               suffix="天"
               prefix={<FieldTimeOutlined />}
               valueStyle={{ color: '#faad14' }}
             />
             <div className={styles.changeInfo}>
-              {getChangeIcon(data.avgDaysChange)}
-              <span style={{ color: data.avgDaysChange < 0 ? '#52c41a' : '#ff4d4f' }}>
-                {Math.abs(data.avgDaysChange || 0).toFixed(1)} 天 vs 上期
+              {getChangeIcon(Number(data.avgDaysChange) || 0)}
+              <span style={{ color: (Number(data.avgDaysChange) || 0) < 0 ? '#52c41a' : '#ff4d4f' }}>
+                {Math.abs(Number(data.avgDaysChange) || 0).toFixed(1)} 天 vs 上期
               </span>
             </div>
           </Card>
         </Col>
         <Col span={5}>
           <Card className={styles.statCard}>
-            <Statistic 
-              title="中位数" 
-              value={data.medianCompletionDays?.toFixed(1)}
+            <Statistic
+              title="中位数"
+              value={data.medianCompletionDays != null ? Number(data.medianCompletionDays).toFixed(1) : '0.0'}
               suffix="天"
               valueStyle={{ color: '#52c41a' }}
             />
@@ -319,9 +320,9 @@ const AvgCompletionTime: React.FC<AvgCompletionTimeProps> = ({
         </Col>
         <Col span={5}>
           <Card className={styles.statCard}>
-            <Statistic 
-              title="最短完成" 
-              value={data.minCompletionDays?.toFixed(1)}
+            <Statistic
+              title="最短完成"
+              value={data.minCompletionDays != null ? Number(data.minCompletionDays).toFixed(1) : '0.0'}
               suffix="天"
               valueStyle={{ color: '#52c41a' }}
             />
@@ -329,9 +330,9 @@ const AvgCompletionTime: React.FC<AvgCompletionTimeProps> = ({
         </Col>
         <Col span={5}>
           <Card className={styles.statCard}>
-            <Statistic 
-              title="最长完成" 
-              value={data.maxCompletionDays?.toFixed(1)}
+            <Statistic
+              title="最长完成"
+              value={data.maxCompletionDays != null ? Number(data.maxCompletionDays).toFixed(1) : '0.0'}
               suffix="天"
               valueStyle={{ color: '#ff4d4f' }}
             />

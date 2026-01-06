@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { 
   Card, 
   Row, 
@@ -157,12 +157,25 @@ const AINews = () => {
     minMatchScore: 70
   })
 
+  // 防止重复请求的 ref
+  const loadingNewsRef = useRef(false);
+  const lastTabRef = useRef<string>('');
+
   // 加载新闻数据
   useEffect(() => {
-    loadNews()
+    // 如果正在加载且是同一个tab，跳过
+    if (loadingNewsRef.current && lastTabRef.current === activeTab) {
+      return;
+    }
+    lastTabRef.current = activeTab;
+    loadNews();
   }, [activeTab])
 
   const loadNews = async () => {
+    if (loadingNewsRef.current) {
+      return;
+    }
+    loadingNewsRef.current = true;
     setLoading(true)
     try {
       // 模拟API调用
@@ -245,6 +258,7 @@ const AINews = () => {
       message.error('加载新闻失败')
     } finally {
       setLoading(false)
+      loadingNewsRef.current = false;
     }
   }
 

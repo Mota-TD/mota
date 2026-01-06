@@ -12,7 +12,7 @@ import { getResourceUtilization } from '@/services/api/resourceManagement'
 import styles from './index.module.css'
 
 interface ResourceUtilizationProps {
-  teamId?: number
+  teamId?: string | number
   startDate: string
   endDate: string
 }
@@ -114,24 +114,24 @@ const ResourceUtilization: React.FC<ResourceUtilizationProps> = ({
         {
           name: '可用工时',
           type: 'bar',
-          data: trends.map(t => t.availableHours),
+          data: trends.map(t => Number(t.availableHours) || 0),
           itemStyle: { color: '#d9d9d9' }
         },
         {
           name: '实际工时',
           type: 'bar',
-          data: trends.map(t => t.actualHours?.toFixed(1)),
+          data: trends.map(t => Number(t.actualHours) || 0),
           itemStyle: { color: '#1890ff' }
         },
         {
           name: '利用率',
           type: 'line',
           yAxisIndex: 1,
-          data: trends.map(t => t.utilizationPercentage?.toFixed(1)),
+          data: trends.map(t => Number(t.utilizationPercentage) || 0),
           itemStyle: { color: '#52c41a' },
           markLine: {
             data: [
-              { yAxis: data.targetUtilization, name: '目标' }
+              { yAxis: Number(data.targetUtilization) || 0, name: '目标' }
             ],
             lineStyle: { color: '#ff4d4f', type: 'dashed' }
           }
@@ -163,7 +163,7 @@ const ResourceUtilization: React.FC<ResourceUtilizationProps> = ({
           label: { show: false },
           data: data.projectUtilizations.map(p => ({
             name: p.projectName,
-            value: p.actualHours?.toFixed(1)
+            value: Number(p.actualHours) || 0
           }))
         }
       ]
@@ -218,39 +218,39 @@ const ResourceUtilization: React.FC<ResourceUtilizationProps> = ({
       title: '可用工时',
       dataIndex: 'availableHours',
       key: 'availableHours',
-      render: (val: number) => `${val}h`
+      render: (val: number) => `${Number(val) || 0}h`
     },
     {
       title: '已分配',
       dataIndex: 'allocatedHours',
       key: 'allocatedHours',
-      render: (val: number) => `${val?.toFixed(1)}h`
+      render: (val: number) => `${Number(val || 0).toFixed(1)}h`
     },
     {
       title: '实际工时',
       dataIndex: 'actualHours',
       key: 'actualHours',
-      render: (val: number) => `${val?.toFixed(1)}h`
+      render: (val: number) => `${Number(val || 0).toFixed(1)}h`
     },
     {
       title: '利用率',
       dataIndex: 'utilizationPercentage',
       key: 'utilizationPercentage',
       render: (val: number, record: MemberUtilization) => (
-        <Progress 
-          percent={val} 
-          size="small" 
+        <Progress
+          percent={Number(val) || 0}
+          size="small"
           strokeColor={getUtilizationColor(record.utilizationStatus)}
-          format={() => `${val?.toFixed(0)}%`}
+          format={() => `${Number(val || 0).toFixed(0)}%`}
         />
       ),
-      sorter: (a: MemberUtilization, b: MemberUtilization) => a.utilizationPercentage - b.utilizationPercentage
+      sorter: (a: MemberUtilization, b: MemberUtilization) => Number(a.utilizationPercentage) - Number(b.utilizationPercentage)
     },
     {
       title: '效率指数',
       dataIndex: 'efficiencyIndex',
       key: 'efficiencyIndex',
-      render: (val: number) => val?.toFixed(2)
+      render: (val: number) => Number(val || 0).toFixed(2)
     },
     {
       title: '状态',
@@ -295,15 +295,15 @@ const ResourceUtilization: React.FC<ResourceUtilizationProps> = ({
       <Row gutter={16} className={styles.statsRow}>
         <Col span={6}>
           <Card className={styles.statCard}>
-            <Statistic 
-              title="团队平均利用率" 
-              value={data.teamAverageUtilization?.toFixed(1)}
+            <Statistic
+              title="团队平均利用率"
+              value={Number(data.teamAverageUtilization || 0).toFixed(1)}
               suffix="%"
-              valueStyle={{ 
-                color: data.teamAverageUtilization >= 50 && data.teamAverageUtilization <= 80 
-                  ? '#52c41a' 
-                  : data.teamAverageUtilization > 80 
-                    ? '#ff4d4f' 
+              valueStyle={{
+                color: Number(data.teamAverageUtilization) >= 50 && Number(data.teamAverageUtilization) <= 80
+                  ? '#52c41a'
+                  : Number(data.teamAverageUtilization) > 80
+                    ? '#ff4d4f'
                     : '#faad14'
               }}
             />

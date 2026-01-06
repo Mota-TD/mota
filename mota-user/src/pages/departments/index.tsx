@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Card,
   Table,
@@ -52,19 +52,31 @@ const DepartmentsPage = () => {
   const [form] = Form.useForm()
   const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null)
   const [viewMode, setViewMode] = useState<'table' | 'tree'>('table')
+  
+  // 使用 ref 防止重复请求
+  const initialLoadDoneRef = useRef(false)
+  const loadingRef = useRef(false)
 
   // 加载部门列表
-  const loadDepartments = async () => {
+  const loadDepartments = async (forceReload = false) => {
+    // 防止重复请求（除非是强制刷新）
+    if (!forceReload && (initialLoadDoneRef.current || loadingRef.current)) {
+      return
+    }
+    
+    loadingRef.current = true
     setLoading(true)
     try {
       // 使用默认组织ID 'default'，与成员管理页面保持一致
       const data = await getDepartmentsByOrgId('default')
       setDepartments(data || [])
+      initialLoadDoneRef.current = true
     } catch (error) {
       console.error('加载部门列表失败:', error)
       message.error('加载部门列表失败')
     } finally {
       setLoading(false)
+      loadingRef.current = false
     }
   }
 
@@ -103,7 +115,7 @@ const DepartmentsPage = () => {
         message.success('创建部门成功')
       }
       setModalVisible(false)
-      loadDepartments()
+      loadDepartments(true)
     } catch (error) {
       console.error('保存部门失败:', error)
       message.error('保存部门失败')
@@ -115,7 +127,7 @@ const DepartmentsPage = () => {
     try {
       await deleteDepartment(id)
       message.success('删除部门成功')
-      loadDepartments()
+      loadDepartments(true)
     } catch (error) {
       console.error('删除部门失败:', error)
       message.error('删除部门失败')
@@ -272,7 +284,7 @@ const DepartmentsPage = () => {
             </Button>
             <Button
               icon={<ReloadOutlined />}
-              onClick={loadDepartments}
+              onClick={() => loadDepartments(true)}
             >
               刷新
             </Button>

@@ -5,6 +5,10 @@
 
 import { message } from 'antd'
 import { useAuthStore } from '@/store/auth'
+import JSONBig from 'json-bigint'
+
+// 创建 JSONBig 实例，将大数字转换为字符串
+const JSONBigString = JSONBig({ storeAsString: true })
 
 // API 基础配置 - 使用 ?? 运算符，只有 undefined/null 时才使用默认值
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
@@ -164,16 +168,41 @@ async function request<T>(url: string, config: RequestConfig = {}): Promise<T> {
       throw new ApiError(-1, errorMsg)
     }
     
-    // 解析响应
-    const result: ApiResult<T> = await response.json()
+    // 解析响应 - 使用 json-bigint 处理大数字，避免精度丢失
+    const responseText = await response.text()
     
-    // 检查业务状态码
-    if (result.code === 200) {
+    // 调试日志：打印原始响应
+    if (import.meta.env.DEV) {
+      console.log('[Request Debug]', fullUrl, 'raw response (first 500 chars):', responseText.substring(0, 500))
+    }
+    
+    const parsed = JSONBigString.parse(responseText)
+    
+    // 调试日志：检查解析后的结果
+    if (import.meta.env.DEV) {
+      console.log('[Request Debug]', fullUrl, 'parsed type:', Array.isArray(parsed) ? 'array' : typeof parsed, 'code:', parsed?.code)
+    }
+    
+    // 兼容两种响应格式：
+    // 1. Result 格式：{ code: 200, message: "操作成功", data: [...] }
+    // 2. 直接数据格式：[...] 或 {...}
+    
+    // 如果响应是数组或者没有 code 字段，说明后端直接返回了数据
+    if (Array.isArray(parsed) || parsed?.code === undefined) {
+      return parsed as T
+    }
+    
+    // 标准 Result 格式处理
+    const result = parsed as ApiResult<T>
+    
+    // 检查业务状态码 - 使用 Number() 确保类型一致，避免 json-bigint 转换问题
+    const code = Number(result.code)
+    if (code === 200) {
       return result.data
     }
     
     // 处理业务错误码
-    switch (result.code) {
+    switch (code) {
       case 401:
         // 未授权，清除登录状态
         if (!isShowingAuthError) {

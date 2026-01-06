@@ -19,7 +19,7 @@ import { getWorkloadAlerts, resolveAlert } from '@/services/api/resourceManageme
 import styles from './index.module.css'
 
 interface WorkloadAlertProps {
-  teamId?: number
+  teamId?: string | number
   onAlertClick?: (alert: Alert) => void
 }
 
@@ -319,8 +319,8 @@ const WorkloadAlert: React.FC<WorkloadAlertProps> = ({
                   <div className={styles.alertDesc}>
                     <p>{alert.description}</p>
                     <div className={styles.alertMeta}>
-                      <span>当前负载: <strong>{alert.currentWorkload?.toFixed(1)}%</strong></span>
-                      <span>建议负载: <strong>{alert.suggestedWorkload?.toFixed(1)}%</strong></span>
+                      <span>当前负载: <strong>{Number(alert.currentWorkload || 0).toFixed(1)}%</strong></span>
+                      <span>建议负载: <strong>{Number(alert.suggestedWorkload || 0).toFixed(1)}%</strong></span>
                       <span>受影响任务: <strong>{alert.affectedTasks}</strong></span>
                     </div>
                     {alert.suggestions && alert.suggestions.length > 0 && (

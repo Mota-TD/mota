@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Card, Form, Input, Button, Avatar, Upload, Tabs, Switch, Select, Divider, App, Spin } from 'antd'
 import {
   UserOutlined,
@@ -27,7 +27,11 @@ const ProfilePage = () => {
   const [avatarUrl, setAvatarUrl] = useState('')
 
   // 加载用户数据
-  const loadUserProfile = async () => {
+  const loadUserProfile = async (forceReload = false) => {
+    if (!forceReload && (profileLoadedRef.current || loadingProfileRef.current)) {
+      return
+    }
+    loadingProfileRef.current = true
     setPageLoading(true)
     try {
       // 调用真实API获取用户信息
@@ -71,10 +75,19 @@ const ProfilePage = () => {
       // 加载失败时不设置默认值，保持表单为空
     } finally {
       setPageLoading(false)
+      loadingProfileRef.current = false
+      profileLoadedRef.current = true
     }
   }
 
+  // 防止重复请求的 ref
+  const profileLoadedRef = useRef(false)
+  const loadingProfileRef = useRef(false)
+
   useEffect(() => {
+    if (profileLoadedRef.current || loadingProfileRef.current) {
+      return
+    }
     loadUserProfile()
   }, [])
 
@@ -404,7 +417,7 @@ const ProfilePage = () => {
           <div>
             <Button
               icon={<ReloadOutlined />}
-              onClick={loadUserProfile}
+              onClick={() => loadUserProfile(true)}
               style={{ marginRight: 8 }}
               disabled={loading}
             >

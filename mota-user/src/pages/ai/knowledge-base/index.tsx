@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Card,
   Tabs,
@@ -104,11 +104,39 @@ const AIKnowledgeBase = () => {
   }>({ visible: false, document: null, activeTab: 'info' })
   const [uploadModalVisible, setUploadModalVisible] = useState(false)
   const [fileList, setFileList] = useState<UploadFile[]>([])
+  
+  // 防止重复请求的 ref
+  const initialLoadDoneRef = useRef(false)
+  const loadingRef = useRef(false)
+  const lastParamsRef = useRef<string>('')
 
   // 加载数据
   useEffect(() => {
-    loadDocuments()
-    loadStats()
+    const paramsKey = `${currentPage}-${pageSize}`
+    
+    // 如果参数没变且已加载过，跳过
+    if (lastParamsRef.current === paramsKey && initialLoadDoneRef.current) {
+      return
+    }
+    
+    // 如果正在加载且参数相同，跳过
+    if (loadingRef.current && lastParamsRef.current === paramsKey) {
+      return
+    }
+    
+    lastParamsRef.current = paramsKey
+    loadingRef.current = true
+    
+    const loadData = async () => {
+      try {
+        await Promise.all([loadDocuments(), loadStats()])
+        initialLoadDoneRef.current = true
+      } finally {
+        loadingRef.current = false
+      }
+    }
+    
+    loadData()
   }, [currentPage, pageSize])
 
   const loadDocuments = async () => {

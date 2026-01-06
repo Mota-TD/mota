@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import {
   Card,
   Button,
@@ -30,6 +30,7 @@ import {
 import dayjs from 'dayjs'
 import * as aiApi from '@/services/api/ai'
 import { departmentTaskApi, taskApi } from '@/services/api'
+import { getDepartmentsByOrgId, type Department } from '@/services/api/department'
 import type { DepartmentTask } from '@/services/api/departmentTask'
 import type { Task } from '@/services/api/task'
 import styles from './index.module.css'
@@ -65,20 +66,53 @@ const AIProjectAssistant: React.FC<AIProjectAssistantProps> = ({
   const [departmentTasks, setDepartmentTasks] = useState<DepartmentTask[]>(propDeptTasks || [])
   const [tasks, setTasks] = useState<Task[]>(propTasks || [])
   
+  // 部门数据状态（用于生成建议时使用）
+  const [allDepartments, setAllDepartments] = useState<Department[]>([])
+  
+  // 使用 ref 防止重复请求
+  const departmentsLoadedRef = useRef(false)
+  const loadingDeptsRef = useRef(false)
+  const projectDataLoadedRef = useRef<string | number | null>(null)
+  const loadingProjectDataRef = useRef(false)
+  
   // AI 功能数据
   const [taskSuggestions, setTaskSuggestions] = useState<aiApi.TaskDecompositionSuggestion[]>([])
   const [progressPrediction, setProgressPrediction] = useState<aiApi.ProgressPrediction | null>(null)
   const [riskWarnings, setRiskWarnings] = useState<aiApi.RiskWarning[]>([])
   const [projectReport, setProjectReport] = useState<aiApi.ProjectReport | null>(null)
 
-  // 加载项目数据
+  // 加载部门数据和项目数据
   useEffect(() => {
-    if (!propDeptTasks || !propTasks) {
-      loadProjectData()
+    // 加载部门数据（只加载一次）
+    if (!departmentsLoadedRef.current && !loadingDeptsRef.current) {
+      loadingDeptsRef.current = true
+      getDepartmentsByOrgId('default')
+        .then(data => {
+          setAllDepartments(data || [])
+          departmentsLoadedRef.current = true
+        })
+        .catch(error => {
+          console.error('加载部门列表失败:', error)
+          setAllDepartments([])
+        })
+        .finally(() => {
+          loadingDeptsRef.current = false
+        })
     }
-  }, [projectId])
+    
+    // 加载项目数据（当 projectId 变化时重新加载）
+    if (!propDeptTasks || !propTasks) {
+      if (projectDataLoadedRef.current !== projectId && !loadingProjectDataRef.current) {
+        loadingProjectDataRef.current = true
+        loadProjectData().finally(() => {
+          projectDataLoadedRef.current = projectId
+          loadingProjectDataRef.current = false
+        })
+      }
+    }
+  }, [projectId, propDeptTasks, propTasks])
 
-  const loadProjectData = async () => {
+  const loadProjectData = useCallback(async () => {
     try {
       const [deptTasksRes, tasksRes] = await Promise.all([
         departmentTaskApi.getDepartmentTasksByProjectId(projectId).catch(() => []),
@@ -89,7 +123,7 @@ const AIProjectAssistant: React.FC<AIProjectAssistantProps> = ({
     } catch (error) {
       console.error('Load project data error:', error)
     }
-  }
+  }, [projectId])
 
   // 计算项目统计数据
   const projectStats = useMemo(() => {
@@ -130,6 +164,22 @@ const AIProjectAssistant: React.FC<AIProjectAssistantProps> = ({
     }
   }, [departmentTasks, tasks])
 
+  // 获取可用的部门名称列表（优先使用传入的部门，否则使用从数据库加载的部门）
+  const availableDepartmentNames = useMemo(() => {
+    if (departments && departments.length > 0) {
+      return departments.map(d => d.name)
+    }
+    return allDepartments.map(d => d.name)
+  }, [departments, allDepartments])
+
+  // 根据索引获取部门名称（用于生成建议时分配部门）
+  const getDepartmentByIndex = (index: number): string => {
+    if (availableDepartmentNames.length === 0) {
+      return '未分配部门'
+    }
+    return availableDepartmentNames[index % availableDepartmentNames.length]
+  }
+
   // AI 任务分解
   const handleTaskDecomposition = async () => {
     setLoading(true)
@@ -138,19 +188,19 @@ const AIProjectAssistant: React.FC<AIProjectAssistantProps> = ({
       const result = await aiApi.generateTaskDecomposition({
         projectName,
         projectDescription: projectDescription || '',
-        departments: departments.map(d => d.name)
+        departments: availableDepartmentNames
       })
       setTaskSuggestions(result.suggestions)
       message.success('AI 任务分解建议已生成')
     } catch (error) {
       console.error('Task decomposition error:', error)
-      // 使用模拟数据
-      setTaskSuggestions([
+      // 使用基于实际部门数据的模拟建议
+      const fallbackSuggestions: aiApi.TaskDecompositionSuggestion[] = [
         {
           id: '1',
           name: '市场调研与分析',
           description: '进行目标市场调研，分析竞品和用户需求',
-          suggestedDepartment: '市场部',
+          suggestedDepartment: getDepartmentByIndex(0),
           suggestedPriority: 'high',
           estimatedDays: 14
         },
@@ -158,7 +208,7 @@ const AIProjectAssistant: React.FC<AIProjectAssistantProps> = ({
           id: '2',
           name: '产品方案设计',
           description: '根据调研结果设计产品方案和功能规划',
-          suggestedDepartment: '产品部',
+          suggestedDepartment: getDepartmentByIndex(1),
           suggestedPriority: 'high',
           estimatedDays: 10,
           dependencies: ['1']
@@ -167,7 +217,7 @@ const AIProjectAssistant: React.FC<AIProjectAssistantProps> = ({
           id: '3',
           name: '技术架构设计',
           description: '设计系统技术架构和技术选型',
-          suggestedDepartment: '技术部',
+          suggestedDepartment: getDepartmentByIndex(2),
           suggestedPriority: 'medium',
           estimatedDays: 7,
           dependencies: ['2']
@@ -176,12 +226,13 @@ const AIProjectAssistant: React.FC<AIProjectAssistantProps> = ({
           id: '4',
           name: '运营推广计划',
           description: '制定产品上线后的运营推广计划',
-          suggestedDepartment: '运营部',
+          suggestedDepartment: getDepartmentByIndex(3),
           suggestedPriority: 'medium',
           estimatedDays: 7,
           dependencies: ['1']
         }
-      ])
+      ]
+      setTaskSuggestions(fallbackSuggestions)
       message.info('已生成模拟的任务分解建议')
     } finally {
       setLoading(false)

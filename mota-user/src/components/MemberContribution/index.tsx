@@ -141,7 +141,7 @@ const MemberContribution: React.FC<MemberContributionProps> = ({
         {
           name: '平均得分',
           type: 'line',
-          data: trends.map(t => t.avgScore?.toFixed(1)),
+          data: trends.map(t => t.avgScore != null ? Number(t.avgScore).toFixed(1) : null),
           itemStyle: { color: '#1890ff' },
           smooth: true,
           areaStyle: { color: 'rgba(24, 144, 255, 0.1)' }
@@ -149,7 +149,7 @@ const MemberContribution: React.FC<MemberContributionProps> = ({
         {
           name: '最高得分',
           type: 'line',
-          data: trends.map(t => t.topContributorScore?.toFixed(1)),
+          data: trends.map(t => t.topContributorScore != null ? Number(t.topContributorScore).toFixed(1) : null),
           itemStyle: { color: '#52c41a' },
           smooth: true,
           lineStyle: { type: 'dashed' }
@@ -157,7 +157,7 @@ const MemberContribution: React.FC<MemberContributionProps> = ({
         {
           name: '最低得分',
           type: 'line',
-          data: trends.map(t => t.bottomContributorScore?.toFixed(1)),
+          data: trends.map(t => t.bottomContributorScore != null ? Number(t.bottomContributorScore).toFixed(1) : null),
           itemStyle: { color: '#ff4d4f' },
           smooth: true,
           lineStyle: { type: 'dashed' }
@@ -243,17 +243,17 @@ const MemberContribution: React.FC<MemberContributionProps> = ({
       key: 'contributionScore',
       render: (score: number, record: MemberContributionType) => (
         <div className={styles.scoreCell}>
-          <Progress 
-            type="circle" 
-            percent={score} 
+          <Progress
+            type="circle"
+            percent={score}
             size={50}
             strokeColor={getScoreColor(score)}
-            format={() => score?.toFixed(0)}
+            format={() => typeof score === 'number' ? score.toFixed(0) : '0'}
           />
           <div className={styles.scoreTrend}>
             {getTrendIcon(record.trend)}
             <span style={{ color: record.scoreChange > 0 ? '#52c41a' : record.scoreChange < 0 ? '#ff4d4f' : '#8c8c8c' }}>
-              {record.scoreChange > 0 ? '+' : ''}{record.scoreChange?.toFixed(1)}
+              {record.scoreChange > 0 ? '+' : ''}{typeof record.scoreChange === 'number' ? record.scoreChange.toFixed(1) : '0.0'}
             </span>
           </div>
         </div>
@@ -283,8 +283,8 @@ const MemberContribution: React.FC<MemberContributionProps> = ({
       key: 'totalHours',
       render: (val: number, record: MemberContributionType) => (
         <div>
-          <div>{val?.toFixed(1)}h</div>
-          <Tag color="blue">{record.hoursPercentage?.toFixed(1)}%</Tag>
+          <div>{val != null ? Number(val).toFixed(1) : '0.0'}h</div>
+          <Tag color="blue">{record.hoursPercentage != null ? Number(record.hoursPercentage).toFixed(1) : '0.0'}%</Tag>
         </div>
       )
     },
@@ -293,8 +293,8 @@ const MemberContribution: React.FC<MemberContributionProps> = ({
       dataIndex: 'onTimeRate',
       key: 'onTimeRate',
       render: (val: number) => (
-        <Tag color={val >= 90 ? 'green' : val >= 70 ? 'blue' : 'orange'}>
-          {val?.toFixed(1)}%
+        <Tag color={(Number(val) || 0) >= 90 ? 'green' : (Number(val) || 0) >= 70 ? 'blue' : 'orange'}>
+          {val != null ? Number(val).toFixed(1) : '0.0'}%
         </Tag>
       )
     },
@@ -350,11 +350,11 @@ const MemberContribution: React.FC<MemberContributionProps> = ({
         </Col>
         <Col span={6}>
           <Card className={styles.statCard}>
-            <Statistic 
-              title="平均贡献得分" 
-              value={data.avgContributionScore?.toFixed(1)}
+            <Statistic
+              title="平均贡献得分"
+              value={data.avgContributionScore != null ? Number(data.avgContributionScore).toFixed(1) : '0.0'}
               prefix={<StarOutlined />}
-              valueStyle={{ color: getScoreColor(data.avgContributionScore) }}
+              valueStyle={{ color: getScoreColor(Number(data.avgContributionScore) || 0) }}
             />
           </Card>
         </Col>
@@ -392,12 +392,12 @@ const MemberContribution: React.FC<MemberContributionProps> = ({
                 <div className={styles.topName}>{member.userName}</div>
                 <div className={styles.topDept}>{member.department}</div>
                 <div className={styles.topScore}>
-                  <span className={styles.scoreValue}>{member.contributionScore?.toFixed(0)}</span>
+                  <span className={styles.scoreValue}>{member.contributionScore != null ? Number(member.contributionScore).toFixed(0) : '0'}</span>
                   <span className={styles.scoreLabel}>分</span>
                 </div>
                 <div className={styles.topStats}>
                   <Tag color="blue">完成 {member.completedTasks} 任务</Tag>
-                  <Tag color="green">准时率 {member.onTimeRate?.toFixed(0)}%</Tag>
+                  <Tag color="green">准时率 {member.onTimeRate != null ? Number(member.onTimeRate).toFixed(0) : '0'}%</Tag>
                 </div>
               </div>
             </Col>

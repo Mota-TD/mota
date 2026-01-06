@@ -132,7 +132,7 @@ const OverdueRate: React.FC<OverdueRateProps> = ({
           name: '逾期率',
           type: 'line',
           yAxisIndex: 1,
-          data: trends.map(t => t.overdueRate?.toFixed(1)),
+          data: trends.map(t => t.overdueRate != null ? Number(t.overdueRate).toFixed(1) : null),
           itemStyle: { color: '#faad14' },
           smooth: true
         }
@@ -281,11 +281,11 @@ const OverdueRate: React.FC<OverdueRateProps> = ({
       dataIndex: 'overdueRate',
       key: 'overdueRate',
       render: (val: number) => (
-        <Progress 
-          percent={val} 
-          size="small" 
+        <Progress
+          percent={val}
+          size="small"
           strokeColor={val > 30 ? '#ff4d4f' : val > 15 ? '#faad14' : '#52c41a'}
-          format={() => `${val?.toFixed(1)}%`}
+          format={() => `${typeof val === 'number' ? val.toFixed(1) : '0.0'}%`}
         />
       ),
       sorter: (a: OverdueByMember, b: OverdueByMember) => a.overdueRate - b.overdueRate
@@ -329,26 +329,26 @@ const OverdueRate: React.FC<OverdueRateProps> = ({
         </Col>
         <Col span={4}>
           <Card className={styles.statCard}>
-            <Statistic 
-              title="逾期率" 
-              value={data.overdueRate?.toFixed(1)}
+            <Statistic
+              title="逾期率"
+              value={data.overdueRate != null ? Number(data.overdueRate).toFixed(1) : '0.0'}
               suffix="%"
               prefix={<ExclamationCircleOutlined />}
-              valueStyle={{ color: data.overdueRate > 20 ? '#ff4d4f' : '#faad14' }}
+              valueStyle={{ color: Number(data.overdueRate || 0) > 20 ? '#ff4d4f' : '#faad14' }}
             />
             <div className={styles.changeInfo}>
-              {getChangeIcon(data.overdueRateChange)}
-              <span style={{ color: data.overdueRateChange < 0 ? '#52c41a' : '#ff4d4f' }}>
-                {Math.abs(data.overdueRateChange || 0).toFixed(1)}% vs 上期
+              {getChangeIcon(Number(data.overdueRateChange || 0))}
+              <span style={{ color: Number(data.overdueRateChange || 0) < 0 ? '#52c41a' : '#ff4d4f' }}>
+                {Math.abs(Number(data.overdueRateChange) || 0).toFixed(1)}% vs 上期
               </span>
             </div>
           </Card>
         </Col>
         <Col span={4}>
           <Card className={styles.statCard}>
-            <Statistic 
-              title="平均逾期天数" 
-              value={data.avgOverdueDays?.toFixed(1)}
+            <Statistic
+              title="平均逾期天数"
+              value={data.avgOverdueDays != null ? Number(data.avgOverdueDays).toFixed(1) : '0.0'}
               suffix="天"
               valueStyle={{ color: '#fa8c16' }}
             />

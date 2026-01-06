@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useRef } from 'react'
 import { Card, Row, Col, List, Avatar, Tag, Progress, Typography, Spin, Button, Input, Tabs } from 'antd'
 import {
   ProjectOutlined,
@@ -140,14 +140,23 @@ const Dashboard = () => {
   const [activities, setActivities] = useState<any[]>([])
   const [news, setNews] = useState<any[]>([])
 
+  // 防止重复请求的 ref
+  const dataLoadedRef = useRef(false)
+  const loadingRef = useRef(false)
+
   // 使用 useMemo 确保每次页面加载时随机选择一条问候语，但在组件生命周期内保持不变
   const greetingData = useMemo(() => getRandomGreeting(), [])
 
   useEffect(() => {
+    // 防止 React StrictMode 下的重复请求
+    if (dataLoadedRef.current || loadingRef.current) {
+      return
+    }
     loadDashboardData()
   }, [])
 
   const loadDashboardData = async () => {
+    loadingRef.current = true
     setLoading(true)
     
     let projects: any[] = []
@@ -239,6 +248,8 @@ const Dashboard = () => {
     }
     
     setLoading(false)
+    loadingRef.current = false
+    dataLoadedRef.current = true
   }
 
   const getStatusColor = (status: string) => {
@@ -689,7 +700,7 @@ const Dashboard = () => {
               ),
               children: (
                 <div style={{ padding: '16px 0' }}>
-                  <NewsFeed userId={user?.id || 1} />
+                  <NewsFeed userId={typeof user?.id === 'number' ? user.id : Number(user?.id) || 1} />
                 </div>
               )
             }

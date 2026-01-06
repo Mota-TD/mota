@@ -40,7 +40,7 @@ import styles from './index.module.css'
 const { Panel } = Collapse
 
 interface AIProgressPredictionProps {
-  projectId: number
+  projectId: string | number
 }
 
 const AIProgressPrediction: React.FC<AIProgressPredictionProps> = ({ projectId }) => {

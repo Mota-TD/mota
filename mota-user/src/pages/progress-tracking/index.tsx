@@ -3,7 +3,7 @@
  * 集成燃尽图、燃起图、速度趋势和AI进度预测
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Card,
   Tabs,
@@ -31,7 +31,7 @@ import { projectApi } from '@/services/api'
 import styles from './index.module.css'
 
 interface Project {
-  id: number
+  id: string
   name: string
   status: string
 }
@@ -40,19 +40,30 @@ const ProgressTrackingPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const [loading, setLoading] = useState(false)
   const [projects, setProjects] = useState<Project[]>([])
-  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null)
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('burndown')
+
+  // 防止重复请求的 ref
+  const projectsLoadedRef = useRef(false)
+  const loadingProjectsRef = useRef(false)
 
   // 从URL参数获取项目ID
   useEffect(() => {
     const projectIdParam = searchParams.get('projectId')
     if (projectIdParam) {
-      setSelectedProjectId(Number(projectIdParam))
+      setSelectedProjectId(projectIdParam)
+    }
+    if (projectsLoadedRef.current || loadingProjectsRef.current) {
+      return
     }
     loadProjects()
   }, [])
 
   const loadProjects = async () => {
+    if (loadingProjectsRef.current) {
+      return
+    }
+    loadingProjectsRef.current = true
     setLoading(true)
     try {
       const result = await projectApi.getProjects()
@@ -61,21 +72,23 @@ const ProgressTrackingPage: React.FC = () => {
       
       // 如果没有选中项目且有项目列表，选择第一个
       if (!selectedProjectId && projectList.length > 0) {
-        const firstProjectId = Number(projectList[0].id)
+        const firstProjectId = projectList[0].id
         setSelectedProjectId(firstProjectId)
-        setSearchParams({ projectId: String(firstProjectId) })
+        setSearchParams({ projectId: firstProjectId })
       }
     } catch (error) {
       console.error('Load projects error:', error)
       message.error('加载项目列表失败')
     } finally {
       setLoading(false)
+      loadingProjectsRef.current = false
+      projectsLoadedRef.current = true
     }
   }
 
-  const handleProjectChange = (projectId: number) => {
+  const handleProjectChange = (projectId: string) => {
     setSelectedProjectId(projectId)
-    setSearchParams({ projectId: String(projectId) })
+    setSearchParams({ projectId: projectId })
   }
 
   const handleTabChange = (key: string) => {

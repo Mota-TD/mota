@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { 
   Card, 
   Input, 
@@ -68,8 +68,15 @@ const AISolution = () => {
   const [solutionTypes, setSolutionTypes] = useState<SolutionType[]>([])
   const [quickTemplates, setQuickTemplates] = useState<QuickTemplate[]>([])
 
+  // 防止重复请求的 ref
+  const configLoadedRef = useRef(false)
+  const loadingConfigRef = useRef(false)
+
   // 加载配置数据
   useEffect(() => {
+    if (configLoadedRef.current || loadingConfigRef.current) {
+      return
+    }
     loadConfig()
   }, [])
 
@@ -81,7 +88,11 @@ const AISolution = () => {
     }
   }, [location.state, form])
 
-  const loadConfig = async () => {
+  const loadConfig = async (forceReload = false) => {
+    if (!forceReload && (configLoadedRef.current || loadingConfigRef.current)) {
+      return
+    }
+    loadingConfigRef.current = true
     try {
       const [typesRes, templatesRes] = await Promise.all([
         getSolutionTypes().catch(() => []),
@@ -112,8 +123,11 @@ const AISolution = () => {
           { label: '团队培训计划', value: '帮我制定技术团队的年度培训计划' },
         ])
       }
+      configLoadedRef.current = true
     } catch (error) {
       console.error('Failed to load config:', error)
+    } finally {
+      loadingConfigRef.current = false
     }
   }
 

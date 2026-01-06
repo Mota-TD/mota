@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Card,
   Table,
@@ -70,11 +70,26 @@ const FavoritesPage: React.FC = () => {
   // 模拟当前用户ID
   const currentUserId = 1;
 
+  // 防止重复请求的 ref
+  const dataLoadedRef = useRef(false)
+  const loadingRef = useRef(false)
+  const lastParamsRef = useRef<string>('')
+
   useEffect(() => {
+    const currentParams = `${activeTab}-${selectedFolder}`
+    // 如果参数变化了，允许重新加载
+    if (lastParamsRef.current !== currentParams) {
+      dataLoadedRef.current = false
+    }
+    if (dataLoadedRef.current || loadingRef.current) {
+      return
+    }
+    lastParamsRef.current = currentParams
     loadData();
   }, [activeTab, selectedFolder]);
 
   const loadData = async () => {
+    loadingRef.current = true
     setLoading(true);
     try {
       if (activeTab === 'favorites') {
@@ -100,6 +115,8 @@ const FavoritesPage: React.FC = () => {
       message.error('加载数据失败');
     } finally {
       setLoading(false);
+      loadingRef.current = false
+      dataLoadedRef.current = true
     }
   };
 

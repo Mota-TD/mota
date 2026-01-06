@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Card,
@@ -127,12 +127,23 @@ const CreateProject = () => {
   })
 
 
+  // 防止重复请求的 ref
+  const dataLoadedRef = useRef(false)
+  const loadingDataRef = useRef(false)
+
   useEffect(() => {
+    if (dataLoadedRef.current || loadingDataRef.current) {
+      return
+    }
     loadData()
     loadNextProjectKey()
   }, [])
 
   const loadData = async () => {
+    if (loadingDataRef.current) {
+      return
+    }
+    loadingDataRef.current = true
     setLoadingData(true)
     try {
       const [deptsRes, usersRes] = await Promise.all([
@@ -158,6 +169,8 @@ const CreateProject = () => {
       setUsers([])
     } finally {
       setLoadingData(false)
+      loadingDataRef.current = false
+      dataLoadedRef.current = true
     }
   }
 

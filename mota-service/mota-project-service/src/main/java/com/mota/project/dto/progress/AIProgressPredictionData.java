@@ -1,5 +1,7 @@
 package com.mota.project.dto.progress;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,6 +22,7 @@ public class AIProgressPredictionData {
     /**
      * 项目ID
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long projectId;
     
     /**
@@ -259,6 +262,7 @@ public class AIProgressPredictionData {
         /**
          * 里程碑ID
          */
+        @JsonSerialize(using = ToStringSerializer.class)
         private Long milestoneId;
         
         /**

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Button,
@@ -84,11 +84,19 @@ const MyTasks = () => {
   const [priorityFilter, setPriorityFilter] = useState<string | undefined>()
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(null)
 
+  // 防止重复请求的 ref
+  const tasksLoadedRef = useRef(false)
+  const loadingTasksRef = useRef(false)
+
   useEffect(() => {
+    if (tasksLoadedRef.current || loadingTasksRef.current) {
+      return
+    }
     loadAllTasks()
   }, [])
 
   const loadAllTasks = async () => {
+    loadingTasksRef.current = true
     setLoading(true)
     try {
       // 同时加载执行任务、部门任务和里程碑任务
@@ -108,6 +116,8 @@ const MyTasks = () => {
       setMilestoneTasks([])
     } finally {
       setLoading(false)
+      loadingTasksRef.current = false
+      tasksLoadedRef.current = true
     }
   }
 

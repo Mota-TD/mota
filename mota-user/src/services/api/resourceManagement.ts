@@ -325,7 +325,7 @@ export function getWorkloadStats(
  * RM-001: 团队成员任务负载可视化
  */
 export function getTeamWorkloadStats(params: {
-  teamId?: number
+  teamId?: string | number
   startDate: string
   endDate: string
 }): Promise<WorkloadStatsData[]> {
@@ -337,7 +337,7 @@ export function getTeamWorkloadStats(params: {
  * RM-002: 团队工作量分布图
  */
 export function getTeamDistribution(
-  teamId: number,
+  teamId: string | number,
   startDate: string,
   endDate: string
 ): Promise<TeamDistributionData> {
@@ -349,7 +349,7 @@ export function getTeamDistribution(
  * RM-003: 过载/空闲预警提示
  */
 export function getWorkloadAlerts(params?: {
-  teamId?: number
+  teamId?: string | number
 }): Promise<WorkloadAlertData> {
   return request.get('/api/resource-management/workload-alerts', params)
 }
@@ -366,7 +366,7 @@ export function resolveAlert(alertId: number): Promise<{ success: boolean; messa
  * RM-004: 资源日历视图
  */
 export function getResourceCalendar(params: {
-  teamId?: number
+  teamId?: string | number
   startDate: string
   endDate: string
 }): Promise<ResourceCalendarData> {
@@ -378,7 +378,7 @@ export function getResourceCalendar(params: {
  * RM-005: 资源利用率图表
  */
 export function getResourceUtilization(params: {
-  teamId?: number
+  teamId?: string | number
   period?: 'DAILY' | 'WEEKLY' | 'MONTHLY'
   startDate: string
   endDate: string
@@ -391,8 +391,8 @@ export function getResourceUtilization(params: {
  * RM-006: 跨项目资源冲突检测
  */
 export function getProjectConflicts(params: {
-  teamId?: number
-  userId?: number
+  teamId?: string | number
+  userId?: string | number
   startDate: string
   endDate: string
 }): Promise<ProjectConflictData> {

@@ -105,14 +105,14 @@ const TeamEfficiency: React.FC<TeamEfficiencyProps> = ({
         {
           name: '完成率',
           type: 'line',
-          data: trends.map(t => t.completionRate?.toFixed(1)),
+          data: trends.map(t => t.completionRate != null ? Number(t.completionRate).toFixed(1) : null),
           itemStyle: { color: '#1890ff' },
           smooth: true
         },
         {
           name: '准时率',
           type: 'line',
-          data: trends.map(t => t.onTimeRate?.toFixed(1)),
+          data: trends.map(t => t.onTimeRate != null ? Number(t.onTimeRate).toFixed(1) : null),
           itemStyle: { color: '#52c41a' },
           smooth: true
         },
@@ -120,7 +120,7 @@ const TeamEfficiency: React.FC<TeamEfficiencyProps> = ({
           name: '速度',
           type: 'bar',
           yAxisIndex: 1,
-          data: trends.map(t => t.velocity?.toFixed(1)),
+          data: trends.map(t => t.velocity != null ? Number(t.velocity).toFixed(1) : null),
           itemStyle: { color: '#faad14' }
         }
       ]
@@ -188,8 +188,8 @@ const TeamEfficiency: React.FC<TeamEfficiencyProps> = ({
             formatter: '{b}\n{c}h'
           },
           data: [
-            { name: '专注时间', value: data.focusTime?.toFixed(1), itemStyle: { color: '#52c41a' } },
-            { name: '会议时间', value: data.meetingTime?.toFixed(1), itemStyle: { color: '#faad14' } },
+            { name: '专注时间', value: data.focusTime != null ? Number(data.focusTime).toFixed(1) : 0, itemStyle: { color: '#52c41a' } },
+            { name: '会议时间', value: data.meetingTime != null ? Number(data.meetingTime).toFixed(1) : 0, itemStyle: { color: '#faad14' } },
             { name: '其他', value: otherTime.toFixed(1), itemStyle: { color: '#d9d9d9' } }
           ]
         }
@@ -229,17 +229,17 @@ const TeamEfficiency: React.FC<TeamEfficiencyProps> = ({
               <span className={styles.kpiTitle}>完成率</span>
             </div>
             <div className={styles.kpiValue}>
-              <Progress 
-                type="circle" 
-                percent={data.completionRate} 
+              <Progress
+                type="circle"
+                percent={data.completionRate}
                 size={80}
                 strokeColor="#1890ff"
-                format={percent => `${percent?.toFixed(1)}%`}
+                format={percent => `${typeof percent === 'number' ? percent.toFixed(1) : '0.0'}%`}
               />
             </div>
             <div className={styles.kpiChange} style={{ color: getChangeColor(data.completionRateChange) }}>
               {getChangeIcon(data.completionRateChange)}
-              <span>{Math.abs(data.completionRateChange || 0).toFixed(1)}% vs 上期</span>
+              <span>{Math.abs(Number(data.completionRateChange) || 0).toFixed(1)}% vs 上期</span>
             </div>
             <div className={styles.kpiDetail}>
               {data.completedTasks} / {data.totalTasks} 任务
@@ -253,20 +253,20 @@ const TeamEfficiency: React.FC<TeamEfficiencyProps> = ({
               <span className={styles.kpiTitle}>准时完成率</span>
             </div>
             <div className={styles.kpiValue}>
-              <Progress 
-                type="circle" 
-                percent={data.onTimeCompletionRate} 
+              <Progress
+                type="circle"
+                percent={data.onTimeCompletionRate}
                 size={80}
                 strokeColor="#52c41a"
-                format={percent => `${percent?.toFixed(1)}%`}
+                format={percent => `${typeof percent === 'number' ? percent.toFixed(1) : '0.0'}%`}
               />
             </div>
             <div className={styles.kpiChange} style={{ color: getChangeColor(data.onTimeRateChange) }}>
               {getChangeIcon(data.onTimeRateChange)}
-              <span>{Math.abs(data.onTimeRateChange || 0).toFixed(1)}% vs 上期</span>
+              <span>{Math.abs(Number(data.onTimeRateChange) || 0).toFixed(1)}% vs 上期</span>
             </div>
             <div className={styles.kpiDetail}>
-              平均 {data.avgCompletionDays?.toFixed(1)} 天完成
+              平均 {data.avgCompletionDays != null ? Number(data.avgCompletionDays).toFixed(1) : '-'} 天完成
             </div>
           </Card>
         </Col>
@@ -285,10 +285,10 @@ const TeamEfficiency: React.FC<TeamEfficiencyProps> = ({
             </div>
             <div className={styles.kpiChange} style={{ color: getChangeColor(data.velocityChange) }}>
               {getChangeIcon(data.velocityChange)}
-              <span>{Math.abs(data.velocityChange || 0).toFixed(1)} vs 上期</span>
+              <span>{Math.abs(Number(data.velocityChange) || 0).toFixed(1)} vs 上期</span>
             </div>
             <div className={styles.kpiDetail}>
-              利用率 {data.utilizationRate?.toFixed(1)}%
+              利用率 {data.utilizationRate != null ? Number(data.utilizationRate).toFixed(1) : '-'}%
             </div>
           </Card>
         </Col>
@@ -299,17 +299,17 @@ const TeamEfficiency: React.FC<TeamEfficiencyProps> = ({
               <span className={styles.kpiTitle}>质量指标</span>
             </div>
             <div className={styles.kpiValue}>
-              <Progress 
-                type="circle" 
-                percent={data.firstTimePassRate} 
+              <Progress
+                type="circle"
+                percent={data.firstTimePassRate}
                 size={80}
                 strokeColor="#722ed1"
-                format={percent => `${percent?.toFixed(1)}%`}
+                format={percent => `${typeof percent === 'number' ? percent.toFixed(1) : '0.0'}%`}
               />
             </div>
             <div className={styles.kpiMeta}>
-              <Tag color="red">Bug率: {data.bugRate?.toFixed(1)}%</Tag>
-              <Tag color="orange">返工率: {data.reworkRate?.toFixed(1)}%</Tag>
+              <Tag color="red">Bug率: {data.bugRate != null ? Number(data.bugRate).toFixed(1) : '-'}%</Tag>
+              <Tag color="orange">返工率: {data.reworkRate != null ? Number(data.reworkRate).toFixed(1) : '-'}%</Tag>
             </div>
             <div className={styles.kpiDetail}>
               首次通过率

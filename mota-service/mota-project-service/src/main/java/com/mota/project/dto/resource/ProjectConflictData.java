@@ -1,5 +1,7 @@
 package com.mota.project.dto.resource;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -55,6 +57,7 @@ public class ProjectConflictData {
         /**
          * 冲突ID
          */
+        @JsonSerialize(using = ToStringSerializer.class)
         private Long conflictId;
         
         /**
@@ -146,6 +149,7 @@ public class ProjectConflictData {
         /**
          * 用户ID
          */
+        @JsonSerialize(using = ToStringSerializer.class)
         private Long userId;
         
         /**
@@ -172,6 +176,7 @@ public class ProjectConflictData {
         /**
          * 项目ID
          */
+        @JsonSerialize(using = ToStringSerializer.class)
         private Long projectId;
         
         /**
@@ -198,6 +203,7 @@ public class ProjectConflictData {
         /**
          * 任务ID
          */
+        @JsonSerialize(using = ToStringSerializer.class)
         private Long taskId;
         
         /**
@@ -208,6 +214,7 @@ public class ProjectConflictData {
         /**
          * 所属项目ID
          */
+        @JsonSerialize(using = ToStringSerializer.class)
         private Long projectId;
         
         /**
@@ -270,6 +277,7 @@ public class ProjectConflictData {
         /**
          * 用户ID
          */
+        @JsonSerialize(using = ToStringSerializer.class)
         private Long userId;
         
         /**
