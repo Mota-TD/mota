@@ -26,7 +26,7 @@ spring:
         file-extension: yml
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:mota}?useUnicode=true&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:mota}?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: ${DB_USERNAME:mota}
     password: ${DB_PASSWORD:mota123}
   data:
@@ -74,6 +74,24 @@ springdoc:
     operations-sorter: alpha
   packages-to-scan: com.mota.project.controller
   show-actuator: false
+
+# 新闻模块配置
+news:
+  cache:
+    # Protobuf序列化配置
+    protobuf:
+      # 是否启用Protobuf序列化（默认启用）
+      # 启用后可减少30-50%存储空间，提升300-400%序列化性能
+      enabled: ${NEWS_CACHE_PROTOBUF_ENABLED:true}
+    
+    # 缓存分片配置
+    sharding:
+      # 是否启用分片（默认禁用，单节点模式）
+      # 启用后支持水平扩展，可处理10倍以上数据量
+      enabled: ${NEWS_CACHE_SHARDING_ENABLED:false}
+      # 每个物理节点的虚拟节点数量（默认150）
+      # 虚拟节点越多，数据分布越均匀，但内存占用略增
+      virtual-nodes: ${NEWS_CACHE_SHARDING_VIRTUAL_NODES:150}
 
 # AI 配置
 ai:

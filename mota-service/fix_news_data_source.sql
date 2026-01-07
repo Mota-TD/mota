@@ -1,0 +1,1 @@
+"ALTER TABLE news_data_source ADD COLUMN last_crawl_status VARCHAR(20) COMMENT '上次采集状态(success/failed)' AFTER total_articles, ADD COLUMN last_error_message TEXT COMMENT '上次错误信息' AFTER last_crawl_status;"  

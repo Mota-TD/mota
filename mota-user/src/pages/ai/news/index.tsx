@@ -1,12 +1,12 @@
-import { useState, useEffect, useRef } from 'react'
-import { 
-  Card, 
-  Row, 
-  Col, 
-  Typography, 
-  Tag, 
-  Space, 
-  Button, 
+import { useState, useEffect, useRef, useCallback } from 'react'
+import {
+  Card,
+  Row,
+  Col,
+  Typography,
+  Tag,
+  Space,
+  Button,
   Input,
   Select,
   List,
@@ -27,11 +27,12 @@ import {
   Statistic,
   Drawer,
   Tree,
-  Divider
+  Divider,
+  Pagination
 } from 'antd'
-import { 
-  GlobalOutlined, 
-  SearchOutlined, 
+import {
+  GlobalOutlined,
+  SearchOutlined,
   StarOutlined,
   StarFilled,
   ShareAltOutlined,
@@ -57,16 +58,18 @@ import {
   BankOutlined,
   AppstoreOutlined
 } from '@ant-design/icons'
-import type { ColumnsType } from 'antd/es/table'
 import styles from './index.module.css'
+import * as smartNewsPushApi from '@/services/api/smartNewsPush'
+import * as aiNewsApi from '@/services/api/aiNews'
 
 const { Title, Text, Paragraph } = Typography
 
-// 模拟数据类型
+// 新闻项类型（与API返回类型对齐）
 interface NewsItem {
   id: string;
   title: string;
   summary: string;
+  content?: string;
   source: string;
   publishTime: string;
   category: string;
@@ -77,8 +80,10 @@ interface NewsItem {
   sentiment?: 'positive' | 'negative' | 'neutral';
   isPolicy?: boolean;
   policyLevel?: string;
+  author?: string;
 }
 
+// 热门话题类型
 interface HotTopic {
   name: string;
   count: number;
@@ -86,6 +91,7 @@ interface HotTopic {
   change: string;
 }
 
+// 行业配置类型
 interface IndustryConfig {
   id: number;
   code: string;
@@ -94,6 +100,7 @@ interface IndustryConfig {
   isPrimary: boolean;
 }
 
+// 业务领域类型
 interface BusinessDomain {
   id: number;
   name: string;
@@ -102,12 +109,21 @@ interface BusinessDomain {
   isCore: boolean;
 }
 
+// 政策监控类型
 interface PolicyMonitor {
   id: number;
   name: string;
   keywords: string[];
   matchedCount: number;
   isEnabled: boolean;
+}
+
+// 统计数据类型
+interface NewsStatistics {
+  todayNews: number;
+  matchedNews: number;
+  policyNews: number;
+  favoriteNews: number;
 }
 
 /**
@@ -120,33 +136,32 @@ const AINews = () => {
   const [searchText, setSearchText] = useState('')
   const [newsData, setNewsData] = useState<NewsItem[]>([])
   const [total, setTotal] = useState(0)
+  const [sortBy, setSortBy] = useState<'relevance' | 'time' | 'source'>('relevance')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  
+  // 统计数据
+  const [statistics, setStatistics] = useState<NewsStatistics>({
+    todayNews: 0,
+    matchedNews: 0,
+    policyNews: 0,
+    favoriteNews: 0
+  })
   
   // 设置相关状态
   const [settingsVisible, setSettingsVisible] = useState(false)
   const [industryDrawerVisible, setIndustryDrawerVisible] = useState(false)
   const [policyDrawerVisible, setPolicyDrawerVisible] = useState(false)
   const [favoriteDrawerVisible, setFavoriteDrawerVisible] = useState(false)
+  const [newsDetailVisible, setNewsDetailVisible] = useState(false)
+  const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null)
+  const [loadingDetail, setLoadingDetail] = useState(false)
   
   // 配置数据
-  const [industries, setIndustries] = useState<IndustryConfig[]>([
-    { id: 1, code: 'IT', name: '信息技术', confidence: 95, isPrimary: true },
-    { id: 2, code: 'FINANCE', name: '金融服务', confidence: 75, isPrimary: false }
-  ])
-  const [businessDomains, setBusinessDomains] = useState<BusinessDomain[]>([
-    { id: 1, name: '企业级SaaS产品', type: 'product', importance: 10, isCore: true },
-    { id: 2, name: 'AI技术研发', type: 'technology', importance: 8, isCore: true }
-  ])
-  const [policyMonitors, setPolicyMonitors] = useState<PolicyMonitor[]>([
-    { id: 1, name: '数字经济政策', keywords: ['数字经济', '数字化转型'], matchedCount: 15, isEnabled: true },
-    { id: 2, name: 'AI行业监管', keywords: ['人工智能', '算法监管'], matchedCount: 8, isEnabled: true }
-  ])
-  const [hotTopics, setHotTopics] = useState<HotTopic[]>([
-    { name: 'AI大模型', count: 1256, trend: 'up', change: '+15%' },
-    { name: '数字化转型', count: 892, trend: 'up', change: '+8%' },
-    { name: '企业服务', count: 756, trend: 'stable', change: '+2%' },
-    { name: '云计算', count: 623, trend: 'up', change: '+12%' },
-    { name: '数据安全', count: 512, trend: 'up', change: '+20%' }
-  ])
+  const [industries, setIndustries] = useState<IndustryConfig[]>([])
+  const [businessDomains, setBusinessDomains] = useState<BusinessDomain[]>([])
+  const [policyMonitors, setPolicyMonitors] = useState<PolicyMonitor[]>([])
+  const [hotTopics, setHotTopics] = useState<HotTopic[]>([])
   
   // 推送配置
   const [pushConfig, setPushConfig] = useState({
@@ -160,139 +175,529 @@ const AINews = () => {
   // 防止重复请求的 ref
   const loadingNewsRef = useRef(false);
   const lastTabRef = useRef<string>('');
+  const initializedRef = useRef(false);
+  const favoritesCache = useRef<Set<string>>(new Set());
+  
+  // 获取当前用户ID（实际项目中应从认证状态获取）
+  const getCurrentUserId = () => {
+    // TODO: 从认证状态获取真实用户ID
+    return 1;
+  }
+  
+  // 获取当前团队ID（实际项目中应从认证状态获取）
+  const getCurrentTeamId = () => {
+    // TODO: 从认证状态获取真实团队ID
+    return 1;
+  }
+
+  // 转换API返回的新闻数据为组件使用的格式
+  const transformNewsArticle = (article: smartNewsPushApi.NewsArticle): NewsItem => {
+    // 格式化匹配度为整数（0-100）
+    const relevanceScore = article.importanceScore
+      ? Math.round(Number(article.importanceScore))
+      : 80;
+    
+    return {
+      id: String(article.id),
+      title: article.title,
+      summary: article.summary || article.content?.substring(0, 200) || '',
+      content: article.content,
+      source: article.sourceName || '未知来源',
+      publishTime: smartNewsPushApi.formatPublishTime(article.publishTime),
+      category: article.category || 'general',
+      tags: article.tags || [],
+      url: article.sourceUrl || '#',
+      isStarred: false, // 需要单独查询收藏状态
+      relevance: Math.min(100, Math.max(0, relevanceScore)), // 确保在0-100范围内
+      sentiment: article.sentiment,
+      isPolicy: article.isPolicy,
+      policyLevel: article.policyLevel,
+      author: article.author
+    }
+  }
+
+  // 加载统计数据
+  const loadStatistics = useCallback(async () => {
+    try {
+      const teamId = getCurrentTeamId()
+      const stats = await smartNewsPushApi.getStatistics(teamId)
+      setStatistics({
+        todayNews: stats.todayArticles || 0,
+        matchedNews: stats.matchedCount || 0,
+        policyNews: stats.policyCount || 0,
+        favoriteNews: stats.favoriteCount || 0
+      })
+    } catch (error) {
+      console.error('加载统计数据失败:', error)
+      // 使用默认值
+      setStatistics({
+        todayNews: 0,
+        matchedNews: 0,
+        policyNews: 0,
+        favoriteNews: 0
+      })
+    }
+  }, [])
+
+  // 加载热门话题
+  const loadHotTopics = useCallback(async () => {
+    try {
+      const topics = await smartNewsPushApi.getHotTopics(5)
+      setHotTopics(topics)
+    } catch (error) {
+      console.error('加载热门话题失败:', error)
+      // 不使用模拟数据，显示空列表
+      setHotTopics([])
+    }
+  }, [])
+
+  // 加载行业配置
+  const loadIndustries = useCallback(async () => {
+    try {
+      const teamId = getCurrentTeamId()
+      const data = await smartNewsPushApi.getTeamIndustries(teamId)
+      setIndustries(data.map(item => ({
+        id: item.id,
+        code: item.industryCode,
+        name: item.industryName,
+        confidence: item.confidence,
+        isPrimary: item.isPrimary
+      })))
+    } catch (error) {
+      console.error('加载行业配置失败:', error)
+      setIndustries([])
+    }
+  }, [])
+
+  // 加载业务领域
+  const loadBusinessDomains = useCallback(async () => {
+    try {
+      const teamId = getCurrentTeamId()
+      const data = await smartNewsPushApi.getTeamBusinessDomains(teamId)
+      setBusinessDomains(data.map(item => ({
+        id: item.id,
+        name: item.domainName,
+        type: item.domainType,
+        importance: item.importance,
+        isCore: item.isCore
+      })))
+    } catch (error) {
+      console.error('加载业务领域失败:', error)
+      setBusinessDomains([])
+    }
+  }, [])
+
+  // 加载政策监控
+  const loadPolicyMonitors = useCallback(async () => {
+    try {
+      const teamId = getCurrentTeamId()
+      const data = await smartNewsPushApi.getPolicyMonitors(teamId)
+      setPolicyMonitors(data.map(item => ({
+        id: item.id,
+        name: item.monitorName,
+        keywords: item.keywords || [],
+        matchedCount: item.matchedCount,
+        isEnabled: item.isEnabled
+      })))
+    } catch (error) {
+      console.error('加载政策监控失败:', error)
+      setPolicyMonitors([])
+    }
+  }, [])
+
+  // 加载推送配置
+  const loadPushConfig = useCallback(async () => {
+    try {
+      const userId = getCurrentUserId()
+      const config = await smartNewsPushApi.getPushConfig(userId)
+      setPushConfig({
+        enabled: config.pushEnabled,
+        frequency: config.pushFrequency,
+        time: config.pushTime || '09:00',
+        channels: config.pushChannels || ['email', 'app'],
+        minMatchScore: config.minMatchScore
+      })
+    } catch (error) {
+      console.error('加载推送配置失败:', error)
+    }
+  }, [])
+
+  // 加载收藏列表（用于缓存收藏状态）
+  const loadFavorites = useCallback(async () => {
+    try {
+      const userId = getCurrentUserId()
+      const favorites = await smartNewsPushApi.getFavorites(userId)
+      favoritesCache.current = new Set(favorites.map(f => String(f.articleId)))
+    } catch (e) {
+      console.warn('获取收藏状态失败:', e)
+    }
+  }, [])
 
   // 加载新闻数据
-  useEffect(() => {
-    // 如果正在加载且是同一个tab，跳过
-    if (loadingNewsRef.current && lastTabRef.current === activeTab) {
-      return;
-    }
-    lastTabRef.current = activeTab;
-    loadNews();
-  }, [activeTab])
-
-  const loadNews = async () => {
+  const loadNews = useCallback(async (tab?: string, page?: number, size?: number) => {
+    const currentTab = tab || activeTab
+    const currentPageNum = page || currentPage
+    const currentPageSize = size || pageSize
+    
     if (loadingNewsRef.current) {
       return;
     }
     loadingNewsRef.current = true;
     setLoading(true)
+    
     try {
-      // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 500))
+      const userId = getCurrentUserId()
+      const teamId = getCurrentTeamId()
+      let articles: smartNewsPushApi.NewsArticle[] = []
+      let totalCount = 0
       
-      const mockNews: NewsItem[] = [
-        {
-          id: '1',
-          title: 'AI大模型在企业服务领域的最新应用进展',
-          summary: '随着人工智能技术的快速发展，大模型在各行业的应用场景不断拓展，本文介绍了AI大模型在企业服务、医疗健康、金融科技等领域的最新应用进展。',
-          source: '36氪',
-          publishTime: '2小时前',
-          category: '科技',
-          tags: ['AI', '大模型', '企业服务'],
-          url: 'https://36kr.com/article/1',
-          isStarred: false,
-          relevance: 95,
-          sentiment: 'positive'
-        },
-        {
-          id: '2',
-          title: '国务院发布关于促进数字经济发展的指导意见',
-          summary: '为加快数字经济发展，推动数字技术与实体经济深度融合，国务院发布最新指导意见，明确了未来五年数字经济发展的主要目标和重点任务。',
-          source: '中国政府网',
-          publishTime: '3小时前',
-          category: '政策',
-          tags: ['数字经济', '政策', '产业发展'],
-          url: 'http://www.gov.cn/policy/1',
-          isStarred: true,
-          relevance: 92,
-          isPolicy: true,
-          policyLevel: 'national'
-        },
-        {
-          id: '3',
-          title: 'SaaS企业如何实现数字化转型升级',
-          summary: '本文深入分析了SaaS企业在数字化转型过程中面临的挑战和机遇，并提供了可行的解决方案和最佳实践案例。',
-          source: '虎嗅',
-          publishTime: '5小时前',
-          category: '行业动态',
-          tags: ['SaaS', '数字化转型', '企业管理'],
-          url: 'https://huxiu.com/article/1',
-          isStarred: false,
-          relevance: 88,
-          sentiment: 'neutral'
-        },
-        {
-          id: '4',
-          title: '2024年企业级AI应用市场分析报告',
-          summary: '艾瑞咨询发布最新报告，详细分析了企业级AI应用市场的发展现状、竞争格局和未来趋势，预计市场规模将在未来三年内翻倍。',
-          source: '艾瑞咨询',
-          publishTime: '1天前',
-          category: '市场分析',
-          tags: ['AI', '市场分析', '企业服务'],
-          url: 'https://iresearch.cn/report/1',
-          isStarred: false,
-          relevance: 85,
-          sentiment: 'positive'
-        },
-        {
-          id: '5',
-          title: '工信部发布人工智能行业规范指南',
-          summary: '工信部正式发布人工智能行业规范指南，对AI算法、数据安全、伦理规范等方面提出了明确要求，将对行业发展产生深远影响。',
-          source: '工信部',
-          publishTime: '1天前',
-          category: '政策',
-          tags: ['AI', '监管', '行业规范'],
-          url: 'https://miit.gov.cn/policy/1',
-          isStarred: true,
-          relevance: 90,
-          isPolicy: true,
-          policyLevel: 'national'
-        }
-      ]
+      switch (currentTab) {
+        case 'recommended':
+          // 智能推荐新闻 - 使用搜索接口支持分页
+          const recommendedResult = await smartNewsPushApi.searchNews({
+            keyword: '',
+            page: currentPageNum,
+            pageSize: currentPageSize
+          })
+          articles = recommendedResult.list
+          totalCount = recommendedResult.total
+          break
+        case 'policy':
+          // 政策新闻 - 使用搜索接口支持分页
+          const policyResult = await smartNewsPushApi.searchNews({
+            keyword: '',
+            category: 'policy',
+            page: currentPageNum,
+            pageSize: currentPageSize
+          })
+          articles = policyResult.list
+          totalCount = policyResult.total
+          break
+        case 'industry':
+          // 行业动态 - 搜索行业相关新闻
+          const industryResult = await smartNewsPushApi.searchNews({
+            keyword: '',
+            category: 'industry',
+            page: currentPageNum,
+            pageSize: currentPageSize
+          })
+          articles = industryResult.list
+          totalCount = industryResult.total
+          break
+        case 'technology':
+          // 科技资讯
+          const techResult = await smartNewsPushApi.searchNews({
+            keyword: '',
+            category: 'technology',
+            page: currentPageNum,
+            pageSize: currentPageSize
+          })
+          articles = techResult.list
+          totalCount = techResult.total
+          break
+        case 'favorites':
+          // 我的收藏
+          const favorites = await smartNewsPushApi.getFavorites(userId)
+          articles = favorites.map(f => f.article).filter((a): a is smartNewsPushApi.NewsArticle => !!a)
+          // 更新收藏缓存
+          favoritesCache.current = new Set(favorites.map(f => String(f.articleId)))
+          // 收藏列表前端分页
+          totalCount = articles.length
+          const startIndex = (currentPageNum - 1) * currentPageSize
+          articles = articles.slice(startIndex, startIndex + currentPageSize)
+          break
+        default:
+          const defaultResult = await smartNewsPushApi.searchNews({
+            keyword: '',
+            page: currentPageNum,
+            pageSize: currentPageSize
+          })
+          articles = defaultResult.list
+          totalCount = defaultResult.total
+      }
       
-      setNewsData(mockNews)
-      setTotal(mockNews.length)
+      // 转换数据格式
+      const newsItems = articles.map(transformNewsArticle)
+      
+      // 如果是收藏页面，标记所有为已收藏
+      if (currentTab === 'favorites') {
+        newsItems.forEach(item => item.isStarred = true)
+      } else {
+        // 使用缓存的收藏状态
+        newsItems.forEach(item => {
+          item.isStarred = favoritesCache.current.has(item.id)
+        })
+      }
+      
+      setNewsData(newsItems)
+      setTotal(totalCount)
     } catch (error) {
-      console.error('Failed to load news:', error)
-      message.error('加载新闻失败')
+      console.error('加载新闻失败:', error)
+      message.error('加载新闻失败，请稍后重试')
+      setNewsData([])
+      setTotal(0)
     } finally {
       setLoading(false)
       loadingNewsRef.current = false;
     }
+  }, [activeTab, currentPage, pageSize])
+
+  // 初始化加载 - 只执行一次
+  useEffect(() => {
+    if (initializedRef.current) {
+      return;
+    }
+    initializedRef.current = true;
+    
+    // 并行加载所有初始数据
+    const initData = async () => {
+      // 先加载收藏列表用于缓存
+      await loadFavorites()
+      
+      // 并行加载其他数据
+      await Promise.all([
+        loadStatistics(),
+        loadHotTopics(),
+        loadIndustries(),
+        loadBusinessDomains(),
+        loadPolicyMonitors(),
+        loadPushConfig(),
+        loadNews('recommended')
+      ])
+    }
+    
+    initData()
+  }, []) // 空依赖数组，只执行一次
+
+  // 切换标签时加载新闻
+  useEffect(() => {
+    // 跳过初始化时的调用
+    if (!initializedRef.current) {
+      return;
+    }
+    // 如果正在加载且是同一个tab，跳过
+    if (loadingNewsRef.current && lastTabRef.current === activeTab) {
+      return;
+    }
+    lastTabRef.current = activeTab;
+    // 切换标签时重置到第一页
+    setCurrentPage(1);
+    loadNews(activeTab, 1, pageSize);
+  }, [activeTab])
+
+  // 分页变化时加载新闻
+  const handlePageChange = (page: number, size?: number) => {
+    const newPageSize = size || pageSize
+    setCurrentPage(page)
+    if (size && size !== pageSize) {
+      setPageSize(size)
+    }
+    loadNews(activeTab, page, newPageSize)
   }
 
-  // 搜索
-  const handleSearch = () => {
-    loadNews()
-  }
-
-  // 刷新新闻
-  const handleRefresh = async () => {
+  // 搜索新闻
+  const handleSearch = async (page = 1) => {
+    if (!searchText.trim()) {
+      setCurrentPage(1)
+      loadNews(activeTab, 1, pageSize)
+      return
+    }
+    
     setLoading(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      await loadNews()
-      message.success('新闻已更新')
+      const result = await smartNewsPushApi.searchNews({
+        keyword: searchText,
+        page: page,
+        pageSize: pageSize
+      })
+      
+      const newsItems = result.list.map(transformNewsArticle)
+      
+      // 使用缓存的收藏状态
+      newsItems.forEach(item => {
+        item.isStarred = favoritesCache.current.has(item.id)
+      })
+      
+      setNewsData(newsItems)
+      setTotal(result.total)
+      setCurrentPage(page)
     } catch (error) {
-      message.error('刷新失败')
+      console.error('搜索新闻失败:', error)
+      message.error('搜索失败，请稍后重试')
     } finally {
       setLoading(false)
     }
   }
 
+  // 刷新新闻
+  const handleRefresh = async () => {
+    setSearchText('')
+    setCurrentPage(1)
+    // 先刷新收藏缓存
+    await loadFavorites()
+    // 并行刷新数据
+    await Promise.all([
+      loadNews(activeTab, 1, pageSize),
+      loadStatistics(),
+      loadHotTopics()
+    ])
+    message.success('新闻已更新')
+  }
+
   // 收藏/取消收藏
   const handleStar = async (id: string) => {
-    setNewsData(newsData.map(item => 
-      item.id === id ? { ...item, isStarred: !item.isStarred } : item
-    ))
-    message.success('操作成功')
+    const userId = getCurrentUserId()
+    const item = newsData.find(n => n.id === id)
+    if (!item) return
+    
+    try {
+      if (item.isStarred) {
+        // 取消收藏
+        await smartNewsPushApi.unfavoriteNews(userId, parseInt(id))
+        message.success('已取消收藏')
+      } else {
+        // 添加收藏
+        await smartNewsPushApi.favoriteNews(userId, parseInt(id))
+        message.success('已收藏')
+      }
+      
+      // 更新本地状态和缓存
+      const newStarred = !item.isStarred
+      if (newStarred) {
+        favoritesCache.current.add(id)
+      } else {
+        favoritesCache.current.delete(id)
+      }
+      
+      setNewsData(newsData.map(n =>
+        n.id === id ? { ...n, isStarred: newStarred } : n
+      ))
+      
+      // 更新统计（不等待）
+      loadStatistics().catch(console.error)
+    } catch (error) {
+      console.error('收藏操作失败:', error)
+      message.error('操作失败，请稍后重试')
+    }
+  }
+
+  // 保存推送配置
+  const handleSavePushConfig = async () => {
+    try {
+      const userId = getCurrentUserId()
+      await smartNewsPushApi.updatePushConfig(userId, {
+        pushEnabled: pushConfig.enabled,
+        pushFrequency: pushConfig.frequency as 'realtime' | 'hourly' | 'daily' | 'weekly',
+        pushTime: pushConfig.time,
+        pushChannels: pushConfig.channels,
+        minMatchScore: pushConfig.minMatchScore
+      })
+      message.success('设置已保存')
+      setSettingsVisible(false)
+    } catch (error) {
+      console.error('保存推送配置失败:', error)
+      message.error('保存失败，请稍后重试')
+    }
+  }
+
+  // 切换政策监控状态
+  const handleTogglePolicyMonitor = async (id: number, enabled: boolean) => {
+    try {
+      await smartNewsPushApi.updatePolicyMonitor(id, { isEnabled: enabled })
+      setPolicyMonitors(policyMonitors.map(m =>
+        m.id === id ? { ...m, isEnabled: enabled } : m
+      ))
+      message.success(enabled ? '已启用监控' : '已禁用监控')
+    } catch (error) {
+      console.error('更新政策监控失败:', error)
+      message.error('操作失败，请稍后重试')
+    }
+  }
+
+  // AI自动识别行业
+  const handleAutoDetectIndustry = async () => {
+    try {
+      const teamId = getCurrentTeamId()
+      // 这里需要企业描述，实际项目中应从企业配置获取
+      const description = '企业级SaaS软件开发，专注于AI技术应用'
+      const detected = await smartNewsPushApi.detectIndustry(teamId, description)
+      
+      setIndustries(detected.map(item => ({
+        id: item.id,
+        code: item.industryCode,
+        name: item.industryName,
+        confidence: item.confidence,
+        isPrimary: item.isPrimary
+      })))
+      
+      message.success('行业识别完成')
+    } catch (error) {
+      console.error('行业识别失败:', error)
+      message.error('行业识别失败，请稍后重试')
+    }
   }
 
   // 分享
-  const handleShare = (item: NewsItem) => {
+  const handleShare = (item: NewsItem, e?: React.MouseEvent) => {
+    e?.stopPropagation()
     navigator.clipboard.writeText(item.url)
     message.success('链接已复制')
+  }
+
+  // 查看新闻详情
+  const handleViewDetail = async (item: NewsItem) => {
+    setSelectedNews(item)
+    setNewsDetailVisible(true)
+    
+    // 暂时不调用后端API,直接使用列表中的数据
+    // 后续可以在后端实现完整后再启用API调用
+    
+    /*
+    // 如果已经有内容,不需要再次加载
+    if (item.content && item.content.length > 100) {
+      return
+    }
+    
+    // 尝试获取完整内容
+    setLoadingDetail(true)
+    try {
+      // 首先尝试从基本详情API获取
+      const detail = await smartNewsPushApi.getArticle(parseInt(item.id))
+      if (detail && detail.content && detail.content.length > 100) {
+        const fullNews = transformNewsArticle(detail)
+        fullNews.isStarred = item.isStarred
+        setSelectedNews(fullNews)
+        setLoadingDetail(false)
+        return
+      }
+      
+      // 如果基本API没有完整内容,尝试完整内容API(可能未实现)
+      try {
+        const fullContentResult = await smartNewsPushApi.getArticleFullContent(parseInt(item.id))
+        if (fullContentResult && fullContentResult.content) {
+          setSelectedNews({
+            ...item,
+            content: fullContentResult.content
+          })
+        }
+      } catch (apiError) {
+        // 完整内容API失败是正常的,因为可能还未实现
+        console.log('完整内容API未实现或失败,使用现有数据')
+      }
+      
+    } catch (error) {
+      console.error('获取新闻详情失败:', error)
+      // 不显示错误提示,静默失败,使用现有的摘要数据
+    } finally {
+      setLoadingDetail(false)
+    }
+    */
+  }
+
+  // 关闭详情抽屉
+  const handleCloseDetail = () => {
+    setNewsDetailVisible(false)
+    setSelectedNews(null)
   }
 
   // 获取趋势图标
@@ -318,7 +723,11 @@ const AINews = () => {
 
   // 新闻卡片
   const NewsCard = ({ item }: { item: NewsItem }) => (
-    <Card className={styles.newsCard} hoverable>
+    <Card
+      className={styles.newsCard}
+      hoverable
+      onClick={() => handleViewDetail(item)}
+    >
       <div className={styles.newsHeader}>
         <Space>
           <Avatar size="small" style={{ background: item.isPolicy ? '#faad14' : '#1890ff' }}>
@@ -335,7 +744,7 @@ const AINews = () => {
             </Tag>
           )}
         </Space>
-        <Space>
+        <Space onClick={e => e.stopPropagation()}>
           <Tooltip title="匹配度">
             <Tag color={item.relevance >= 90 ? 'red' : item.relevance >= 80 ? 'orange' : 'blue'}>
               <AimOutlined /> {item.relevance}%
@@ -347,21 +756,22 @@ const AINews = () => {
             </Tag>
           )}
           <Tooltip title={item.isStarred ? '取消收藏' : '收藏'}>
-            <Button 
-              type="text" 
+            <Button
+              type="text"
               icon={item.isStarred ? <StarFilled style={{ color: '#faad14' }} /> : <StarOutlined />}
-              onClick={() => handleStar(item.id)}
+              onClick={(e) => {
+                e.stopPropagation()
+                handleStar(item.id)
+              }}
             />
           </Tooltip>
         </Space>
       </div>
       <Title level={5} className={styles.newsTitle}>
-        <a href={item.url} target="_blank" rel="noopener noreferrer">
-          {item.title}
-        </a>
+        {item.title}
       </Title>
       <Paragraph type="secondary" ellipsis={{ rows: 2 }} className={styles.newsSummary}>
-        {item.summary}
+        {item.summary || '暂无摘要'}
       </Paragraph>
       <div className={styles.newsFooter}>
         <Space wrap>
@@ -369,12 +779,20 @@ const AINews = () => {
             <Tag key={tag}>{tag}</Tag>
           ))}
         </Space>
-        <Space>
+        <Space onClick={e => e.stopPropagation()}>
           <Tooltip title="分享">
-            <Button type="text" size="small" icon={<ShareAltOutlined />} onClick={() => handleShare(item)} />
+            <Button type="text" size="small" icon={<ShareAltOutlined />} onClick={(e) => handleShare(item, e)} />
           </Tooltip>
-          <Tooltip title="打开链接">
-            <Button type="text" size="small" icon={<LinkOutlined />} href={item.url} target="_blank" />
+          <Tooltip title="打开原文">
+            <Button
+              type="text"
+              size="small"
+              icon={<LinkOutlined />}
+              onClick={(e) => {
+                e.stopPropagation()
+                window.open(item.url, '_blank')
+              }}
+            />
           </Tooltip>
         </Space>
       </div>
@@ -421,16 +839,16 @@ const AINews = () => {
       {/* 统计概览 */}
       <Row gutter={16} className={styles.statsRow}>
         <Col xs={12} sm={6}>
-          <StatCard title="今日新闻" value={128} icon={<FileTextOutlined />} color="#1890ff" />
+          <StatCard title="今日新闻" value={statistics.todayNews} icon={<FileTextOutlined />} color="#1890ff" />
         </Col>
         <Col xs={12} sm={6}>
-          <StatCard title="匹配推荐" value={45} icon={<AimOutlined />} color="#52c41a" />
+          <StatCard title="匹配推荐" value={statistics.matchedNews} icon={<AimOutlined />} color="#52c41a" />
         </Col>
         <Col xs={12} sm={6}>
-          <StatCard title="政策动态" value={12} icon={<SafetyCertificateOutlined />} color="#faad14" />
+          <StatCard title="政策动态" value={statistics.policyNews} icon={<SafetyCertificateOutlined />} color="#faad14" />
         </Col>
         <Col xs={12} sm={6}>
-          <StatCard title="我的收藏" value={23} icon={<StarOutlined />} color="#722ed1" />
+          <StatCard title="我的收藏" value={statistics.favoriteNews} icon={<StarOutlined />} color="#722ed1" />
         </Col>
       </Row>
 
@@ -445,12 +863,16 @@ const AINews = () => {
                 prefix={<SearchOutlined />}
                 value={searchText}
                 onChange={e => setSearchText(e.target.value)}
-                onPressEnter={handleSearch}
+                onPressEnter={() => handleSearch()}
                 style={{ width: 300 }}
                 allowClear
               />
               <Space>
-                <Select defaultValue="relevance" style={{ width: 120 }}>
+                <Select
+                  value={sortBy}
+                  onChange={(value) => setSortBy(value)}
+                  style={{ width: 120 }}
+                >
                   <Select.Option value="relevance">按匹配度</Select.Option>
                   <Select.Option value="time">按时间</Select.Option>
                   <Select.Option value="source">按来源</Select.Option>
@@ -477,13 +899,43 @@ const AINews = () => {
             {/* 新闻列表 */}
             <Spin spinning={loading}>
               {newsData.length > 0 ? (
-                <div className={styles.newsList}>
-                  {newsData.map(item => (
-                    <NewsCard key={item.id} item={item} />
-                  ))}
-                </div>
+                <>
+                  <div className={styles.newsList}>
+                    {newsData.map(item => (
+                      <NewsCard key={item.id} item={item} />
+                    ))}
+                  </div>
+                  {/* 分页 */}
+                  <div className={styles.pagination}>
+                    <Pagination
+                      current={currentPage}
+                      pageSize={pageSize}
+                      total={total}
+                      onChange={handlePageChange}
+                      showSizeChanger
+                      showQuickJumper
+                      showTotal={(total, range) => `第 ${range[0]}-${range[1]} 条，共 ${total} 条`}
+                      pageSizeOptions={['10', '20', '50']}
+                    />
+                  </div>
+                </>
               ) : (
-                <Empty description="暂无相关新闻" />
+                <Empty
+                  description={
+                    <div>
+                      <p>暂无新闻数据</p>
+                      <Text type="secondary">
+                        {activeTab === 'favorites'
+                          ? '您还没有收藏任何新闻'
+                          : '系统正在采集新闻，请稍后刷新页面'}
+                      </Text>
+                    </div>
+                  }
+                >
+                  <Button type="primary" onClick={handleRefresh} icon={<SyncOutlined />}>
+                    刷新数据
+                  </Button>
+                </Empty>
               )}
             </Spin>
           </Card>
@@ -576,7 +1028,11 @@ const AINews = () => {
                     <Text>{item.name}</Text>
                     <Space>
                       <Badge count={item.matchedCount} style={{ backgroundColor: '#52c41a' }} />
-                      <Switch size="small" checked={item.isEnabled} />
+                      <Switch
+                        size="small"
+                        checked={item.isEnabled}
+                        onChange={(checked) => handleTogglePolicyMonitor(item.id, checked)}
+                      />
                     </Space>
                   </Space>
                 </List.Item>
@@ -610,10 +1066,7 @@ const AINews = () => {
         title="推送设置"
         open={settingsVisible}
         onCancel={() => setSettingsVisible(false)}
-        onOk={() => {
-          message.success('设置已保存')
-          setSettingsVisible(false)
-        }}
+        onOk={handleSavePushConfig}
         width={600}
       >
         <Form layout="vertical">
@@ -666,7 +1119,12 @@ const AINews = () => {
         <div style={{ marginBottom: 16 }}>
           <Text type="secondary">配置您的企业所属行业，AI将根据行业特征推荐相关新闻</Text>
         </div>
-        <Button type="primary" icon={<RobotOutlined />} style={{ marginBottom: 16 }}>
+        <Button
+          type="primary"
+          icon={<RobotOutlined />}
+          style={{ marginBottom: 16 }}
+          onClick={handleAutoDetectIndustry}
+        >
           AI自动识别行业
         </Button>
         <Divider />
@@ -713,7 +1171,10 @@ const AINews = () => {
           renderItem={item => (
             <List.Item
               actions={[
-                <Switch checked={item.isEnabled} />,
+                <Switch
+                  checked={item.isEnabled}
+                  onChange={(checked) => handleTogglePolicyMonitor(item.id, checked)}
+                />,
                 <Button type="link" size="small">编辑</Button>
               ]}
             >
@@ -733,6 +1194,185 @@ const AINews = () => {
         <Button type="dashed" block icon={<PlusOutlined />} style={{ marginTop: 16 }}>
           添加监控规则
         </Button>
+      </Drawer>
+
+      {/* 新闻详情抽屉 */}
+      <Drawer
+        title="新闻详情"
+        placement="right"
+        width={1200}
+        open={newsDetailVisible}
+        onClose={handleCloseDetail}
+        bodyStyle={{ padding: 0 }}
+        extra={
+          <Button
+            type="text"
+            icon={<LinkOutlined />}
+            onClick={() => selectedNews && window.open(selectedNews.url, '_blank')}
+          >
+            查看原文
+          </Button>
+        }
+      >
+        {selectedNews && (
+          <div className={styles.newsDetail}>
+            {/* 详情头部 */}
+            <div className={styles.detailHeader}>
+              <Title level={3} style={{ marginBottom: 16 }}>
+                {selectedNews.title}
+              </Title>
+              <Space wrap style={{ marginBottom: 16 }}>
+                <Space>
+                  <Avatar size="small" style={{ background: selectedNews.isPolicy ? '#faad14' : '#1890ff' }}>
+                    {selectedNews.isPolicy ? <FileTextOutlined /> : selectedNews.source.charAt(0)}
+                  </Avatar>
+                  <Text>{selectedNews.source}</Text>
+                </Space>
+                <Divider type="vertical" />
+                <Text type="secondary">
+                  <ClockCircleOutlined /> {selectedNews.publishTime}
+                </Text>
+                {selectedNews.author && (
+                  <>
+                    <Divider type="vertical" />
+                    <Text type="secondary">
+                      <TeamOutlined /> {selectedNews.author}
+                    </Text>
+                  </>
+                )}
+              </Space>
+              <Space wrap>
+                {selectedNews.isPolicy && (
+                  <Tag color="gold" icon={<SafetyCertificateOutlined />}>
+                    {selectedNews.policyLevel === 'national' ? '国家级' : '地方级'}政策
+                  </Tag>
+                )}
+                <Tag color={selectedNews.relevance >= 90 ? 'red' : selectedNews.relevance >= 80 ? 'orange' : 'blue'}>
+                  <AimOutlined /> 匹配度 {selectedNews.relevance}%
+                </Tag>
+                {selectedNews.sentiment && (
+                  <Tag color={selectedNews.sentiment === 'positive' ? 'green' : selectedNews.sentiment === 'negative' ? 'red' : 'default'}>
+                    {selectedNews.sentiment === 'positive' ? '正面' : selectedNews.sentiment === 'negative' ? '负面' : '中性'}
+                  </Tag>
+                )}
+                <Tag>{selectedNews.category}</Tag>
+              </Space>
+            </div>
+
+            <Divider />
+
+            {/* 详情内容 */}
+            <div className={styles.detailContent}>
+              <Spin spinning={loadingDetail} tip="正在加载完整内容...">
+                {selectedNews.content && selectedNews.content.length > 100 ? (
+                  // 有完整内容时显示
+                  <>
+                    <div
+                      className={styles.articleContent}
+                      dangerouslySetInnerHTML={{ __html: selectedNews.content }}
+                    />
+                    {/* 原文链接提示 */}
+                    <div style={{
+                      padding: '16px',
+                      background: 'var(--bg-secondary)',
+                      borderRadius: '8px',
+                      marginTop: '24px',
+                      textAlign: 'center'
+                    }}>
+                      <Text type="secondary">
+                        <LinkOutlined /> 以上内容来自原文,
+                      </Text>
+                      <Button
+                        type="link"
+                        onClick={() => window.open(selectedNews.url, '_blank')}
+                      >
+                        点击访问原始链接
+                      </Button>
+                    </div>
+                  </>
+                ) : selectedNews.summary ? (
+                  // 只有摘要时,显示提示文案
+                  <div className={styles.articleContent}>
+                    <div style={{
+                      padding: '40px 20px',
+                      background: 'var(--bg-secondary)',
+                      borderRadius: '12px',
+                      textAlign: 'center'
+                    }}>
+                      <Text type="secondary">
+                        <LinkOutlined /> 完整内容加载失败,请访问原文链接查看
+                      </Text>
+                    </div>
+                  </div>
+                ) : (
+                  // 既没有内容也没有摘要
+                  <div className={styles.articleContent}>
+                    <Empty
+                      description={
+                        <div>
+                          <p>暂无详细内容</p>
+                          <Text type="secondary">无法获取文章内容</Text>
+                        </div>
+                      }
+                      style={{ padding: '40px 0' }}
+                    >
+                      <Button
+                        type="primary"
+                        size="large"
+                        icon={<LinkOutlined />}
+                        onClick={() => window.open(selectedNews.url, '_blank')}
+                      >
+                        访问原文链接
+                      </Button>
+                    </Empty>
+                  </div>
+                )}
+              </Spin>
+            </div>
+
+            <Divider />
+
+            {/* 标签 */}
+            {selectedNews.tags.length > 0 && (
+              <div className={styles.detailTags}>
+                <Text type="secondary" style={{ marginRight: 8 }}>
+                  <TagsOutlined /> 相关标签：
+                </Text>
+                <Space wrap>
+                  {selectedNews.tags.map(tag => (
+                    <Tag key={tag} color="blue">{tag}</Tag>
+                  ))}
+                </Space>
+              </div>
+            )}
+
+            {/* 操作按钮 */}
+            <div className={styles.detailActions}>
+              <Space size="middle">
+                <Button
+                  type={selectedNews.isStarred ? 'default' : 'primary'}
+                  icon={selectedNews.isStarred ? <StarFilled style={{ color: '#faad14' }} /> : <StarOutlined />}
+                  onClick={() => {
+                    handleStar(selectedNews.id)
+                    setSelectedNews({ ...selectedNews, isStarred: !selectedNews.isStarred })
+                  }}
+                >
+                  {selectedNews.isStarred ? '已收藏' : '收藏'}
+                </Button>
+                <Button icon={<ShareAltOutlined />} onClick={() => handleShare(selectedNews)}>
+                  分享
+                </Button>
+                <Button
+                  type="primary"
+                  icon={<LinkOutlined />}
+                  onClick={() => window.open(selectedNews.url, '_blank')}
+                >
+                  查看原文
+                </Button>
+              </Space>
+            </div>
+          </div>
+        )}
       </Drawer>
     </div>
   )

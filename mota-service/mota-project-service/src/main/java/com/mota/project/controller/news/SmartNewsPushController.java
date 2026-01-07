@@ -126,10 +126,11 @@ public class SmartNewsPushController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
         List<NewsArticle> articles = smartNewsPushService.searchNews(keyword, category, page, pageSize);
+        int total = smartNewsPushService.countSearchNews(keyword, category);
         
         Map<String, Object> result = new HashMap<>();
         result.put("list", articles);
-        result.put("total", 100); // 模拟总数
+        result.put("total", total);
         result.put("page", page);
         result.put("pageSize", pageSize);
         
@@ -137,17 +138,14 @@ public class SmartNewsPushController {
     }
 
     /**
-     * 获取新闻详情
+     * 获取新闻详情 - 从数据库获取
      */
     @GetMapping("/article/{id}")
     public R<NewsArticle> getArticle(@PathVariable Long id) {
-        NewsArticle article = new NewsArticle();
-        article.setId(id);
-        article.setTitle("AI技术最新进展：大模型应用场景持续拓展");
-        article.setContent("随着人工智能技术的快速发展，大模型在各行业的应用场景不断拓展...");
-        article.setSummary("本文介绍了AI大模型在企业服务、医疗健康、金融科技等领域的最新应用进展。");
-        article.setSourceName("36氪");
-        article.setCategory("technology");
+        NewsArticle article = smartNewsPushService.getArticleById(id);
+        if (article == null) {
+            return R.fail("文章不存在");
+        }
         return R.ok(article);
     }
 
@@ -468,23 +466,7 @@ public class SmartNewsPushController {
      */
     @GetMapping("/statistics")
     public R<Map<String, Object>> getStatistics(@RequestParam(required = false) Long teamId) {
-        Map<String, Object> stats = new HashMap<>();
-        stats.put("totalArticles", 15680);
-        stats.put("todayArticles", 128);
-        stats.put("policyCount", 256);
-        stats.put("matchedCount", 89);
-        stats.put("favoriteCount", 45);
-        stats.put("pushCount", 12);
-        
-        Map<String, Integer> categoryStats = new HashMap<>();
-        categoryStats.put("technology", 5200);
-        categoryStats.put("industry", 4300);
-        categoryStats.put("policy", 2100);
-        categoryStats.put("finance", 1800);
-        categoryStats.put("market", 1500);
-        categoryStats.put("management", 780);
-        stats.put("categoryDistribution", categoryStats);
-        
+        Map<String, Object> stats = smartNewsPushService.getStatistics(teamId);
         return R.ok(stats);
     }
 
@@ -493,18 +475,40 @@ public class SmartNewsPushController {
      */
     @GetMapping("/hot-topics")
     public R<List<Map<String, Object>>> getHotTopics(@RequestParam(defaultValue = "10") int limit) {
-        List<Map<String, Object>> topics = List.of(
-            Map.of("name", "AI大模型", "count", 1256, "trend", "up", "change", "+15%"),
-            Map.of("name", "数字化转型", "count", 892, "trend", "up", "change", "+8%"),
-            Map.of("name", "企业服务", "count", 756, "trend", "stable", "change", "+2%"),
-            Map.of("name", "云计算", "count", 623, "trend", "up", "change", "+12%"),
-            Map.of("name", "数据安全", "count", 512, "trend", "up", "change", "+20%"),
-            Map.of("name", "智能制造", "count", 489, "trend", "down", "change", "-3%"),
-            Map.of("name", "新能源", "count", 456, "trend", "up", "change", "+25%"),
-            Map.of("name", "元宇宙", "count", 398, "trend", "down", "change", "-15%"),
-            Map.of("name", "区块链", "count", 356, "trend", "stable", "change", "+1%"),
-            Map.of("name", "物联网", "count", 312, "trend", "up", "change", "+5%")
-        );
-        return R.ok(topics.subList(0, Math.min(limit, topics.size())));
+        List<Map<String, Object>> topics = smartNewsPushService.getHotTopics(limit);
+        return R.ok(topics);
+    }
+    
+    /**
+     * 获取行业动态新闻
+     */
+    @GetMapping("/industry")
+    public R<List<NewsArticle>> getIndustryNews(
+            @RequestParam(required = false) Long teamId,
+            @RequestParam(defaultValue = "20") int limit) {
+        List<NewsArticle> articles = smartNewsPushService.getIndustryNews(teamId, limit);
+        return R.ok(articles);
+    }
+    
+    /**
+     * 获取科技资讯
+     */
+    @GetMapping("/technology")
+    public R<List<NewsArticle>> getTechnologyNews(
+            @RequestParam(defaultValue = "20") int limit) {
+        List<NewsArticle> articles = smartNewsPushService.getTechnologyNews(limit);
+        return R.ok(articles);
+    }
+    
+    /**
+     * 手动触发新闻采集
+     */
+    @PostMapping("/crawl/trigger")
+    public R<Map<String, Object>> triggerCrawl() {
+        smartNewsPushService.triggerManualCrawl();
+        Map<String, Object> result = new HashMap<>();
+        result.put("message", "新闻采集任务已触发");
+        result.put("timestamp", System.currentTimeMillis());
+        return R.ok(result);
     }
 }

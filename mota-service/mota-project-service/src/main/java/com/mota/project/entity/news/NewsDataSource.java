@@ -96,6 +96,16 @@ public class NewsDataSource {
     private Integer totalArticles;
     
     /**
+     * 上次采集状态(success/failed)
+     */
+    private String lastCrawlStatus;
+    
+    /**
+     * 上次错误信息
+     */
+    private String lastErrorMessage;
+    
+    /**
      * 创建者ID
      */
     private Long creatorId;

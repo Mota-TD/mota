@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mota.project.mapper.news.NewsDataSourceMapper">
+
+    <resultMap id="BaseResultMap" type="com.mota.project.entity.news.NewsDataSource">
+        <id column="id" property="id"/>
+        <result column="source_name" property="sourceName"/>
+        <result column="source_type" property="sourceType"/>
+        <result column="source_url" property="sourceUrl"/>
+        <result column="category" property="category"/>
+        <result column="language" property="language"/>
+        <result column="update_frequency" property="updateFrequency"/>
+        <result column="is_enabled" property="isEnabled"/>
+        <result column="priority" property="priority"/>
+        <result column="reliability_score" property="reliabilityScore"/>
+        <result column="total_articles" property="totalArticles"/>
+        <result column="last_crawl_at" property="lastCrawlAt"/>
+        <result column="last_crawl_status" property="lastCrawlStatus"/>
+        <result column="last_error_message" property="lastErrorMessage"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, source_name, source_type, source_url, category, language, update_frequency,
+        is_enabled, priority, reliability_score, total_articles, last_crawl_at,
+        last_crawl_status, last_error_message, created_at, updated_at
+    </sql>
+
+    <select id="selectAllEnabled" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM news_data_source
+        WHERE is_enabled = 1
+        ORDER BY priority DESC, id ASC
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM news_data_source
+        ORDER BY priority DESC, id ASC
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM news_data_source
+        WHERE id = #{id}
+    </select>
+
+    <update id="updateCrawlStatus">
+        UPDATE news_data_source
+        SET last_crawl_at = #{lastCrawlAt},
+            last_crawl_status = #{status},
+            last_error_message = #{errorMessage}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateTotalArticles">
+        UPDATE news_data_source
+        SET total_articles = #{count}
+        WHERE id = #{id}
+    </update>
+
+    <update id="incrementTotalArticles">
+        UPDATE news_data_source
+        SET total_articles = total_articles + #{delta}
+        WHERE id = #{id}
+    </update>
+
+</mapper>

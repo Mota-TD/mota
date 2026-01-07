@@ -319,6 +319,14 @@ export const getArticle = (id: number) => {
   return request.get<NewsArticle>(`/api/news/article/${id}`);
 };
 
+/**
+ * 获取新闻完整内容(实时抓取)
+ * 如果数据库中没有完整内容,会尝试从原文链接抓取
+ */
+export const getArticleFullContent = (id: number) => {
+  return request.get<{ content: string; source: 'database' | 'crawled' }>(`/api/news/article/${id}/full-content`);
+};
+
 // ==================== NW-004 政策监控 ====================
 
 /**
@@ -564,6 +572,27 @@ export const getHotTopics = (limit = 10) => {
   return request.get<HotTopic[]>('/api/news/hot-topics', { limit });
 };
 
+/**
+ * 获取行业动态新闻
+ */
+export const getIndustryNews = (teamId?: number, limit = 20) => {
+  return request.get<NewsArticle[]>('/api/news/industry', { teamId, limit });
+};
+
+/**
+ * 获取科技资讯
+ */
+export const getTechnologyNews = (limit = 20) => {
+  return request.get<NewsArticle[]>('/api/news/technology', { limit });
+};
+
+/**
+ * 手动触发新闻采集
+ */
+export const triggerCrawl = () => {
+  return request.post<{ message: string; timestamp: number }>('/api/news/crawl/trigger');
+};
+
 // ==================== 辅助函数 ====================
 
 /**
@@ -614,22 +643,45 @@ export const industryOptions = [
  * 格式化发布时间
  */
 export const formatPublishTime = (time: string): string => {
-  const date = new Date(time);
-  const now = new Date();
-  const diff = now.getTime() - date.getTime();
-  
-  const minutes = Math.floor(diff / 60000);
-  const hours = Math.floor(diff / 3600000);
-  const days = Math.floor(diff / 86400000);
-  
-  if (minutes < 60) {
-    return `${minutes}分钟前`;
-  } else if (hours < 24) {
-    return `${hours}小时前`;
-  } else if (days < 7) {
-    return `${days}天前`;
-  } else {
-    return date.toLocaleDateString();
+  try {
+    const date = new Date(time);
+    
+    // 检查日期是否有效
+    if (isNaN(date.getTime())) {
+      return '时间未知';
+    }
+    
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    
+    // 如果时间是未来的,返回时间未知
+    if (diff < 0) {
+      return '时间未知';
+    }
+    
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    const months = Math.floor(days / 30);
+    const years = Math.floor(days / 365);
+    
+    if (seconds < 60) {
+      return `${seconds}秒前`;
+    } else if (minutes < 60) {
+      return `${minutes}分钟前`;
+    } else if (hours < 24) {
+      return `${hours}小时前`;
+    } else if (days < 30) {
+      return `${days}天前`;
+    } else if (months < 12) {
+      return `${months}月前`;
+    } else {
+      return `${years}年前`;
+    }
+  } catch (error) {
+    console.error('时间格式化失败:', error);
+    return '时间未知';
   }
 };
 

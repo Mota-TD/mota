@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mota.project.mapper.news.NewsArticleMapper">
+
+    <resultMap id="BaseResultMap" type="com.mota.project.entity.news.NewsArticle">
+        <id column="id" property="id"/>
+        <result column="source_id" property="sourceId"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="summary" property="summary"/>
+        <result column="author" property="author"/>
+        <result column="source_name" property="sourceName"/>
+        <result column="source_url" property="sourceUrl"/>
+        <result column="image_url" property="imageUrl"/>
+        <result column="category" property="category"/>
+        <result column="tags" property="tags"/>
+        <result column="keywords" property="keywords"/>
+        <result column="publish_time" property="publishTime"/>
+        <result column="crawl_time" property="crawlTime"/>
+        <result column="word_count" property="wordCount"/>
+        <result column="read_time" property="readTime"/>
+        <result column="sentiment" property="sentiment"/>
+        <result column="sentiment_score" property="sentimentScore"/>
+        <result column="importance_score" property="importanceScore"/>
+        <result column="quality_score" property="qualityScore"/>
+        <result column="is_policy" property="isPolicy"/>
+        <result column="policy_level" property="policyLevel"/>
+        <result column="policy_type" property="policyType"/>
+        <result column="view_count" property="viewCount"/>
+        <result column="share_count" property="shareCount"/>
+        <result column="favorite_count" property="favoriteCount"/>
+        <result column="status" property="status"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, source_id, title, content, summary, author, source_name, source_url, image_url,
+        category, tags, keywords, publish_time, crawl_time, word_count, read_time,
+        sentiment, sentiment_score, importance_score, quality_score, is_policy,
+        policy_level, policy_type, view_count, share_count, favorite_count, status,
+        created_at, updated_at
+    </sql>
+
+    <insert id="insert" parameterType="com.mota.project.entity.news.NewsArticle" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO news_article (
+            source_id, title, content, summary, author, source_name, source_url, image_url,
+            category, tags, keywords, publish_time, crawl_time, word_count, read_time,
+            sentiment, sentiment_score, importance_score, quality_score, is_policy,
+            policy_level, policy_type, view_count, share_count, favorite_count, status
+        ) VALUES (
+            #{sourceId}, #{title}, #{content}, #{summary}, #{author}, #{sourceName}, #{sourceUrl}, #{imageUrl},
+            #{category}, #{tags}, #{keywords}, #{publishTime}, #{crawlTime}, #{wordCount}, #{readTime},
+            #{sentiment}, #{sentimentScore}, #{importanceScore}, #{qualityScore}, #{isPolicy},
+            #{policyLevel}, #{policyType}, #{viewCount}, #{shareCount}, #{favoriteCount}, #{status}
+        )
+    </insert>
+
+    <insert id="batchInsert" parameterType="list">
+        INSERT INTO news_article (
+            source_id, title, content, summary, author, source_name, source_url, image_url,
+            category, tags, keywords, publish_time, crawl_time, word_count, read_time,
+            sentiment, sentiment_score, importance_score, quality_score, is_policy,
+            policy_level, policy_type, view_count, share_count, favorite_count, status
+        ) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+                #{item.sourceId}, #{item.title}, #{item.content}, #{item.summary}, #{item.author},
+                #{item.sourceName}, #{item.sourceUrl}, #{item.imageUrl}, #{item.category},
+                #{item.tags}, #{item.keywords}, #{item.publishTime}, #{item.crawlTime},
+                #{item.wordCount}, #{item.readTime}, #{item.sentiment}, #{item.sentimentScore},
+                #{item.importanceScore}, #{item.qualityScore}, #{item.isPolicy},
+                #{item.policyLevel}, #{item.policyType}, #{item.viewCount}, #{item.shareCount},
+                #{item.favoriteCount}, #{item.status}
+            )
+        </foreach>
+    </insert>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM news_article
+        WHERE id = #{id} AND status = 'active'
+    </select>
+
+    <select id="selectBySourceUrl" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM news_article
+        WHERE source_url = #{sourceUrl}
+        LIMIT 1
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM news_article
+        WHERE status = 'active'
+        ORDER BY publish_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="selectByCategory" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM news_article
+        WHERE status = 'active' AND category = #{category}
+        ORDER BY publish_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="search" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM news_article
+        WHERE status = 'active'
+          AND (title LIKE CONCAT('%', #{keyword}, '%') OR summary LIKE CONCAT('%', #{keyword}, '%'))
+        ORDER BY publish_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="selectPolicyNews" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM news_article
+        WHERE status = 'active' AND is_policy = 1
+        ORDER BY publish_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="selectByKeywords" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM news_article
+        WHERE status = 'active'
+          AND (
+            <foreach collection="keywords" item="keyword" separator=" OR ">
+                title LIKE CONCAT('%', #{keyword}, '%') OR summary LIKE CONCAT('%', #{keyword}, '%')
+            </foreach>
+          )
+        ORDER BY importance_score DESC, publish_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countAll" resultType="int">
+        SELECT COUNT(*) FROM news_article WHERE status = 'active'
+    </select>
+
+    <select id="countToday" resultType="int">
+        SELECT COUNT(*) FROM news_article 
+        WHERE status = 'active' AND publish_time >= #{today}
+    </select>
+
+    <select id="countByCategory" resultType="int">
+        SELECT COUNT(*) FROM news_article 
+        WHERE status = 'active' AND category = #{category}
+    </select>
+
+    <select id="countPolicyNews" resultType="int">
+        SELECT COUNT(*) FROM news_article
+        WHERE status = 'active' AND is_policy = 1
+    </select>
+
+    <select id="countSearch" resultType="int">
+        SELECT COUNT(*) FROM news_article
+        WHERE status = 'active'
+          AND (title LIKE CONCAT('%', #{keyword}, '%') OR summary LIKE CONCAT('%', #{keyword}, '%'))
+    </select>
+
+    <update id="incrementViewCount">
+        UPDATE news_article SET view_count = view_count + 1 WHERE id = #{id}
+    </update>
+
+    <update id="updateFavoriteCount">
+        UPDATE news_article SET favorite_count = favorite_count + #{delta} WHERE id = #{id}
+    </update>
+
+    <delete id="deleteOldNews">
+        DELETE FROM news_article WHERE publish_time &lt; #{beforeDate}
+    </delete>
+
+    <select id="existsBySourceUrl" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM news_article WHERE source_url = #{sourceUrl}
+    </select>
+
+    <select id="selectAllIds" resultType="long">
+        SELECT id FROM news_article
+        WHERE status = 'active'
+        ORDER BY id
+        LIMIT #{offset}, #{limit}
+    </select>
+
+</mapper>

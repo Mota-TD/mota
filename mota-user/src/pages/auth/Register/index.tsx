@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Form, Input, Button, Checkbox, App, Select, Card, Alert, Cascader } from 'antd'
 import { UserOutlined, LockOutlined, MailOutlined, BankOutlined, PhoneOutlined } from '@ant-design/icons'
-import { 
-  register as registerApi, 
-  getTopLevelIndustries, 
+import {
+  register as registerApi,
+  getTopLevelIndustries,
   getChildIndustries,
   validateInvitation,
   Industry,
@@ -41,15 +41,22 @@ const Register = () => {
   const inviteCode = searchParams.get('inviteCode')
   const [invitationInfo, setInvitationInfo] = useState<InvitationValidateResult | null>(null)
   const [loadingInvitation, setLoadingInvitation] = useState(false)
+  
+  // 防止 React StrictMode 下的重复请求
+  const industriesLoadedRef = useRef(false)
+  const invitationValidatedRef = useRef(false)
 
   // 加载一级行业
   useEffect(() => {
+    if (industriesLoadedRef.current) return
+    industriesLoadedRef.current = true
     loadTopLevelIndustries()
   }, [])
 
   // 验证邀请码
   useEffect(() => {
-    if (inviteCode) {
+    if (inviteCode && !invitationValidatedRef.current) {
+      invitationValidatedRef.current = true
       validateInviteCode(inviteCode)
     }
   }, [inviteCode])

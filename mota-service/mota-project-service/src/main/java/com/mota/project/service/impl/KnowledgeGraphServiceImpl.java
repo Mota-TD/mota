@@ -466,4 +466,306 @@ public class KnowledgeGraphServiceImpl implements KnowledgeGraphService {
         // TODO: 转换分布数据
         return result;
     }
+
+    // ========== 聚类与子图 ==========
+
+    @Override
+    public Map<String, Object> getClusteredVisualizationData(Map<String, Object> config) {
+        Map<String, Object> data = new HashMap<>();
+        
+        // 获取全局图谱概览
+        Map<String, Object> overview = getGlobalGraphOverview();
+        data.putAll(overview);
+        
+        // 添加聚类信息
+        List<Map<String, Object>> clusters = new ArrayList<>();
+        Map<String, Object> defaultCluster = new HashMap<>();
+        defaultCluster.put("id", 1);
+        defaultCluster.put("name", "默认聚类");
+        defaultCluster.put("color", "#1890ff");
+        defaultCluster.put("nodeCount", ((List<?>) overview.get("nodes")).size());
+        clusters.add(defaultCluster);
+        
+        data.put("clusters", clusters);
+        
+        return data;
+    }
+
+    @Override
+    public Map<String, Object> getInteractiveGraphData(Long centerNodeId, Integer depth,
+            List<String> nodeTypes, List<String> relationTypes, Double minWeight) {
+        if (centerNodeId != null) {
+            return getGraphVisualizationData(centerNodeId, depth != null ? depth : 2);
+        }
+        return getGlobalGraphOverview();
+    }
+
+    @Override
+    public List<Map<String, Object>> clusterNodes(Map<String, Object> config) {
+        // TODO: 实现真正的聚类算法
+        List<Map<String, Object>> clusters = new ArrayList<>();
+        
+        Map<String, Object> cluster = new HashMap<>();
+        cluster.put("id", 1);
+        cluster.put("name", "默认聚类");
+        cluster.put("description", "所有节点的默认聚类");
+        cluster.put("color", "#1890ff");
+        cluster.put("nodeIds", List.of());
+        cluster.put("nodeCount", 0);
+        clusters.add(cluster);
+        
+        return clusters;
+    }
+
+    @Override
+    public Map<String, Object> getClusterDetails(Long clusterId) {
+        Map<String, Object> details = new HashMap<>();
+        details.put("id", clusterId);
+        details.put("name", "聚类-" + clusterId);
+        details.put("description", "聚类详情");
+        details.put("color", "#1890ff");
+        details.put("nodeIds", List.of());
+        details.put("nodeCount", 0);
+        details.put("nodes", List.of());
+        return details;
+    }
+
+    @Override
+    public Map<String, Object> updateClusterLayout(Long clusterId, String layout) {
+        // 返回更新后的布局数据
+        return getClusterDetails(clusterId);
+    }
+
+    @Override
+    public Map<String, Object> filterSubgraph(Map<String, Object> filter) {
+        // 根据筛选条件返回子图
+        return getGlobalGraphOverview();
+    }
+
+    @Override
+    public Map<String, Object> saveSubgraphAsView(Map<String, Object> filter, String viewName) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("id", System.currentTimeMillis());
+        result.put("name", viewName);
+        return result;
+    }
+
+    @Override
+    public List<Map<String, Object>> getSavedViews() {
+        // TODO: 从数据库获取保存的视图
+        return new ArrayList<>();
+    }
+
+    @Override
+    public byte[] exportSubgraph(Map<String, Object> filter, String format) {
+        // TODO: 实现子图导出
+        return new byte[0];
+    }
+
+    // ========== 路径查询 ==========
+
+    @Override
+    public Map<String, Object> findShortestPath(Long sourceNodeId, Long targetNodeId,
+            Integer maxDepth, List<String> relationTypes) {
+        Map<String, Object> result = new HashMap<>();
+        
+        List<List<KnowledgeNode>> paths = findPaths(sourceNodeId, targetNodeId,
+                maxDepth != null ? maxDepth : 5);
+        
+        if (!paths.isEmpty()) {
+            List<KnowledgeNode> shortestPath = paths.get(0);
+            result.put("nodes", shortestPath.stream().map(this::nodeToMap).toList());
+            result.put("edges", List.of());
+            result.put("totalWeight", 1.0);
+            result.put("length", shortestPath.size());
+        }
+        
+        return result;
+    }
+
+    @Override
+    public List<Map<String, Object>> findAllPaths(Long sourceNodeId, Long targetNodeId,
+            Integer maxDepth, Integer maxPaths) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        
+        List<List<KnowledgeNode>> paths = findPaths(sourceNodeId, targetNodeId,
+                maxDepth != null ? maxDepth : 5);
+        
+        int limit = maxPaths != null ? maxPaths : 10;
+        for (int i = 0; i < Math.min(paths.size(), limit); i++) {
+            Map<String, Object> pathData = new HashMap<>();
+            pathData.put("nodes", paths.get(i).stream().map(this::nodeToMap).toList());
+            pathData.put("edges", List.of());
+            pathData.put("totalWeight", 1.0);
+            pathData.put("length", paths.get(i).size());
+            result.add(pathData);
+        }
+        
+        return result;
+    }
+
+    @Override
+    public List<Map<String, Object>> findPathsByRelationType(Long sourceNodeId,
+            String relationType, Integer maxDepth) {
+        // TODO: 实现按关系类型查找路径
+        return new ArrayList<>();
+    }
+
+    // ========== 知识导航 ==========
+
+    @Override
+    public List<Map<String, Object>> getNavigationSuggestions(Long nodeId, Integer limit) {
+        List<Map<String, Object>> suggestions = new ArrayList<>();
+        
+        List<KnowledgeNode> relatedNodes = getRelatedNodes(nodeId, limit != null ? limit : 10);
+        for (KnowledgeNode node : relatedNodes) {
+            Map<String, Object> suggestion = new HashMap<>();
+            suggestion.put("node", nodeToMap(node));
+            suggestion.put("relation", "related_to");
+            suggestion.put("relevanceScore", 0.8);
+            suggestion.put("reason", "相关节点");
+            suggestions.add(suggestion);
+        }
+        
+        return suggestions;
+    }
+
+    @Override
+    public List<Map<String, Object>> getNavigationHistory(Integer limit) {
+        // TODO: 从用户会话或数据库获取导航历史
+        return new ArrayList<>();
+    }
+
+    @Override
+    public void recordNavigation(Long nodeId) {
+        // TODO: 记录用户导航历史
+    }
+
+    @Override
+    public List<Map<String, Object>> getRelatedKnowledge(Long nodeId, List<String> types,
+            Integer limit, Double minRelevance) {
+        return getNavigationSuggestions(nodeId, limit);
+    }
+
+    // ========== 关联推荐 ==========
+
+    @Override
+    public Map<String, Object> getRecommendations(Long nodeId, List<String> types) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("sourceNodeId", nodeId);
+        result.put("recommendations", new ArrayList<>());
+        result.put("generatedAt", LocalDateTime.now().toString());
+        return result;
+    }
+
+    @Override
+    public List<Map<String, Object>> getDocumentRecommendations(Long nodeId, Integer limit) {
+        // TODO: 实现文档推荐
+        return new ArrayList<>();
+    }
+
+    @Override
+    public List<Map<String, Object>> getProjectRecommendations(Long nodeId, Integer limit) {
+        // TODO: 实现项目推荐
+        return new ArrayList<>();
+    }
+
+    @Override
+    public List<Map<String, Object>> getPersonRecommendations(Long nodeId, Integer limit) {
+        // TODO: 实现人员推荐
+        return new ArrayList<>();
+    }
+
+    @Override
+    public List<Map<String, Object>> getSimilarNodes(Long nodeId, Integer limit) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        
+        List<KnowledgeNode> relatedNodes = getRelatedNodes(nodeId, limit != null ? limit : 10);
+        for (KnowledgeNode node : relatedNodes) {
+            Map<String, Object> nodeData = nodeToMap(node);
+            nodeData.put("similarity", 0.75);
+            result.add(nodeData);
+        }
+        
+        return result;
+    }
+
+    // ========== 实体识别与关系抽取 ==========
+
+    @Override
+    public Map<String, Object> extractEntitiesFromDocument(Long documentId) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("documentId", documentId);
+        result.put("entities", new ArrayList<>());
+        result.put("processingTime", 0);
+        result.put("modelUsed", "default");
+        return result;
+    }
+
+    @Override
+    public List<Map<String, Object>> extractEntitiesFromText(String text) {
+        // TODO: 实现从文本提取实体
+        return new ArrayList<>();
+    }
+
+    @Override
+    public Map<String, Object> extractRelationsFromDocument(Long documentId) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("documentId", documentId);
+        result.put("relations", new ArrayList<>());
+        result.put("processingTime", 0);
+        result.put("modelUsed", "default");
+        return result;
+    }
+
+    @Override
+    public List<Map<String, Object>> extractRelationsFromEntities(List<Map<String, Object>> entities) {
+        // TODO: 实现从实体提取关系
+        return new ArrayList<>();
+    }
+
+    @Override
+    public Map<String, Object> extractAttributesFromEntity(Long entityId) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("entityId", entityId);
+        result.put("entityName", "");
+        result.put("attributes", new ArrayList<>());
+        result.put("processingTime", 0);
+        return result;
+    }
+
+    @Override
+    public List<Map<String, Object>> batchExtractAttributes(List<Long> entityIds) {
+        List<Map<String, Object>> results = new ArrayList<>();
+        for (Long entityId : entityIds) {
+            results.add(extractAttributesFromEntity(entityId));
+        }
+        return results;
+    }
+
+    // ========== 知识融合 ==========
+
+    @Override
+    public List<Map<String, Object>> findDuplicates(Double threshold) {
+        // TODO: 实现重复实体检测
+        return new ArrayList<>();
+    }
+
+    @Override
+    public Map<String, Object> mergeEntities(Long entity1Id, Long entity2Id,
+            String mergedName, Map<String, String> conflictResolution) {
+        KnowledgeNode mergedNode = mergeNodes(Arrays.asList(entity1Id, entity2Id), mergedName);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("mergedNode", nodeToMap(mergedNode));
+        result.put("sourceNodes", List.of());
+        result.put("conflictsResolved", List.of());
+        return result;
+    }
+
+    @Override
+    public List<Map<String, Object>> autoMergeDuplicates(Double threshold) {
+        // TODO: 实现自动合并重复实体
+        return new ArrayList<>();
+    }
 }

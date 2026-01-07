@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mota.project.mapper.KnowledgeEdgeMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.mota.project.entity.KnowledgeEdge">
+        <id column="id" property="id"/>
+        <result column="source_node_id" property="sourceNodeId"/>
+        <result column="target_node_id" property="targetNodeId"/>
+        <result column="relation_type" property="relationType"/>
+        <result column="weight" property="weight"/>
+        <result column="properties" property="properties"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <!-- 基础列 -->
+    <sql id="Base_Column_List">
+        id, source_node_id, target_node_id, relation_type, weight, properties, created_at
+    </sql>
+
+    <!-- 获取节点的出边 -->
+    <select id="selectOutEdges" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM knowledge_edge
+        WHERE source_node_id = #{nodeId}
+        ORDER BY weight DESC, created_at DESC
+    </select>
+
+    <!-- 获取节点的入边 -->
+    <select id="selectInEdges" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM knowledge_edge
+        WHERE target_node_id = #{nodeId}
+        ORDER BY weight DESC, created_at DESC
+    </select>
+
+    <!-- 获取两个节点之间的边 -->
+    <select id="selectEdgesBetween" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM knowledge_edge
+        WHERE (source_node_id = #{sourceNodeId} AND target_node_id = #{targetNodeId})
+           OR (source_node_id = #{targetNodeId} AND target_node_id = #{sourceNodeId})
+        ORDER BY weight DESC
+    </select>
+
+    <!-- 按关系类型获取边 -->
+    <select id="selectByRelationType" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM knowledge_edge
+        WHERE relation_type = #{relationType}
+        ORDER BY weight DESC, created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 删除节点相关的所有边 -->
+    <delete id="deleteByNodeId">
+        DELETE FROM knowledge_edge
+        WHERE source_node_id = #{nodeId} OR target_node_id = #{nodeId}
+    </delete>
+
+    <!-- 获取关系类型分布 -->
+    <select id="selectRelationTypeDistribution" resultType="java.util.Map">
+        SELECT relation_type AS relationType, COUNT(*) AS count
+        FROM knowledge_edge
+        GROUP BY relation_type
+    </select>
+
+    <!-- 获取边总数 -->
+    <select id="countEdges" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM knowledge_edge
+    </select>
+
+    <!-- 检查边是否存在 -->
+    <select id="existsEdge" resultType="java.lang.Boolean">
+        SELECT COUNT(*) > 0
+        FROM knowledge_edge
+        WHERE source_node_id = #{sourceNodeId} 
+          AND target_node_id = #{targetNodeId}
+          AND relation_type = #{relationType}
+    </select>
+
+    <!-- 更新边权重 -->
+    <update id="updateWeight">
+        UPDATE knowledge_edge 
+        SET weight = #{weight}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 获取高权重边 -->
+    <select id="selectHighWeightEdges" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM knowledge_edge
+        WHERE weight >= #{minWeight}
+        ORDER BY weight DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>

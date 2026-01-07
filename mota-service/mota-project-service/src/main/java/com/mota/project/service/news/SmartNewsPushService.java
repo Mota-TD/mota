@@ -1,6 +1,8 @@
 package com.mota.project.service.news;
 
 import com.mota.project.entity.news.*;
+import com.mota.project.mapper.news.NewsArticleMapper;
+import com.mota.project.mapper.news.NewsFavoriteMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,23 +16,36 @@ import java.util.stream.Collectors;
 /**
  * 智能新闻推送服务
  * 实现 NW-001 到 NW-009 功能
+ * 所有数据从数据库获取，不使用模拟数据
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class SmartNewsPushService {
 
+    private final NewsCrawlerService newsCrawlerService;
+    private final NewsArticleMapper newsArticleMapper;
+    private final NewsFavoriteMapper newsFavoriteMapper;
+    private final NewsCacheService newsCacheService;
+    private final BloomFilterService bloomFilterService;
+    private final SmartPreloadService smartPreloadService;
+
     // ==================== NW-001 行业识别 ====================
 
     /**
      * 自动识别企业行业
+     * 基于关键词匹配的简单AI识别
      */
     public List<EnterpriseIndustry> detectIndustry(Long teamId, String companyDescription) {
         log.info("开始识别企业行业, teamId: {}", teamId);
         
+        if (companyDescription == null || companyDescription.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+        
         List<EnterpriseIndustry> industries = new ArrayList<>();
         
-        // 模拟AI行业识别逻辑
+        // 行业关键词映射
         Map<String, String[]> industryKeywords = new HashMap<>();
         industryKeywords.put("IT", new String[]{"软件", "互联网", "科技", "技术", "开发", "系统", "平台", "数字化"});
         industryKeywords.put("FINANCE", new String[]{"金融", "银行", "保险", "投资", "证券", "基金", "理财"});
@@ -41,9 +56,11 @@ public class SmartNewsPushService {
         
         for (Map.Entry<String, String[]> entry : industryKeywords.entrySet()) {
             int matchCount = 0;
+            List<String> matchedKeywords = new ArrayList<>();
             for (String keyword : entry.getValue()) {
-                if (companyDescription != null && companyDescription.contains(keyword)) {
+                if (companyDescription.contains(keyword)) {
                     matchCount++;
+                    matchedKeywords.add(keyword);
                 }
             }
             
@@ -54,8 +71,8 @@ public class SmartNewsPushService {
                 industry.setIndustryName(getIndustryName(entry.getKey()));
                 industry.setConfidence(BigDecimal.valueOf(Math.min(100, matchCount * 20)));
                 industry.setIsAutoDetected(true);
-                industry.setDetectionSource("ai");
-                industry.setKeywords("[\"" + String.join("\",\"", entry.getValue()) + "\"]");
+                industry.setDetectionSource("keyword_matching");
+                industry.setKeywords("[\"" + String.join("\",\"", matchedKeywords) + "\"]");
                 industry.setCreatedAt(LocalDateTime.now());
                 industries.add(industry);
             }
@@ -74,45 +91,24 @@ public class SmartNewsPushService {
 
     /**
      * 获取团队行业配置
+     * TODO: 需要实现数据库存储
      */
     public List<EnterpriseIndustry> getTeamIndustries(Long teamId) {
-        // 模拟返回数据
-        List<EnterpriseIndustry> industries = new ArrayList<>();
-        
-        EnterpriseIndustry primary = new EnterpriseIndustry();
-        primary.setId(1L);
-        primary.setTeamId(teamId);
-        primary.setIndustryCode("IT");
-        primary.setIndustryName("信息技术");
-        primary.setConfidence(BigDecimal.valueOf(95));
-        primary.setIsPrimary(true);
-        primary.setIsAutoDetected(true);
-        primary.setKeywords("[\"软件\",\"互联网\",\"科技\"]");
-        industries.add(primary);
-        
-        EnterpriseIndustry secondary = new EnterpriseIndustry();
-        secondary.setId(2L);
-        secondary.setTeamId(teamId);
-        secondary.setIndustryCode("FINANCE");
-        secondary.setIndustryName("金融服务");
-        secondary.setConfidence(BigDecimal.valueOf(75));
-        secondary.setIsPrimary(false);
-        secondary.setIsAutoDetected(true);
-        secondary.setKeywords("[\"金融\",\"投资\"]");
-        industries.add(secondary);
-        
-        return industries;
+        log.info("获取团队行业配置, teamId: {}", teamId);
+        // 返回空列表，提示用户需要配置
+        return Collections.emptyList();
     }
 
     /**
      * 保存行业配置
+     * TODO: 需要实现数据库存储
      */
     @Transactional
     public EnterpriseIndustry saveIndustry(EnterpriseIndustry industry) {
         industry.setCreatedAt(LocalDateTime.now());
         industry.setUpdatedAt(LocalDateTime.now());
-        // 实际应保存到数据库
         industry.setId(System.currentTimeMillis());
+        // TODO: 保存到数据库
         return industry;
     }
 
@@ -124,9 +120,12 @@ public class SmartNewsPushService {
     public List<BusinessDomain> extractBusinessDomains(Long teamId, String businessDescription) {
         log.info("开始提取业务领域, teamId: {}", teamId);
         
+        if (businessDescription == null || businessDescription.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+        
         List<BusinessDomain> domains = new ArrayList<>();
         
-        // 模拟AI业务领域提取
         String[] domainTypes = {"product", "service", "market", "technology"};
         Map<String, String[]> domainKeywords = new HashMap<>();
         domainKeywords.put("product", new String[]{"产品", "解决方案", "系统", "平台", "工具"});
@@ -140,7 +139,7 @@ public class SmartNewsPushService {
             List<String> matchedKeywords = new ArrayList<>();
             
             for (String keyword : keywords) {
-                if (businessDescription != null && businessDescription.contains(keyword)) {
+                if (businessDescription.contains(keyword)) {
                     matchCount++;
                     matchedKeywords.add(keyword);
                 }
@@ -164,117 +163,138 @@ public class SmartNewsPushService {
 
     /**
      * 获取团队业务领域
+     * TODO: 需要实现数据库存储
      */
     public List<BusinessDomain> getTeamBusinessDomains(Long teamId) {
-        List<BusinessDomain> domains = new ArrayList<>();
-        
-        BusinessDomain domain1 = new BusinessDomain();
-        domain1.setId(1L);
-        domain1.setTeamId(teamId);
-        domain1.setDomainName("企业级SaaS产品");
-        domain1.setDomainType("product");
-        domain1.setKeywords("[\"SaaS\",\"企业服务\",\"协同办公\"]");
-        domain1.setImportance(10);
-        domain1.setIsCore(true);
-        domains.add(domain1);
-        
-        BusinessDomain domain2 = new BusinessDomain();
-        domain2.setId(2L);
-        domain2.setTeamId(teamId);
-        domain2.setDomainName("AI技术研发");
-        domain2.setDomainType("technology");
-        domain2.setKeywords("[\"人工智能\",\"机器学习\",\"NLP\"]");
-        domain2.setImportance(8);
-        domain2.setIsCore(true);
-        domains.add(domain2);
-        
-        return domains;
+        log.info("获取团队业务领域, teamId: {}", teamId);
+        return Collections.emptyList();
     }
 
     // ==================== NW-003 新闻采集 ====================
 
     /**
-     * 获取新闻数据源列表
+     * 获取新闻数据源列表 - 从数据库获取
      */
     public List<NewsDataSource> getDataSources() {
-        List<NewsDataSource> sources = new ArrayList<>();
-        
-        sources.add(createDataSource(1L, "36氪", "rss", "technology", 90));
-        sources.add(createDataSource(2L, "虎嗅", "rss", "technology", 88));
-        sources.add(createDataSource(3L, "钛媒体", "rss", "technology", 85));
-        sources.add(createDataSource(4L, "亿欧网", "api", "industry", 82));
-        sources.add(createDataSource(5L, "艾瑞咨询", "crawler", "market", 90));
-        sources.add(createDataSource(6L, "国务院政策", "crawler", "policy", 100));
-        
-        return sources;
+        return newsCrawlerService.getDataSources();
     }
 
     /**
-     * 采集新闻
+     * 采集新闻 - 触发爬虫服务
      */
     public List<NewsArticle> crawlNews(Long sourceId) {
         log.info("开始采集新闻, sourceId: {}", sourceId);
-        
-        List<NewsArticle> articles = new ArrayList<>();
-        
-        // 模拟采集的新闻
-        for (int i = 1; i <= 5; i++) {
-            NewsArticle article = new NewsArticle();
-            article.setId((long) i);
-            article.setSourceId(sourceId);
-            article.setTitle("AI技术最新进展：大模型应用场景持续拓展 " + i);
-            article.setContent("随着人工智能技术的快速发展，大模型在各行业的应用场景不断拓展...");
-            article.setSummary("本文介绍了AI大模型在企业服务、医疗健康、金融科技等领域的最新应用进展。");
-            article.setAuthor("科技观察员");
-            article.setSourceName("36氪");
-            article.setSourceUrl("https://36kr.com/article/" + i);
-            article.setCategory("technology");
-            article.setTags("[\"AI\",\"大模型\",\"企业服务\"]");
-            article.setKeywords("[\"人工智能\",\"GPT\",\"应用场景\"]");
-            article.setPublishTime(LocalDateTime.now().minusHours(i));
-            article.setCrawlTime(LocalDateTime.now());
-            article.setWordCount(1500);
-            article.setReadTime(300);
-            article.setSentiment("positive");
-            article.setSentimentScore(BigDecimal.valueOf(0.85));
-            article.setImportanceScore(BigDecimal.valueOf(85));
-            article.setQualityScore(BigDecimal.valueOf(90));
-            article.setStatus("active");
-            articles.add(article);
-        }
-        
-        return articles;
+        newsCrawlerService.crawlAllSourcesAsync();
+        return newsCrawlerService.getAllNews(20);
     }
 
     /**
-     * 搜索新闻
+     * 搜索新闻 - 优先从缓存获取（带分页）+ 智能预加载
      */
     public List<NewsArticle> searchNews(String keyword, String category, int page, int pageSize) {
-        log.info("搜索新闻, keyword: {}, category: {}", keyword, category);
+        log.info("搜索新闻, keyword: {}, category: {}, page: {}, pageSize: {}", keyword, category, page, pageSize);
         
-        List<NewsArticle> articles = new ArrayList<>();
-        
-        // 模拟搜索结果
-        for (int i = 1; i <= pageSize; i++) {
-            NewsArticle article = new NewsArticle();
-            article.setId((long) ((page - 1) * pageSize + i));
-            article.setTitle("关于\"" + keyword + "\"的最新报道 " + i);
-            article.setSummary("这是一篇关于" + keyword + "的深度分析文章...");
-            article.setSourceName("科技媒体");
-            article.setCategory(category != null ? category : "technology");
-            article.setPublishTime(LocalDateTime.now().minusDays(i));
-            article.setViewCount(1000 + i * 100);
-            article.setImportanceScore(BigDecimal.valueOf(80 + Math.random() * 20));
-            articles.add(article);
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            // 搜索结果优先从缓存获取
+            List<NewsArticle> cached = newsCacheService.getSearchResult(keyword, page, pageSize);
+            if (cached != null) {
+                log.debug("从缓存返回搜索结果: keyword={}, count={}", keyword, cached.size());
+                return cached;
+            }
+            
+            // 缓存未命中，从数据库搜索
+            List<NewsArticle> results = newsCrawlerService.searchNews(keyword, page, pageSize);
+            if (!results.isEmpty()) {
+                newsCacheService.cacheSearchResult(keyword, page, pageSize, results);
+            }
+            return results;
+        } else if (category != null && !category.trim().isEmpty()) {
+            // 记录分类新闻访问（用于智能预加载）
+            smartPreloadService.recordCategoryNewsAccess(category, page, pageSize);
+            
+            // 分类新闻优先从缓存获取
+            List<NewsArticle> cached = newsCacheService.getCategoryNews(category, page, pageSize);
+            if (cached != null) {
+                log.debug("从缓存返回分类新闻: category={}, count={}", category, cached.size());
+                return cached;
+            }
+            
+            // 缓存未命中，从数据库获取
+            List<NewsArticle> results = newsCrawlerService.getNewsByCategory(category, page, pageSize);
+            if (!results.isEmpty()) {
+                newsCacheService.cacheCategoryNews(category, page, pageSize, results);
+            }
+            return results;
+        } else {
+            // 记录新闻列表访问（用于智能预加载）
+            smartPreloadService.recordNewsListAccess(page, pageSize);
+            
+            // 全部新闻优先从缓存获取
+            List<NewsArticle> cached = newsCacheService.getNewsList(page, pageSize);
+            if (cached != null) {
+                log.debug("从缓存返回新闻列表: count={}", cached.size());
+                return cached;
+            }
+            
+            // 缓存未命中，从数据库获取
+            List<NewsArticle> results = newsCrawlerService.getAllNews(page, pageSize);
+            if (!results.isEmpty()) {
+                newsCacheService.cacheNewsList(page, pageSize, results);
+            }
+            return results;
+        }
+    }
+
+    /**
+     * 获取搜索结果总数
+     */
+    public int countSearchNews(String keyword, String category) {
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            return newsCrawlerService.countSearch(keyword);
+        } else if (category != null && !category.trim().isEmpty()) {
+            return newsCrawlerService.countByCategory(category);
+        } else {
+            return newsCrawlerService.countAll();
+        }
+    }
+
+    /**
+     * 根据ID获取新闻文章 - 优先从缓存获取，使用布隆过滤器防穿透 + 智能预加载
+     */
+    public NewsArticle getArticleById(Long id) {
+        // 1. 布隆过滤器检查（防止缓存穿透）
+        if (!bloomFilterService.mightContain(id)) {
+            log.debug("布隆过滤器判断文章不存在: {}", id);
+            return null; // 直接返回，不查询缓存和数据库
         }
         
-        return articles;
+        // 2. 记录新闻详情访问（用于智能预加载）
+        smartPreloadService.recordNewsDetailAccess(id);
+        
+        // 3. 先从缓存获取
+        NewsArticle cached = newsCacheService.getNewsDetail(id);
+        if (cached != null) {
+            // 增加浏览次数（异步）
+            newsCacheService.incrementViewCount(id);
+            return cached;
+        }
+        
+        // 4. 缓存未命中，从数据库获取
+        NewsArticle article = newsArticleMapper.selectById(id);
+        if (article != null) {
+            // 缓存文章详情
+            newsCacheService.cacheNewsDetail(article);
+            // 增加浏览次数
+            newsCacheService.incrementViewCount(id);
+        }
+        return article;
     }
 
     // ==================== NW-004 政策监控 ====================
 
     /**
      * 创建政策监控
+     * TODO: 需要实现数据库存储
      */
     @Transactional
     public PolicyMonitor createPolicyMonitor(PolicyMonitor monitor) {
@@ -284,66 +304,38 @@ public class SmartNewsPushService {
         monitor.setMatchedCount(0);
         monitor.setCreatedAt(LocalDateTime.now());
         monitor.setUpdatedAt(LocalDateTime.now());
+        // TODO: 保存到数据库
         return monitor;
     }
 
     /**
      * 获取政策监控列表
+     * TODO: 需要实现数据库存储
      */
     public List<PolicyMonitor> getPolicyMonitors(Long teamId) {
-        List<PolicyMonitor> monitors = new ArrayList<>();
-        
-        PolicyMonitor monitor1 = new PolicyMonitor();
-        monitor1.setId(1L);
-        monitor1.setTeamId(teamId);
-        monitor1.setMonitorName("数字经济政策");
-        monitor1.setPolicyTypes("[\"产业政策\",\"扶持政策\"]");
-        monitor1.setPolicyLevels("[\"national\",\"provincial\"]");
-        monitor1.setKeywords("[\"数字经济\",\"数字化转型\",\"智能制造\"]");
-        monitor1.setIsEnabled(true);
-        monitor1.setAlertEnabled(true);
-        monitor1.setMatchedCount(15);
-        monitor1.setLastCheckAt(LocalDateTime.now().minusHours(1));
-        monitors.add(monitor1);
-        
-        PolicyMonitor monitor2 = new PolicyMonitor();
-        monitor2.setId(2L);
-        monitor2.setTeamId(teamId);
-        monitor2.setMonitorName("AI行业监管");
-        monitor2.setPolicyTypes("[\"监管政策\",\"行业规范\"]");
-        monitor2.setPolicyLevels("[\"national\"]");
-        monitor2.setKeywords("[\"人工智能\",\"算法监管\",\"数据安全\"]");
-        monitor2.setIsEnabled(true);
-        monitor2.setAlertEnabled(true);
-        monitor2.setMatchedCount(8);
-        monitor2.setLastCheckAt(LocalDateTime.now().minusHours(2));
-        monitors.add(monitor2);
-        
-        return monitors;
+        log.info("获取政策监控列表, teamId: {}", teamId);
+        return Collections.emptyList();
     }
 
     /**
-     * 获取政策新闻
+     * 获取政策新闻 - 优先从缓存获取
      */
     public List<NewsArticle> getPolicyNews(Long teamId, int limit) {
-        List<NewsArticle> policies = new ArrayList<>();
+        log.info("获取政策新闻, teamId: {}, limit: {}", teamId, limit);
         
-        for (int i = 1; i <= limit; i++) {
-            NewsArticle article = new NewsArticle();
-            article.setId((long) i);
-            article.setTitle("国务院发布关于促进数字经济发展的指导意见 " + i);
-            article.setSummary("为加快数字经济发展，推动数字技术与实体经济深度融合...");
-            article.setSourceName("中国政府网");
-            article.setCategory("policy");
-            article.setIsPolicy(true);
-            article.setPolicyLevel("national");
-            article.setPolicyType("产业政策");
-            article.setPublishTime(LocalDateTime.now().minusDays(i));
-            article.setImportanceScore(BigDecimal.valueOf(95));
-            policies.add(article);
+        // 先从缓存获取
+        List<NewsArticle> cached = newsCacheService.getPolicyNews(limit);
+        if (cached != null) {
+            log.debug("从缓存返回政策新闻: count={}", cached.size());
+            return cached;
         }
         
-        return policies;
+        // 缓存未命中，从数据库获取
+        List<NewsArticle> results = newsCrawlerService.getPolicyNews(limit);
+        if (!results.isEmpty()) {
+            newsCacheService.cachePolicyNews(limit, results);
+        }
+        return results;
     }
 
     // ==================== NW-005 智能匹配 ====================
@@ -354,83 +346,104 @@ public class SmartNewsPushService {
     public NewsMatchRecord calculateMatch(Long articleId, Long teamId, Long userId) {
         log.info("计算新闻匹配度, articleId: {}, teamId: {}, userId: {}", articleId, teamId, userId);
         
+        // 获取文章
+        NewsArticle article = newsArticleMapper.selectById(articleId);
+        if (article == null) {
+            throw new RuntimeException("文章不存在: " + articleId);
+        }
+        
         NewsMatchRecord record = new NewsMatchRecord();
         record.setId(System.currentTimeMillis());
         record.setArticleId(articleId);
         record.setTeamId(teamId);
         record.setUserId(userId);
         
-        // 模拟匹配计算
-        double industryScore = 0.3 + Math.random() * 0.3;
-        double keywordScore = 0.2 + Math.random() * 0.3;
-        double semanticScore = 0.4 + Math.random() * 0.4;
+        // 基于文章内容计算匹配度
+        String text = (article.getTitle() + " " + 
+                      (article.getSummary() != null ? article.getSummary() : "")).toLowerCase();
         
-        double totalScore = (industryScore * 30 + keywordScore * 30 + semanticScore * 40);
+        // 计算各维度分数
+        double importanceScore = article.getImportanceScore() != null ? 
+                                 article.getImportanceScore().doubleValue() / 100 : 0.5;
+        double qualityScore = article.getQualityScore() != null ? 
+                             article.getQualityScore().doubleValue() / 100 : 0.5;
         
-        record.setMatchType("semantic");
+        double totalScore = (importanceScore * 50 + qualityScore * 50);
+        
+        record.setMatchType("content_based");
         record.setMatchScore(BigDecimal.valueOf(totalScore));
-        record.setSemanticSimilarity(BigDecimal.valueOf(semanticScore));
-        record.setMatchedKeywords("[\"AI\",\"企业服务\",\"数字化\"]");
-        record.setMatchedIndustries("[\"IT\",\"金融\"]");
-        record.setRelevanceReason("该新闻与您关注的AI技术和企业服务领域高度相关");
-        record.setIsRecommended(totalScore >= 70);
-        record.setRecommendationRank(totalScore >= 90 ? 1 : (totalScore >= 80 ? 2 : 3));
+        record.setSemanticSimilarity(BigDecimal.valueOf(importanceScore));
+        record.setRelevanceReason("基于文章内容质量和重要性评分");
+        record.setIsRecommended(totalScore >= 60);
+        record.setRecommendationRank(totalScore >= 80 ? 1 : (totalScore >= 60 ? 2 : 3));
         record.setCreatedAt(LocalDateTime.now());
         
         return record;
     }
 
     /**
-     * 获取推荐新闻
+     * 获取推荐新闻 - 基于用户兴趣，优先从缓存获取
      */
     public List<NewsArticle> getRecommendedNews(Long userId, Long teamId, int limit) {
         log.info("获取推荐新闻, userId: {}, teamId: {}", userId, teamId);
         
-        List<NewsArticle> articles = new ArrayList<>();
+        // 获取用户偏好
+        NewsUserPreference preference = getUserPreference(userId);
+        List<String> interests;
         
-        for (int i = 1; i <= limit; i++) {
-            NewsArticle article = new NewsArticle();
-            article.setId((long) i);
-            article.setTitle("为您推荐：企业数字化转型最佳实践 " + i);
-            article.setSummary("基于您的阅读偏好和企业行业特征，为您精选的相关资讯...");
-            article.setSourceName("行业观察");
-            article.setCategory("industry");
-            article.setPublishTime(LocalDateTime.now().minusHours(i * 2));
-            article.setImportanceScore(BigDecimal.valueOf(95 - i * 3));
-            article.setQualityScore(BigDecimal.valueOf(90));
-            articles.add(article);
+        if (preference != null && preference.getPreferredKeywords() != null) {
+            // 将JSON字符串转换为List
+            String keywordsJson = preference.getPreferredKeywords();
+            if (keywordsJson.startsWith("[") && keywordsJson.endsWith("]")) {
+                // 简单解析JSON数组
+                keywordsJson = keywordsJson.substring(1, keywordsJson.length() - 1);
+                interests = Arrays.asList(keywordsJson.replace("\"", "").split(","));
+            } else {
+                interests = Arrays.asList("AI", "数字化", "企业服务", "科技", "人工智能");
+            }
+        } else {
+            // 默认推荐关键词
+            interests = Arrays.asList("AI", "数字化", "企业服务", "科技", "人工智能");
         }
         
-        return articles;
+        // 构建缓存键（基于兴趣关键词）
+        String cacheKey = String.join(",", interests);
+        
+        // 尝试从缓存获取（使用搜索缓存机制）
+        List<NewsArticle> cached = newsCacheService.getSearchResult(cacheKey, 1, limit);
+        if (cached != null && !cached.isEmpty()) {
+            log.debug("从缓存返回推荐新闻: userId={}, count={}", userId, cached.size());
+            return cached;
+        }
+        
+        // 缓存未命中，从数据库获取
+        List<NewsArticle> results = newsCrawlerService.getRecommendedNews(interests, limit);
+        if (!results.isEmpty()) {
+            newsCacheService.cacheSearchResult(cacheKey, 1, limit, results);
+        }
+        return results;
     }
 
     // ==================== NW-006 个性化推送 ====================
 
     /**
      * 获取用户偏好
+     * TODO: 需要实现数据库存储
      */
     public NewsUserPreference getUserPreference(Long userId) {
-        NewsUserPreference preference = new NewsUserPreference();
-        preference.setId(1L);
-        preference.setUserId(userId);
-        preference.setPreferredCategories("[\"technology\",\"industry\",\"policy\"]");
-        preference.setPreferredSources("[\"36氪\",\"虎嗅\",\"钛媒体\"]");
-        preference.setPreferredKeywords("[\"AI\",\"SaaS\",\"数字化\"]");
-        preference.setBlockedKeywords("[\"娱乐\",\"八卦\"]");
-        preference.setInterestIndustries("[\"IT\",\"金融\"]");
-        preference.setInterestTopics("[\"人工智能\",\"企业服务\",\"云计算\"]");
-        preference.setReadingLevel("normal");
-        preference.setContentLanguage("zh");
-        preference.setMinQualityScore(BigDecimal.valueOf(60));
-        return preference;
+        log.info("获取用户偏好, userId: {}", userId);
+        // 返回null表示用户未设置偏好
+        return null;
     }
 
     /**
      * 更新用户偏好
+     * TODO: 需要实现数据库存储
      */
     @Transactional
     public NewsUserPreference updateUserPreference(NewsUserPreference preference) {
         preference.setUpdatedAt(LocalDateTime.now());
+        // TODO: 保存到数据库
         return preference;
     }
 
@@ -438,66 +451,54 @@ public class SmartNewsPushService {
      * 基于角色获取推荐
      */
     public List<NewsArticle> getNewsByRole(String role, int limit) {
-        List<NewsArticle> articles = new ArrayList<>();
+        log.info("基于角色获取推荐, role: {}", role);
         
-        Map<String, String[]> roleCategories = new HashMap<>();
-        roleCategories.put("manager", new String[]{"management", "strategy", "industry"});
-        roleCategories.put("developer", new String[]{"technology", "development", "tools"});
-        roleCategories.put("sales", new String[]{"market", "customer", "trends"});
-        
-        String[] categories = roleCategories.getOrDefault(role, new String[]{"general"});
-        
-        for (int i = 1; i <= limit; i++) {
-            NewsArticle article = new NewsArticle();
-            article.setId((long) i);
-            article.setTitle("适合" + role + "角色的资讯 " + i);
-            article.setCategory(categories[i % categories.length]);
-            article.setPublishTime(LocalDateTime.now().minusHours(i));
-            articles.add(article);
+        // 根据角色确定分类
+        String category;
+        switch (role) {
+            case "manager":
+                category = "industry";
+                break;
+            case "developer":
+                category = "technology";
+                break;
+            case "sales":
+                category = "finance";
+                break;
+            default:
+                category = "technology";
         }
         
-        return articles;
+        return newsCrawlerService.getNewsByCategory(category, limit);
     }
 
     // ==================== NW-007 推送优化 ====================
 
     /**
      * 获取推送配置
+     * TODO: 需要实现数据库存储
      */
     public NewsPushConfig getPushConfig(Long userId) {
-        NewsPushConfig config = new NewsPushConfig();
-        config.setId(1L);
-        config.setUserId(userId);
-        config.setPushEnabled(true);
-        config.setPushChannels("[\"email\",\"app\"]");
-        config.setPushFrequency("daily");
-        config.setPushTime("09:00");
-        config.setPushDays("[1,2,3,4,5]");
-        config.setTimezone("Asia/Shanghai");
-        config.setMaxArticlesPerPush(10);
-        config.setMinMatchScore(BigDecimal.valueOf(70));
-        config.setIncludeSummary(true);
-        config.setIncludeImage(true);
-        config.setQuietHoursStart("22:00");
-        config.setQuietHoursEnd("08:00");
-        config.setLastPushAt(LocalDateTime.now().minusDays(1));
-        config.setNextPushAt(LocalDateTime.now().plusDays(1).withHour(9).withMinute(0));
-        return config;
+        log.info("获取推送配置, userId: {}", userId);
+        // 返回null表示用户未设置推送配置
+        return null;
     }
 
     /**
      * 更新推送配置
+     * TODO: 需要实现数据库存储
      */
     @Transactional
     public NewsPushConfig updatePushConfig(NewsPushConfig config) {
         config.setUpdatedAt(LocalDateTime.now());
-        // 计算下次推送时间
         config.setNextPushAt(calculateNextPushTime(config));
+        // TODO: 保存到数据库
         return config;
     }
 
     /**
      * 执行推送
+     * TODO: 需要实现实际推送逻辑
      */
     @Transactional
     public NewsPushRecord executePush(Long userId, List<Long> articleIds, String channel) {
@@ -517,119 +518,99 @@ public class SmartNewsPushService {
         record.setClickCount(0);
         record.setCreatedAt(LocalDateTime.now());
         
+        // TODO: 保存推送记录到数据库
+        // TODO: 实际执行推送（邮件、App推送等）
+        
         return record;
     }
 
     /**
      * 获取推送历史
+     * TODO: 需要实现数据库存储
      */
     public List<NewsPushRecord> getPushHistory(Long userId, int page, int pageSize) {
-        List<NewsPushRecord> records = new ArrayList<>();
-        
-        for (int i = 1; i <= pageSize; i++) {
-            NewsPushRecord record = new NewsPushRecord();
-            record.setId((long) ((page - 1) * pageSize + i));
-            record.setUserId(userId);
-            record.setPushChannel("email");
-            record.setPushType("scheduled");
-            record.setArticleCount(10);
-            record.setPushTitle("每日精选资讯");
-            record.setPushStatus("sent");
-            record.setSentAt(LocalDateTime.now().minusDays(i));
-            record.setOpenedAt(i % 2 == 0 ? LocalDateTime.now().minusDays(i).plusHours(1) : null);
-            record.setClickCount(i * 2);
-            records.add(record);
-        }
-        
-        return records;
+        log.info("获取推送历史, userId: {}", userId);
+        return Collections.emptyList();
     }
 
     // ==================== NW-008 新闻收藏 ====================
 
     /**
-     * 收藏新闻
+     * 收藏新闻 - 保存到数据库
      */
     @Transactional
     public NewsFavorite favoriteNews(Long userId, Long articleId, Long folderId, String note) {
+        log.info("收藏新闻, userId: {}, articleId: {}", userId, articleId);
+        
+        // 检查文章是否存在
+        NewsArticle article = newsArticleMapper.selectById(articleId);
+        if (article == null) {
+            throw new RuntimeException("文章不存在: " + articleId);
+        }
+        
+        // 检查是否已收藏
+        if (newsFavoriteMapper.existsFavorite(userId, articleId)) {
+            throw new RuntimeException("已收藏该文章");
+        }
+        
         NewsFavorite favorite = new NewsFavorite();
-        favorite.setId(System.currentTimeMillis());
         favorite.setUserId(userId);
         favorite.setArticleId(articleId);
         favorite.setFolderId(folderId);
         favorite.setNote(note);
         favorite.setCreatedAt(LocalDateTime.now());
+        
+        newsFavoriteMapper.insertFavorite(favorite);
+        
+        // 更新文章收藏数
+        newsArticleMapper.updateFavoriteCount(articleId, 1);
+        
+        // 更新收藏夹文章数
+        if (folderId != null) {
+            newsFavoriteMapper.updateFolderArticleCount(folderId, 1);
+        }
+        
         return favorite;
     }
 
     /**
-     * 取消收藏
+     * 取消收藏 - 从数据库删除
      */
     @Transactional
     public void unfavoriteNews(Long userId, Long articleId) {
         log.info("取消收藏, userId: {}, articleId: {}", userId, articleId);
+        
+        int deleted = newsFavoriteMapper.deleteFavorite(userId, articleId);
+        if (deleted > 0) {
+            // 更新文章收藏数
+            newsArticleMapper.updateFavoriteCount(articleId, -1);
+        }
     }
 
     /**
-     * 获取收藏列表
+     * 获取收藏列表 - 从数据库获取
      */
     public List<NewsFavorite> getFavorites(Long userId, Long folderId) {
-        List<NewsFavorite> favorites = new ArrayList<>();
-        
-        for (int i = 1; i <= 5; i++) {
-            NewsFavorite favorite = new NewsFavorite();
-            favorite.setId((long) i);
-            favorite.setUserId(userId);
-            favorite.setArticleId((long) (i * 10));
-            favorite.setFolderId(folderId);
-            favorite.setNote("重要资讯 " + i);
-            favorite.setTags("[\"AI\",\"重要\"]");
-            favorite.setCreatedAt(LocalDateTime.now().minusDays(i));
-            favorites.add(favorite);
-        }
-        
-        return favorites;
+        log.info("获取收藏列表, userId: {}, folderId: {}", userId, folderId);
+        return newsFavoriteMapper.selectByUserId(userId, folderId, 0, 100);
     }
 
     /**
-     * 获取收藏夹列表
+     * 获取收藏夹列表 - 从数据库获取
      */
     public List<NewsFavoriteFolder> getFolders(Long userId) {
-        List<NewsFavoriteFolder> folders = new ArrayList<>();
-        
-        NewsFavoriteFolder defaultFolder = new NewsFavoriteFolder();
-        defaultFolder.setId(1L);
-        defaultFolder.setUserId(userId);
-        defaultFolder.setFolderName("默认收藏夹");
-        defaultFolder.setIsDefault(true);
-        defaultFolder.setArticleCount(15);
-        folders.add(defaultFolder);
-        
-        NewsFavoriteFolder techFolder = new NewsFavoriteFolder();
-        techFolder.setId(2L);
-        techFolder.setUserId(userId);
-        techFolder.setFolderName("技术文章");
-        techFolder.setIsDefault(false);
-        techFolder.setArticleCount(8);
-        folders.add(techFolder);
-        
-        NewsFavoriteFolder policyFolder = new NewsFavoriteFolder();
-        policyFolder.setId(3L);
-        policyFolder.setUserId(userId);
-        policyFolder.setFolderName("政策法规");
-        policyFolder.setIsDefault(false);
-        policyFolder.setArticleCount(5);
-        folders.add(policyFolder);
-        
-        return folders;
+        log.info("获取收藏夹列表, userId: {}", userId);
+        return newsFavoriteMapper.selectFoldersByUserId(userId);
     }
 
     /**
-     * 创建收藏夹
+     * 创建收藏夹 - 保存到数据库
      */
     @Transactional
     public NewsFavoriteFolder createFolder(Long userId, String folderName, String description) {
+        log.info("创建收藏夹, userId: {}, folderName: {}", userId, folderName);
+        
         NewsFavoriteFolder folder = new NewsFavoriteFolder();
-        folder.setId(System.currentTimeMillis());
         folder.setUserId(userId);
         folder.setFolderName(folderName);
         folder.setDescription(description);
@@ -637,6 +618,9 @@ public class SmartNewsPushService {
         folder.setArticleCount(0);
         folder.setCreatedAt(LocalDateTime.now());
         folder.setUpdatedAt(LocalDateTime.now());
+        
+        newsFavoriteMapper.insertFolder(folder);
+        
         return folder;
     }
 
@@ -655,11 +639,6 @@ public class SmartNewsPushService {
         categories.add(createCategory(5L, "market", "市场分析", null, "LineChartOutlined", "#722ed1"));
         categories.add(createCategory(6L, "management", "企业管理", null, "TeamOutlined", "#13c2c2"));
         
-        // 子分类
-        categories.add(createCategory(7L, "tech_ai", "人工智能", 1L, null, null));
-        categories.add(createCategory(8L, "tech_cloud", "云计算", 1L, null, null));
-        categories.add(createCategory(9L, "tech_bigdata", "大数据", 1L, null, null));
-        
         return categories;
     }
 
@@ -669,36 +648,16 @@ public class SmartNewsPushService {
     public List<Map<String, Object>> getCategoryTree() {
         List<NewsCategory> allCategories = getCategories();
         
-        // 构建树形结构
         List<Map<String, Object>> tree = new ArrayList<>();
         
         for (NewsCategory category : allCategories) {
-            if (category.getParentId() == null || category.getParentId() == 0) {
-                Map<String, Object> node = new HashMap<>();
-                node.put("id", category.getId());
-                node.put("code", category.getCategoryCode());
-                node.put("name", category.getCategoryName());
-                node.put("icon", category.getIcon());
-                node.put("color", category.getColor());
-                
-                // 查找子分类
-                List<Map<String, Object>> children = new ArrayList<>();
-                for (NewsCategory child : allCategories) {
-                    if (category.getId().equals(child.getParentId())) {
-                        Map<String, Object> childNode = new HashMap<>();
-                        childNode.put("id", child.getId());
-                        childNode.put("code", child.getCategoryCode());
-                        childNode.put("name", child.getCategoryName());
-                        children.add(childNode);
-                    }
-                }
-                
-                if (!children.isEmpty()) {
-                    node.put("children", children);
-                }
-                
-                tree.add(node);
-            }
+            Map<String, Object> node = new HashMap<>();
+            node.put("id", category.getId());
+            node.put("code", category.getCategoryCode());
+            node.put("name", category.getCategoryName());
+            node.put("icon", category.getIcon());
+            node.put("color", category.getColor());
+            tree.add(node);
         }
         
         return tree;
@@ -710,14 +669,13 @@ public class SmartNewsPushService {
     public String classifyNews(String title, String content) {
         log.info("自动分类新闻: {}", title);
         
-        // 模拟AI分类逻辑
         Map<String, String[]> categoryKeywords = new HashMap<>();
         categoryKeywords.put("technology", new String[]{"AI", "人工智能", "技术", "软件", "互联网", "科技"});
         categoryKeywords.put("policy", new String[]{"政策", "法规", "监管", "政府", "国务院"});
         categoryKeywords.put("finance", new String[]{"金融", "投资", "股票", "基金", "银行"});
         categoryKeywords.put("industry", new String[]{"行业", "市场", "企业", "产业"});
         
-        String text = (title + " " + content).toLowerCase();
+        String text = (title + " " + (content != null ? content : "")).toLowerCase();
         String bestCategory = "general";
         int maxMatches = 0;
         
@@ -735,6 +693,107 @@ public class SmartNewsPushService {
         }
         
         return bestCategory;
+    }
+
+    // ==================== 统计接口 ====================
+
+    /**
+     * 获取新闻统计数据 - 优先从缓存获取
+     */
+    public Map<String, Object> getStatistics(Long teamId) {
+        log.info("获取新闻统计, teamId: {}", teamId);
+        
+        // 先从缓存获取
+        Map<String, Object> cached = newsCacheService.getStatistics();
+        if (cached != null) {
+            log.debug("从缓存返回统计数据");
+            return cached;
+        }
+        
+        // 缓存未命中，从数据库获取
+        Map<String, Object> stats = newsCrawlerService.getStatistics();
+        if (stats != null && !stats.isEmpty()) {
+            newsCacheService.cacheStatistics(stats);
+        }
+        return stats;
+    }
+
+    /**
+     * 获取热门话题 - 优先从缓存获取
+     */
+    public List<Map<String, Object>> getHotTopics(int limit) {
+        // 先从缓存获取
+        List<Map<String, Object>> cached = newsCacheService.getHotTopics();
+        if (cached != null && !cached.isEmpty()) {
+            log.debug("从缓存返回热门话题: count={}", cached.size());
+            // 如果缓存的数量大于需要的数量，截取
+            if (cached.size() > limit) {
+                return cached.subList(0, limit);
+            }
+            return cached;
+        }
+        
+        // 缓存未命中，从数据库统计
+        List<Map<String, Object>> topics = newsCrawlerService.getHotTopics(limit);
+        if (!topics.isEmpty()) {
+            newsCacheService.cacheHotTopics(topics);
+        }
+        return topics;
+    }
+
+    /**
+     * 获取行业动态新闻 - 优先从缓存获取
+     */
+    public List<NewsArticle> getIndustryNews(Long teamId, int limit) {
+        log.info("获取行业动态新闻, teamId: {}, limit: {}", teamId, limit);
+        
+        // 先从缓存获取
+        List<NewsArticle> cached = newsCacheService.getCategoryNews("industry", 1, limit);
+        if (cached != null) {
+            log.debug("从缓存返回行业动态: count={}", cached.size());
+            return cached;
+        }
+        
+        // 缓存未命中，从数据库获取
+        List<NewsArticle> results = newsCrawlerService.getNewsByCategory("industry", limit);
+        if (!results.isEmpty()) {
+            newsCacheService.cacheCategoryNews("industry", 1, limit, results);
+        }
+        return results;
+    }
+
+    /**
+     * 获取科技资讯 - 优先从缓存获取
+     */
+    public List<NewsArticle> getTechnologyNews(int limit) {
+        log.info("获取科技资讯, limit: {}", limit);
+        
+        // 先从缓存获取
+        List<NewsArticle> cached = newsCacheService.getCategoryNews("technology", 1, limit);
+        if (cached != null) {
+            log.debug("从缓存返回科技资讯: count={}", cached.size());
+            return cached;
+        }
+        
+        // 缓存未命中，从数据库获取
+        List<NewsArticle> results = newsCrawlerService.getNewsByCategory("technology", limit);
+        if (!results.isEmpty()) {
+            newsCacheService.cacheCategoryNews("technology", 1, limit, results);
+        }
+        return results;
+    }
+
+    /**
+     * 手动触发新闻采集
+     * 采集完成后清除相关缓存
+     */
+    public void triggerManualCrawl() {
+        log.info("手动触发新闻采集");
+        newsCrawlerService.crawlAllSourcesAsync();
+        
+        // 清除所有新闻相关缓存，确保用户获取最新数据
+        log.info("清除新闻缓存以获取最新数据");
+        newsCacheService.clearAllNewsCache();
     }
 
     // ==================== 辅助方法 ====================
@@ -759,19 +818,6 @@ public class SmartNewsPushService {
         return names.getOrDefault(type, type);
     }
 
-    private NewsDataSource createDataSource(Long id, String name, String type, String category, int reliability) {
-        NewsDataSource source = new NewsDataSource();
-        source.setId(id);
-        source.setSourceName(name);
-        source.setSourceType(type);
-        source.setCategory(category);
-        source.setReliabilityScore(BigDecimal.valueOf(reliability));
-        source.setIsEnabled(true);
-        source.setUpdateFrequency(60);
-        source.setTotalArticles(1000 + (int)(Math.random() * 5000));
-        return source;
-    }
-
     private NewsCategory createCategory(Long id, String code, String name, Long parentId, String icon, String color) {
         NewsCategory category = new NewsCategory();
         category.setId(id);
@@ -783,7 +829,6 @@ public class SmartNewsPushService {
         category.setColor(color);
         category.setIsSystem(true);
         category.setIsEnabled(true);
-        category.setArticleCount((int)(Math.random() * 500));
         return category;
     }
 

@@ -1,0 +1,122 @@
+syntax = "proto3";
+
+package com.mota.project.proto.news;
+
+option java_package = "com.mota.project.proto.news";
+option java_outer_classname = "NewsCacheProto";
+option java_multiple_files = true;
+
+// 新闻文章缓存对象
+message NewsArticleCache {
+  int64 id = 1;
+  int64 source_id = 2;
+  string external_id = 3;
+  string title = 4;
+  string content = 5;
+  string summary = 6;
+  string author = 7;
+  string source_name = 8;
+  string source_url = 9;
+  string image_url = 10;
+  string images = 11;  // JSON string
+  string category = 12;
+  string tags = 13;  // JSON string
+  string keywords = 14;  // JSON string
+  string entities = 15;  // JSON string
+  int64 publish_time = 16;  // timestamp in milliseconds
+  int64 crawl_time = 17;  // timestamp in milliseconds
+  string language = 18;
+  int32 word_count = 19;
+  int32 read_time = 20;
+  string sentiment = 21;
+  double sentiment_score = 22;
+  double importance_score = 23;
+  double quality_score = 24;
+  bool is_policy = 25;
+  string policy_level = 26;
+  string policy_type = 27;
+  int32 view_count = 28;
+  int32 share_count = 29;
+  int32 favorite_count = 30;
+  string status = 31;
+  int64 created_at = 32;  // timestamp in milliseconds
+  int64 updated_at = 33;  // timestamp in milliseconds
+}
+
+// 新闻文章列表缓存对象
+message NewsArticleListCache {
+  repeated NewsArticleCache articles = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+  int64 cache_time = 5;  // timestamp in milliseconds
+}
+
+// 新闻统计数据缓存对象
+message NewsStatsCache {
+  int64 total_articles = 1;
+  int64 today_articles = 2;
+  int64 week_articles = 3;
+  int64 month_articles = 4;
+  map<string, int64> category_stats = 5;
+  map<string, int64> source_stats = 6;
+  int64 cache_time = 7;  // timestamp in milliseconds
+}
+
+// 热门话题缓存对象
+message HotTopicCache {
+  string topic = 1;
+  int64 count = 2;
+  double score = 3;
+  repeated string keywords = 4;
+  int64 first_seen = 5;  // timestamp in milliseconds
+  int64 last_seen = 6;  // timestamp in milliseconds
+}
+
+// 热门话题列表缓存对象
+message HotTopicListCache {
+  repeated HotTopicCache topics = 1;
+  int64 cache_time = 2;  // timestamp in milliseconds
+}
+
+// 新闻数据源缓存对象
+message NewsDataSourceCache {
+  int64 id = 1;
+  string source_name = 2;
+  string source_type = 3;
+  string source_url = 4;
+  string api_endpoint = 5;
+  string crawl_config = 6;  // JSON string
+  string category = 7;
+  string language = 8;
+  string country = 9;
+  int32 update_frequency = 10;
+  int64 last_crawl_at = 11;  // timestamp in milliseconds
+  int64 next_crawl_at = 12;  // timestamp in milliseconds
+  bool is_enabled = 13;
+  int32 priority = 14;
+  double reliability_score = 15;
+  int32 total_articles = 16;
+  int64 creator_id = 17;
+  int64 created_at = 18;  // timestamp in milliseconds
+  int64 updated_at = 19;  // timestamp in milliseconds
+}
+
+// 用户推荐新闻缓存对象
+message UserRecommendationCache {
+  int64 user_id = 1;
+  repeated NewsArticleCache recommended_articles = 2;
+  repeated string preferred_categories = 3;
+  repeated string preferred_keywords = 4;
+  double recommendation_score = 5;
+  int64 cache_time = 6;  // timestamp in milliseconds
+  int64 expire_time = 7;  // timestamp in milliseconds
+}
+
+// 分类新闻缓存对象
+message CategoryNewsCache {
+  string category = 1;
+  repeated NewsArticleCache articles = 2;
+  int32 total = 3;
+  int64 cache_time = 4;  // timestamp in milliseconds
+}

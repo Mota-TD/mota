@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mota.project.mapper.KnowledgeNodeMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.mota.project.entity.KnowledgeNode">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="node_type" property="nodeType"/>
+        <result column="description" property="description"/>
+        <result column="related_id" property="relatedId"/>
+        <result column="related_type" property="relatedType"/>
+        <result column="properties" property="properties"/>
+        <result column="embedding_vector" property="embeddingVector"/>
+        <result column="reference_count" property="referenceCount"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <!-- 基础列 -->
+    <sql id="Base_Column_List">
+        id, name, node_type, description, related_id, related_type, 
+        properties, embedding_vector, reference_count, created_at, updated_at
+    </sql>
+
+    <!-- 按类型获取节点列表 -->
+    <select id="selectByNodeType" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM knowledge_node
+        WHERE node_type = #{nodeType}
+        ORDER BY reference_count DESC, created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 搜索节点 -->
+    <select id="searchNodes" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM knowledge_node
+        WHERE (name LIKE CONCAT('%', #{keyword}, '%') 
+               OR description LIKE CONCAT('%', #{keyword}, '%'))
+        <if test="nodeType != null and nodeType != ''">
+            AND node_type = #{nodeType}
+        </if>
+        ORDER BY reference_count DESC, created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 按关联ID获取节点 -->
+    <select id="selectByRelatedId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM knowledge_node
+        WHERE related_id = #{relatedId} AND related_type = #{relatedType}
+        LIMIT 1
+    </select>
+
+    <!-- 获取热门节点 -->
+    <select id="selectPopularNodes" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM knowledge_node
+        ORDER BY reference_count DESC, created_at DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 获取邻居节点 -->
+    <select id="selectNeighbors" resultMap="BaseResultMap">
+        SELECT DISTINCT n.*
+        FROM knowledge_node n
+        WHERE n.id IN (
+            SELECT target_node_id FROM knowledge_edge WHERE source_node_id = #{nodeId}
+            UNION
+            SELECT source_node_id FROM knowledge_edge WHERE target_node_id = #{nodeId}
+        )
+        LIMIT 100
+    </select>
+
+    <!-- 增加引用次数 -->
+    <update id="incrementReferenceCount">
+        UPDATE knowledge_node 
+        SET reference_count = reference_count + 1, updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 更新向量嵌入 -->
+    <update id="updateEmbeddingVector">
+        UPDATE knowledge_node 
+        SET embedding_vector = #{embeddingVector}, updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 获取节点类型分布 -->
+    <select id="selectNodeTypeDistribution" resultType="java.util.Map">
+        SELECT node_type AS nodeType, COUNT(*) AS count
+        FROM knowledge_node
+        GROUP BY node_type
+    </select>
+
+    <!-- 获取节点总数 -->
+    <select id="countNodes" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM knowledge_node
+    </select>
+
+    <!-- 按名称查找节点 -->
+    <select id="selectByName" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM knowledge_node
+        WHERE name = #{name}
+        LIMIT 1
+    </select>
+
+    <!-- 批量获取节点 -->
+    <select id="selectByIds" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM knowledge_node
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+</mapper>

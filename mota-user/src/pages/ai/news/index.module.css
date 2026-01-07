@@ -438,3 +438,119 @@
   color: #faad14;
   border-color: #ffe58f;
 }
+
+/* 新闻详情抽屉 */
+.newsDetail {
+  padding: 24px;
+}
+
+.detailHeader {
+  padding-bottom: 16px;
+}
+
+.detailContent {
+  padding: 16px 0;
+  min-height: 300px;
+}
+
+.articleContent {
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--text-primary);
+}
+
+.articleContent p {
+  margin-bottom: 16px;
+}
+
+.articleContent img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+.articleContent h1,
+.articleContent h2,
+.articleContent h3,
+.articleContent h4 {
+  margin-top: 24px;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.articleContent blockquote {
+  border-left: 4px solid var(--primary-color);
+  padding-left: 16px;
+  margin: 16px 0;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.articleContent ul,
+.articleContent ol {
+  padding-left: 24px;
+  margin-bottom: 16px;
+}
+
+.articleContent li {
+  margin-bottom: 8px;
+}
+
+.articleContent a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.articleContent a:hover {
+  text-decoration: underline;
+}
+
+.articleContent pre {
+  background: var(--bg-secondary);
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.articleContent code {
+  background: var(--bg-secondary);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Consolas', 'Monaco', monospace;
+}
+
+.detailTags {
+  padding: 16px 0;
+}
+
+.detailActions {
+  padding: 24px 0;
+  display: flex;
+  justify-content: center;
+  border-top: 1px solid var(--border-color);
+  margin-top: 16px;
+}
+
+/* 新闻卡片点击样式 */
+.newsCard {
+  cursor: pointer;
+}
+
+.newsTitle {
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.newsTitle:hover {
+  color: var(--primary-color);
+}
+
+/* 分页样式 */
+.pagination {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+  margin-top: 16px;
+  border-top: 1px solid var(--border-color);
+}

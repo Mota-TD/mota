@@ -4,6 +4,8 @@ import com.mota.project.entity.KnowledgeEdge;
 import com.mota.project.entity.KnowledgeNode;
 import com.mota.project.service.KnowledgeGraphService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -217,5 +219,245 @@ public class KnowledgeGraphController {
     @GetMapping("/stats/edge-types")
     public ResponseEntity<Map<String, Long>> getEdgeTypeDistribution() {
         return ResponseEntity.ok(knowledgeGraphService.getEdgeTypeDistribution());
+    }
+
+    // ========== 聚类与子图 ==========
+
+    @PostMapping("/visualization/clustered")
+    public ResponseEntity<Map<String, Object>> getClusteredVisualizationData(
+            @RequestBody(required = false) Map<String, Object> config) {
+        return ResponseEntity.ok(knowledgeGraphService.getClusteredVisualizationData(
+                config != null ? config : Map.of()));
+    }
+
+    @GetMapping("/visualization/interactive")
+    public ResponseEntity<Map<String, Object>> getInteractiveGraphData(
+            @RequestParam(required = false) Long centerNodeId,
+            @RequestParam(required = false) Integer depth,
+            @RequestParam(required = false) List<String> nodeTypes,
+            @RequestParam(required = false) List<String> relationTypes,
+            @RequestParam(required = false) Double minWeight) {
+        return ResponseEntity.ok(knowledgeGraphService.getInteractiveGraphData(
+                centerNodeId, depth, nodeTypes, relationTypes, minWeight));
+    }
+
+    @PostMapping("/cluster")
+    public ResponseEntity<List<Map<String, Object>>> clusterNodes(
+            @RequestBody Map<String, Object> config) {
+        return ResponseEntity.ok(knowledgeGraphService.clusterNodes(config));
+    }
+
+    @GetMapping("/cluster/{clusterId}")
+    public ResponseEntity<Map<String, Object>> getClusterDetails(@PathVariable Long clusterId) {
+        return ResponseEntity.ok(knowledgeGraphService.getClusterDetails(clusterId));
+    }
+
+    @PostMapping("/cluster/{clusterId}/layout")
+    public ResponseEntity<Map<String, Object>> updateClusterLayout(
+            @PathVariable Long clusterId,
+            @RequestBody Map<String, String> request) {
+        return ResponseEntity.ok(knowledgeGraphService.updateClusterLayout(
+                clusterId, request.get("layout")));
+    }
+
+    @PostMapping("/subgraph/filter")
+    public ResponseEntity<Map<String, Object>> filterSubgraph(
+            @RequestBody Map<String, Object> filter) {
+        return ResponseEntity.ok(knowledgeGraphService.filterSubgraph(filter));
+    }
+
+    @PostMapping("/subgraph/save-view")
+    public ResponseEntity<Map<String, Object>> saveSubgraphAsView(
+            @RequestBody Map<String, Object> request) {
+        @SuppressWarnings("unchecked")
+        Map<String, Object> filter = (Map<String, Object>) request.get("filter");
+        String viewName = (String) request.get("viewName");
+        return ResponseEntity.ok(knowledgeGraphService.saveSubgraphAsView(filter, viewName));
+    }
+
+    @GetMapping("/subgraph/views")
+    public ResponseEntity<List<Map<String, Object>>> getSavedViews() {
+        return ResponseEntity.ok(knowledgeGraphService.getSavedViews());
+    }
+
+    @PostMapping("/subgraph/export")
+    public ResponseEntity<byte[]> exportSubgraph(@RequestBody Map<String, Object> request) {
+        @SuppressWarnings("unchecked")
+        Map<String, Object> filter = (Map<String, Object>) request.get("filter");
+        String format = (String) request.get("format");
+        byte[] data = knowledgeGraphService.exportSubgraph(filter, format);
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentDispositionFormData("attachment", "subgraph." + format);
+        
+        return ResponseEntity.ok().headers(headers).body(data);
+    }
+
+    // ========== 路径查询 ==========
+
+    @GetMapping("/paths/shortest")
+    public ResponseEntity<Map<String, Object>> findShortestPath(
+            @RequestParam Long sourceNodeId,
+            @RequestParam Long targetNodeId,
+            @RequestParam(required = false) Integer maxDepth,
+            @RequestParam(required = false) List<String> relationTypes) {
+        return ResponseEntity.ok(knowledgeGraphService.findShortestPath(
+                sourceNodeId, targetNodeId, maxDepth, relationTypes));
+    }
+
+    @GetMapping("/paths/all")
+    public ResponseEntity<List<Map<String, Object>>> findAllPaths(
+            @RequestParam Long sourceNodeId,
+            @RequestParam Long targetNodeId,
+            @RequestParam(required = false) Integer maxDepth,
+            @RequestParam(required = false) Integer maxPaths) {
+        return ResponseEntity.ok(knowledgeGraphService.findAllPaths(
+                sourceNodeId, targetNodeId, maxDepth, maxPaths));
+    }
+
+    @GetMapping("/paths/by-relation")
+    public ResponseEntity<List<Map<String, Object>>> findPathsByRelationType(
+            @RequestParam Long sourceNodeId,
+            @RequestParam String relationType,
+            @RequestParam(defaultValue = "3") Integer maxDepth) {
+        return ResponseEntity.ok(knowledgeGraphService.findPathsByRelationType(
+                sourceNodeId, relationType, maxDepth));
+    }
+
+    // ========== 知识导航 ==========
+
+    @GetMapping("/navigation/{nodeId}/suggestions")
+    public ResponseEntity<List<Map<String, Object>>> getNavigationSuggestions(
+            @PathVariable Long nodeId,
+            @RequestParam(defaultValue = "10") Integer limit) {
+        return ResponseEntity.ok(knowledgeGraphService.getNavigationSuggestions(nodeId, limit));
+    }
+
+    @GetMapping("/navigation/history")
+    public ResponseEntity<List<Map<String, Object>>> getNavigationHistory(
+            @RequestParam(defaultValue = "20") Integer limit) {
+        return ResponseEntity.ok(knowledgeGraphService.getNavigationHistory(limit));
+    }
+
+    @PostMapping("/navigation/record/{nodeId}")
+    public ResponseEntity<Void> recordNavigation(@PathVariable Long nodeId) {
+        knowledgeGraphService.recordNavigation(nodeId);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/navigation/{nodeId}/related")
+    public ResponseEntity<List<Map<String, Object>>> getRelatedKnowledge(
+            @PathVariable Long nodeId,
+            @RequestParam(required = false) List<String> types,
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Double minRelevance) {
+        return ResponseEntity.ok(knowledgeGraphService.getRelatedKnowledge(
+                nodeId, types, limit, minRelevance));
+    }
+
+    // ========== 关联推荐 ==========
+
+    @GetMapping("/recommendations/{nodeId}")
+    public ResponseEntity<Map<String, Object>> getRecommendations(
+            @PathVariable Long nodeId,
+            @RequestParam(required = false) List<String> types) {
+        return ResponseEntity.ok(knowledgeGraphService.getRecommendations(nodeId, types));
+    }
+
+    @GetMapping("/recommendations/{nodeId}/documents")
+    public ResponseEntity<List<Map<String, Object>>> getDocumentRecommendations(
+            @PathVariable Long nodeId,
+            @RequestParam(defaultValue = "10") Integer limit) {
+        return ResponseEntity.ok(knowledgeGraphService.getDocumentRecommendations(nodeId, limit));
+    }
+
+    @GetMapping("/recommendations/{nodeId}/projects")
+    public ResponseEntity<List<Map<String, Object>>> getProjectRecommendations(
+            @PathVariable Long nodeId,
+            @RequestParam(defaultValue = "10") Integer limit) {
+        return ResponseEntity.ok(knowledgeGraphService.getProjectRecommendations(nodeId, limit));
+    }
+
+    @GetMapping("/recommendations/{nodeId}/persons")
+    public ResponseEntity<List<Map<String, Object>>> getPersonRecommendations(
+            @PathVariable Long nodeId,
+            @RequestParam(defaultValue = "10") Integer limit) {
+        return ResponseEntity.ok(knowledgeGraphService.getPersonRecommendations(nodeId, limit));
+    }
+
+    @GetMapping("/recommendations/{nodeId}/similar")
+    public ResponseEntity<List<Map<String, Object>>> getSimilarNodes(
+            @PathVariable Long nodeId,
+            @RequestParam(defaultValue = "10") Integer limit) {
+        return ResponseEntity.ok(knowledgeGraphService.getSimilarNodes(nodeId, limit));
+    }
+
+    // ========== 实体识别与关系抽取 ==========
+
+    @PostMapping("/extract/entities/{documentId}")
+    public ResponseEntity<Map<String, Object>> extractEntitiesFromDocument(
+            @PathVariable Long documentId) {
+        return ResponseEntity.ok(knowledgeGraphService.extractEntitiesFromDocument(documentId));
+    }
+
+    @PostMapping("/extract/entities/text")
+    public ResponseEntity<List<Map<String, Object>>> extractEntitiesFromText(
+            @RequestBody Map<String, String> request) {
+        return ResponseEntity.ok(knowledgeGraphService.extractEntitiesFromText(request.get("text")));
+    }
+
+    @PostMapping("/extract/relations/{documentId}")
+    public ResponseEntity<Map<String, Object>> extractRelationsFromDocument(
+            @PathVariable Long documentId) {
+        return ResponseEntity.ok(knowledgeGraphService.extractRelationsFromDocument(documentId));
+    }
+
+    @PostMapping("/extract/relations/entities")
+    public ResponseEntity<List<Map<String, Object>>> extractRelationsFromEntities(
+            @RequestBody Map<String, Object> request) {
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> entities = (List<Map<String, Object>>) request.get("entities");
+        return ResponseEntity.ok(knowledgeGraphService.extractRelationsFromEntities(entities));
+    }
+
+    @PostMapping("/extract/attributes/{entityId}")
+    public ResponseEntity<Map<String, Object>> extractAttributesFromEntity(
+            @PathVariable Long entityId) {
+        return ResponseEntity.ok(knowledgeGraphService.extractAttributesFromEntity(entityId));
+    }
+
+    @PostMapping("/extract/attributes/batch")
+    public ResponseEntity<List<Map<String, Object>>> batchExtractAttributes(
+            @RequestBody Map<String, Object> request) {
+        @SuppressWarnings("unchecked")
+        List<Long> entityIds = (List<Long>) request.get("entityIds");
+        return ResponseEntity.ok(knowledgeGraphService.batchExtractAttributes(entityIds));
+    }
+
+    // ========== 知识融合 ==========
+
+    @GetMapping("/fusion/duplicates")
+    public ResponseEntity<List<Map<String, Object>>> findDuplicates(
+            @RequestParam(defaultValue = "0.8") Double threshold) {
+        return ResponseEntity.ok(knowledgeGraphService.findDuplicates(threshold));
+    }
+
+    @PostMapping("/fusion/merge")
+    public ResponseEntity<Map<String, Object>> mergeEntities(
+            @RequestBody Map<String, Object> request) {
+        Long entity1Id = ((Number) request.get("entity1Id")).longValue();
+        Long entity2Id = ((Number) request.get("entity2Id")).longValue();
+        String mergedName = (String) request.get("mergedName");
+        @SuppressWarnings("unchecked")
+        Map<String, String> conflictResolution = (Map<String, String>) request.get("conflictResolution");
+        return ResponseEntity.ok(knowledgeGraphService.mergeEntities(
+                entity1Id, entity2Id, mergedName, conflictResolution));
+    }
+
+    @PostMapping("/fusion/auto-merge")
+    public ResponseEntity<List<Map<String, Object>>> autoMergeDuplicates(
+            @RequestParam(defaultValue = "0.9") Double threshold) {
+        return ResponseEntity.ok(knowledgeGraphService.autoMergeDuplicates(threshold));
     }
 }

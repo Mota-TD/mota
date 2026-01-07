@@ -21,6 +21,37 @@ public class RedisService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
+    // ========== Binary 操作 (用于Protobuf) ==========
+
+    /**
+     * 设置二进制数据（用于Protobuf序列化）
+     */
+    public void setBytes(String key, byte[] value) {
+        redisTemplate.execute((org.springframework.data.redis.core.RedisCallback<Void>) connection -> {
+            connection.set(key.getBytes(), value);
+            return null;
+        });
+    }
+
+    /**
+     * 设置二进制数据（带过期时间，秒）
+     */
+    public void setBytes(String key, byte[] value, long seconds) {
+        redisTemplate.execute((org.springframework.data.redis.core.RedisCallback<Void>) connection -> {
+            connection.setEx(key.getBytes(), seconds, value);
+            return null;
+        });
+    }
+
+    /**
+     * 获取二进制数据
+     */
+    public byte[] getBytes(String key) {
+        return redisTemplate.execute((org.springframework.data.redis.core.RedisCallback<byte[]>) connection -> {
+            return connection.get(key.getBytes());
+        });
+    }
+
     // ========== String 操作 ==========
 
     /**
@@ -278,5 +309,66 @@ public class RedisService {
      */
     public Long zSize(String key) {
         return redisTemplate.opsForZSet().size(key);
+    }
+
+    // ========== Key 操作 ==========
+
+    /**
+     * SCAN命令 - 迭代查找匹配的键
+     *
+     * @param cursor 游标位置，初始为"0"
+     * @param pattern 匹配模式，如 "news:*"
+     * @param count 每次迭代返回的键数量建议值
+     * @return Map包含新游标和匹配的键列表
+     */
+    public Map<String, Object> scan(String cursor, String pattern, int count) {
+        return redisTemplate.execute((org.springframework.data.redis.core.RedisCallback<Map<String, Object>>) connection -> {
+            Map<String, Object> result = new java.util.HashMap<>();
+            
+            // 构建SCAN选项
+            org.springframework.data.redis.core.ScanOptions options = org.springframework.data.redis.core.ScanOptions
+                .scanOptions()
+                .match(pattern)
+                .count(count)
+                .build();
+            
+            // 执行SCAN命令
+            org.springframework.data.redis.core.Cursor<byte[]> scanCursor = connection.scan(options);
+            
+            // 收集匹配的键
+            java.util.List<String> keys = new java.util.ArrayList<>();
+            while (scanCursor.hasNext()) {
+                keys.add(new String(scanCursor.next()));
+            }
+            
+            // 返回结果
+            result.put("cursor", "0"); // Spring Data Redis的Cursor会自动迭代到结束
+            result.put("keys", keys);
+            
+            try {
+                scanCursor.close();
+            } catch (Exception e) {
+                // 忽略关闭异常
+            }
+            
+            return result;
+        });
+    }
+
+    /**
+     * 批量删除缓存（使用数组）
+     */
+    public Long delete(String... keys) {
+        if (keys == null || keys.length == 0) {
+            return 0L;
+        }
+        return redisTemplate.delete(java.util.Arrays.asList(keys));
+    }
+
+    /**
+     * 设置过期时间（秒）
+     */
+    public Boolean expire(String key, long seconds) {
+        return redisTemplate.expire(key, seconds, TimeUnit.SECONDS);
     }
 }

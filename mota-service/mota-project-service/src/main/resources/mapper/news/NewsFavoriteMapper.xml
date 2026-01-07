@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mota.project.mapper.news.NewsFavoriteMapper">
+
+    <resultMap id="FavoriteResultMap" type="com.mota.project.entity.news.NewsFavorite">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="article_id" property="articleId"/>
+        <result column="folder_id" property="folderId"/>
+        <result column="note" property="note"/>
+        <result column="tags" property="tags"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <resultMap id="FolderResultMap" type="com.mota.project.entity.news.NewsFavoriteFolder">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="folder_name" property="folderName"/>
+        <result column="description" property="description"/>
+        <result column="is_default" property="isDefault"/>
+        <result column="article_count" property="articleCount"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <!-- 收藏操作 -->
+    <insert id="insertFavorite" parameterType="com.mota.project.entity.news.NewsFavorite" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO news_favorite (user_id, article_id, folder_id, note, tags)
+        VALUES (#{userId}, #{articleId}, #{folderId}, #{note}, #{tags})
+    </insert>
+
+    <delete id="deleteFavorite">
+        DELETE FROM news_favorite WHERE user_id = #{userId} AND article_id = #{articleId}
+    </delete>
+
+    <select id="selectByUserId" resultMap="FavoriteResultMap">
+        SELECT f.id, f.user_id, f.article_id, f.folder_id, f.note, f.tags, f.created_at
+        FROM news_favorite f
+        WHERE f.user_id = #{userId}
+        <if test="folderId != null">
+            AND f.folder_id = #{folderId}
+        </if>
+        ORDER BY f.created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="existsFavorite" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM news_favorite WHERE user_id = #{userId} AND article_id = #{articleId}
+    </select>
+
+    <select id="countByUserId" resultType="int">
+        SELECT COUNT(*) FROM news_favorite WHERE user_id = #{userId}
+    </select>
+
+    <!-- 收藏夹操作 -->
+    <insert id="insertFolder" parameterType="com.mota.project.entity.news.NewsFavoriteFolder" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO news_favorite_folder (user_id, folder_name, description, is_default, article_count)
+        VALUES (#{userId}, #{folderName}, #{description}, #{isDefault}, #{articleCount})
+    </insert>
+
+    <delete id="deleteFolder">
+        DELETE FROM news_favorite_folder WHERE id = #{id}
+    </delete>
+
+    <select id="selectFoldersByUserId" resultMap="FolderResultMap">
+        SELECT id, user_id, folder_name, description, is_default, article_count, created_at, updated_at
+        FROM news_favorite_folder
+        WHERE user_id = #{userId}
+        ORDER BY is_default DESC, created_at ASC
+    </select>
+
+    <update id="updateFolderArticleCount">
+        UPDATE news_favorite_folder SET article_count = article_count + #{delta} WHERE id = #{id}
+    </update>
+
+    <select id="selectDefaultFolder" resultMap="FolderResultMap">
+        SELECT id, user_id, folder_name, description, is_default, article_count, created_at, updated_at
+        FROM news_favorite_folder
+        WHERE user_id = #{userId} AND is_default = 1
+        LIMIT 1
+    </select>
+
+</mapper>
