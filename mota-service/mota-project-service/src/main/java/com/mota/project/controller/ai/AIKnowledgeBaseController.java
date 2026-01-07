@@ -19,14 +19,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * AI知识库控制器
+ * AI知识库控制器（项目知识库相关）
  * 提供AI-001到AI-010的所有API接口
+ * 注意：此控制器提供项目相关的知识库AI功能
  */
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/ai/knowledge")
 @RequiredArgsConstructor
-@Tag(name = "AI知识库", description = "AI知识库管理接口")
+@Tag(name = "项目AI知识库", description = "项目相关的AI知识库管理接口")
 public class AIKnowledgeBaseController {
 
     private final AIKnowledgeBaseService knowledgeBaseService;

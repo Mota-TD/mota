@@ -20,7 +20,7 @@ import java.util.Map;
  */
 @Tag(name = "资源管理", description = "资源管理相关接口")
 @RestController
-@RequestMapping("/api/resource-management")
+@RequestMapping("/api/v1/resource-management")
 @RequiredArgsConstructor
 public class ResourceManagementController {
     

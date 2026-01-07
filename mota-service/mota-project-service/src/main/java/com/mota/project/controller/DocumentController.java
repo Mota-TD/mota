@@ -21,7 +21,7 @@ import java.util.Map;
  * 文档控制器
  */
 @RestController
-@RequestMapping("/api/documents")
+@RequestMapping("/api/v1/documents")
 @RequiredArgsConstructor
 public class DocumentController {
 

@@ -173,8 +173,9 @@ public class CalendarEventServiceImpl implements CalendarEventService {
                 CalendarEventAttendee attendee = new CalendarEventAttendee();
                 attendee.setEventId(eventId);
                 attendee.setUserId(userId);
-                attendee.setResponseStatus(CalendarEventAttendee.RESPONSE_PENDING);
-                attendee.setRequired(true);
+                attendee.setStatus(CalendarEventAttendee.STATUS_PENDING);
+                attendee.setIsOptional(false);
+                attendee.setRole(CalendarEventAttendee.ROLE_REQUIRED);
                 return attendee;
             })
             .collect(Collectors.toList());

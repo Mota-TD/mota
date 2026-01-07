@@ -1,4 +1,12 @@
+# =====================================================
+# Mota 微服务 Docker Compose 配置
+# =====================================================
+
 services:
+  # =====================================================
+  # 基础设施服务
+  # =====================================================
+  
   # MySQL 数据库
   mysql:
     image: mysql:8.0
@@ -21,6 +29,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - mota-network
 
   # Redis 缓存
   redis:
@@ -36,6 +46,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - mota-network
 
   # Nacos 服务注册与配置中心
   nacos:
@@ -58,7 +70,199 @@ services:
       timeout: 10s
       retries: 10
       start_period: 60s
+    networks:
+      - mota-network
 
+  # =====================================================
+  # 微服务 (开发环境可选启动)
+  # =====================================================
+
+  # API 网关
+  mota-gateway:
+    build:
+      context: ../mota-gateway
+      dockerfile: Dockerfile
+    container_name: mota-gateway
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - NACOS_SERVER_ADDR=nacos:8848
+    depends_on:
+      nacos:
+        condition: service_healthy
+    networks:
+      - mota-network
+    profiles:
+      - services
+
+  # 认证服务
+  mota-auth-service:
+    build:
+      context: ../mota-auth-service
+      dockerfile: Dockerfile
+    container_name: mota-auth-service
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - NACOS_SERVER_ADDR=nacos:8848
+      - MYSQL_HOST=mysql
+      - REDIS_HOST=redis
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    networks:
+      - mota-network
+    profiles:
+      - services
+
+  # 项目服务
+  mota-project-service:
+    build:
+      context: ../mota-project-service
+      dockerfile: Dockerfile
+    container_name: mota-project-service
+    restart: unless-stopped
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - NACOS_SERVER_ADDR=nacos:8848
+      - MYSQL_HOST=mysql
+      - REDIS_HOST=redis
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    networks:
+      - mota-network
+    profiles:
+      - services
+
+  # AI 服务
+  mota-ai-service:
+    build:
+      context: ../mota-ai-service
+      dockerfile: Dockerfile
+    container_name: mota-ai-service
+    restart: unless-stopped
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - NACOS_SERVER_ADDR=nacos:8848
+      - MYSQL_HOST=mysql
+      - REDIS_HOST=redis
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    networks:
+      - mota-network
+    profiles:
+      - services
+
+  # 知识库服务
+  mota-knowledge-service:
+    build:
+      context: ../mota-knowledge-service
+      dockerfile: Dockerfile
+    container_name: mota-knowledge-service
+    restart: unless-stopped
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - NACOS_SERVER_ADDR=nacos:8848
+      - MYSQL_HOST=mysql
+      - REDIS_HOST=redis
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    networks:
+      - mota-network
+    profiles:
+      - services
+
+  # 通知服务
+  mota-notify-service:
+    build:
+      context: ../mota-notify-service
+      dockerfile: Dockerfile
+    container_name: mota-notify-service
+    restart: unless-stopped
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - NACOS_SERVER_ADDR=nacos:8848
+      - MYSQL_HOST=mysql
+      - REDIS_HOST=redis
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    networks:
+      - mota-network
+    profiles:
+      - services
+
+  # 日历服务
+  mota-calendar-service:
+    build:
+      context: ../mota-calendar-service
+      dockerfile: Dockerfile
+    container_name: mota-calendar-service
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - NACOS_SERVER_ADDR=nacos:8848
+      - MYSQL_HOST=mysql
+      - REDIS_HOST=redis
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nacos:
+        condition: service_healthy
+    networks:
+      - mota-network
+    profiles:
+      - services
+
+# =====================================================
+# 网络配置
+# =====================================================
+networks:
+  mota-network:
+    driver: bridge
+
+# =====================================================
+# 数据卷配置
+# =====================================================
 volumes:
   mysql_data:
   redis_data:

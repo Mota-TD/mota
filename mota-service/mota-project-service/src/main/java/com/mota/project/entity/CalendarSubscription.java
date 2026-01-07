@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 
 /**
  * 日历订阅实体
+ * 对应数据库表: mota_project.calendar_subscription
  */
 @Data
 @TableName("calendar_subscription")
@@ -20,14 +21,29 @@ public class CalendarSubscription {
     private Long userId;
     
     /**
+     * 企业ID
+     */
+    private Long enterpriseId;
+    
+    /**
      * 订阅名称
      */
     private String name;
     
     /**
-     * 订阅URL (iCal格式)
+     * 订阅类型: personal, team, project, external
      */
-    private String url;
+    private String subscriptionType;
+    
+    /**
+     * 订阅源URL (iCal格式)
+     */
+    private String sourceUrl;
+    
+    /**
+     * 订阅源ID
+     */
+    private Long sourceId;
     
     /**
      * 日历颜色
@@ -35,9 +51,14 @@ public class CalendarSubscription {
     private String color;
     
     /**
-     * 同步间隔（分钟）
+     * 是否可见
      */
-    private Integer syncInterval;
+    private Boolean isVisible;
+    
+    /**
+     * 同步频率（分钟）
+     */
+    private Integer syncFrequency;
     
     /**
      * 最后同步时间
@@ -45,14 +66,14 @@ public class CalendarSubscription {
     private LocalDateTime lastSyncAt;
     
     /**
-     * 状态: active(活动), error(错误), paused(暂停)
+     * 同步状态: success, error, pending
      */
-    private String status;
+    private String syncStatus;
     
     /**
-     * 错误信息
+     * 同步错误信息
      */
-    private String errorMessage;
+    private String syncError;
     
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
@@ -60,11 +81,23 @@ public class CalendarSubscription {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedAt;
     
-    // 状态常量
-    public static final String STATUS_ACTIVE = "active";
-    public static final String STATUS_ERROR = "error";
-    public static final String STATUS_PAUSED = "paused";
+    /**
+     * 是否删除
+     */
+    @TableLogic
+    private Integer deleted;
     
-    // 默认同步间隔（分钟）
-    public static final int DEFAULT_SYNC_INTERVAL = 60;
+    // 订阅类型常量
+    public static final String TYPE_PERSONAL = "personal";
+    public static final String TYPE_TEAM = "team";
+    public static final String TYPE_PROJECT = "project";
+    public static final String TYPE_EXTERNAL = "external";
+    
+    // 同步状态常量
+    public static final String SYNC_SUCCESS = "success";
+    public static final String SYNC_ERROR = "error";
+    public static final String SYNC_PENDING = "pending";
+    
+    // 默认同步频率（分钟）
+    public static final int DEFAULT_SYNC_FREQUENCY = 60;
 }

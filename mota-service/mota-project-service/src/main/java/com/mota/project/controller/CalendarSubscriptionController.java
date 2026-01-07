@@ -91,26 +91,27 @@ public class CalendarSubscriptionController {
     }
     
     /**
-     * 暂停订阅
+     * 暂停订阅（设置为不可见）
      */
     @PostMapping("/{id}/pause")
     public Result<Boolean> pauseSubscription(@PathVariable Long id) {
         CalendarSubscription subscription = calendarSubscriptionService.getById(id);
         if (subscription != null) {
-            subscription.setStatus(CalendarSubscription.STATUS_PAUSED);
+            subscription.setIsVisible(false);
             calendarSubscriptionService.updateSubscription(subscription);
         }
         return Result.success(true);
     }
     
     /**
-     * 恢复订阅
+     * 恢复订阅（设置为可见并重新同步）
      */
     @PostMapping("/{id}/resume")
     public Result<Boolean> resumeSubscription(@PathVariable Long id) {
         CalendarSubscription subscription = calendarSubscriptionService.getById(id);
         if (subscription != null) {
-            subscription.setStatus(CalendarSubscription.STATUS_ACTIVE);
+            subscription.setIsVisible(true);
+            subscription.setSyncStatus(CalendarSubscription.SYNC_PENDING);
             calendarSubscriptionService.updateSubscription(subscription);
         }
         return Result.success(true);

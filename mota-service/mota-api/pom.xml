@@ -20,6 +20,10 @@
         <module>mota-api-auth</module>
         <module>mota-api-user</module>
         <module>mota-api-project</module>
+        <module>mota-api-ai</module>
+        <module>mota-api-knowledge</module>
+        <module>mota-api-notify</module>
+        <module>mota-api-calendar</module>
     </modules>
 
 </project>

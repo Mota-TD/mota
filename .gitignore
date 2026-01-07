@@ -32,3 +32,8 @@ out/
 
 # Vite
 .vite/
+
+# TypeScript build output (prevent compiled config files from being committed)
+vite.config.js
+vite.config.d.ts
+*.tsbuildinfo

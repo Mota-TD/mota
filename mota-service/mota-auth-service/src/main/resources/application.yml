@@ -26,8 +26,8 @@ spring:
         file-extension: yml
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:mota}?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-    username: ${DB_USERNAME:mota}
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:mota_auth}?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:mota_auth}
     password: ${DB_PASSWORD:mota123}
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
@@ -46,6 +46,10 @@ spring:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       database: 0
+  # Redisson配置
+  redis:
+    redisson:
+      file: classpath:redisson.yml
 
 # MyBatis Plus配置
 mybatis-plus:

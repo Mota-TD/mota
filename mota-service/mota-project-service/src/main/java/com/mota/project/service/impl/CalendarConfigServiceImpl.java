@@ -1,52 +1,61 @@
 package com.mota.project.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mota.project.entity.CalendarConfig;
 import com.mota.project.mapper.CalendarConfigMapper;
 import com.mota.project.service.CalendarConfigService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.time.LocalTime;
 
 /**
  * 日历配置服务实现
+ * 用于管理用户的日历显示配置（视图设置、工作时间等）
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
-public class CalendarConfigServiceImpl extends ServiceImpl<CalendarConfigMapper, CalendarConfig> 
+public class CalendarConfigServiceImpl extends ServiceImpl<CalendarConfigMapper, CalendarConfig>
         implements CalendarConfigService {
     
     private final CalendarConfigMapper calendarConfigMapper;
     
     @Override
-    public List<CalendarConfig> getByUserId(Long userId) {
+    public CalendarConfig getByUserId(Long userId) {
         return calendarConfigMapper.selectByUserId(userId);
     }
     
     @Override
-    public CalendarConfig getDefaultByUserId(Long userId) {
-        return calendarConfigMapper.selectDefaultByUserId(userId);
+    public CalendarConfig getByUserIdAndEnterpriseId(Long userId, Long enterpriseId) {
+        return calendarConfigMapper.selectByUserIdAndEnterpriseId(userId, enterpriseId);
     }
     
     @Override
     @Transactional
-    public CalendarConfig createConfig(CalendarConfig config) {
-        config.setCreatedAt(LocalDateTime.now());
-        config.setUpdatedAt(LocalDateTime.now());
-        
-        // 如果是第一个配置，设为默认
-        List<CalendarConfig> existingConfigs = getByUserId(config.getUserId());
-        if (existingConfigs.isEmpty()) {
-            config.setIsDefault(true);
+    public CalendarConfig saveOrUpdateConfig(CalendarConfig config) {
+        CalendarConfig existing = null;
+        if (config.getEnterpriseId() != null) {
+            existing = calendarConfigMapper.selectByUserIdAndEnterpriseId(config.getUserId(), config.getEnterpriseId());
+        } else {
+            existing = calendarConfigMapper.selectByUserId(config.getUserId());
         }
         
-        save(config);
-        return config;
+        if (existing != null) {
+            config.setId(existing.getId());
+            config.setUpdatedAt(LocalDateTime.now());
+            updateById(config);
+            log.info("更新日历配置成功: id={}, userId={}", config.getId(), config.getUserId());
+        } else {
+            config.setCreatedAt(LocalDateTime.now());
+            config.setUpdatedAt(LocalDateTime.now());
+            save(config);
+            log.info("创建日历配置成功: id={}, userId={}", config.getId(), config.getUserId());
+        }
+        return getById(config.getId());
     }
     
     @Override
@@ -54,25 +63,39 @@ public class CalendarConfigServiceImpl extends ServiceImpl<CalendarConfigMapper,
     public CalendarConfig updateConfig(CalendarConfig config) {
         config.setUpdatedAt(LocalDateTime.now());
         updateById(config);
+        log.info("更新日历配置成功: id={}", config.getId());
         return getById(config.getId());
     }
     
     @Override
-    @Transactional
-    public void setDefault(Long userId, Long configId) {
-        // 先将该用户所有配置设为非默认
-        LambdaUpdateWrapper<CalendarConfig> resetWrapper = new LambdaUpdateWrapper<>();
-        resetWrapper.eq(CalendarConfig::getUserId, userId)
-                   .set(CalendarConfig::getIsDefault, false)
-                   .set(CalendarConfig::getUpdatedAt, LocalDateTime.now());
-        update(resetWrapper);
+    public CalendarConfig getOrCreateDefault(Long userId, Long enterpriseId) {
+        CalendarConfig config = null;
+        if (enterpriseId != null) {
+            config = calendarConfigMapper.selectByUserIdAndEnterpriseId(userId, enterpriseId);
+        } else {
+            config = calendarConfigMapper.selectByUserId(userId);
+        }
         
-        // 设置指定配置为默认
-        LambdaUpdateWrapper<CalendarConfig> setWrapper = new LambdaUpdateWrapper<>();
-        setWrapper.eq(CalendarConfig::getId, configId)
-                 .eq(CalendarConfig::getUserId, userId)
-                 .set(CalendarConfig::getIsDefault, true)
-                 .set(CalendarConfig::getUpdatedAt, LocalDateTime.now());
-        update(setWrapper);
+        if (config == null) {
+            // 创建默认配置
+            config = new CalendarConfig();
+            config.setUserId(userId);
+            config.setEnterpriseId(enterpriseId);
+            config.setDefaultView(CalendarConfig.VIEW_MONTH);
+            config.setWeekStart(CalendarConfig.WEEK_START_MONDAY);
+            config.setWorkHoursStart(LocalTime.of(9, 0));
+            config.setWorkHoursEnd(LocalTime.of(18, 0));
+            config.setWorkDays("[1,2,3,4,5]");
+            config.setTimezone("Asia/Shanghai");
+            config.setDefaultReminder(15);
+            config.setShowWeekends(true);
+            config.setShowDeclined(false);
+            config.setCreatedAt(LocalDateTime.now());
+            config.setUpdatedAt(LocalDateTime.now());
+            save(config);
+            log.info("创建默认日历配置: userId={}, enterpriseId={}", userId, enterpriseId);
+        }
+        
+        return config;
     }
 }

@@ -14,7 +14,7 @@ import java.util.List;
  * 工作流控制器
  */
 @RestController
-@RequestMapping("/api/workflows")
+@RequestMapping("/api/v1/workflows")
 @RequiredArgsConstructor
 public class WorkflowController {
 

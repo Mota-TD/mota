@@ -1,5 +1,7 @@
 package com.mota.common.security.config;
 
+import com.mota.common.security.filter.UserHeaderFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,15 +10,19 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
  * 通用安全配置
  * 禁用 HTTP Basic 认证，防止返回 WWW-Authenticate 头
- * 认证由网关统一处理，各微服务不需要再次认证
+ * 认证由网关统一处理，各微服务从请求头读取用户信息
  */
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final UserHeaderFilter userHeaderFilter;
 
     @Bean
     @ConditionalOnMissingBean(SecurityFilterChain.class)
@@ -42,7 +48,9 @@ public class SecurityConfig {
                     response.setContentType("application/json;charset=UTF-8");
                     response.getWriter().write("{\"code\":401,\"message\":\"未授权\",\"timestamp\":" + System.currentTimeMillis() + "}");
                 })
-            );
+            )
+            // 添加用户请求头过滤器，从网关传递的请求头中读取用户信息
+            .addFilterBefore(userHeaderFilter, UsernamePasswordAuthenticationFilter.class);
         
         return http.build();
     }

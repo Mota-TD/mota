@@ -16,7 +16,7 @@ import java.util.Map;
  * 知识图谱控制器
  */
 @RestController
-@RequestMapping("/api/knowledge-graph")
+@RequestMapping("/api/v1/knowledge-graph")
 @RequiredArgsConstructor
 public class KnowledgeGraphController {
 

@@ -18,11 +18,11 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo [1/4] Docker 已运行
+echo [1/5] Docker 已运行
 echo.
 
 REM 启动基础设施
-echo [2/4] 启动基础设施（PostgreSQL、Redis、Nacos）...
+echo [2/5] 启动基础设施（MySQL、Redis、Nacos）...
 docker-compose up -d
 
 if errorlevel 1 (
@@ -32,21 +32,48 @@ if errorlevel 1 (
 )
 
 echo.
-echo [3/4] 等待服务就绪（约30秒）...
-timeout /t 30 /nobreak >nul
+echo [3/5] 等待MySQL启动（约15秒）...
+timeout /t 15 /nobreak >nul
 
 echo.
-echo [4/4] 基础设施启动完成！
+echo [4/5] 正在执行数据库初始化脚本...
+echo      文件: ./init-db.sql
+echo      架构: 微服务多库设计
+echo.
+
+docker exec -i mota-mysql mysql -uroot -proot123 < ./init-db.sql
+
+if %errorlevel% equ 0 (
+    echo      数据库初始化成功！
+) else (
+    echo      [警告] 数据库初始化可能失败，请检查日志
+    echo      如果是首次运行，可能需要等待MySQL完全启动后重试
+)
+
+echo.
+echo [5/5] 基础设施启动完成！
 echo.
 echo ========================================
 echo   服务访问地址
 echo ========================================
-echo   PostgreSQL: localhost:5432
+echo   MySQL:      localhost:3306
+echo              root密码: root123
 echo   Redis:      localhost:6379
 echo   Nacos:      http://localhost:8848/nacos
 echo              用户名: nacos
 echo              密码:   nacos
 echo ========================================
+echo.
+echo   微服务数据库架构：
+echo   ----------------------------------------
+echo   mota_auth      - 认证服务数据库
+echo   mota_project   - 项目服务数据库
+echo   mota_ai        - AI服务数据库
+echo   mota_knowledge - 知识服务数据库
+echo   mota_notify    - 通知服务数据库
+echo   mota_calendar  - 日历服务数据库
+echo   ----------------------------------------
+echo   服务账户密码统一为: mota123
 echo.
 echo 现在可以启动后端微服务了：
 echo   cd .. ^&^& java -jar mota-auth-service/target/mota-auth-service-1.0.0-SNAPSHOT.jar

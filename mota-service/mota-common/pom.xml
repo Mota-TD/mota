@@ -22,6 +22,7 @@
         <module>mota-common-redis</module>
         <module>mota-common-mybatis</module>
         <module>mota-common-log</module>
+        <module>mota-common-feign</module>
     </modules>
 
 </project>

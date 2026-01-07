@@ -16,10 +16,11 @@ import java.util.Map;
 /**
  * 新闻文章控制器
  * 提供新闻内容获取和实时抓取功能
+ * 此控制器属于项目服务，提供项目相关的新闻文章功能
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/news/article")
+@RequestMapping("/api/v1/news/article")
 @RequiredArgsConstructor
 public class NewsArticleController {
 

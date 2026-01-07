@@ -1,0 +1,158 @@
+server:
+  port: 8086
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+spring:
+  application:
+    name: mota-calendar-service
+  profiles:
+    active: dev
+  config:
+    import: optional:nacos:${spring.application.name}.yml
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_SERVER:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:}
+        group: ${NACOS_GROUP:DEFAULT_GROUP}
+      config:
+        server-addr: ${NACOS_SERVER:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:}
+        group: ${NACOS_GROUP:DEFAULT_GROUP}
+        file-extension: yml
+  
+  # 数据源配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:mota_calendar}?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:mota_calendar}
+    password: ${DB_PASSWORD:mota123}
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 30000
+      pool-name: MotaCalendarHikariCP
+      max-lifetime: 1800000
+      connection-timeout: 30000
+
+  # Redis配置
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      database: 5
+      timeout: 10000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-wait: -1ms
+          max-idle: 8
+          min-idle: 0
+  # Redisson配置
+  redis:
+    redisson:
+      file: classpath:redisson.yml
+
+# MyBatis-Plus配置
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.mota.calendar.entity
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# JWT配置
+jwt:
+  secret: ${JWT_SECRET:bW90YS1zZWNyZXQta2V5LWZvci1qd3QtdG9rZW4tZ2VuZXJhdGlvbi1tdXN0LWJlLWF0LWxlYXN0LTI1Ni1iaXRz}
+  expiration: 86400000
+  refresh-expiration: 604800000
+
+# 日历配置
+calendar:
+  # 日历类型
+  types:
+    - personal   # 个人日历
+    - team       # 团队日历
+    - project    # 项目日历
+    - task       # 任务日历
+  
+  # 视图配置
+  views:
+    default: month
+    available:
+      - day
+      - week
+      - month
+      - agenda
+  
+  # 提醒配置
+  reminder:
+    default-before: 15  # 默认提前15分钟提醒
+    options:
+      - 0      # 事件开始时
+      - 5      # 5分钟前
+      - 15     # 15分钟前
+      - 30     # 30分钟前
+      - 60     # 1小时前
+      - 1440   # 1天前
+  
+  # 循环事件配置
+  recurrence:
+    max-occurrences: 365  # 最大循环次数
+    max-years: 5          # 最大循环年限
+  
+  # iCal配置
+  ical:
+    enabled: true
+    export-path: /api/v1/calendar/export
+    subscription-path: /api/v1/calendar/subscribe
+  
+  # 冲突检测配置
+  conflict:
+    enabled: true
+    check-interval: 60  # 检测间隔（秒）
+
+# 日志配置
+logging:
+  level:
+    com.mota: debug
+    org.springframework.cloud: info
+
+# Actuator配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+# SpringDoc配置
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /doc.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  group-configs:
+    - group: '日历事件'
+      paths-to-match: '/api/v1/calendar/events/**'
+    - group: '日历配置'
+      paths-to-match: '/api/v1/calendar/config/**'
+    - group: '日历订阅'
+      paths-to-match: '/api/v1/calendar/subscriptions/**'
+    - group: '提醒管理'
+      paths-to-match: '/api/v1/calendar/reminders/**'

@@ -13,9 +13,10 @@ import java.util.Map;
 /**
  * AI方案生成控制器（旧版兼容接口）
  * 注意：新功能请使用 AIProposalGenerationController
+ * 此控制器属于项目服务，提供项目相关的AI方案生成功能
  */
 @RestController
-@RequestMapping("/api/ai/proposal/legacy")
+@RequestMapping("/api/v1/ai/proposal/legacy")
 @RequiredArgsConstructor
 @Tag(name = "AI方案生成（旧版）", description = "AI方案生成旧版兼容接口")
 public class AIProposalController {

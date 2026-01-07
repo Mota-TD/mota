@@ -19,7 +19,7 @@ import java.util.Map;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/knowledge/statistics")
+@RequestMapping("/api/v1/knowledge/statistics")
 @RequiredArgsConstructor
 public class KnowledgeStatisticsController {
 

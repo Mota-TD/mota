@@ -11,17 +11,21 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
- * AI 智能功能控制器
+ * AI 项目智能功能控制器
+ * 提供项目相关的AI功能：历史记录、方案生成、PPT生成、项目协同AI等
+ *
+ * 注意：
+ * - AI核心功能（对话、新闻、训练、搜索）已迁移到 mota-ai-service
+ * - 此控制器只保留与项目强相关的AI功能
  */
 @Slf4j
-@Tag(name = "AI 智能功能", description = "AI 方案生成、PPT生成、任务分解、风险预警等智能功能")
+@Tag(name = "AI项目智能功能", description = "项目相关的AI功能：历史记录、方案生成、PPT生成、项目协同AI等")
 @RestController
 @RequestMapping("/api/v1/ai")
 @RequiredArgsConstructor
@@ -117,90 +121,6 @@ public class AIController {
     public Result<Void> deleteHistory(
             @Parameter(description = "记录ID", required = true) @PathVariable String id) {
         return Result.success(null);
-    }
-
-    // ============ 新闻 API ============
-
-    /**
-     * 获取新闻列表
-     */
-    @Operation(summary = "获取AI推荐新闻", description = "获取AI推荐的相关新闻列表")
-    @ApiResponse(responseCode = "200", description = "查询成功")
-    @GetMapping("/news")
-    public Result<NewsListResponse> getNews(
-            @Parameter(description = "新闻分类") @RequestParam(required = false) String category,
-            @Parameter(description = "搜索关键字") @RequestParam(required = false) String search,
-            @Parameter(description = "页码") @RequestParam(defaultValue = "1") Integer page,
-            @Parameter(description = "每页数量") @RequestParam(defaultValue = "10") Integer pageSize) {
-        
-        List<NewsItem> newsList = new ArrayList<>();
-        newsList.add(NewsItem.builder()
-                .id("1")
-                .title("人工智能在企业管理中的应用趋势")
-                .summary("随着AI技术的不断发展，越来越多的企业开始将人工智能应用于日常管理中...")
-                .source("科技日报")
-                .sourceIcon("https://example.com/tech-daily.png")
-                .publishTime(LocalDateTime.now().minusHours(2).format(DATE_FORMATTER))
-                .category("technology")
-                .tags(Arrays.asList("AI", "企业管理", "数字化"))
-                .url("https://example.com/news/1")
-                .isStarred(false)
-                .relevance(95)
-                .build());
-        newsList.add(NewsItem.builder()
-                .id("2")
-                .title("2024年项目管理最佳实践报告发布")
-                .summary("PMI发布了最新的项目管理最佳实践报告，涵盖敏捷、瀑布等多种方法论...")
-                .source("PMI官网")
-                .sourceIcon("https://example.com/pmi.png")
-                .publishTime(LocalDateTime.now().minusHours(5).format(DATE_FORMATTER))
-                .category("management")
-                .tags(Arrays.asList("项目管理", "敏捷", "最佳实践"))
-                .url("https://example.com/news/2")
-                .isStarred(true)
-                .relevance(88)
-                .build());
-        newsList.add(NewsItem.builder()
-                .id("3")
-                .title("远程协作工具市场分析")
-                .summary("疫情后远程办公成为常态，各类协作工具市场竞争激烈...")
-                .source("36氪")
-                .sourceIcon("https://example.com/36kr.png")
-                .publishTime(LocalDateTime.now().minusDays(1).format(DATE_FORMATTER))
-                .category("industry")
-                .tags(Arrays.asList("远程办公", "协作工具", "市场分析"))
-                .url("https://example.com/news/3")
-                .isStarred(false)
-                .relevance(82)
-                .build());
-        
-        return Result.success(NewsListResponse.builder()
-                .list(newsList)
-                .total(newsList.size())
-                .build());
-    }
-
-    /**
-     * 收藏/取消收藏新闻
-     */
-    @Operation(summary = "收藏/取消收藏新闻", description = "切换新闻的收藏状态")
-    @ApiResponse(responseCode = "200", description = "操作成功")
-    @PostMapping("/news/{id}/star")
-    public Result<Map<String, Boolean>> toggleNewsStar(
-            @Parameter(description = "新闻ID", required = true) @PathVariable String id) {
-        Map<String, Boolean> result = new HashMap<>();
-        result.put("isStarred", true);
-        return Result.success(result);
-    }
-
-    /**
-     * 刷新新闻
-     */
-    @Operation(summary = "刷新新闻列表", description = "获取最新的AI推荐新闻")
-    @ApiResponse(responseCode = "200", description = "刷新成功")
-    @PostMapping("/news/refresh")
-    public Result<NewsListResponse> refreshNews() {
-        return getNews(null, null, 1, 10);
     }
 
     // ============ 方案生成 API ============
@@ -338,129 +258,8 @@ public class AIController {
         return Result.success("/downloads/ppt/" + id + "." + format);
     }
 
-    // ============ 模型训练 API ============
-
-    /**
-     * 获取训练统计
-     */
-    @Operation(summary = "获取训练统计", description = "获取AI模型训练的统计信息")
-    @ApiResponse(responseCode = "200", description = "查询成功")
-    @GetMapping("/training/stats")
-    public Result<TrainingStats> getTrainingStats() {
-        return Result.success(TrainingStats.builder()
-                .totalDocuments(156)
-                .totalTokens("2.5M")
-                .lastTraining(LocalDateTime.now().minusDays(3).format(DATE_FORMATTER))
-                .modelVersion("v1.2.0")
-                .accuracy(0.92)
-                .build());
-    }
-
-    /**
-     * 获取训练历史
-     */
-    @Operation(summary = "获取训练历史", description = "获取AI模型的训练历史记录")
-    @ApiResponse(responseCode = "200", description = "查询成功")
-    @GetMapping("/training/history")
-    public Result<List<TrainingHistory>> getTrainingHistory() {
-        List<TrainingHistory> history = Arrays.asList(
-                TrainingHistory.builder().id(1).version("v1.2.0").date("2024-01-15").documents(156).status("completed").accuracy(0.92).build(),
-                TrainingHistory.builder().id(2).version("v1.1.0").date("2024-01-01").documents(120).status("completed").accuracy(0.89).build(),
-                TrainingHistory.builder().id(3).version("v1.0.0").date("2023-12-15").documents(80).status("completed").accuracy(0.85).build()
-        );
-        return Result.success(history);
-    }
-
-    /**
-     * 获取知识库文档列表
-     */
-    @Operation(summary = "获取知识库文档列表", description = "获取用于AI训练的知识库文档")
-    @ApiResponse(responseCode = "200", description = "查询成功")
-    @GetMapping("/training/documents")
-    public Result<List<KnowledgeDocument>> getKnowledgeDocuments() {
-        List<KnowledgeDocument> documents = Arrays.asList(
-                KnowledgeDocument.builder().id(1).name("公司制度手册.pdf").size("2.5MB").uploadTime("2024-01-10").status("indexed").build(),
-                KnowledgeDocument.builder().id(2).name("产品说明书.docx").size("1.2MB").uploadTime("2024-01-08").status("indexed").build(),
-                KnowledgeDocument.builder().id(3).name("培训资料.pptx").size("5.8MB").uploadTime("2024-01-05").status("pending").build()
-        );
-        return Result.success(documents);
-    }
-
-    /**
-     * 上传知识库文档
-     */
-    @Operation(summary = "上传知识库文档", description = "上传文档到知识库用于AI训练")
-    @ApiResponse(responseCode = "200", description = "上传成功")
-    @PostMapping("/training/documents")
-    public Result<KnowledgeDocument> uploadKnowledgeDocument(
-            @Parameter(description = "文档文件", required = true) @RequestParam("file") MultipartFile file) {
-        return Result.success(KnowledgeDocument.builder()
-                .id(new Random().nextInt(1000))
-                .name(file.getOriginalFilename())
-                .size(formatFileSize(file.getSize()))
-                .uploadTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                .status("pending")
-                .build());
-    }
-
-    /**
-     * 删除知识库文档
-     */
-    @Operation(summary = "删除知识库文档", description = "从知识库中删除文档")
-    @ApiResponse(responseCode = "200", description = "删除成功")
-    @DeleteMapping("/training/documents/{id}")
-    public Result<Void> deleteKnowledgeDocument(
-            @Parameter(description = "文档ID", required = true) @PathVariable Integer id) {
-        return Result.success(null);
-    }
-
-    /**
-     * 开始训练
-     */
-    @Operation(summary = "开始AI训练", description = "启动AI模型训练任务")
-    @ApiResponse(responseCode = "200", description = "训练任务已启动")
-    @PostMapping("/training/start")
-    public Result<Map<String, String>> startTraining() {
-        Map<String, String> result = new HashMap<>();
-        result.put("taskId", UUID.randomUUID().toString());
-        return Result.success(result);
-    }
-
-    /**
-     * 获取训练进度
-     */
-    @Operation(summary = "获取训练进度", description = "获取AI训练任务的进度")
-    @ApiResponse(responseCode = "200", description = "查询成功")
-    @GetMapping("/training/progress/{taskId}")
-    public Result<Map<String, Object>> getTrainingProgress(
-            @Parameter(description = "训练任务ID", required = true) @PathVariable String taskId) {
-        Map<String, Object> result = new HashMap<>();
-        result.put("progress", 75);
-        result.put("status", "training");
-        return Result.success(result);
-    }
-
-    /**
-     * 保存训练设置
-     */
-    @Operation(summary = "保存训练设置", description = "保存AI模型训练的配置参数")
-    @ApiResponse(responseCode = "200", description = "保存成功")
-    @PostMapping("/training/settings")
-    public Result<Void> saveTrainingSettings(@RequestBody TrainingSettingsRequest request) {
-        return Result.success(null);
-    }
-
-    /**
-     * 保存业务配置
-     */
-    @Operation(summary = "保存业务配置", description = "保存AI业务相关的配置")
-    @ApiResponse(responseCode = "200", description = "保存成功")
-    @PostMapping("/training/business-config")
-    public Result<Void> saveBusinessConfig(@RequestBody BusinessConfigRequest request) {
-        return Result.success(null);
-    }
-
     // ============ 项目协同 AI 功能 ============
+    // 注意：模型训练相关API已迁移到 mota-ai-service 的 AITrainingController
 
     /**
      * AI 任务分解 - 调用 Claude 大模型进行智能任务分解
@@ -657,19 +456,5 @@ public class AIController {
                 .resourceRequirements("需要2名开发人员、1名测试人员")
                 .risks(Arrays.asList("需求变更风险", "技术难点风险", "人员变动风险"))
                 .build());
-    }
-
-    // ============ 辅助方法 ============
-
-    private String formatFileSize(long size) {
-        if (size < 1024) {
-            return size + "B";
-        } else if (size < 1024 * 1024) {
-            return String.format("%.1fKB", size / 1024.0);
-        } else if (size < 1024 * 1024 * 1024) {
-            return String.format("%.1fMB", size / (1024.0 * 1024));
-        } else {
-            return String.format("%.1fGB", size / (1024.0 * 1024 * 1024));
-        }
     }
 }

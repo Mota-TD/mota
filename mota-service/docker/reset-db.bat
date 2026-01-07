@@ -1,28 +1,24 @@
 @echo off
 chcp 65001 >nul
 echo ========================================
-echo Mota 数据库重置工具
+echo Mota 微服务数据库重置工具
 echo ========================================
 echo.
 echo 警告: 此操作将删除所有数据并重新初始化数据库!
 echo.
-echo 数据库初始化脚本包含以下模块：
-echo   [V1.0]  基础表结构（用户、项目、通知、活动等）
-echo   [V2.0]  项目协同模块（部门任务、工作计划、里程碑等）
-echo   [V3.0]  任务依赖和子任务（依赖关系、检查清单、日程等）
-echo   [V4.0]  文档协作（文档管理、版本控制、知识图谱等）
-echo   [V5.0]  工作流和视图配置（自定义工作流、状态管理等）
-echo   [V8.0]  知识使用统计（复用统计、知识缺口分析等）
-echo   [V9.0]  AI知识库（文档向量化、语义搜索、OCR等）
-echo   [V10.0] 智能新闻推送（新闻分类、用户偏好、推送记录等）
-echo   [V11.0] AI方案生成（方案内容、图表建议、导出模板等）
-echo   [V12.0] 智能搜索（搜索日志、关键词统计等）
-echo   [V13.0] AI助手（聊天会话、数据分析、任务命令等）
-echo   [V14.0] 多模型支持（模型配置、调用日志、性能监控等）
-echo   [V15.0] 系统管理增强（操作日志、系统配置、数据备份等）
-echo   [V16.0] 通知中心增强（通知偏好、免打扰、订阅管理等）
-echo   [V17.0] 企业注册模块（企业信息、管理员、审核等）
-echo   [V21.0] 里程碑负责人和任务同步
+echo 微服务数据库架构：
+echo   [mota_auth]      认证服务 - 用户、企业、部门、SSO、权限
+echo   [mota_project]   项目服务 - 项目、任务、里程碑、文档、工作流
+echo   [mota_ai]        AI服务   - 对话、方案生成、智能搜索、新闻
+echo   [mota_knowledge] 知识服务 - 文件管理、分类、标签、模板
+echo   [mota_notify]    通知服务 - 通知、订阅、邮件队列、推送
+echo   [mota_calendar]  日历服务 - 事件、参与者、提醒、订阅
+echo.
+echo 初始化脚本包含：
+echo   - 6个独立数据库和服务账户
+echo   - 100+ 数据表
+echo   - 完整的索引和约束
+echo   - 初始化数据（行业、工作流模板、AI方案模板）
 echo.
 set /p confirm="确认继续? (y/n): "
 if /i not "%confirm%"=="y" (
@@ -50,13 +46,18 @@ echo [4/5] 等待MySQL启动（约15秒）...
 timeout /t 15 /nobreak >nul
 
 echo.
-echo [5/5] 正在执行数据库初始化脚本...
-echo      文件: ../sql/init-db.sql
-echo      大小: 约 249KB
-echo      表数: 约 178 个
+echo [5/5] 正在清理旧数据库并执行初始化脚本...
+echo      清理: 删除旧的 mota 数据库和用户（如果存在）
+echo      文件: ./init-db.sql
+echo      架构: 微服务多库设计
+echo      数据库: 6个
 echo.
 
-docker exec -i mota-mysql mysql -uroot -proot123 mota < ../sql/init-db.sql
+REM 删除旧的 mota 数据库和用户（如果存在）
+docker exec -i mota-mysql mysql -uroot -proot123 -e "DROP DATABASE IF EXISTS mota; DROP USER IF EXISTS 'mota'@'%%'; FLUSH PRIVILEGES;" 2>nul
+
+REM 执行初始化脚本
+docker exec -i mota-mysql mysql -uroot -proot123 < ./init-db.sql
 
 if %errorlevel% equ 0 (
     echo.
@@ -64,12 +65,16 @@ if %errorlevel% equ 0 (
     echo 数据库重置完成!
     echo ========================================
     echo.
-    echo 已成功创建 178 个数据表，涵盖：
-    echo - 核心项目管理（项目、任务、成员、部门）
-    echo - 文档协作（文档、版本、评论、协作者）
-    echo - 工作流管理（工作流模板、状态、流转规则）
-    echo - AI功能（知识库、助手、新闻推送、方案生成）
-    echo - 系统管理（用户、通知、日志、配置）
+    echo   已成功创建 6 个微服务数据库：
+    echo.
+    echo   mota_auth      - 认证服务数据库
+    echo   mota_project   - 项目服务数据库
+    echo   mota_ai        - AI服务数据库
+    echo   mota_knowledge - 知识服务数据库
+    echo   mota_notify    - 通知服务数据库
+    echo   mota_calendar  - 日历服务数据库
+    echo.
+    echo 每个数据库都有独立的服务账户（密码: mota123）
     echo.
     echo 请刷新浏览器页面查看效果。
 ) else (
@@ -80,7 +85,7 @@ if %errorlevel% equ 0 (
     echo.
     echo 请检查：
     echo 1. MySQL容器是否正常运行: docker ps
-    echo 2. init-db.sql文件是否存在: dir ..\sql\init-db.sql
+    echo 2. init-db.sql文件是否存在: dir .\init-db.sql
     echo 3. 数据库连接信息是否正确
     echo 4. 查看MySQL日志: docker logs mota-mysql
     echo.

@@ -30,7 +30,7 @@ import java.util.Map;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/news/cache/sharding")
+@RequestMapping("/api/v1/news/cache/sharding")
 @RequiredArgsConstructor
 @Tag(name = "缓存分片管理", description = "缓存分片管理相关接口")
 public class CacheShardingController {

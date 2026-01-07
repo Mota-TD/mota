@@ -16,10 +16,11 @@ import java.util.Map;
 /**
  * AI方案生成控制器
  * 实现AG-001到AG-010功能的REST API
+ * 此控制器属于项目服务，提供项目相关的AI方案生成功能
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/ai/proposal")
+@RequestMapping("/api/v1/ai/proposal")
 @RequiredArgsConstructor
 @Tag(name = "AI方案生成", description = "AI智能方案生成相关接口")
 public class AIProposalGenerationController {

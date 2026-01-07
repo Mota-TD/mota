@@ -13,7 +13,7 @@ import java.util.Map;
  * 用户视图配置控制器
  */
 @RestController
-@RequestMapping("/api/view-configs")
+@RequestMapping("/api/v1/view-configs")
 @RequiredArgsConstructor
 public class UserViewConfigController {
 

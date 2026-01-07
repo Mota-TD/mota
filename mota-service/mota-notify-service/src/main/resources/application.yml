@@ -1,0 +1,203 @@
+server:
+  port: 8085
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+spring:
+  application:
+    name: mota-notify-service
+  profiles:
+    active: dev
+  config:
+    import: optional:nacos:${spring.application.name}.yml
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_SERVER:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:}
+        group: ${NACOS_GROUP:DEFAULT_GROUP}
+      config:
+        server-addr: ${NACOS_SERVER:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:}
+        group: ${NACOS_GROUP:DEFAULT_GROUP}
+        file-extension: yml
+  
+  # 数据源配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:mota_notify}?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:mota_notify}
+    password: ${DB_PASSWORD:mota123}
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 30000
+      pool-name: MotaNotifyHikariCP
+      max-lifetime: 1800000
+      connection-timeout: 30000
+
+  # Redis配置
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      database: 4
+      timeout: 10000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-wait: -1ms
+          max-idle: 8
+          min-idle: 0
+  # Redisson配置
+  redis:
+    redisson:
+      file: classpath:redisson.yml
+
+  # 邮件配置
+  mail:
+    host: ${MAIL_HOST:smtp.example.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+    default-encoding: UTF-8
+
+  # Kafka配置
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
+    consumer:
+      group-id: mota-notify-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      retries: 3
+
+  # Thymeleaf配置（邮件模板）
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    cache: false
+
+# MyBatis-Plus配置
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.mota.notify.entity
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# JWT配置
+jwt:
+  secret: ${JWT_SECRET:bW90YS1zZWNyZXQta2V5LWZvci1qd3QtdG9rZW4tZ2VuZXJhdGlvbi1tdXN0LWJlLWF0LWxlYXN0LTI1Ni1iaXRz}
+  expiration: 86400000
+  refresh-expiration: 604800000
+
+# 通知配置
+notify:
+  # WebSocket配置
+  websocket:
+    enabled: true
+    endpoint: /ws/notify
+    heartbeat-interval: 30000
+  
+  # 邮件通知配置
+  email:
+    enabled: true
+    from: ${MAIL_FROM:noreply@mota.com}
+    from-name: 摩塔通知
+    retry-times: 3
+    retry-interval: 60000
+  
+  # 推送通知配置
+  push:
+    # 企业微信
+    wechat-work:
+      enabled: false
+      corp-id: ${WECHAT_WORK_CORP_ID:}
+      agent-id: ${WECHAT_WORK_AGENT_ID:}
+      secret: ${WECHAT_WORK_SECRET:}
+    # 钉钉
+    dingtalk:
+      enabled: false
+      app-key: ${DINGTALK_APP_KEY:}
+      app-secret: ${DINGTALK_APP_SECRET:}
+    # 飞书
+    feishu:
+      enabled: false
+      app-id: ${FEISHU_APP_ID:}
+      app-secret: ${FEISHU_APP_SECRET:}
+  
+  # 通知聚合配置
+  aggregation:
+    enabled: true
+    interval: 300  # 聚合间隔（秒）
+    max-count: 10  # 最大聚合数量
+  
+  # AI分类配置
+  ai-classification:
+    enabled: true
+    threshold: 0.7  # 分类置信度阈值
+  
+  # 免打扰配置
+  dnd:
+    default-start: "22:00"
+    default-end: "08:00"
+
+# 日志配置
+logging:
+  level:
+    com.mota: debug
+    org.springframework.cloud: info
+
+# Actuator配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+# SpringDoc配置
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /doc.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  group-configs:
+    - group: '通知管理'
+      paths-to-match: '/api/v1/notifications/**'
+    - group: '订阅管理'
+      paths-to-match: '/api/v1/notifications/subscriptions/**'
+    - group: '免打扰设置'
+      paths-to-match: '/api/v1/notifications/dnd/**'
+    - group: '偏好设置'
+      paths-to-match: '/api/v1/notifications/preferences/**'

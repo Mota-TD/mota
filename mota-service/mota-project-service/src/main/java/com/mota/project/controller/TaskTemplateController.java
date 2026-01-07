@@ -13,7 +13,7 @@ import java.util.Map;
  * 任务模板控制器
  */
 @RestController
-@RequestMapping("/api/task-templates")
+@RequestMapping("/api/v1/task-templates")
 @RequiredArgsConstructor
 public class TaskTemplateController {
 

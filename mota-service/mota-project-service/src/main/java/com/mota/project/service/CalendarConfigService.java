@@ -3,27 +3,26 @@ package com.mota.project.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.mota.project.entity.CalendarConfig;
 
-import java.util.List;
-
 /**
  * 日历配置服务接口
+ * 用于管理用户的日历显示配置（视图设置、工作时间等）
  */
 public interface CalendarConfigService extends IService<CalendarConfig> {
     
     /**
-     * 获取用户的日历配置列表
+     * 获取用户的日历配置
      */
-    List<CalendarConfig> getByUserId(Long userId);
+    CalendarConfig getByUserId(Long userId);
     
     /**
-     * 获取用户的默认日历配置
+     * 获取用户在指定企业的日历配置
      */
-    CalendarConfig getDefaultByUserId(Long userId);
+    CalendarConfig getByUserIdAndEnterpriseId(Long userId, Long enterpriseId);
     
     /**
-     * 创建日历配置
+     * 创建或更新日历配置
      */
-    CalendarConfig createConfig(CalendarConfig config);
+    CalendarConfig saveOrUpdateConfig(CalendarConfig config);
     
     /**
      * 更新日历配置
@@ -31,7 +30,7 @@ public interface CalendarConfigService extends IService<CalendarConfig> {
     CalendarConfig updateConfig(CalendarConfig config);
     
     /**
-     * 设置默认日历
+     * 获取或创建默认配置
      */
-    void setDefault(Long userId, Long configId);
+    CalendarConfig getOrCreateDefault(Long userId, Long enterpriseId);
 }

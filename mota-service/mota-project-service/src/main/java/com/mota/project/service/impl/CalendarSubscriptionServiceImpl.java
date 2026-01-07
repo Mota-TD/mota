@@ -30,7 +30,7 @@ public class CalendarSubscriptionServiceImpl extends ServiceImpl<CalendarSubscri
     private final CalendarSubscriptionMapper calendarSubscriptionMapper;
     private final CalendarEventMapper calendarEventMapper;
     
-    @Value("${app.base-url:http://localhost:8083}")
+    @Value("${app.base-url:http://localhost:8084}")
     private String baseUrl;
     
     @Override
@@ -41,9 +41,12 @@ public class CalendarSubscriptionServiceImpl extends ServiceImpl<CalendarSubscri
     @Override
     @Transactional
     public CalendarSubscription createSubscription(CalendarSubscription subscription) {
-        subscription.setStatus(CalendarSubscription.STATUS_ACTIVE);
-        if (subscription.getSyncInterval() == null) {
-            subscription.setSyncInterval(CalendarSubscription.DEFAULT_SYNC_INTERVAL);
+        subscription.setSyncStatus(CalendarSubscription.SYNC_PENDING);
+        if (subscription.getSyncFrequency() == null) {
+            subscription.setSyncFrequency(CalendarSubscription.DEFAULT_SYNC_FREQUENCY);
+        }
+        if (subscription.getIsVisible() == null) {
+            subscription.setIsVisible(true);
         }
         subscription.setCreatedAt(LocalDateTime.now());
         subscription.setUpdatedAt(LocalDateTime.now());
@@ -70,19 +73,19 @@ public class CalendarSubscriptionServiceImpl extends ServiceImpl<CalendarSubscri
         
         try {
             // TODO: 实现实际的iCal同步逻辑
-            // 1. 从subscription.getUrl()获取iCal数据
+            // 1. 从subscription.getSourceUrl()获取iCal数据
             // 2. 解析iCal数据
             // 3. 将事件保存到数据库
             
-            log.info("Syncing subscription: {} from URL: {}", subscriptionId, subscription.getUrl());
+            log.info("Syncing subscription: {} from URL: {}", subscriptionId, subscription.getSourceUrl());
             
             // 更新同步状态为成功
-            calendarSubscriptionMapper.updateSyncStatus(subscriptionId, CalendarSubscription.STATUS_ACTIVE, null);
+            calendarSubscriptionMapper.updateSyncStatus(subscriptionId, CalendarSubscription.SYNC_SUCCESS, null);
             
         } catch (Exception e) {
             log.error("Failed to sync subscription: {}", subscriptionId, e);
             // 更新同步状态为错误
-            calendarSubscriptionMapper.updateSyncStatus(subscriptionId, CalendarSubscription.STATUS_ERROR, e.getMessage());
+            calendarSubscriptionMapper.updateSyncStatus(subscriptionId, CalendarSubscription.SYNC_ERROR, e.getMessage());
         }
     }
     

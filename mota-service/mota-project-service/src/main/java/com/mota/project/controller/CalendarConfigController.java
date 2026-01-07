@@ -7,10 +7,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 /**
  * 日历配置控制器
+ * 用于管理用户的日历显示配置（视图设置、工作时间等）
  */
 @Slf4j
 @RestController
@@ -21,12 +20,23 @@ public class CalendarConfigController {
     private final CalendarConfigService calendarConfigService;
     
     /**
-     * 获取用户的日历配置列表
+     * 获取用户的日历配置
      */
     @GetMapping("/user/{userId}")
-    public Result<List<CalendarConfig>> getUserConfigs(@PathVariable Long userId) {
-        List<CalendarConfig> configs = calendarConfigService.getByUserId(userId);
-        return Result.success(configs);
+    public Result<CalendarConfig> getUserConfig(@PathVariable Long userId) {
+        CalendarConfig config = calendarConfigService.getByUserId(userId);
+        return Result.success(config);
+    }
+    
+    /**
+     * 获取用户在指定企业的日历配置
+     */
+    @GetMapping("/user/{userId}/enterprise/{enterpriseId}")
+    public Result<CalendarConfig> getUserEnterpriseConfig(
+            @PathVariable Long userId,
+            @PathVariable Long enterpriseId) {
+        CalendarConfig config = calendarConfigService.getByUserIdAndEnterpriseId(userId, enterpriseId);
+        return Result.success(config);
     }
     
     /**
@@ -39,12 +49,12 @@ public class CalendarConfigController {
     }
     
     /**
-     * 创建日历配置
+     * 创建或更新日历配置
      */
     @PostMapping
-    public Result<CalendarConfig> createConfig(@RequestBody CalendarConfig config) {
-        CalendarConfig created = calendarConfigService.createConfig(config);
-        return Result.success(created);
+    public Result<CalendarConfig> saveOrUpdateConfig(@RequestBody CalendarConfig config) {
+        CalendarConfig saved = calendarConfigService.saveOrUpdateConfig(config);
+        return Result.success(saved);
     }
     
     /**
@@ -69,22 +79,13 @@ public class CalendarConfigController {
     }
     
     /**
-     * 设置默认日历
-     */
-    @PostMapping("/user/{userId}/default/{configId}")
-    public Result<Boolean> setDefaultConfig(
-            @PathVariable Long userId,
-            @PathVariable Long configId) {
-        calendarConfigService.setDefault(userId, configId);
-        return Result.success(true);
-    }
-    
-    /**
-     * 获取用户的默认日历配置
+     * 获取或创建默认日历配置
      */
     @GetMapping("/user/{userId}/default")
-    public Result<CalendarConfig> getDefaultConfig(@PathVariable Long userId) {
-        CalendarConfig config = calendarConfigService.getDefaultByUserId(userId);
+    public Result<CalendarConfig> getOrCreateDefaultConfig(
+            @PathVariable Long userId,
+            @RequestParam(required = false) Long enterpriseId) {
+        CalendarConfig config = calendarConfigService.getOrCreateDefault(userId, enterpriseId);
         return Result.success(config);
     }
 }

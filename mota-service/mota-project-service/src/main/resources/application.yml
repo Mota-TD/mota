@@ -1,5 +1,5 @@
 server:
-  port: 8083
+  port: 8084
   servlet:
     encoding:
       charset: UTF-8
@@ -26,14 +26,16 @@ spring:
         file-extension: yml
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:mota}?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-    username: ${DB_USERNAME:mota}
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:mota_project}?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:mota_project}
     password: ${DB_PASSWORD:mota123}
   data:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
-      database: 0
+      database: 1
+      redisson:
+        file: classpath:redisson.yml
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml

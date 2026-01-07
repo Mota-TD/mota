@@ -18,7 +18,7 @@ import java.time.LocalDate;
  */
 @Tag(name = "报表分析", description = "报表分析相关接口")
 @RestController
-@RequestMapping("/api/report-analytics")
+@RequestMapping("/api/v1/report-analytics")
 @RequiredArgsConstructor
 public class ReportAnalyticsController {
     

@@ -1,0 +1,173 @@
+server:
+  port: 8083
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+spring:
+  application:
+    name: mota-ai-service
+  profiles:
+    active: dev
+  config:
+    import: optional:nacos:${spring.application.name}.yml
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_SERVER:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:}
+        group: ${NACOS_GROUP:DEFAULT_GROUP}
+      config:
+        server-addr: ${NACOS_SERVER:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:}
+        group: ${NACOS_GROUP:DEFAULT_GROUP}
+        file-extension: yml
+  
+  # 数据源配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:mota_ai}?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:mota_ai}
+    password: ${DB_PASSWORD:mota123}
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 30000
+      pool-name: MotaAIHikariCP
+      max-lifetime: 1800000
+      connection-timeout: 30000
+
+  # Redis配置
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      database: 2
+      timeout: 10000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-wait: -1ms
+          max-idle: 8
+          min-idle: 0
+  # Redisson配置
+  redis:
+    redisson:
+      file: classpath:redisson.yml
+
+# MyBatis-Plus配置
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.mota.ai.entity
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# JWT配置
+jwt:
+  secret: ${JWT_SECRET:bW90YS1zZWNyZXQta2V5LWZvci1qd3QtdG9rZW4tZ2VuZXJhdGlvbi1tdXN0LWJlLWF0LWxlYXN0LTI1Ni1iaXRz}
+  expiration: 86400000
+  refresh-expiration: 604800000
+
+# AI模型配置
+ai:
+  # 默认模型提供商
+  default-provider: doubao
+  
+  # 豆包(火山引擎)配置
+  doubao:
+    api-key: ${DOUBAO_API_KEY:}
+    api-endpoint: https://ark.cn-beijing.volces.com/api/v3/chat/completions
+    default-model: doubao-pro-32k
+    timeout: 60000
+    max-tokens: 4096
+  
+  # OpenAI配置
+  openai:
+    api-key: ${OPENAI_API_KEY:}
+    api-endpoint: https://api.openai.com/v1
+    default-model: gpt-4
+    timeout: 60000
+    max-tokens: 4096
+  
+  # Claude配置
+  claude:
+    api-key: ${CLAUDE_API_KEY:}
+    api-endpoint: https://api.anthropic.com/v1
+    default-model: claude-3-opus-20240229
+    timeout: 60000
+    max-tokens: 4096
+  
+  # 通义千问配置
+  qwen:
+    api-key: ${QWEN_API_KEY:}
+    api-endpoint: https://dashscope.aliyuncs.com/api/v1
+    default-model: qwen-max
+    timeout: 60000
+    max-tokens: 4096
+
+  # 向量数据库配置
+  vector:
+    provider: milvus
+    milvus:
+      host: ${MILVUS_HOST:localhost}
+      port: ${MILVUS_PORT:19530}
+      collection-name: mota_knowledge
+      dimension: 1536
+
+  # 新闻采集配置
+  news:
+    crawl:
+      enabled: true
+      cron: "0 0 */2 * * ?"  # 每2小时执行一次
+      max-articles-per-source: 50
+    cache:
+      ttl: 3600  # 缓存1小时
+      max-size: 10000
+
+# 日志配置
+logging:
+  level:
+    com.mota: debug
+    org.springframework.cloud: info
+
+# Actuator配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+# SpringDoc配置
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /doc.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  group-configs:
+    - group: 'AI助手'
+      paths-to-match: '/api/v1/ai/assistant/**'
+    - group: 'AI方案生成'
+      paths-to-match: '/api/v1/ai/proposal/**'
+    - group: '智能搜索'
+      paths-to-match: '/api/v1/ai/search/**'
+    - group: '智能新闻'
+      paths-to-match: '/api/v1/ai/news/**'
+    - group: 'AI知识库'
+      paths-to-match: '/api/v1/ai/knowledge/**'
+    - group: '多模型管理'
+      paths-to-match: '/api/v1/ai/models/**'

@@ -6,23 +6,22 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
-import java.util.List;
-
 /**
  * 日历配置Mapper接口
+ * 用于管理用户的日历显示配置（视图设置、工作时间等）
  */
 @Mapper
 public interface CalendarConfigMapper extends BaseMapper<CalendarConfig> {
     
     /**
-     * 根据用户ID查询日历配置列表
+     * 获取用户的日历配置
      */
-    @Select("SELECT * FROM calendar_config WHERE user_id = #{userId} ORDER BY is_default DESC, created_at ASC")
-    List<CalendarConfig> selectByUserId(@Param("userId") Long userId);
+    @Select("SELECT * FROM calendar_config WHERE user_id = #{userId} LIMIT 1")
+    CalendarConfig selectByUserId(@Param("userId") Long userId);
     
     /**
-     * 查询用户的默认日历配置
+     * 获取用户在指定企业的日历配置
      */
-    @Select("SELECT * FROM calendar_config WHERE user_id = #{userId} AND is_default = true LIMIT 1")
-    CalendarConfig selectDefaultByUserId(@Param("userId") Long userId);
+    @Select("SELECT * FROM calendar_config WHERE user_id = #{userId} AND enterprise_id = #{enterpriseId} LIMIT 1")
+    CalendarConfig selectByUserIdAndEnterpriseId(@Param("userId") Long userId, @Param("enterpriseId") Long enterpriseId);
 }

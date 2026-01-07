@@ -30,7 +30,7 @@ spring:
           enabled: true
           lower-case-service-id: true
       routes:
-        # 认证服务
+        # ==================== 认证服务 ====================
         - id: mota-auth-service
           uri: lb://mota-auth-service
           predicates:
@@ -38,7 +38,7 @@ spring:
           filters:
             - StripPrefix=0
 
-        # 用户服务
+        # ==================== 用户服务 ====================
         - id: mota-user-service
           uri: lb://mota-user-service
           predicates:
@@ -47,11 +47,29 @@ spring:
             - StripPrefix=0
             - AuthFilter
 
-        # 项目服务
+        # ==================== 项目服务 ====================
         - id: mota-project-service
           uri: lb://mota-project-service
           predicates:
             - Path=/api/v1/projects/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # 任务服务（项目服务）
+        - id: mota-task-service
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/tasks/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # 里程碑服务（项目服务）
+        - id: mota-milestone-service
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/milestones/**
           filters:
             - StripPrefix=0
             - AuthFilter
@@ -65,29 +83,20 @@ spring:
             - StripPrefix=0
             - AuthFilter
 
+        # 部门任务服务（项目服务）
+        - id: mota-department-task-service
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/department-tasks/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
         # 活动服务（项目服务）
         - id: mota-activity-service
           uri: lb://mota-project-service
           predicates:
             - Path=/api/v1/activities/**
-          filters:
-            - StripPrefix=0
-            - AuthFilter
-
-        # 通知服务（项目服务）
-        - id: mota-notification-service
-          uri: lb://mota-project-service
-          predicates:
-            - Path=/api/v1/notifications/**
-          filters:
-            - StripPrefix=0
-            - AuthFilter
-
-        # AI服务（项目服务）
-        - id: mota-ai-service
-          uri: lb://mota-project-service
-          predicates:
-            - Path=/api/v1/ai/**
           filters:
             - StripPrefix=0
             - AuthFilter
@@ -110,29 +119,277 @@ spring:
             - StripPrefix=0
             - AuthFilter
 
-        # 执行任务服务
-        - id: mota-task-service
-          uri: lb://mota-project-service
-          predicates:
-            - Path=/api/v1/tasks/**
-          filters:
-            - StripPrefix=0
-            - AuthFilter
-
-        # 部门任务服务
-        - id: mota-department-task-service
-          uri: lb://mota-project-service
-          predicates:
-            - Path=/api/v1/department-tasks/**
-          filters:
-            - StripPrefix=0
-            - AuthFilter
-
-        # 视图配置服务
+        # 视图配置服务（项目服务）
         - id: mota-view-config-service
           uri: lb://mota-project-service
           predicates:
-            - Path=/api/view-configs/**
+            - Path=/api/v1/view-configs/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # 工作流服务（项目服务）
+        - id: mota-workflow-service
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/workflows/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # 进度报告服务（项目服务）
+        - id: mota-progress-service
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/progress/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # 资源管理服务（项目服务）
+        - id: mota-resource-service
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/resources/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # ==================== AI服务（独立微服务） ====================
+        # 注意：更具体的路由必须放在通用路由之前，Spring Cloud Gateway按顺序匹配
+        # AI核心功能统一路由到 mota-ai-service
+        
+        # AI助手/对话服务 - 路由到独立AI服务
+        - id: mota-ai-assistant-service
+          uri: lb://mota-ai-service
+          predicates:
+            - Path=/api/v1/ai/assistant/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # AI新闻服务 - 路由到独立AI服务
+        - id: mota-ai-news-service
+          uri: lb://mota-ai-service
+          predicates:
+            - Path=/api/v1/ai/news/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # AI方案生成服务 - 路由到独立AI服务
+        - id: mota-ai-proposal-service
+          uri: lb://mota-ai-service
+          predicates:
+            - Path=/api/v1/ai/proposal/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # AI训练服务 - 路由到独立AI服务
+        - id: mota-ai-training-service
+          uri: lb://mota-ai-service
+          predicates:
+            - Path=/api/v1/ai/training/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # AI智能搜索服务 - 路由到独立AI服务
+        - id: mota-ai-search-service
+          uri: lb://mota-ai-service
+          predicates:
+            - Path=/api/v1/ai/search/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # AI多模型管理服务 - 路由到独立AI服务
+        - id: mota-ai-multi-model-service
+          uri: lb://mota-ai-service
+          predicates:
+            - Path=/api/v1/ai/multi-model/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # AI项目协同功能 - 路由到项目服务（项目相关的AI功能）
+        - id: mota-ai-project-service
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/ai/project/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # AI历史记录 - 路由到项目服务
+        - id: mota-ai-history-service
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/ai/history/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # AI方案/解决方案生成 - 路由到项目服务（项目方案）
+        - id: mota-ai-solution-service
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/ai/solution/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # AI PPT生成 - 路由到项目服务
+        - id: mota-ai-ppt-service
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/ai/ppt/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # AI知识库服务 - 路由到项目服务（项目知识库）
+        - id: mota-ai-knowledge-service
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/ai/knowledge/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # AI服务 - 其他通用AI功能 - 路由到AI服务（最后匹配）
+        - id: mota-ai-general-service
+          uri: lb://mota-ai-service
+          predicates:
+            - Path=/api/v1/ai/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # 智能搜索服务 - 路由到AI服务
+        - id: mota-search-service
+          uri: lb://mota-ai-service
+          predicates:
+            - Path=/api/v1/search/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # ==================== 知识服务（独立微服务） ====================
+        # 注意：知识相关功能目前分布在两个服务中
+        # - mota-knowledge-service: 文件管理、模板管理
+        # - mota-project-service: 知识图谱、知识统计（待迁移）
+        
+        # 知识图谱 - 暂时路由到项目服务（使用 /api/v1/knowledge-graph 路径）
+        - id: mota-knowledge-graph
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/knowledge-graph/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # 知识统计 - 暂时路由到项目服务（使用 /api/v1/knowledge/statistics 路径）
+        # 注意：这个路由必须在通用知识路由之前
+        - id: mota-knowledge-statistics
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/knowledge/statistics/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # 知识文件 - 路由到知识服务
+        - id: mota-knowledge-files-service
+          uri: lb://mota-knowledge-service
+          predicates:
+            - Path=/api/v1/knowledge/files/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # 知识模板 - 路由到知识服务
+        - id: mota-template-service
+          uri: lb://mota-knowledge-service
+          predicates:
+            - Path=/api/v1/knowledge/templates/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # 知识服务通用路由 - 路由到知识服务（最后匹配）
+        - id: mota-knowledge-service
+          uri: lb://mota-knowledge-service
+          predicates:
+            - Path=/api/v1/knowledge/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # 文档管理
+        - id: mota-document-service
+          uri: lb://mota-knowledge-service
+          predicates:
+            - Path=/api/v1/documents/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+
+        # ==================== 通知服务 ====================
+        # 通知功能 - 路由到项目服务（项目服务提供完整的通知功能，包括聚合、智能分类、置顶等）
+        - id: mota-notifications-service
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/notifications/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # 内部通知服务 - 路由到独立通知服务（用于服务间调用）
+        - id: mota-notify-internal-service
+          uri: lb://mota-notify-service
+          predicates:
+            - Path=/api/v1/notify/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # ==================== 日历功能 ====================
+        # 日历事件 - 路由到项目服务（因为需要访问任务和里程碑数据）
+        - id: mota-calendar-events
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/calendar-events/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # 日历配置 - 路由到项目服务
+        - id: mota-calendar-configs
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/calendar-configs/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # 日历订阅 - 路由到项目服务
+        - id: mota-calendar-subscriptions
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/calendar-subscriptions/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # ==================== 新闻服务（项目服务） ====================
+        # 智能新闻推送 - 路由到项目服务（统一使用/api/v1/前缀）
+        - id: mota-news-service
+          uri: lb://mota-project-service
+          predicates:
+            - Path=/api/v1/news/**
           filters:
             - StripPrefix=0
             - AuthFilter

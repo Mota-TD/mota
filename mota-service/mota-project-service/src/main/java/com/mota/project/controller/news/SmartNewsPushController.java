@@ -14,10 +14,11 @@ import java.util.Map;
 /**
  * 智能新闻推送控制器
  * 实现 NW-001 到 NW-009 功能的 REST API
+ * 此控制器属于项目服务，提供项目相关的智能新闻推送功能
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/news")
+@RequestMapping("/api/v1/news")
 @RequiredArgsConstructor
 public class SmartNewsPushController {
 
