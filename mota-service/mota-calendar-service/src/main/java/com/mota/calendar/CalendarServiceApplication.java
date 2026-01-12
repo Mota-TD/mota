@@ -27,7 +27,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  */
 @SpringBootApplication(scanBasePackages = {"com.mota.calendar", "com.mota.common"})
 @EnableDiscoveryClient
-@EnableFeignClients(basePackages = "com.mota.calendar.feign")
+@EnableFeignClients(basePackages = {"com.mota.calendar.feign", "com.mota.common.feign"})
 @MapperScan("com.mota.calendar.mapper")
 @EnableAsync
 @EnableScheduling

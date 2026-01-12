@@ -1,0 +1,169 @@
+server:
+  port: 8089
+
+spring:
+  application:
+    name: mota-search-service
+  profiles:
+    active: dev
+  config:
+    import: optional:nacos:${spring.application.name}.yml
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_SERVER:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:}
+        group: ${NACOS_GROUP:DEFAULT_GROUP}
+      config:
+        server-addr: ${NACOS_SERVER:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:}
+        group: ${NACOS_GROUP:DEFAULT_GROUP}
+        file-extension: yml
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/mota_search?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USERNAME:mota}
+    password: ${MYSQL_PASSWORD:mota123}
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 30000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: 0
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
+    consumer:
+      group-id: search-service
+      auto-offset-reset: earliest
+      enable-auto-commit: true
+      auto-commit-interval: 1000
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: 1
+      retries: 3
+
+# Elasticsearch配置
+elasticsearch:
+  host: ${ES_HOST:localhost}
+  port: ${ES_PORT:9200}
+  scheme: ${ES_SCHEME:http}
+  username: ${ES_USERNAME:}
+  password: ${ES_PASSWORD:}
+  connect-timeout: 5000
+  socket-timeout: 60000
+  index-prefix: mota
+
+# Milvus向量数据库配置
+milvus:
+  host: ${MILVUS_HOST:localhost}
+  port: ${MILVUS_PORT:19530}
+  username: ${MILVUS_USERNAME:}
+  password: ${MILVUS_PASSWORD:}
+  database: default
+  collection: mota_vectors
+  connect-timeout: 10000
+  keep-alive-time: 55000
+  idle-timeout: 24
+
+# MyBatis-Plus配置
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.mota.search.entity
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.mota.search: DEBUG
+    org.elasticsearch: INFO
+    io.milvus: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+
+# Feign配置
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 10000
+        loggerLevel: BASIC
+  circuitbreaker:
+    enabled: true
+
+# 搜索服务配置
+search:
+  # 默认配置
+  default:
+    page-size: 20
+    max-page-size: 100
+    highlight-pre-tag: "<em>"
+    highlight-post-tag: "</em>"
+  # 同义词配置
+  synonym:
+    enabled: true
+    cache-ttl: 3600
+  # 热词配置
+  hotword:
+    enabled: true
+    refresh-interval: 3600
+    top-count: 20
+  # 历史记录配置
+  history:
+    enabled: true
+    retention-days: 90
+    max-per-user: 1000
+  # 向量搜索配置
+  vector:
+    enabled: true
+    dimension: 768
+    metric-type: COSINE
+    index-type: IVF_FLAT
+    nlist: 1024
+    nprobe: 16
+
+# Springdoc OpenAPI配置
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+
+# 管理端点配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: ${spring.application.name}

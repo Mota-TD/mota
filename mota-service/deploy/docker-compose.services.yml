@@ -1,0 +1,352 @@
+# =====================================================
+# Mota 微服务 Docker Compose 配置
+# =====================================================
+
+services:
+  # =====================================================
+  # API 网关
+  # =====================================================
+  gateway:
+    image: mota/gateway:${IMAGE_TAG:-latest}
+    build:
+      context: ../mota-gateway
+      dockerfile: Dockerfile
+    container_name: mota-gateway
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${DEPLOY_ENV:-prod}
+      - NACOS_SERVER=${NACOS_SERVER:-nacos:8848}
+      - NACOS_SERVER_ADDR=${NACOS_SERVER:-nacos:8848}
+      - NACOS_NAMESPACE=${NACOS_NAMESPACE:-}
+      - NACOS_GROUP=${NACOS_GROUP:-DEFAULT_GROUP}
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - JWT_SECRET=${JWT_SECRET}
+      - TZ=${TZ:-Asia/Shanghai}
+      - JAVA_OPTS=-Xms256m -Xmx512m -XX:+UseG1GC
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - mota-network
+
+  # =====================================================
+  # 认证服务
+  # =====================================================
+  auth-service:
+    image: mota/auth-service:${IMAGE_TAG:-latest}
+    build:
+      context: ../mota-auth-service
+      dockerfile: Dockerfile
+    container_name: mota-auth-service
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${DEPLOY_ENV:-prod}
+      - NACOS_SERVER=${NACOS_SERVER:-nacos:8848}
+      - NACOS_SERVER_ADDR=${NACOS_SERVER:-nacos:8848}
+      - NACOS_NAMESPACE=${NACOS_NAMESPACE:-}
+      - DB_HOST=${MYSQL_HOST:-mysql}
+      - DB_PORT=${MYSQL_PORT:-3306}
+      - DB_NAME=mota_user
+      - DB_USERNAME=${MYSQL_USER:-mota}
+      - DB_PASSWORD=${MYSQL_PASSWORD:-mota123}
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - JWT_SECRET=${JWT_SECRET}
+      - TZ=${TZ:-Asia/Shanghai}
+      - JAVA_OPTS=-Xms256m -Xmx512m -XX:+UseG1GC
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - mota-network
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT:-1g}
+          cpus: '${SERVICE_CPU_LIMIT:-1.0}'
+
+  # =====================================================
+  # 用户服务
+  # =====================================================
+  user-service:
+    image: mota/user-service:${IMAGE_TAG:-latest}
+    build:
+      context: ../mota-user-service
+      dockerfile: Dockerfile
+    container_name: mota-user-service
+    restart: unless-stopped
+    ports:
+      - "8087:8087"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${DEPLOY_ENV:-prod}
+      - NACOS_SERVER=${NACOS_SERVER:-nacos:8848}
+      - NACOS_SERVER_ADDR=${NACOS_SERVER:-nacos:8848}
+      - NACOS_NAMESPACE=${NACOS_NAMESPACE:-}
+      - DB_HOST=${MYSQL_HOST:-mysql}
+      - DB_PORT=${MYSQL_PORT:-3306}
+      - DB_NAME=mota_user
+      - DB_USERNAME=${MYSQL_USER:-mota}
+      - DB_PASSWORD=${MYSQL_PASSWORD:-mota123}
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - TZ=${TZ:-Asia/Shanghai}
+      - JAVA_OPTS=-Xms256m -Xmx512m -XX:+UseG1GC
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8087/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - mota-network
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT:-1g}
+          cpus: '${SERVICE_CPU_LIMIT:-1.0}'
+
+  # =====================================================
+  # 项目服务
+  # =====================================================
+  project-service:
+    image: mota/project-service:${IMAGE_TAG:-latest}
+    build:
+      context: ../mota-project-service
+      dockerfile: Dockerfile
+    container_name: mota-project-service
+    restart: unless-stopped
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${DEPLOY_ENV:-prod}
+      - NACOS_SERVER=${NACOS_SERVER:-nacos:8848}
+      - NACOS_SERVER_ADDR=${NACOS_SERVER:-nacos:8848}
+      - NACOS_NAMESPACE=${NACOS_NAMESPACE:-}
+      - DB_HOST=${MYSQL_HOST:-mysql}
+      - DB_PORT=${MYSQL_PORT:-3306}
+      - DB_NAME=mota_project
+      - DB_USERNAME=${MYSQL_USER:-mota}
+      - DB_PASSWORD=${MYSQL_PASSWORD:-mota123}
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      - TZ=${TZ:-Asia/Shanghai}
+      - JAVA_OPTS=-Xms512m -Xmx1g -XX:+UseG1GC
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - mota-network
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT:-1g}
+          cpus: '${SERVICE_CPU_LIMIT:-1.0}'
+
+  # =====================================================
+  # AI 服务
+  # =====================================================
+  ai-service:
+    image: mota/ai-service:${IMAGE_TAG:-latest}
+    build:
+      context: ../mota-ai-service
+      dockerfile: Dockerfile
+    container_name: mota-ai-service
+    restart: unless-stopped
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${DEPLOY_ENV:-prod}
+      - NACOS_SERVER=${NACOS_SERVER:-nacos:8848}
+      - NACOS_SERVER_ADDR=${NACOS_SERVER:-nacos:8848}
+      - NACOS_NAMESPACE=${NACOS_NAMESPACE:-}
+      - DB_HOST=${MYSQL_HOST:-mysql}
+      - DB_PORT=${MYSQL_PORT:-3306}
+      - DB_NAME=mota_ai
+      - DB_USERNAME=${MYSQL_USER:-mota}
+      - DB_PASSWORD=${MYSQL_PASSWORD:-mota123}
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - MILVUS_HOST=${MILVUS_HOST:-milvus}
+      - MILVUS_PORT=${MILVUS_PORT:-19530}
+      - ES_HOST=${ES_HOST:-elasticsearch}
+      - ES_PORT=${ES_PORT:-9200}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_API_BASE=${OPENAI_API_BASE:-https://api.openai.com/v1}
+      - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - TZ=${TZ:-Asia/Shanghai}
+      - JAVA_OPTS=-Xms512m -Xmx1g -XX:+UseG1GC
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - mota-network
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT:-1g}
+          cpus: '${SERVICE_CPU_LIMIT:-1.0}'
+
+  # =====================================================
+  # 知识库服务
+  # =====================================================
+  knowledge-service:
+    image: mota/knowledge-service:${IMAGE_TAG:-latest}
+    build:
+      context: ../mota-knowledge-service
+      dockerfile: Dockerfile
+    container_name: mota-knowledge-service
+    restart: unless-stopped
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${DEPLOY_ENV:-prod}
+      - NACOS_SERVER=${NACOS_SERVER:-nacos:8848}
+      - NACOS_SERVER_ADDR=${NACOS_SERVER:-nacos:8848}
+      - NACOS_NAMESPACE=${NACOS_NAMESPACE:-}
+      - DB_HOST=${MYSQL_HOST:-mysql}
+      - DB_PORT=${MYSQL_PORT:-3306}
+      - DB_NAME=mota_knowledge
+      - DB_USERNAME=${MYSQL_USER:-mota}
+      - DB_PASSWORD=${MYSQL_PASSWORD:-mota123}
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-http://minio:9000}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-mota_admin}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-mota_password}
+      - ES_HOST=${ES_HOST:-elasticsearch}
+      - ES_PORT=${ES_PORT:-9200}
+      - TZ=${TZ:-Asia/Shanghai}
+      - JAVA_OPTS=-Xms256m -Xmx512m -XX:+UseG1GC
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - mota-network
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT:-1g}
+          cpus: '${SERVICE_CPU_LIMIT:-1.0}'
+
+  # =====================================================
+  # 通知服务
+  # =====================================================
+  notify-service:
+    image: mota/notify-service:${IMAGE_TAG:-latest}
+    build:
+      context: ../mota-notify-service
+      dockerfile: Dockerfile
+    container_name: mota-notify-service
+    restart: unless-stopped
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${DEPLOY_ENV:-prod}
+      - NACOS_SERVER=${NACOS_SERVER:-nacos:8848}
+      - NACOS_SERVER_ADDR=${NACOS_SERVER:-nacos:8848}
+      - NACOS_NAMESPACE=${NACOS_NAMESPACE:-}
+      - DB_HOST=${MYSQL_HOST:-mysql}
+      - DB_PORT=${MYSQL_PORT:-3306}
+      - DB_NAME=mota_notify
+      - DB_USERNAME=${MYSQL_USER:-mota}
+      - DB_PASSWORD=${MYSQL_PASSWORD:-mota123}
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      - MAIL_HOST=${MAIL_HOST:-}
+      - MAIL_PORT=${MAIL_PORT:-465}
+      - MAIL_USERNAME=${MAIL_USERNAME:-}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:-}
+      - TZ=${TZ:-Asia/Shanghai}
+      - JAVA_OPTS=-Xms256m -Xmx512m -XX:+UseG1GC
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - mota-network
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT:-1g}
+          cpus: '${SERVICE_CPU_LIMIT:-1.0}'
+
+  # =====================================================
+  # 日历服务
+  # =====================================================
+  calendar-service:
+    image: mota/calendar-service:${IMAGE_TAG:-latest}
+    build:
+      context: ../mota-calendar-service
+      dockerfile: Dockerfile
+    container_name: mota-calendar-service
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${DEPLOY_ENV:-prod}
+      - NACOS_SERVER=${NACOS_SERVER:-nacos:8848}
+      - NACOS_SERVER_ADDR=${NACOS_SERVER:-nacos:8848}
+      - NACOS_NAMESPACE=${NACOS_NAMESPACE:-}
+      - DB_HOST=${MYSQL_HOST:-mysql}
+      - DB_PORT=${MYSQL_PORT:-3306}
+      - DB_NAME=mota_calendar
+      - DB_USERNAME=${MYSQL_USER:-mota}
+      - DB_PASSWORD=${MYSQL_PASSWORD:-mota123}
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - TZ=${TZ:-Asia/Shanghai}
+      - JAVA_OPTS=-Xms256m -Xmx512m -XX:+UseG1GC
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8086/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - mota-network
+    deploy:
+      resources:
+        limits:
+          memory: ${SERVICE_MEMORY_LIMIT:-1g}
+          cpus: '${SERVICE_CPU_LIMIT:-1.0}'
+
+# =====================================================
+# 网络配置
+# =====================================================
+networks:
+  mota-network:
+    external: true
+    name: mota_mota-network

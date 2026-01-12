@@ -1,5 +1,6 @@
 package com.mota.calendar.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.mota.calendar.entity.CalendarEvent;
 import com.mota.calendar.entity.CalendarEventAttendee;
 
@@ -9,7 +10,7 @@ import java.util.List;
 /**
  * 日历事件服务接口
  */
-public interface CalendarEventService {
+public interface CalendarEventService extends IService<CalendarEvent> {
     
     /**
      * 创建事件
@@ -17,9 +18,19 @@ public interface CalendarEventService {
     CalendarEvent createEvent(CalendarEvent event, List<Long> attendeeIds);
     
     /**
+     * 创建事件（无参与者）
+     */
+    CalendarEvent createEvent(CalendarEvent event);
+    
+    /**
      * 更新事件
      */
     CalendarEvent updateEvent(Long id, CalendarEvent event, List<Long> attendeeIds);
+    
+    /**
+     * 更新事件（无参与者变更）
+     */
+    CalendarEvent updateEvent(CalendarEvent event);
     
     /**
      * 删除事件
@@ -67,9 +78,29 @@ public interface CalendarEventService {
     List<CalendarEvent> getEventsByTaskId(Long taskId);
     
     /**
+     * 获取任务关联的单个事件
+     */
+    CalendarEvent getByTaskId(Long taskId);
+    
+    /**
      * 获取里程碑关联的事件
      */
     List<CalendarEvent> getEventsByMilestoneId(Long milestoneId);
+    
+    /**
+     * 获取里程碑关联的单个事件
+     */
+    CalendarEvent getByMilestoneId(Long milestoneId);
+    
+    /**
+     * 获取会议关联的事件
+     */
+    CalendarEvent getByMeetingId(Long meetingId);
+    
+    /**
+     * 获取日历的事件列表
+     */
+    List<CalendarEvent> getCalendarEvents(Long calendarId, LocalDateTime startTime, LocalDateTime endTime);
     
     /**
      * 添加参与者

@@ -1,5 +1,6 @@
 package com.mota.user.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.mota.common.mybatis.base.BaseEntityDO;
 import lombok.Data;
@@ -9,6 +10,8 @@ import java.time.LocalDateTime;
 
 /**
  * 用户实体
+ * 
+ * @author mota
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -41,32 +44,68 @@ public class User extends BaseEntityDO {
     private String nickname;
 
     /**
-     * 头像
+     * 真实姓名
+     */
+    private String realName;
+
+    /**
+     * 头像URL
      */
     private String avatar;
 
     /**
-     * 状态
+     * 性别（0未知 1男 2女）
+     */
+    private Integer gender;
+
+    /**
+     * 状态（1正常 0禁用）
      */
     private Integer status;
 
     /**
-     * 组织ID
+     * 部门ID
      */
-    private String orgId;
+    @TableField("dept_id")
+    private Long deptId;
 
     /**
-     * 组织名称
+     * 岗位ID
      */
-    private String orgName;
+    private Long postId;
 
     /**
-     * 角色
+     * 用户类型（1普通用户 2管理员 3超级管理员）
      */
-    private String role;
+    private Integer userType;
 
     /**
      * 最后登录时间
      */
     private LocalDateTime lastLoginAt;
+
+    /**
+     * 最后登录IP
+     */
+    private String lastLoginIp;
+
+    /**
+     * 登录失败次数
+     */
+    private Integer loginFailCount;
+
+    /**
+     * 账号锁定时间
+     */
+    private LocalDateTime lockTime;
+
+    /**
+     * 密码过期时间
+     */
+    private LocalDateTime passwordExpireAt;
+
+    /**
+     * 备注
+     */
+    private String remark;
 }

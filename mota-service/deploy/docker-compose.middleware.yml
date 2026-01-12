@@ -1,0 +1,339 @@
+# =====================================================
+# Mota 中间件 Docker Compose 配置
+# 包含：MySQL、Redis、Nacos、Kafka、Elasticsearch、Milvus、MinIO
+# =====================================================
+
+services:
+  # =====================================================
+  # MySQL 数据库
+  # =====================================================
+  mysql:
+    image: mysql:8.0
+    container_name: mota-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-mota}
+      MYSQL_USER: ${MYSQL_USER:-mota}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-mota123}
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
+      - ./mysql/init:/docker-entrypoint-initdb.d:ro
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --default-authentication-plugin=mysql_native_password
+      --max_connections=1000
+      --innodb_buffer_pool_size=1G
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root123}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - mota-network
+    deploy:
+      resources:
+        limits:
+          memory: ${MYSQL_MEMORY_LIMIT:-2g}
+          cpus: '${MYSQL_CPU_LIMIT:-2.0}'
+
+  # =====================================================
+  # Redis 缓存
+  # =====================================================
+  redis:
+    image: redis:7-alpine
+    container_name: mota-redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --requirepass ${REDIS_PASSWORD:-}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mota-network
+    deploy:
+      resources:
+        limits:
+          memory: ${REDIS_MEMORY_LIMIT:-1g}
+          cpus: '${REDIS_CPU_LIMIT:-1.0}'
+
+  # =====================================================
+  # Nacos 服务注册与配置中心
+  # =====================================================
+  nacos:
+    image: nacos/nacos-server:v2.3.0
+    container_name: mota-nacos
+    restart: unless-stopped
+    environment:
+      MODE: standalone
+      NACOS_AUTH_ENABLE: "false"
+      JVM_XMS: 256m
+      JVM_XMX: 512m
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+      - "9849:9849"
+    volumes:
+      - nacos_data:/home/nacos/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8848/nacos/"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    networks:
+      - mota-network
+
+  # =====================================================
+  # Zookeeper (Kafka 依赖) - 使用官方镜像
+  # =====================================================
+  zookeeper:
+    image: zookeeper:3.8
+    container_name: mota-zookeeper
+    restart: unless-stopped
+    environment:
+      ZOO_4LW_COMMANDS_WHITELIST: "*"
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "2181:2181"
+    volumes:
+      - zookeeper_data:/data
+      - zookeeper_datalog:/datalog
+    healthcheck:
+      test: ["CMD-SHELL", "echo ruok | nc localhost 2181 | grep imok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mota-network
+
+  # =====================================================
+  # Kafka 消息队列 - 使用 Apache 官方镜像 (KRaft 模式，无需 Zookeeper)
+  # =====================================================
+  kafka:
+    image: apache/kafka:3.7.0
+    container_name: mota-kafka
+    restart: unless-stopped
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+      KAFKA_LOG_RETENTION_HOURS: 168
+      CLUSTER_ID: mota-kafka-cluster-001
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "9092:9092"
+      - "9094:9094"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - mota-network
+
+  # =====================================================
+  # Kafka UI (可选)
+  # =====================================================
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: mota-kafka-ui
+    restart: unless-stopped
+    environment:
+      KAFKA_CLUSTERS_0_NAME: mota-kafka
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    ports:
+      - "8090:8080"
+    depends_on:
+      - kafka
+    networks:
+      - mota-network
+    profiles:
+      - tools
+
+  # =====================================================
+  # Elasticsearch 搜索引擎
+  # =====================================================
+  elasticsearch:
+    image: elasticsearch:8.11.0
+    container_name: mota-elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=false
+      - "ES_JAVA_OPTS=${ES_JAVA_OPTS:--Xms1g -Xmx1g}"
+      - TZ=${TZ:-Asia/Shanghai}
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+      - ./elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - mota-network
+    deploy:
+      resources:
+        limits:
+          memory: ${ES_MEMORY_LIMIT:-2g}
+          cpus: '${ES_CPU_LIMIT:-2.0}'
+
+  # =====================================================
+  # Kibana (可选)
+  # =====================================================
+  kibana:
+    image: kibana:8.11.0
+    container_name: mota-kibana
+    restart: unless-stopped
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - TZ=${TZ:-Asia/Shanghai}
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - mota-network
+    profiles:
+      - tools
+
+  # =====================================================
+  # Milvus 向量数据库 (Standalone 模式，内置 etcd 和 minio)
+  # =====================================================
+  milvus:
+    image: milvusdb/milvus:v2.3.3
+    container_name: mota-milvus
+    restart: unless-stopped
+    command: ["milvus", "run", "standalone"]
+    security_opt:
+      - seccomp:unconfined
+    environment:
+      ETCD_USE_EMBED: "true"
+      ETCD_DATA_DIR: /var/lib/milvus/etcd
+      ETCD_CONFIG_PATH: /milvus/configs/embedEtcd.yaml
+      COMMON_STORAGETYPE: local
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "19530:19530"
+      - "9091:9091"
+    volumes:
+      - milvus_data:/var/lib/milvus
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+      start_period: 90s
+    networks:
+      - mota-network
+
+  # =====================================================
+  # Attu - Milvus 管理界面 (可选)
+  # =====================================================
+  attu:
+    image: zilliz/attu:v2.3.2
+    container_name: mota-attu
+    restart: unless-stopped
+    environment:
+      MILVUS_URL: milvus:19530
+    ports:
+      - "8000:3000"
+    depends_on:
+      - milvus
+    networks:
+      - mota-network
+    profiles:
+      - tools
+
+  # =====================================================
+  # MinIO 对象存储
+  # =====================================================
+  minio:
+    image: minio/minio:latest
+    container_name: mota-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-mota_admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-mota_password}
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - mota-network
+
+# =====================================================
+# 网络配置
+# =====================================================
+networks:
+  mota-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+# =====================================================
+# 数据卷配置
+# =====================================================
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  nacos_data:
+    driver: local
+  zookeeper_data:
+    driver: local
+  zookeeper_datalog:
+    driver: local
+  kafka_data:
+    driver: local
+  es_data:
+    driver: local
+  milvus_data:
+    driver: local
+  minio_data:
+    driver: local

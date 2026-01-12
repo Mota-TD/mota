@@ -60,6 +60,13 @@ public class SecurityUtils {
             return null;
         }
     }
+    
+    /**
+     * 获取当前租户ID（别名方法，映射到enterpriseId）
+     */
+    public static Long getTenantId() {
+        return getEnterpriseId();
+    }
 
     /**
      * 判断是否已登录

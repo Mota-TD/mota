@@ -65,4 +65,19 @@ public class NotificationDTO {
      * 创建时间
      */
     private LocalDateTime createdAt;
+    
+    /**
+     * 业务类型
+     */
+    private String businessType;
+    
+    /**
+     * 业务ID
+     */
+    private Long businessId;
+    
+    /**
+     * 通知渠道
+     */
+    private String channel;
 }

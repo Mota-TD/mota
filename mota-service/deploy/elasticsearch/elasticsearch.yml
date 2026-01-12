@@ -1,0 +1,57 @@
+# =====================================================
+# Elasticsearch 配置文件
+# =====================================================
+
+# 集群名称
+cluster.name: mota-cluster
+
+# 节点名称
+node.name: mota-es-node-1
+
+# 数据和日志路径
+path.data: /usr/share/elasticsearch/data
+path.logs: /usr/share/elasticsearch/logs
+
+# 网络配置
+network.host: 0.0.0.0
+http.port: 9200
+transport.port: 9300
+
+# 发现配置（单节点模式）
+discovery.type: single-node
+
+# 安全配置（开发环境禁用）
+xpack.security.enabled: false
+xpack.security.enrollment.enabled: false
+
+# 内存锁定
+bootstrap.memory_lock: true
+
+# 跨域配置
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+http.cors.allow-headers: "X-Requested-With,Content-Type,Content-Length,Authorization"
+
+# 索引配置
+action.auto_create_index: true
+action.destructive_requires_name: true
+
+# 分片配置
+index.number_of_shards: 1
+index.number_of_replicas: 0
+
+# 慢查询日志
+index.search.slowlog.threshold.query.warn: 10s
+index.search.slowlog.threshold.query.info: 5s
+index.search.slowlog.threshold.query.debug: 2s
+index.search.slowlog.threshold.query.trace: 500ms
+
+index.search.slowlog.threshold.fetch.warn: 1s
+index.search.slowlog.threshold.fetch.info: 800ms
+index.search.slowlog.threshold.fetch.debug: 500ms
+index.search.slowlog.threshold.fetch.trace: 200ms
+
+index.indexing.slowlog.threshold.index.warn: 10s
+index.indexing.slowlog.threshold.index.info: 5s
+index.indexing.slowlog.threshold.index.debug: 2s
+index.indexing.slowlog.threshold.index.trace: 500ms

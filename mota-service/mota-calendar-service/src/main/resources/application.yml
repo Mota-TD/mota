@@ -29,7 +29,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:mota_calendar}?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-    username: ${DB_USERNAME:mota_calendar}
+    username: ${DB_USERNAME:mota}
     password: ${DB_PASSWORD:mota123}
     hikari:
       minimum-idle: 5
@@ -56,6 +56,22 @@ spring:
   redis:
     redisson:
       file: classpath:redisson.yml
+
+  # Kafka配置
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
+    consumer:
+      group-id: calendar-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      enable-auto-commit: true
+      auto-commit-interval: 1000
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      retries: 3
 
 # MyBatis-Plus配置
 mybatis-plus:
@@ -156,3 +172,16 @@ springdoc:
       paths-to-match: '/api/v1/calendar/subscriptions/**'
     - group: '提醒管理'
       paths-to-match: '/api/v1/calendar/reminders/**'
+    - group: '日历管理'
+      paths-to-match: '/api/calendars/**'
+
+# Feign配置
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 10000
+        loggerLevel: basic
+  circuitbreaker:
+    enabled: true

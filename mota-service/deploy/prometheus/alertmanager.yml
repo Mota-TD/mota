@@ -1,0 +1,135 @@
+# =====================================================
+# AlertManager 配置
+# =====================================================
+
+global:
+  # 解析超时时间
+  resolve_timeout: 5m
+  # SMTP 配置（邮件告警）
+  smtp_smarthost: '${SMTP_HOST}:${SMTP_PORT}'
+  smtp_from: '${SMTP_FROM}'
+  smtp_auth_username: '${SMTP_USERNAME}'
+  smtp_auth_password: '${SMTP_PASSWORD}'
+  smtp_require_tls: true
+
+# 告警模板
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# 路由配置
+route:
+  # 分组依据
+  group_by: ['alertname', 'severity', 'instance']
+  # 分组等待时间
+  group_wait: 30s
+  # 分组间隔
+  group_interval: 5m
+  # 重复间隔
+  repeat_interval: 4h
+  # 默认接收者
+  receiver: 'default-receiver'
+  
+  # 子路由
+  routes:
+    # 严重告警 - 立即通知
+    - match:
+        severity: critical
+      receiver: 'critical-receiver'
+      group_wait: 10s
+      repeat_interval: 1h
+      continue: true
+    
+    # 警告告警
+    - match:
+        severity: warning
+      receiver: 'warning-receiver'
+      group_wait: 1m
+      repeat_interval: 4h
+    
+    # 数据库告警
+    - match_re:
+        alertname: ^(Mysql|Redis).*
+      receiver: 'database-receiver'
+      group_by: ['alertname', 'instance']
+    
+    # 应用服务告警
+    - match:
+        job: spring-boot-apps
+      receiver: 'app-receiver'
+      group_by: ['alertname', 'service']
+
+# 抑制规则
+inhibit_rules:
+  # 当 critical 告警触发时，抑制同实例的 warning 告警
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'instance']
+  
+  # 当实例宕机时，抑制该实例的其他告警
+  - source_match:
+      alertname: 'InstanceDown'
+    target_match_re:
+      alertname: '.+'
+    equal: ['instance']
+
+# 接收者配置
+receivers:
+  # 默认接收者
+  - name: 'default-receiver'
+    email_configs:
+      - to: '${ALERT_EMAIL}'
+        send_resolved: true
+        headers:
+          Subject: '[Mota告警] {{ .GroupLabels.alertname }}'
+    webhook_configs:
+      - url: '${WEBHOOK_URL}'
+        send_resolved: true
+
+  # 严重告警接收者
+  - name: 'critical-receiver'
+    email_configs:
+      - to: '${CRITICAL_ALERT_EMAIL}'
+        send_resolved: true
+        headers:
+          Subject: '[Mota严重告警] {{ .GroupLabels.alertname }}'
+    webhook_configs:
+      - url: '${WEBHOOK_URL}'
+        send_resolved: true
+      # 企业微信机器人
+      - url: '${WECHAT_WEBHOOK_URL}'
+        send_resolved: true
+      # 钉钉机器人
+      - url: '${DINGTALK_WEBHOOK_URL}'
+        send_resolved: true
+
+  # 警告告警接收者
+  - name: 'warning-receiver'
+    email_configs:
+      - to: '${ALERT_EMAIL}'
+        send_resolved: true
+        headers:
+          Subject: '[Mota警告] {{ .GroupLabels.alertname }}'
+
+  # 数据库告警接收者
+  - name: 'database-receiver'
+    email_configs:
+      - to: '${DBA_EMAIL}'
+        send_resolved: true
+        headers:
+          Subject: '[Mota数据库告警] {{ .GroupLabels.alertname }}'
+    webhook_configs:
+      - url: '${WEBHOOK_URL}'
+        send_resolved: true
+
+  # 应用服务告警接收者
+  - name: 'app-receiver'
+    email_configs:
+      - to: '${DEV_EMAIL}'
+        send_resolved: true
+        headers:
+          Subject: '[Mota应用告警] {{ .GroupLabels.alertname }}'
+    webhook_configs:
+      - url: '${WEBHOOK_URL}'
+        send_resolved: true

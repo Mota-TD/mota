@@ -5,12 +5,15 @@ server:
       charset: UTF-8
       enabled: true
       force: true
+  # Netty 配置
+  netty:
+    connection-timeout: 30000
 
 spring:
   application:
     name: mota-gateway
   profiles:
-    active: dev
+    active: ${SPRING_PROFILES_ACTIVE:dev}
   config:
     import: optional:nacos:${spring.application.name}.yml
   cloud:
@@ -19,11 +22,15 @@ spring:
         server-addr: ${NACOS_SERVER:localhost:8848}
         namespace: ${NACOS_NAMESPACE:}
         group: ${NACOS_GROUP:DEFAULT_GROUP}
+        # Docker 环境下使用容器 IP
+        ip: ${NACOS_DISCOVERY_IP:}
+        port: ${NACOS_DISCOVERY_PORT:8080}
       config:
         server-addr: ${NACOS_SERVER:localhost:8848}
         namespace: ${NACOS_NAMESPACE:}
         group: ${NACOS_GROUP:DEFAULT_GROUP}
         file-extension: yml
+        refresh-enabled: true
     gateway:
       discovery:
         locator:
@@ -415,39 +422,137 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
       database: 0
+      timeout: 10000
+      lettuce:
+        pool:
+          max-active: 20
+          max-idle: 10
+          min-idle: 5
+          max-wait: -1
 
 # JWT配置
 jwt:
   secret: ${JWT_SECRET:bW90YS1zZWNyZXQta2V5LWZvci1qd3QtdG9rZW4tZ2VuZXJhdGlvbi1tdXN0LWJlLWF0LWxlYXN0LTI1Ni1iaXRz}
   expiration: 86400000
   refresh-expiration: 604800000
-
-# 白名单配置
-gateway:
+  issuer: mota
+  # 白名单路径（不需要认证）
   white-list:
     - /api/v1/auth/login
     - /api/v1/auth/register
     - /api/v1/auth/refresh
     - /api/v1/auth/captcha
+    - /api/v1/auth/validate-invitation
+    - /api/v1/auth/forgot-password
+    - /api/v1/auth/reset-password
+    - /api/v1/auth/industries
+    - /api/v1/auth/industries/**
+    - /api/v1/public/**
     - /actuator/**
     - /doc.html
     - /webjars/**
     - /swagger-resources/**
     - /v3/api-docs/**
+    - /favicon.ico
+
+# 网关配置
+gateway:
+  # IP过滤配置
+  ip-filter:
+    enabled: ${IP_FILTER_ENABLED:false}
+    whitelist-mode: false
+    # IP白名单（仅在whitelist-mode为true时生效）
+    whitelist:
+      - 127.0.0.1
+      - ::1
+    # IP黑名单
+    blacklist: []
+    # 动态黑名单（Redis存储）
+    dynamic-blacklist-enabled: true
+    dynamic-blacklist-ttl: 3600
+  
+  # 请求体大小限制配置
+  request-size:
+    enabled: true
+    # 默认最大请求体大小：10MB
+    max-request-size: 10485760
+    # 文件上传最大大小：100MB
+    max-file-upload-size: 104857600
+    # 文件上传路径
+    file-upload-paths:
+      - /api/v1/knowledge/files/**
+      - /api/v1/documents/upload/**
+      - /api/v1/tasks/*/attachments/**
+      - /api/v1/projects/*/files/**
+    # 路径级别的大小限制
+    path-limits:
+      /api/v1/ai/training/documents: 209715200  # 200MB
+      /api/v1/knowledge/import: 524288000       # 500MB
+
+# 限流配置
+rate-limiter:
+  enabled: ${RATE_LIMITER_ENABLED:true}
+  # 每秒请求数
+  replenish-rate: ${RATE_LIMITER_REPLENISH_RATE:100}
+  # 令牌桶容量
+  burst-capacity: ${RATE_LIMITER_BURST_CAPACITY:200}
+
+# 熔断配置
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10000
+        permitted-number-of-calls-in-half-open-state: 3
+        slow-call-duration-threshold: 2000
+        slow-call-rate-threshold: 80
+    instances:
+      backendService:
+        base-config: default
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 30s
 
 # 日志配置
 logging:
   level:
-    com.mota: debug
-    org.springframework.cloud.gateway: debug
+    root: ${LOG_LEVEL:INFO}
+    com.mota: ${MOTA_LOG_LEVEL:DEBUG}
+    org.springframework.cloud.gateway: ${GATEWAY_LOG_LEVEL:INFO}
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: ${LOG_PATH:/app/logs}/gateway.log
+    max-size: 100MB
+    max-history: 30
 
 # Actuator配置
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,gateway
+        include: health,info,gateway,prometheus,metrics
+      base-path: /actuator
   endpoint:
     health:
       show-details: always
+      probes:
+        enabled: true
+    gateway:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true

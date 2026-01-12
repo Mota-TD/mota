@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Mota Logo](../mota-user/public/logo.svg)
+![Mota Logo](../mota-web/public/logo.svg)
 
 **AI原生的企业级项目管理和团队协作平台**
 

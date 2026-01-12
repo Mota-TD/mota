@@ -636,7 +636,7 @@ interface NewsCategory {
 
 ### 5.3 前端实现
 
-已在 `mota-user/src/pages/ai/news/index.tsx` 中实现，主要功能：
+已在 `mota-web/src/pages/ai/news/index.tsx` 中实现，主要功能：
 
 - 新闻列表展示（智能推荐、政策监控、行业动态等分类）
 - 新闻搜索和筛选

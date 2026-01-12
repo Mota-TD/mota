@@ -39,7 +39,7 @@ public class KnowledgeFileServiceImpl implements KnowledgeFileService {
         knowledgeFile.setFileType(getFileExtension(file.getOriginalFilename()));
         knowledgeFile.setFileSize(file.getSize());
         knowledgeFile.setVersion(1);
-        knowledgeFile.setStatus(1);
+        knowledgeFile.setStatus("published");
         knowledgeFile.setCreatedBy(userId);
         knowledgeFile.setCreatedAt(LocalDateTime.now());
         knowledgeFile.setUpdatedAt(LocalDateTime.now());
@@ -70,7 +70,7 @@ public class KnowledgeFileServiceImpl implements KnowledgeFileService {
         folder.setParentId(parentId);
         folder.setName(name);
         folder.setType("folder");
-        folder.setStatus(1);
+        folder.setStatus("published");
         folder.setCreatedBy(userId);
         folder.setCreatedAt(LocalDateTime.now());
         folder.setUpdatedAt(LocalDateTime.now());
@@ -168,7 +168,7 @@ public class KnowledgeFileServiceImpl implements KnowledgeFileService {
         copy.setFilePath(source.getFilePath());
         copy.setContent(source.getContent());
         copy.setVersion(1);
-        copy.setStatus(1);
+        copy.setStatus("published");
         copy.setCreatedBy(source.getCreatedBy());
         copy.setCreatedAt(LocalDateTime.now());
         copy.setUpdatedAt(LocalDateTime.now());

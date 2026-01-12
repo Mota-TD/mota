@@ -18,11 +18,17 @@
         <module>mota-gateway</module>
         <module>mota-auth-service</module>
         <module>mota-user-service</module>
+        <module>mota-tenant-service</module>
         <module>mota-project-service</module>
+        <module>mota-task-service</module>
+        <module>mota-collab-service</module>
         <module>mota-ai-service</module>
         <module>mota-knowledge-service</module>
         <module>mota-notify-service</module>
         <module>mota-calendar-service</module>
+        <module>mota-search-service</module>
+        <module>mota-file-service</module>
+        <module>mota-report-service</module>
     </modules>
 
     <properties>
@@ -127,6 +133,16 @@
             <dependency>
                 <groupId>com.mota</groupId>
                 <artifactId>mota-common-log</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mota</groupId>
+                <artifactId>mota-common-feign</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mota</groupId>
+                <artifactId>mota-common-kafka</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -297,6 +313,15 @@
                                 <version>${mapstruct.version}</version>
                             </path>
                         </annotationProcessorPaths>
+                    </configuration>
+                </plugin>
+                <!-- 默认跳过测试，因为测试需要外部服务（数据库、Redis等） -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.2.2</version>
+                    <configuration>
+                        <skipTests>true</skipTests>
                     </configuration>
                 </plugin>
             </plugins>

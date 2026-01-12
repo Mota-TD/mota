@@ -1,0 +1,92 @@
+# =====================================================
+# Milvus 配置文件
+# =====================================================
+
+# etcd 配置
+etcd:
+  endpoints:
+    - etcd:2379
+  rootPath: by-dev
+  metaSubPath: meta
+  kvSubPath: kv
+
+# MinIO 配置
+minio:
+  address: minio-milvus
+  port: 9000
+  accessKeyID: minioadmin
+  secretAccessKey: minioadmin
+  useSSL: false
+  bucketName: milvus-bucket
+  rootPath: files
+
+# 日志配置
+log:
+  level: info
+  file:
+    rootPath: /var/lib/milvus/logs
+    maxSize: 300
+    maxAge: 10
+    maxBackups: 20
+
+# 通用配置
+common:
+  chanNamePrefix:
+    cluster: by-dev
+    rootCoordTimeTick: rootcoord-timetick
+    rootCoordStatistics: rootcoord-statistics
+    rootCoordDml: rootcoord-dml
+    rootCoordDelta: rootcoord-delta
+    search: search
+    searchResult: searchResult
+    queryTimeTick: queryTimeTick
+    dataCoordStatistic: datacoord-statistics-channel
+    dataCoordTimeTick: datacoord-timetick-channel
+    dataCoordSegmentInfo: segment-info-channel
+
+# 代理配置
+proxy:
+  port: 19530
+  internalPort: 19529
+  http:
+    enabled: true
+    debug_mode: false
+
+# 查询节点配置
+queryNode:
+  cacheSize: 32
+  gracefulStopTimeout: 30
+
+# 数据节点配置
+dataNode:
+  segment:
+    insertBufSize: 16777216
+    deleteBufBytes: 67108864
+    syncPeriod: 600
+
+# 索引节点配置
+indexNode:
+  scheduler:
+    buildParallel: 1
+
+# 根协调器配置
+rootCoord:
+  dmlChannelNum: 256
+  maxPartitionNum: 4096
+  minSegmentSizeToEnableIndex: 1024
+
+# 数据协调器配置
+dataCoord:
+  segment:
+    maxSize: 512
+    sealProportion: 0.25
+    assignmentExpiration: 2000
+  compaction:
+    enableAutoCompaction: true
+
+# 查询协调器配置
+queryCoord:
+  autoHandoff: true
+  autoBalance: true
+  balanceIntervalSeconds: 60
+  memoryUsageMaxDifferencePercentage: 30

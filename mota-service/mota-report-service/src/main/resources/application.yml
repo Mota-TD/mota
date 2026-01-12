@@ -1,0 +1,217 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: mota-report-service
+  profiles:
+    active: dev
+  config:
+    import: optional:nacos:${spring.application.name}.yml
+  
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/mota_report?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USERNAME:mota}
+    password: ${MYSQL_PASSWORD:mota123}
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 30000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      pool-name: ReportHikariCP
+  
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    database: 0
+    timeout: 10000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: -1ms
+        max-idle: 8
+        min-idle: 0
+  
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
+    consumer:
+      group-id: mota-report-group
+      auto-offset-reset: earliest
+      enable-auto-commit: true
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      retries: 3
+  
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+  
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_SERVER:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:}
+        group: DEFAULT_GROUP
+      config:
+        server-addr: ${NACOS_SERVER:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:}
+        group: DEFAULT_GROUP
+        file-extension: yml
+  
+  freemarker:
+    template-loader-path: classpath:/templates/
+    suffix: .ftl
+    charset: UTF-8
+    check-template-location: true
+    cache: true
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.mota.report.entity
+  global-config:
+    db-config:
+      id-type: ASSIGN_ID
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# 报表服务配置
+report:
+  # 报表存储配置
+  storage:
+    type: ${REPORT_STORAGE_TYPE:local}
+    local:
+      base-path: ${REPORT_LOCAL_PATH:/data/reports}
+    oss:
+      endpoint: ${OSS_ENDPOINT:}
+      access-key: ${OSS_ACCESS_KEY:}
+      secret-key: ${OSS_SECRET_KEY:}
+      bucket: ${OSS_BUCKET:mota-reports}
+  
+  # 报表生成配置
+  generate:
+    # 最大并发生成数
+    max-concurrent: 5
+    # 单个报表最大数据行数
+    max-rows: 100000
+    # 生成超时时间(秒)
+    timeout: 300
+    # 临时文件目录
+    temp-dir: ${REPORT_TEMP_DIR:/tmp/reports}
+  
+  # 报表保留配置
+  retention:
+    # 默认保留天数
+    default-days: 30
+    # 最大保留天数
+    max-days: 365
+    # 清理任务执行时间
+    cleanup-cron: "0 0 2 * * ?"
+  
+  # 导出配置
+  export:
+    excel:
+      # 最大行数
+      max-rows: 65535
+      # 默认字体
+      default-font: Microsoft YaHei
+      # 默认字号
+      default-font-size: 11
+    pdf:
+      # 字体路径
+      font-path: ${PDF_FONT_PATH:/fonts/simsun.ttc}
+      # 页面大小
+      page-size: A4
+      # 页边距
+      margin: 36
+    word:
+      # 默认字体
+      default-font: 宋体
+      # 默认字号
+      default-font-size: 12
+
+# 仪表盘配置
+dashboard:
+  # 数据缓存时间(秒)
+  cache-seconds: 60
+  # 最大组件数
+  max-widgets: 20
+  # 默认刷新间隔(秒)
+  default-refresh-interval: 300
+
+# 定时任务配置
+schedule:
+  # 是否启用定时任务
+  enabled: true
+  # 任务执行线程池大小
+  pool-size: 5
+  # 任务检查间隔(秒)
+  check-interval: 60
+
+# Feign配置
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 30000
+        loggerLevel: BASIC
+  circuitbreaker:
+    enabled: true
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.mota.report: DEBUG
+    com.mota.report.mapper: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: logs/mota-report-service.log
+    max-size: 100MB
+    max-history: 30
+
+# Actuator配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+# Knife4j配置
+knife4j:
+  enable: true
+  setting:
+    language: zh_CN
+    swagger-model-name: 实体类列表
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  group-configs:
+    - group: 报表服务
+      paths-to-match: /**
+      packages-to-scan: com.mota.report.controller

@@ -27,6 +27,7 @@ public class LoginResponse implements Serializable {
     private String refreshToken;
 
     @Schema(description = "令牌类型")
+    @Builder.Default
     private String tokenType = "Bearer";
 
     @Schema(description = "过期时间（秒）")

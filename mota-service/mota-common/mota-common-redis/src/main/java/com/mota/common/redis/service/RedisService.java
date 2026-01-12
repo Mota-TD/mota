@@ -91,6 +91,28 @@ public class RedisService {
     }
 
     /**
+     * 删除缓存（别名）
+     */
+    public Boolean deleteObject(String key) {
+        return delete(key);
+    }
+
+    /**
+     * 获取缓存对象（别名）
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T getCacheObject(String key) {
+        return get(key);
+    }
+
+    /**
+     * 设置缓存对象（别名）
+     */
+    public void setCacheObject(String key, Object value, long timeout, TimeUnit unit) {
+        set(key, value, timeout, unit);
+    }
+
+    /**
      * 批量删除缓存
      */
     public Long delete(Collection<String> keys) {
@@ -247,10 +269,33 @@ public class RedisService {
     }
 
     /**
+     * 添加Set元素（别名方法）
+     */
+    public Long setCacheSetValue(String key, String value) {
+        return redisTemplate.opsForSet().add(key, value);
+    }
+
+    /**
      * 获取Set所有元素
      */
     public Set<Object> sMembers(String key) {
         return redisTemplate.opsForSet().members(key);
+    }
+
+    /**
+     * 获取Set所有元素（别名方法，返回String类型）
+     */
+    @SuppressWarnings("unchecked")
+    public Set<String> getCacheSet(String key) {
+        Set<Object> members = redisTemplate.opsForSet().members(key);
+        if (members == null) {
+            return null;
+        }
+        Set<String> result = new java.util.HashSet<>();
+        for (Object member : members) {
+            result.add(member.toString());
+        }
+        return result;
     }
 
     /**

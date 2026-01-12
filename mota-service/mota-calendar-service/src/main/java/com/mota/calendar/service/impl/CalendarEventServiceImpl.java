@@ -1,6 +1,7 @@
 package com.mota.calendar.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.mota.calendar.entity.CalendarEvent;
 import com.mota.calendar.entity.CalendarEventAttendee;
 import com.mota.calendar.mapper.CalendarEventMapper;
@@ -22,9 +23,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CalendarEventServiceImpl implements CalendarEventService {
+public class CalendarEventServiceImpl extends ServiceImpl<CalendarEventMapper, CalendarEvent> implements CalendarEventService {
     
-    private final CalendarEventMapper eventMapper;
     private final CalendarEventAttendeeMapper attendeeMapper;
     
     @Override
@@ -33,7 +33,7 @@ public class CalendarEventServiceImpl implements CalendarEventService {
         event.setStatus(CalendarEvent.STATUS_ACTIVE);
         event.setCreatedAt(LocalDateTime.now());
         event.setUpdatedAt(LocalDateTime.now());
-        eventMapper.insert(event);
+        baseMapper.insert(event);
         
         // 添加参与者
         if (attendeeIds != null && !attendeeIds.isEmpty()) {
@@ -46,15 +46,21 @@ public class CalendarEventServiceImpl implements CalendarEventService {
     
     @Override
     @Transactional
+    public CalendarEvent createEvent(CalendarEvent event) {
+        return createEvent(event, null);
+    }
+    
+    @Override
+    @Transactional
     public CalendarEvent updateEvent(Long id, CalendarEvent event, List<Long> attendeeIds) {
-        CalendarEvent existing = eventMapper.selectById(id);
+        CalendarEvent existing = baseMapper.selectById(id);
         if (existing == null) {
             throw new RuntimeException("事件不存在: " + id);
         }
         
         event.setId(id);
         event.setUpdatedAt(LocalDateTime.now());
-        eventMapper.updateById(event);
+        baseMapper.updateById(event);
         
         // 更新参与者
         if (attendeeIds != null) {
@@ -65,39 +71,48 @@ public class CalendarEventServiceImpl implements CalendarEventService {
         }
         
         log.info("更新日历事件成功: id={}", id);
-        return eventMapper.selectById(id);
+        return baseMapper.selectById(id);
+    }
+    
+    @Override
+    @Transactional
+    public CalendarEvent updateEvent(CalendarEvent event) {
+        event.setUpdatedAt(LocalDateTime.now());
+        baseMapper.updateById(event);
+        log.info("更新日历事件成功: id={}", event.getId());
+        return baseMapper.selectById(event.getId());
     }
     
     @Override
     @Transactional
     public boolean deleteEvent(Long id) {
         attendeeMapper.deleteByEventId(id);
-        int result = eventMapper.deleteById(id);
+        int result = baseMapper.deleteById(id);
         log.info("删除日历事件: id={}, result={}", id, result > 0);
         return result > 0;
     }
     
     @Override
     public boolean cancelEvent(Long id) {
-        CalendarEvent event = eventMapper.selectById(id);
+        CalendarEvent event = baseMapper.selectById(id);
         if (event == null) {
             return false;
         }
         event.setStatus(CalendarEvent.STATUS_CANCELLED);
         event.setUpdatedAt(LocalDateTime.now());
-        int result = eventMapper.updateById(event);
+        int result = baseMapper.updateById(event);
         log.info("取消日历事件: id={}, result={}", id, result > 0);
         return result > 0;
     }
     
     @Override
     public CalendarEvent getEventById(Long id) {
-        return eventMapper.selectById(id);
+        return baseMapper.selectById(id);
     }
     
     @Override
     public CalendarEvent getEventWithAttendees(Long id) {
-        CalendarEvent event = eventMapper.selectById(id);
+        CalendarEvent event = baseMapper.selectById(id);
         if (event != null) {
             List<CalendarEventAttendee> attendees = attendeeMapper.findByEventId(id);
             event.setAttendees(attendees);
@@ -107,18 +122,18 @@ public class CalendarEventServiceImpl implements CalendarEventService {
     
     @Override
     public List<CalendarEvent> getUserEvents(Long userId, LocalDateTime startTime, LocalDateTime endTime) {
-        return eventMapper.findByUserIdAndTimeRange(userId, startTime, endTime);
+        return baseMapper.findByUserIdAndTimeRange(userId, startTime, endTime);
     }
     
     @Override
     public List<CalendarEvent> getProjectEvents(Long projectId, LocalDateTime startTime, LocalDateTime endTime) {
-        return eventMapper.findByProjectIdAndTimeRange(projectId, startTime, endTime);
+        return baseMapper.findByProjectIdAndTimeRange(projectId, startTime, endTime);
     }
     
     @Override
     public List<CalendarEvent> getUserEventsInRange(Long userId, LocalDateTime startTime, LocalDateTime endTime) {
         // 获取用户创建的事件
-        List<CalendarEvent> createdEvents = eventMapper.findByUserIdAndTimeRange(userId, startTime, endTime);
+        List<CalendarEvent> createdEvents = baseMapper.findByUserIdAndTimeRange(userId, startTime, endTime);
         
         // 获取用户参与的事件
         List<Long> participatingEventIds = attendeeMapper.findEventIdsByUserId(userId);
@@ -130,7 +145,7 @@ public class CalendarEventServiceImpl implements CalendarEventService {
                    .ge(CalendarEvent::getStartTime, startTime)
                    .le(CalendarEvent::getEndTime, endTime)
                    .eq(CalendarEvent::getStatus, CalendarEvent.STATUS_ACTIVE);
-            participatingEvents = eventMapper.selectList(wrapper);
+            participatingEvents = baseMapper.selectList(wrapper);
         }
         
         // 合并并去重
@@ -148,17 +163,55 @@ public class CalendarEventServiceImpl implements CalendarEventService {
     
     @Override
     public List<CalendarEvent> getUpcomingEvents(Long userId, Integer minutes) {
-        return eventMapper.findUpcomingEvents(userId, minutes);
+        return baseMapper.findUpcomingEvents(userId, minutes);
     }
     
     @Override
     public List<CalendarEvent> getEventsByTaskId(Long taskId) {
-        return eventMapper.findByTaskId(taskId);
+        return baseMapper.findByTaskId(taskId);
+    }
+    
+    @Override
+    public CalendarEvent getByTaskId(Long taskId) {
+        LambdaQueryWrapper<CalendarEvent> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(CalendarEvent::getTaskId, taskId)
+               .eq(CalendarEvent::getStatus, CalendarEvent.STATUS_ACTIVE)
+               .last("LIMIT 1");
+        return baseMapper.selectOne(wrapper);
     }
     
     @Override
     public List<CalendarEvent> getEventsByMilestoneId(Long milestoneId) {
-        return eventMapper.findByMilestoneId(milestoneId);
+        return baseMapper.findByMilestoneId(milestoneId);
+    }
+    
+    @Override
+    public CalendarEvent getByMilestoneId(Long milestoneId) {
+        LambdaQueryWrapper<CalendarEvent> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(CalendarEvent::getMilestoneId, milestoneId)
+               .eq(CalendarEvent::getStatus, CalendarEvent.STATUS_ACTIVE)
+               .last("LIMIT 1");
+        return baseMapper.selectOne(wrapper);
+    }
+    
+    @Override
+    public CalendarEvent getByMeetingId(Long meetingId) {
+        LambdaQueryWrapper<CalendarEvent> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(CalendarEvent::getMeetingId, meetingId)
+               .eq(CalendarEvent::getStatus, CalendarEvent.STATUS_ACTIVE)
+               .last("LIMIT 1");
+        return baseMapper.selectOne(wrapper);
+    }
+    
+    @Override
+    public List<CalendarEvent> getCalendarEvents(Long calendarId, LocalDateTime startTime, LocalDateTime endTime) {
+        LambdaQueryWrapper<CalendarEvent> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(CalendarEvent::getCalendarId, calendarId)
+               .ge(CalendarEvent::getStartTime, startTime)
+               .le(CalendarEvent::getEndTime, endTime)
+               .eq(CalendarEvent::getStatus, CalendarEvent.STATUS_ACTIVE)
+               .orderByAsc(CalendarEvent::getStartTime);
+        return baseMapper.selectList(wrapper);
     }
     
     @Override
@@ -207,7 +260,7 @@ public class CalendarEventServiceImpl implements CalendarEventService {
     
     @Override
     public boolean canAccessEvent(Long eventId, Long userId) {
-        CalendarEvent event = eventMapper.selectById(eventId);
+        CalendarEvent event = baseMapper.selectById(eventId);
         if (event == null) {
             return false;
         }
@@ -233,7 +286,7 @@ public class CalendarEventServiceImpl implements CalendarEventService {
         for (Long id : ids) {
             attendeeMapper.deleteByEventId(id);
         }
-        int result = eventMapper.deleteBatchIds(ids);
+        int result = baseMapper.deleteBatchIds(ids);
         log.info("批量删除日历事件: ids={}, result={}", ids, result);
         return result > 0;
     }

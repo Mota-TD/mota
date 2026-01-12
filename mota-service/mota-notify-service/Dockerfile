@@ -2,17 +2,17 @@
 # Mota Notify Service Dockerfile
 # =====================================================
 
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 
 LABEL maintainer="Mota Team"
-LABEL description="Mota Notify Service - 通知、邮件、推送服务"
+LABEL description="Mota Notify Service - 通知消息服务"
 
 # 设置工作目录
 WORKDIR /app
 
 # 设置时区
 ENV TZ=Asia/Shanghai
-RUN apk add --no-cache tzdata && \
+RUN apk add --no-cache tzdata curl && \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone
 
@@ -20,7 +20,7 @@ RUN apk add --no-cache tzdata && \
 RUN addgroup -g 1000 mota && \
     adduser -u 1000 -G mota -s /bin/sh -D mota
 
-# 复制jar包
+# 复制jar�?
 COPY target/*.jar app.jar
 
 # 设置文件权限
@@ -30,10 +30,14 @@ RUN chown -R mota:mota /app
 USER mota
 
 # 暴露端口
-EXPOSE 8085
+EXPOSE 8086
+
+# 健康检�?
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8086/actuator/health || exit 1
 
 # JVM参数
-ENV JAVA_OPTS="-Xms256m -Xmx512m -XX:+UseG1GC -XX:MaxGCPauseMillis=100"
+ENV JAVA_OPTS="-Xms256m -Xmx512m -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:+HeapDumpOnOutOfMemoryError"
 
 # 启动命令
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar app.jar"]

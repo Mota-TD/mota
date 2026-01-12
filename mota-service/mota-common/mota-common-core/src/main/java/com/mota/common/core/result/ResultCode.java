@@ -15,6 +15,8 @@ public enum ResultCode implements IResultCode {
 
     // 客户端错误 4xx
     FAIL(400, "操作失败"),
+    PARAM_ERROR(400, "参数错误"),
+    BUSINESS_ERROR(400, "业务错误"),
     BAD_REQUEST(400, "请求参数错误"),
     UNAUTHORIZED(401, "未授权"),
     TOKEN_EXPIRED(401, "Token已过期"),

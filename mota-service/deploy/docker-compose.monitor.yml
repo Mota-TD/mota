@@ -1,0 +1,240 @@
+# =====================================================
+# Mota 监控服务 Docker Compose 配置
+# 包含：Prometheus、Grafana、AlertManager、ELK Stack
+# =====================================================
+
+services:
+  # =====================================================
+  # Prometheus 监控
+  # =====================================================
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    container_name: mota-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/rules:/etc/prometheus/rules:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mota-network
+
+  # =====================================================
+  # Grafana 可视化
+  # =====================================================
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: mota-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin123}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=https://grafana.mota.com
+      - TZ=${TZ:-Asia/Shanghai}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mota-network
+
+  # =====================================================
+  # AlertManager 告警管理
+  # =====================================================
+  alertmanager:
+    image: prom/alertmanager:v0.26.0
+    container_name: mota-alertmanager
+    restart: unless-stopped
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./prometheus/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9093/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mota-network
+
+  # =====================================================
+  # Node Exporter 主机监控
+  # =====================================================
+  node-exporter:
+    image: prom/node-exporter:v1.6.1
+    container_name: mota-node-exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - mota-network
+
+  # =====================================================
+  # cAdvisor 容器监控
+  # =====================================================
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    container_name: mota-cadvisor
+    restart: unless-stopped
+    ports:
+      - "8088:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    privileged: true
+    devices:
+      - /dev/kmsg
+    networks:
+      - mota-network
+
+  # =====================================================
+  # Logstash 日志处理
+  # =====================================================
+  logstash:
+    image: logstash:8.11.0
+    container_name: mota-logstash
+    restart: unless-stopped
+    ports:
+      - "5044:5044"
+      - "9600:9600"
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+    environment:
+      - "LS_JAVA_OPTS=-Xms256m -Xmx512m"
+      - TZ=${TZ:-Asia/Shanghai}
+    depends_on:
+      - elasticsearch
+    networks:
+      - mota-network
+    profiles:
+      - elk
+
+  # =====================================================
+  # Filebeat 日志采集
+  # =====================================================
+  filebeat:
+    image: elastic/filebeat:8.11.0
+    container_name: mota-filebeat
+    restart: unless-stopped
+    user: root
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - filebeat_data:/usr/share/filebeat/data
+    environment:
+      - TZ=${TZ:-Asia/Shanghai}
+    depends_on:
+      - logstash
+    networks:
+      - mota-network
+    profiles:
+      - elk
+
+  # =====================================================
+  # SkyWalking OAP 服务
+  # =====================================================
+  skywalking-oap:
+    image: apache/skywalking-oap-server:9.6.0
+    container_name: mota-skywalking-oap
+    restart: unless-stopped
+    ports:
+      - "11800:11800"
+      - "12800:12800"
+    environment:
+      - SW_STORAGE=elasticsearch
+      - SW_STORAGE_ES_CLUSTER_NODES=elasticsearch:9200
+      - SW_HEALTH_CHECKER=default
+      - SW_TELEMETRY=prometheus
+      - TZ=${TZ:-Asia/Shanghai}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:12800/healthcheck || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - mota-network
+    profiles:
+      - skywalking
+
+  # =====================================================
+  # SkyWalking UI
+  # =====================================================
+  skywalking-ui:
+    image: apache/skywalking-ui:9.6.0
+    container_name: mota-skywalking-ui
+    restart: unless-stopped
+    ports:
+      - "8089:8080"
+    environment:
+      - SW_OAP_ADDRESS=http://skywalking-oap:12800
+      - TZ=${TZ:-Asia/Shanghai}
+    depends_on:
+      skywalking-oap:
+        condition: service_healthy
+    networks:
+      - mota-network
+    profiles:
+      - skywalking
+
+# =====================================================
+# 网络配置
+# =====================================================
+networks:
+  mota-network:
+    external: true
+    name: mota_mota-network
+
+# =====================================================
+# 数据卷配置
+# =====================================================
+volumes:
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  alertmanager_data:
+    driver: local
+  filebeat_data:
+    driver: local

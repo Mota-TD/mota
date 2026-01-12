@@ -69,6 +69,14 @@
             <groupId>com.mota</groupId>
             <artifactId>mota-common-log</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.mota</groupId>
+            <artifactId>mota-common-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.mota</groupId>
+            <artifactId>mota-common-feign</artifactId>
+        </dependency>
 
         <!-- API Modules -->
         <dependency>

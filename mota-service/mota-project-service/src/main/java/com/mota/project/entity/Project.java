@@ -15,11 +15,19 @@ import java.time.LocalDateTime;
 
 /**
  * 项目实体
+ * 支持多租户隔离
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("project")
 public class Project extends BaseEntityDO {
+
+    /**
+     * 租户ID（多租户隔离）
+     */
+    @TableField(value = "tenant_id")
+    @JsonSerialize(using = ToStringSerializer.class)
+    private Long tenantId;
 
     /**
      * 组织ID
@@ -117,6 +125,27 @@ public class Project extends BaseEntityDO {
     private String visibility;
 
     /**
+     * 项目类型(standard/template/agile/waterfall)
+     */
+    private String projectType;
+
+    /**
+     * 模板ID（如果是从模板创建的项目）
+     */
+    @JsonSerialize(using = ToStringSerializer.class)
+    private Long templateId;
+
+    /**
+     * 是否为模板项目
+     */
+    private Boolean isTemplate;
+
+    /**
+     * 项目配置（JSON格式）
+     */
+    private String settings;
+
+    /**
      * 项目状态枚举
      */
     public static class Status {
@@ -145,5 +174,16 @@ public class Project extends BaseEntityDO {
         public static final String PRIVATE = "private";
         public static final String INTERNAL = "internal";
         public static final String PUBLIC = "public";
+    }
+
+    /**
+     * 项目类型枚举
+     */
+    public static class ProjectType {
+        public static final String STANDARD = "standard";
+        public static final String TEMPLATE = "template";
+        public static final String AGILE = "agile";
+        public static final String WATERFALL = "waterfall";
+        public static final String KANBAN = "kanban";
     }
 }
