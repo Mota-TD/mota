@@ -78,11 +78,18 @@ interface NewsArticle {
   commentCount: number;
 }
 
-// 新闻分类
-interface NewsCategory {
+// 新闻分类（本地使用，带图标）
+interface NewsCategoryLocal {
   key: string;
   label: string;
   icon: React.ReactNode;
+  count: number;
+}
+
+// 新闻分类（API返回，不带图标）
+interface NewsCategory {
+  key: string;
+  label: string;
   count: number;
 }
 
@@ -128,145 +135,28 @@ export default function NewsPage() {
   const { data: newsData, isLoading } = useQuery({
     queryKey: ['news', activeTab, searchText, selectedCategory],
     queryFn: async () => {
-      // 模拟API调用
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      
-      const mockNews: NewsArticle[] = [
-        {
-          id: '1',
-          title: '人工智能在企业项目管理中的应用趋势分析',
-          summary: '随着AI技术的快速发展，越来越多的企业开始将人工智能应用于项目管理领域。本文分析了当前AI在项目管理中的主要应用场景和未来发展趋势。',
-          content: '详细内容...',
-          source: '科技日报',
-          sourceIcon: '📰',
-          author: '张明',
-          category: 'technology',
-          tags: ['AI', '项目管理', '数字化转型'],
-          imageUrl: 'https://picsum.photos/400/200?random=1',
-          publishedAt: dayjs().subtract(2, 'hour').toISOString(),
-          url: 'https://example.com/news/1',
-          relevanceScore: 95,
-          isRead: false,
-          isFavorite: false,
-          viewCount: 1234,
-          likeCount: 89,
-          commentCount: 23,
-        },
-        {
-          id: '2',
-          title: '国务院发布关于促进数字经济发展的指导意见',
-          summary: '国务院近日印发《关于促进数字经济高质量发展的指导意见》，明确了未来五年数字经济发展的主要目标和重点任务。',
-          content: '详细内容...',
-          source: '新华社',
-          sourceIcon: '🏛️',
-          author: '李华',
-          category: 'policy',
-          tags: ['政策', '数字经济', '发展规划'],
-          imageUrl: 'https://picsum.photos/400/200?random=2',
-          publishedAt: dayjs().subtract(5, 'hour').toISOString(),
-          url: 'https://example.com/news/2',
-          relevanceScore: 88,
-          isRead: true,
-          isFavorite: true,
-          viewCount: 5678,
-          likeCount: 234,
-          commentCount: 56,
-        },
-        {
-          id: '3',
-          title: '2024年企业协作软件市场规模预计突破500亿',
-          summary: '根据最新市场研究报告，2024年全球企业协作软件市场规模预计将突破500亿美元，年增长率达到15%。',
-          content: '详细内容...',
-          source: '经济观察报',
-          sourceIcon: '📊',
-          author: '王芳',
-          category: 'market',
-          tags: ['市场分析', '企业协作', 'SaaS'],
-          imageUrl: 'https://picsum.photos/400/200?random=3',
-          publishedAt: dayjs().subtract(1, 'day').toISOString(),
-          url: 'https://example.com/news/3',
-          relevanceScore: 82,
-          isRead: false,
-          isFavorite: false,
-          viewCount: 2345,
-          likeCount: 123,
-          commentCount: 34,
-        },
-        {
-          id: '4',
-          title: '某知名科技公司发布新一代项目管理平台',
-          summary: '该平台集成了AI助手、实时协作、智能分析等功能，旨在帮助企业提升项目管理效率。',
-          content: '详细内容...',
-          source: '36氪',
-          sourceIcon: '🚀',
-          author: '陈刚',
-          category: 'company',
-          tags: ['产品发布', '项目管理', '创新'],
-          imageUrl: 'https://picsum.photos/400/200?random=4',
-          publishedAt: dayjs().subtract(2, 'day').toISOString(),
-          url: 'https://example.com/news/4',
-          relevanceScore: 78,
-          isRead: true,
-          isFavorite: false,
-          viewCount: 3456,
-          likeCount: 167,
-          commentCount: 45,
-        },
-        {
-          id: '5',
-          title: '行业报告：远程办公对项目管理的影响研究',
-          summary: '本报告深入分析了远程办公模式下项目管理面临的挑战和机遇，并提出了相应的解决方案。',
-          content: '详细内容...',
-          source: '哈佛商业评论',
-          sourceIcon: '📚',
-          author: '刘洋',
-          category: 'industry',
-          tags: ['远程办公', '研究报告', '管理创新'],
-          imageUrl: 'https://picsum.photos/400/200?random=5',
-          publishedAt: dayjs().subtract(3, 'day').toISOString(),
-          url: 'https://example.com/news/5',
-          relevanceScore: 75,
-          isRead: false,
-          isFavorite: true,
-          viewCount: 4567,
-          likeCount: 289,
-          commentCount: 78,
-        },
-      ];
-
-      // 过滤
-      let filtered = mockNews;
-      if (activeTab === 'unread') {
-        filtered = filtered.filter((n) => !n.isRead);
-      } else if (activeTab === 'favorite') {
-        filtered = filtered.filter((n) => n.isFavorite);
+      try {
+        const { newsService } = await import('@/services');
+        return await newsService.getNews({
+          tab: activeTab,
+          category: selectedCategory !== 'all' ? selectedCategory : undefined,
+          search: searchText || undefined,
+        });
+      } catch {
+        return {
+          articles: [],
+          categories: [
+            { key: 'all', label: '全部', count: 0 },
+            { key: 'industry', label: '行业动态', count: 0 },
+            { key: 'policy', label: '政策法规', count: 0 },
+            { key: 'technology', label: '技术趋势', count: 0 },
+            { key: 'market', label: '市场分析', count: 0 },
+            { key: 'company', label: '企业动态', count: 0 },
+          ],
+          total: 0,
+          unreadCount: 0,
+        };
       }
-      if (selectedCategory !== 'all') {
-        filtered = filtered.filter((n) => n.category === selectedCategory);
-      }
-      if (searchText) {
-        filtered = filtered.filter(
-          (n) =>
-            n.title.toLowerCase().includes(searchText.toLowerCase()) ||
-            n.summary.toLowerCase().includes(searchText.toLowerCase())
-        );
-      }
-
-      const categories: NewsCategory[] = [
-        { key: 'all', label: '全部', icon: <ReadOutlined />, count: mockNews.length },
-        { key: 'industry', label: '行业动态', icon: <GlobalOutlined />, count: 12 },
-        { key: 'policy', label: '政策法规', icon: <BankOutlined />, count: 8 },
-        { key: 'technology', label: '技术趋势', icon: <RocketOutlined />, count: 15 },
-        { key: 'market', label: '市场分析', icon: <FireOutlined />, count: 10 },
-        { key: 'company', label: '企业动态', icon: <TeamOutlined />, count: 20 },
-      ];
-
-      return {
-        articles: filtered,
-        categories,
-        total: filtered.length,
-        unreadCount: mockNews.filter((n) => !n.isRead).length,
-      };
     },
   });
 
@@ -274,24 +164,28 @@ export default function NewsPage() {
   const { data: pushSettings } = useQuery({
     queryKey: ['news-push-settings'],
     queryFn: async (): Promise<PushSettings> => {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return {
-        enabled: true,
-        frequency: 'daily',
-        categories: ['industry', 'policy', 'technology'],
-        keywords: ['AI', '项目管理', '数字化'],
-        quietHoursEnabled: true,
-        quietHoursStart: '22:00',
-        quietHoursEnd: '08:00',
-      };
+      try {
+        const { newsService } = await import('@/services');
+        return await newsService.getPushSettings();
+      } catch {
+        return {
+          enabled: false,
+          frequency: 'daily',
+          categories: [],
+          keywords: [],
+          quietHoursEnabled: false,
+          quietHoursStart: '22:00',
+          quietHoursEnd: '08:00',
+        };
+      }
     },
   });
 
   // 标记已读
   const markAsReadMutation = useMutation({
     mutationFn: async (id: string) => {
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      return { id };
+      const { newsService } = await import('@/services');
+      return await newsService.markAsRead(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['news'] });
@@ -301,8 +195,8 @@ export default function NewsPage() {
   // 收藏/取消收藏
   const toggleFavoriteMutation = useMutation({
     mutationFn: async ({ id, isFavorite }: { id: string; isFavorite: boolean }) => {
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      return { id, isFavorite };
+      const { newsService } = await import('@/services');
+      return await newsService.toggleFavorite(id, isFavorite);
     },
     onSuccess: (_, variables) => {
       message.success(variables.isFavorite ? '已收藏' : '已取消收藏');
@@ -313,8 +207,8 @@ export default function NewsPage() {
   // 保存推送设置
   const savePushSettingsMutation = useMutation({
     mutationFn: async (settings: PushSettings) => {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      return settings;
+      const { newsService } = await import('@/services');
+      return await newsService.savePushSettings(settings);
     },
     onSuccess: () => {
       message.success('设置已保存');
@@ -480,7 +374,7 @@ export default function NewsPage() {
                   value: c.key,
                   label: (
                     <Space>
-                      {c.icon}
+                      {categoryConfig[c.key]?.icon || <ReadOutlined />}
                       {c.label}
                       <Badge count={c.count} style={{ backgroundColor: '#52c41a' }} />
                     </Space>
@@ -706,7 +600,7 @@ export default function NewsPage() {
                   .map((category) => (
                     <Col span={12} key={category.key}>
                       <Checkbox value={category.key}>
-                        {category.icon} {category.label}
+                        {categoryConfig[category.key]?.icon || <ReadOutlined />} {category.label}
                       </Checkbox>
                     </Col>
                   ))}

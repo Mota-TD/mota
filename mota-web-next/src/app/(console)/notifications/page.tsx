@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Card,
   Typography,
@@ -46,10 +46,11 @@ import {
   EyeInvisibleOutlined,
 } from '@ant-design/icons';
 import Link from 'next/link';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/zh-cn';
+import { notificationService, type Notification as ServiceNotification, type NotificationSettings as ServiceNotificationSettings } from '@/services';
 
 dayjs.extend(relativeTime);
 dayjs.locale('zh-cn');
@@ -137,209 +138,165 @@ export default function NotificationsPage() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settingsForm] = Form.useForm();
 
-  // 获取通知列表
-  const { data: notifications, isLoading } = useQuery<Notification[]>({
-    queryKey: ['notifications', activeTab],
-    queryFn: async () => {
-      // 模拟API调用
-      const allNotifications: Notification[] = [
-        {
-          id: '1',
-          type: 'mention',
-          category: 'important',
-          title: '张三 在任务中提到了你',
-          content: '@你 请帮忙审核一下这个功能的实现方案',
-          read: false,
-          createdAt: dayjs().subtract(5, 'minute').toISOString(),
-          sender: { id: '1', name: '张三' },
-          link: '/tasks/101',
-          actions: [
-            { key: 'view', label: '查看', type: 'primary' },
-            { key: 'reply', label: '回复' },
-          ],
-        },
-        {
-          id: '2',
-          type: 'task',
-          category: 'important',
-          title: '任务即将到期',
-          content: '任务"实现用户认证模块"将在2小时后到期',
-          read: false,
-          createdAt: dayjs().subtract(30, 'minute').toISOString(),
-          link: '/tasks/102',
-          actions: [
-            { key: 'view', label: '查看任务', type: 'primary' },
-            { key: 'extend', label: '延期' },
-          ],
-        },
-        {
-          id: '3',
-          type: 'comment',
-          category: 'normal',
-          title: '李四 评论了你的任务',
-          content: '这个方案看起来不错，有几个小建议...',
-          read: false,
-          createdAt: dayjs().subtract(1, 'hour').toISOString(),
-          sender: { id: '2', name: '李四' },
-          link: '/tasks/103#comments',
-        },
-        {
-          id: '4',
-          type: 'project',
-          category: 'normal',
-          title: '项目进度更新',
-          content: '摩塔项目管理系统 进度已更新至 65%',
-          read: true,
-          createdAt: dayjs().subtract(2, 'hour').toISOString(),
-          link: '/projects/1',
-        },
-        {
-          id: '5',
-          type: 'calendar',
-          category: 'normal',
-          title: '会议提醒',
-          content: '项目周会将在15分钟后开始',
-          read: true,
-          createdAt: dayjs().subtract(3, 'hour').toISOString(),
-          link: '/calendar',
-          actions: [
-            { key: 'join', label: '加入会议', type: 'primary' },
-          ],
-        },
-        {
-          id: '6',
-          type: 'ai',
-          category: 'low',
-          title: 'AI 智能推荐',
-          content: '根据您的工作习惯，建议将"编写单元测试"任务安排在上午完成',
-          read: true,
-          createdAt: dayjs().subtract(4, 'hour').toISOString(),
-          actions: [
-            { key: 'apply', label: '采纳建议', type: 'primary' },
-            { key: 'dismiss', label: '忽略' },
-          ],
-        },
-        {
-          id: '7',
-          type: 'system',
-          category: 'low',
-          title: '系统更新通知',
-          content: '系统将于今晚22:00进行维护升级，预计持续30分钟',
-          read: true,
-          createdAt: dayjs().subtract(1, 'day').toISOString(),
-        },
-        {
-          id: '8',
-          type: 'task',
-          category: 'normal',
-          title: '任务状态变更',
-          content: '5个任务的状态已更新',
-          read: true,
-          createdAt: dayjs().subtract(1, 'day').toISOString(),
-          aggregation: {
-            count: 5,
-            items: ['任务A已完成', '任务B进行中', '任务C待审核', '任务D已完成', '任务E进行中'],
-          },
-        },
-      ];
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [settings, setSettings] = useState<NotificationSettings | null>(null);
 
-      if (activeTab === 'unread') {
-        return allNotifications.filter((n) => !n.read);
-      }
-      if (activeTab === 'important') {
-        return allNotifications.filter((n) => n.category === 'important');
-      }
-      return allNotifications;
-    },
-  });
+  // 获取通知列表
+  const fetchNotifications = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await notificationService.getNotifications({
+        type: activeTab === 'unread' ? undefined : activeTab === 'important' ? 'important' : undefined,
+        read: activeTab === 'unread' ? false : undefined,
+      });
+      
+      // 转换数据格式 - response.records 是通知数组
+      const records = response.records || [];
+      const convertedNotifications: Notification[] = records.map((n: ServiceNotification) => ({
+        id: n.id,
+        type: (n.type as 'task' | 'project' | 'comment' | 'mention' | 'system' | 'calendar' | 'ai') || 'system',
+        category: 'normal' as 'important' | 'normal' | 'low', // 默认为普通
+        title: n.title,
+        content: n.content,
+        read: n.read,
+        createdAt: n.createdAt,
+        sender: n.senderId ? { id: n.senderId, name: n.senderName || '', avatar: n.senderAvatar } : undefined,
+        link: n.actionUrl,
+      }));
+      
+      setNotifications(convertedNotifications);
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error);
+      setNotifications([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [activeTab]);
 
   // 获取未读数量
-  const { data: unreadCount } = useQuery<number>({
-    queryKey: ['notifications-unread-count'],
-    queryFn: async () => 3,
-  });
+  const fetchUnreadCount = useCallback(async () => {
+    try {
+      const count = await notificationService.getUnreadCount();
+      setUnreadCount(count);
+    } catch (error) {
+      console.error('Failed to fetch unread count:', error);
+      setUnreadCount(0);
+    }
+  }, []);
 
   // 获取通知设置
-  const { data: settings } = useQuery<NotificationSettings>({
-    queryKey: ['notification-settings'],
-    queryFn: async () => ({
-      channels: {
-        inApp: true,
-        email: true,
-        push: true,
-        wechat: false,
-      },
-      categories: {
-        task: true,
-        project: true,
-        comment: true,
-        mention: true,
-        system: true,
-        calendar: true,
-        ai: true,
-      },
-      doNotDisturb: {
-        enabled: false,
-        startTime: '22:00',
-        endTime: '08:00',
-        allowImportant: true,
-      },
-      digest: {
-        enabled: true,
-        frequency: 'daily',
-        time: '09:00',
-      },
-    }),
-  });
+  const fetchSettings = useCallback(async () => {
+    try {
+      const data = await notificationService.getNotificationSettings();
+      // 将 service 返回的设置转换为页面使用的格式
+      setSettings({
+        channels: {
+          inApp: data.inApp?.enabled ?? true,
+          email: data.email?.enabled ?? true,
+          push: data.push?.enabled ?? true,
+          wechat: false, // service 中没有 wechat
+        },
+        categories: {
+          task: data.inApp?.taskAssigned ?? true,
+          project: data.inApp?.projectUpdated ?? true,
+          comment: true, // 默认开启
+          mention: data.inApp?.mentioned ?? true,
+          system: data.inApp?.systemAnnouncements ?? true,
+          calendar: true, // 默认开启
+          ai: true, // 默认开启
+        },
+        doNotDisturb: {
+          enabled: data.dnd?.enabled ?? false,
+          startTime: data.dnd?.startTime ?? '22:00',
+          endTime: data.dnd?.endTime ?? '08:00',
+          allowImportant: true, // 默认允许重要通知
+        },
+        digest: {
+          enabled: data.email?.dailyDigest ?? true,
+          frequency: 'daily' as 'daily' | 'weekly',
+          time: '09:00',
+        },
+      });
+    } catch (error) {
+      console.error('Failed to fetch notification settings:', error);
+      // 设置默认值而不是 null
+      setSettings({
+        channels: { inApp: true, email: true, push: true, wechat: false },
+        categories: { task: true, project: true, comment: true, mention: true, system: true, calendar: true, ai: true },
+        doNotDisturb: { enabled: false, startTime: '22:00', endTime: '08:00', allowImportant: true },
+        digest: { enabled: true, frequency: 'daily', time: '09:00' },
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchNotifications();
+    fetchUnreadCount();
+    fetchSettings();
+  }, [fetchNotifications, fetchUnreadCount, fetchSettings]);
 
   // 标记已读
   const markAsReadMutation = useMutation({
     mutationFn: async (ids: string[]) => {
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      await Promise.all(ids.map(id => notificationService.markAsRead(id)));
       return ids;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
-      queryClient.invalidateQueries({ queryKey: ['notifications-unread-count'] });
+      fetchNotifications();
+      fetchUnreadCount();
       message.success('已标记为已读');
+    },
+    onError: () => {
+      message.error('操作失败');
     },
   });
 
   // 标记全部已读
   const markAllAsReadMutation = useMutation({
     mutationFn: async () => {
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      await notificationService.markAllAsRead();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
-      queryClient.invalidateQueries({ queryKey: ['notifications-unread-count'] });
+      fetchNotifications();
+      fetchUnreadCount();
       message.success('已全部标记为已读');
+    },
+    onError: () => {
+      message.error('操作失败');
     },
   });
 
   // 删除通知
   const deleteNotificationMutation = useMutation({
     mutationFn: async (ids: string[]) => {
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      await Promise.all(ids.map(id => notificationService.deleteNotification(id)));
       return ids;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      fetchNotifications();
       setSelectedIds([]);
       message.success('已删除');
+    },
+    onError: () => {
+      message.error('删除失败');
     },
   });
 
   // 保存设置
   const saveSettingsMutation = useMutation({
     mutationFn: async (values: NotificationSettings) => {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await notificationService.updateNotificationSettings(values as unknown as ServiceNotificationSettings);
       return values;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notification-settings'] });
+      fetchSettings();
       setIsSettingsOpen(false);
       message.success('设置已保存');
+    },
+    onError: () => {
+      message.error('保存设置失败');
     },
   });
 
@@ -595,7 +552,7 @@ export default function NotificationsPage() {
               <Button
                 icon={<ReloadOutlined />}
                 size="small"
-                onClick={() => queryClient.invalidateQueries({ queryKey: ['notifications'] })}
+                onClick={() => fetchNotifications()}
               >
                 刷新
               </Button>
@@ -633,7 +590,7 @@ export default function NotificationsPage() {
         <Form
           form={settingsForm}
           layout="vertical"
-          initialValues={settings}
+          initialValues={settings || undefined}
           onFinish={(values) => saveSettingsMutation.mutate(values)}
         >
           <Title level={5}>通知渠道</Title>

@@ -157,40 +157,14 @@ export default function AIPage() {
   // 获取会话列表
   const { data: conversations } = useQuery<Conversation[]>({
     queryKey: ['ai-conversations'],
-    queryFn: async () => [
-      {
-        id: '1',
-        title: '项目进度分析',
-        lastMessage: '根据当前进度，项目预计可以按时完成...',
-        updatedAt: dayjs().subtract(1, 'hour').toISOString(),
-        messageCount: 12,
-        starred: true,
-      },
-      {
-        id: '2',
-        title: '任务分解讨论',
-        lastMessage: '我已经将需求分解为5个子任务...',
-        updatedAt: dayjs().subtract(3, 'hour').toISOString(),
-        messageCount: 8,
-        starred: false,
-      },
-      {
-        id: '3',
-        title: '技术方案咨询',
-        lastMessage: '建议使用微服务架构来实现...',
-        updatedAt: dayjs().subtract(1, 'day').toISOString(),
-        messageCount: 15,
-        starred: true,
-      },
-      {
-        id: '4',
-        title: '文档撰写帮助',
-        lastMessage: '这是生成的API文档草稿...',
-        updatedAt: dayjs().subtract(2, 'day').toISOString(),
-        messageCount: 6,
-        starred: false,
-      },
-    ],
+    queryFn: async () => {
+      try {
+        const { aiService } = await import('@/services');
+        return await aiService.getConversations();
+      } catch {
+        return [];
+      }
+    },
   });
 
   // 获取当前会话消息
@@ -198,95 +172,12 @@ export default function AIPage() {
     queryKey: ['ai-messages', currentConversationId],
     queryFn: async () => {
       if (!currentConversationId) return [];
-      return [
-        {
-          id: '1',
-          role: 'user',
-          content: '帮我分析一下当前项目的进度情况',
-          timestamp: dayjs().subtract(1, 'hour').toISOString(),
-          status: 'sent',
-        },
-        {
-          id: '2',
-          role: 'assistant',
-          content: `根据我对项目数据的分析，以下是当前项目进度情况：
-
-## 整体进度
-- **完成率**: 65%
-- **预计完成时间**: 2024年2月15日
-- **风险等级**: 中等
-
-## 各模块进度
-| 模块 | 进度 | 状态 |
-|------|------|------|
-| 用户认证 | 100% | ✅ 已完成 |
-| 项目管理 | 80% | 🔄 进行中 |
-| 任务管理 | 70% | 🔄 进行中 |
-| 报表分析 | 40% | ⚠️ 滞后 |
-
-## 风险提示
-1. **报表分析模块**进度滞后，建议增加资源投入
-2. 有3个任务即将到期，需要关注
-3. 团队成员张三工作负载较高
-
-## 建议
-- 优先处理即将到期的任务
-- 考虑将部分任务重新分配
-- 安排一次进度同步会议`,
-          timestamp: dayjs().subtract(1, 'hour').add(30, 'second').toISOString(),
-          status: 'sent',
-          references: [
-            { type: 'project', id: '1', title: '摩塔项目管理系统' },
-            { type: 'task', id: '101', title: '报表分析模块开发' },
-          ],
-        },
-        {
-          id: '3',
-          role: 'user',
-          content: '报表分析模块滞后的原因是什么？',
-          timestamp: dayjs().subtract(50, 'minute').toISOString(),
-          status: 'sent',
-        },
-        {
-          id: '4',
-          role: 'assistant',
-          content: `根据任务记录和团队反馈，报表分析模块滞后的主要原因如下：
-
-## 主要原因
-
-### 1. 需求变更 (影响: 高)
-- 原始需求在开发中期进行了较大调整
-- 新增了3个复杂的图表类型
-- 数据源接口发生变化
-
-### 2. 技术难点 (影响: 中)
-- 大数据量下的性能优化挑战
-- 复杂图表的实现需要更多时间
-- 与第三方图表库的集成问题
-
-### 3. 资源不足 (影响: 中)
-- 负责该模块的开发人员同时承担其他任务
-- 缺少专业的数据可视化经验
-
-## 建议措施
-
-1. **短期**: 
-   - 与产品经理确认需求优先级，考虑分期交付
-   - 安排技术攻关解决性能问题
-
-2. **中期**:
-   - 调配额外开发资源
-   - 考虑引入成熟的图表组件库
-
-需要我帮你生成一份详细的改进计划吗？`,
-          timestamp: dayjs().subtract(49, 'minute').toISOString(),
-          status: 'sent',
-          references: [
-            { type: 'task', id: '101', title: '报表分析模块开发' },
-            { type: 'document', id: '201', title: '报表需求变更记录' },
-          ],
-        },
-      ];
+      try {
+        const { aiService } = await import('@/services');
+        return await aiService.getConversationMessages(currentConversationId);
+      } catch {
+        return [];
+      }
     },
     enabled: !!currentConversationId,
   });
@@ -294,67 +185,59 @@ export default function AIPage() {
   // 获取AI建议
   const { data: suggestions } = useQuery({
     queryKey: ['ai-suggestions'],
-    queryFn: async () => [
-      {
-        id: '1',
-        type: 'task',
-        title: '任务优化建议',
-        content: '发现3个任务可以合并处理，预计节省2天工时',
-        priority: 'high',
-      },
-      {
-        id: '2',
-        type: 'schedule',
-        title: '日程冲突提醒',
-        content: '明天下午有2个会议时间重叠，建议调整',
-        priority: 'medium',
-      },
-      {
-        id: '3',
-        type: 'document',
-        title: '文档更新提醒',
-        content: 'API文档已过期，建议更新',
-        priority: 'low',
-      },
-    ],
+    queryFn: async () => {
+      try {
+        const { aiService } = await import('@/services');
+        return await aiService.getSuggestions();
+      } catch {
+        return [];
+      }
+    },
   });
 
   // 发送消息
   const sendMessageMutation = useMutation({
     mutationFn: async (content: string) => {
       setIsTyping(true);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      setIsTyping(false);
-      return {
-        id: Date.now().toString(),
-        role: 'assistant' as const,
-        content: `这是AI对"${content}"的回复。在实际应用中，这里会调用AI服务生成真实的回复内容。`,
-        timestamp: new Date().toISOString(),
-        status: 'sent' as const,
-      };
+      try {
+        const { aiService } = await import('@/services');
+        const response = await aiService.sendMessage(currentConversationId, content);
+        setIsTyping(false);
+        return response;
+      } catch (error) {
+        setIsTyping(false);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ai-messages'] });
       setInputValue('');
+    },
+    onError: () => {
+      message.error('发送失败，请重试');
     },
   });
 
   // 创建新会话
   const createConversationMutation = useMutation({
     mutationFn: async () => {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return { id: Date.now().toString(), title: '新对话' };
+      const { aiService } = await import('@/services');
+      return await aiService.createConversation();
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['ai-conversations'] });
       setCurrentConversationId(data.id);
+    },
+    onError: () => {
+      message.error('创建会话失败');
     },
   });
 
   // 删除会话
   const deleteConversationMutation = useMutation({
     mutationFn: async (id: string) => {
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      const { aiService } = await import('@/services');
+      await aiService.deleteConversation(id);
       return id;
     },
     onSuccess: () => {
@@ -364,16 +247,23 @@ export default function AIPage() {
       }
       message.success('会话已删除');
     },
+    onError: () => {
+      message.error('删除失败');
+    },
   });
 
   // 反馈
   const feedbackMutation = useMutation({
     mutationFn: async ({ messageId, feedback }: { messageId: string; feedback: 'like' | 'dislike' }) => {
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      const { aiService } = await import('@/services');
+      await aiService.feedbackMessage(messageId, feedback);
       return { messageId, feedback };
     },
     onSuccess: () => {
       message.success('感谢您的反馈');
+    },
+    onError: () => {
+      message.error('反馈提交失败');
     },
   });
 

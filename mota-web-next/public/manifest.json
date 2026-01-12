@@ -1,0 +1,10 @@
+{
+  "name": "Mota 项目管理系统",
+  "short_name": "Mota",
+  "description": "智能项目管理与协作平台",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1890ff",
+  "icons": []
+}

@@ -121,192 +121,106 @@ export default function SettingsPage() {
   // 获取当前用户信息
   const { data: currentUser } = useQuery({
     queryKey: ['current-user'],
-    queryFn: async () => ({
-      id: '1',
-      name: '张三',
-      email: 'zhangsan@example.com',
-      avatar: '',
-      phone: '13800138000',
-      department: '技术部',
-      position: '高级工程师',
-      timezone: 'Asia/Shanghai',
-      language: 'zh-CN',
-    }),
+    queryFn: async () => {
+      try {
+        const { systemService } = await import('@/services');
+        return await systemService.getCurrentUser();
+      } catch {
+        return null;
+      }
+    },
   });
 
   // 获取用户列表
   const { data: users, isLoading: isLoadingUsers } = useQuery<User[]>({
     queryKey: ['users'],
-    queryFn: async () => [
-      {
-        id: '1',
-        name: '张三',
-        email: 'zhangsan@example.com',
-        role: 'admin',
-        department: '技术部',
-        status: 'active',
-        lastLogin: dayjs().subtract(1, 'hour').toISOString(),
-        createdAt: dayjs().subtract(1, 'year').toISOString(),
-      },
-      {
-        id: '2',
-        name: '李四',
-        email: 'lisi@example.com',
-        role: 'member',
-        department: '产品部',
-        status: 'active',
-        lastLogin: dayjs().subtract(2, 'hour').toISOString(),
-        createdAt: dayjs().subtract(6, 'month').toISOString(),
-      },
-      {
-        id: '3',
-        name: '王五',
-        email: 'wangwu@example.com',
-        role: 'member',
-        department: '设计部',
-        status: 'inactive',
-        lastLogin: dayjs().subtract(7, 'day').toISOString(),
-        createdAt: dayjs().subtract(3, 'month').toISOString(),
-      },
-      {
-        id: '4',
-        name: '赵六',
-        email: 'zhaoliu@example.com',
-        role: 'guest',
-        department: '市场部',
-        status: 'pending',
-        lastLogin: '',
-        createdAt: dayjs().subtract(1, 'day').toISOString(),
-      },
-    ],
+    queryFn: async () => {
+      try {
+        const { memberService } = await import('@/services');
+        const response = await memberService.getMembers();
+        return (response.records || []).map((m: any) => ({
+          id: m.id,
+          name: m.name,
+          email: m.email,
+          avatar: m.avatar,
+          role: m.role || 'member',
+          department: m.department || '',
+          status: m.status || 'active',
+          lastLogin: m.lastLogin || '',
+          createdAt: m.createdAt || '',
+        }));
+      } catch {
+        return [];
+      }
+    },
   });
 
   // 获取角色列表
   const { data: roles } = useQuery<Role[]>({
     queryKey: ['roles'],
-    queryFn: async () => [
-      {
-        id: '1',
-        name: '管理员',
-        description: '拥有所有权限',
-        permissions: ['*'],
-        userCount: 2,
-        isSystem: true,
-      },
-      {
-        id: '2',
-        name: '成员',
-        description: '普通成员权限',
-        permissions: ['project:read', 'task:*', 'document:read'],
-        userCount: 15,
-        isSystem: true,
-      },
-      {
-        id: '3',
-        name: '访客',
-        description: '只读权限',
-        permissions: ['project:read', 'task:read', 'document:read'],
-        userCount: 5,
-        isSystem: true,
-      },
-      {
-        id: '4',
-        name: '项目经理',
-        description: '项目管理权限',
-        permissions: ['project:*', 'task:*', 'member:read'],
-        userCount: 3,
-        isSystem: false,
-      },
-    ],
+    queryFn: async () => {
+      try {
+        const { systemService } = await import('@/services');
+        return await systemService.getRoles();
+      } catch {
+        return [];
+      }
+    },
   });
 
   // 获取API密钥列表
   const { data: apiKeys } = useQuery<ApiKey[]>({
     queryKey: ['api-keys'],
-    queryFn: async () => [
-      {
-        id: '1',
-        name: '生产环境',
-        key: 'sk-prod-xxxxxxxxxxxxxxxxxxxx',
-        permissions: ['read', 'write'],
-        lastUsed: dayjs().subtract(5, 'minute').toISOString(),
-        createdAt: dayjs().subtract(30, 'day').toISOString(),
-      },
-      {
-        id: '2',
-        name: '测试环境',
-        key: 'sk-test-xxxxxxxxxxxxxxxxxxxx',
-        permissions: ['read'],
-        lastUsed: dayjs().subtract(1, 'day').toISOString(),
-        createdAt: dayjs().subtract(60, 'day').toISOString(),
-        expiresAt: dayjs().add(30, 'day').toISOString(),
-      },
-    ],
+    queryFn: async () => {
+      try {
+        const { systemService } = await import('@/services');
+        return await systemService.getApiKeys();
+      } catch {
+        return [];
+      }
+    },
   });
 
   // 获取操作日志
   const { data: auditLogs } = useQuery<AuditLog[]>({
     queryKey: ['audit-logs'],
-    queryFn: async () => [
-      {
-        id: '1',
-        user: '张三',
-        action: '登录系统',
-        target: '-',
-        ip: '192.168.1.100',
-        timestamp: dayjs().subtract(1, 'hour').toISOString(),
-        status: 'success',
-      },
-      {
-        id: '2',
-        user: '张三',
-        action: '创建项目',
-        target: '新项目A',
-        ip: '192.168.1.100',
-        timestamp: dayjs().subtract(2, 'hour').toISOString(),
-        status: 'success',
-      },
-      {
-        id: '3',
-        user: '李四',
-        action: '修改任务',
-        target: '任务#123',
-        ip: '192.168.1.101',
-        timestamp: dayjs().subtract(3, 'hour').toISOString(),
-        status: 'success',
-      },
-      {
-        id: '4',
-        user: '王五',
-        action: '删除文档',
-        target: '文档#456',
-        ip: '192.168.1.102',
-        timestamp: dayjs().subtract(4, 'hour').toISOString(),
-        status: 'failed',
-      },
-    ],
+    queryFn: async () => {
+      try {
+        const { systemService } = await import('@/services');
+        return await systemService.getAuditLogs();
+      } catch {
+        return [];
+      }
+    },
   });
 
   // 获取系统统计
   const { data: systemStats } = useQuery({
     queryKey: ['system-stats'],
-    queryFn: async () => ({
-      totalUsers: 25,
-      activeUsers: 18,
-      totalProjects: 12,
-      totalTasks: 456,
-      storageUsed: 2.5, // GB
-      storageTotal: 10, // GB
-      apiCalls: 12580,
-      lastBackup: dayjs().subtract(6, 'hour').toISOString(),
-    }),
+    queryFn: async () => {
+      try {
+        const { systemService } = await import('@/services');
+        return await systemService.getSystemStats();
+      } catch {
+        return {
+          totalUsers: 0,
+          activeUsers: 0,
+          totalProjects: 0,
+          totalTasks: 0,
+          storageUsed: 0,
+          storageTotal: 10,
+          apiCalls: 0,
+          lastBackup: '',
+        };
+      }
+    },
   });
 
   // 更新个人信息
   const updateProfileMutation = useMutation({
     mutationFn: async (values: any) => {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      return values;
+      const { systemService } = await import('@/services');
+      return await systemService.updateProfile(values);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['current-user'] });
@@ -317,8 +231,12 @@ export default function SettingsPage() {
   // 创建/更新用户
   const saveUserMutation = useMutation({
     mutationFn: async (values: any) => {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      return values;
+      const { memberService } = await import('@/services');
+      if (editingUser) {
+        return await memberService.updateMember(editingUser.id, values);
+      } else {
+        return await memberService.createMember(values);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -332,8 +250,8 @@ export default function SettingsPage() {
   // 删除用户
   const deleteUserMutation = useMutation({
     mutationFn: async (id: string) => {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return id;
+      const { memberService } = await import('@/services');
+      return await memberService.deleteMember(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -344,8 +262,8 @@ export default function SettingsPage() {
   // 创建API密钥
   const createApiKeyMutation = useMutation({
     mutationFn: async (values: any) => {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      return { ...values, key: 'sk-new-' + Math.random().toString(36).substring(7) };
+      const { systemService } = await import('@/services');
+      return await systemService.createApiKey(values);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['api-keys'] });
@@ -357,8 +275,8 @@ export default function SettingsPage() {
   // 删除API密钥
   const deleteApiKeyMutation = useMutation({
     mutationFn: async (id: string) => {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return id;
+      const { systemService } = await import('@/services');
+      return await systemService.deleteApiKey(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['api-keys'] });
@@ -541,7 +459,7 @@ export default function SettingsPage() {
         <Form
           form={profileForm}
           layout="vertical"
-          initialValues={currentUser}
+          initialValues={currentUser || undefined}
           onFinish={(values) => updateProfileMutation.mutate(values)}
         >
           <Row gutter={24}>

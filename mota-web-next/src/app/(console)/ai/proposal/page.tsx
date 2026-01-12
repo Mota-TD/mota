@@ -167,33 +167,12 @@ export default function AIProposalPage() {
   const { data: historyData } = useQuery({
     queryKey: ['proposal-history'],
     queryFn: async (): Promise<GenerationHistory[]> => {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return [
-        {
-          id: '1',
-          title: '2024年Q1项目立项报告',
-          type: '项目立项报告',
-          status: 'completed',
-          createdAt: dayjs().subtract(1, 'day').toISOString(),
-          wordCount: 3500,
-        },
-        {
-          id: '2',
-          title: '微服务架构技术方案',
-          type: '技术方案',
-          status: 'completed',
-          createdAt: dayjs().subtract(3, 'day').toISOString(),
-          wordCount: 5200,
-        },
-        {
-          id: '3',
-          title: '新产品商业计划书',
-          type: '商业计划书',
-          status: 'completed',
-          createdAt: dayjs().subtract(5, 'day').toISOString(),
-          wordCount: 8000,
-        },
-      ];
+      try {
+        const { aiService } = await import('@/services');
+        return await aiService.getProposalHistory();
+      } catch {
+        return [];
+      }
     },
   });
 
@@ -206,9 +185,9 @@ export default function AIProposalPage() {
       keywords: string[];
       references: string[];
     }) => {
-      // 模拟生成过程
       setCurrentStep(2);
       
+      // 初始化方案状态用于显示进度
       const proposal: Proposal = {
         id: Date.now().toString(),
         title: values.title,
@@ -231,59 +210,47 @@ export default function AIProposalPage() {
 
       setGeneratingProposal(proposal);
 
-      // 模拟逐章节生成
-      for (let i = 0; i < proposal.outline.length; i++) {
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-        
-        const sectionContent = `这是"${proposal.outline[i].title}"章节的内容。
+      try {
+        // 调用真实 API 生成方案
+        const { aiService } = await import('@/services');
+        const result = await aiService.generateProposal({
+          template: values.template,
+          title: values.title,
+          requirements: values.requirements,
+          keywords: values.keywords,
+          references: values.references,
+        });
 
-根据您提供的需求和关键词，AI已为您生成了相关内容。
-
-## 主要内容
-
-1. 第一个要点：详细描述相关内容...
-2. 第二个要点：进一步阐述...
-3. 第三个要点：补充说明...
-
-## 分析与建议
-
-基于当前情况的分析，建议采取以下措施：
-
-- 措施一：具体实施方案
-- 措施二：配套支持措施
-- 措施三：风险防控措施
-
-## 预期效果
-
-通过以上措施的实施，预计可以达到以下效果：
-
-1. 效果一
-2. 效果二
-3. 效果三`;
-
-        proposal.outline[i].content = sectionContent;
-        proposal.outline[i].suggestions = [
-          '可以添加更多数据支撑',
-          '建议补充案例分析',
-          '可以增加图表说明',
-        ];
-        proposal.wordCount += sectionContent.length;
-        
-        setGeneratingProposal({ ...proposal });
+        // 如果 API 返回了完整结果，使用它
+        if (result && result.outline) {
+          proposal.outline = result.outline;
+          proposal.content = result.content || proposal.outline.map((s: ProposalSection) => `# ${s.title}\n\n${s.content}`).join('\n\n');
+          proposal.wordCount = result.wordCount || proposal.content.length;
+          proposal.status = 'completed';
+        } else {
+          // 如果 API 没有返回完整结果，标记为失败
+          proposal.status = 'failed';
+        }
+      } catch {
+        // API 调用失败，标记为失败
+        proposal.status = 'failed';
       }
-
-      proposal.status = 'completed';
-      proposal.content = proposal.outline.map((s) => `# ${s.title}\n\n${s.content}`).join('\n\n');
       
       return proposal;
     },
     onSuccess: (proposal) => {
       setGeneratingProposal(proposal);
-      setCurrentStep(3);
-      message.success('方案生成完成！');
+      if (proposal.status === 'completed') {
+        setCurrentStep(3);
+        message.success('方案生成完成！');
+      } else {
+        message.error('生成失败，请重试');
+        setCurrentStep(1);
+      }
     },
     onError: () => {
       message.error('生成失败，请重试');
+      setCurrentStep(1);
     },
   });
 

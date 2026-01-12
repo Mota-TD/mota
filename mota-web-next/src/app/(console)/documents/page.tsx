@@ -143,146 +143,16 @@ export default function DocumentsPage() {
   const { data: documents, isLoading } = useQuery<Document[]>({
     queryKey: ['documents', currentFolderId, searchKeyword, activeTab],
     queryFn: async () => {
-      const allDocs: Document[] = [
-        {
-          id: 'folder-1',
-          title: '项目文档',
-          type: 'folder',
-          parentId: null,
-          createdBy: { id: '1', name: '张三' },
-          createdAt: dayjs().subtract(30, 'day').toISOString(),
-          updatedAt: dayjs().subtract(1, 'day').toISOString(),
-          viewCount: 0,
-          starred: true,
-          tags: [],
-          permission: 'team',
-        },
-        {
-          id: 'folder-2',
-          title: '设计资源',
-          type: 'folder',
-          parentId: null,
-          createdBy: { id: '2', name: '李四' },
-          createdAt: dayjs().subtract(20, 'day').toISOString(),
-          updatedAt: dayjs().subtract(2, 'day').toISOString(),
-          viewCount: 0,
-          starred: false,
-          tags: [],
-          permission: 'team',
-        },
-        {
-          id: '1',
-          title: '产品需求文档 v2.0',
-          type: 'markdown',
-          size: 256000,
-          parentId: null,
-          createdBy: { id: '1', name: '张三' },
-          createdAt: dayjs().subtract(5, 'day').toISOString(),
-          updatedAt: dayjs().subtract(1, 'hour').toISOString(),
-          viewCount: 128,
-          starred: true,
-          tags: ['PRD', '核心功能'],
-          permission: 'team',
-          collaborators: [
-            { id: '1', name: '张三', role: 'owner' },
-            { id: '2', name: '李四', role: 'editor' },
-          ],
-          version: 5,
-          comments: 12,
-        },
-        {
-          id: '2',
-          title: '系统架构设计',
-          type: 'pdf',
-          size: 1024000,
-          parentId: null,
-          createdBy: { id: '2', name: '李四' },
-          createdAt: dayjs().subtract(10, 'day').toISOString(),
-          updatedAt: dayjs().subtract(2, 'day').toISOString(),
-          viewCount: 89,
-          starred: true,
-          tags: ['架构', '技术方案'],
-          permission: 'team',
-          version: 3,
-          comments: 8,
-        },
-        {
-          id: '3',
-          title: '项目进度报告',
-          type: 'excel',
-          size: 512000,
-          parentId: null,
-          createdBy: { id: '1', name: '张三' },
-          createdAt: dayjs().subtract(3, 'day').toISOString(),
-          updatedAt: dayjs().subtract(1, 'day').toISOString(),
-          viewCount: 45,
-          starred: false,
-          tags: ['报告', '进度'],
-          permission: 'team',
-          version: 2,
-          comments: 3,
-        },
-        {
-          id: '4',
-          title: '产品演示PPT',
-          type: 'ppt',
-          size: 2048000,
-          parentId: null,
-          createdBy: { id: '3', name: '王五' },
-          createdAt: dayjs().subtract(7, 'day').toISOString(),
-          updatedAt: dayjs().subtract(3, 'day').toISOString(),
-          viewCount: 67,
-          starred: false,
-          tags: ['演示', '产品'],
-          permission: 'public',
-          version: 4,
-          comments: 5,
-        },
-        {
-          id: '5',
-          title: '会议纪要 - 2024W01',
-          type: 'word',
-          size: 64000,
-          parentId: null,
-          createdBy: { id: '1', name: '张三' },
-          createdAt: dayjs().subtract(1, 'day').toISOString(),
-          updatedAt: dayjs().subtract(1, 'day').toISOString(),
-          viewCount: 23,
-          starred: false,
-          tags: ['会议', '纪要'],
-          permission: 'team',
-          version: 1,
-          comments: 0,
-        },
-      ];
-
-      let filtered = allDocs;
-
-      if (currentFolderId) {
-        filtered = filtered.filter((doc) => doc.parentId === currentFolderId);
-      } else {
-        filtered = filtered.filter((doc) => doc.parentId === null);
+      try {
+        const { documentService } = await import('@/services');
+        return await documentService.getDocuments({
+          folderId: currentFolderId,
+          search: searchKeyword || undefined,
+          tab: activeTab,
+        });
+      } catch {
+        return [];
       }
-
-      if (searchKeyword) {
-        filtered = filtered.filter(
-          (doc) =>
-            doc.title.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-            doc.tags.some((tag) => tag.toLowerCase().includes(searchKeyword.toLowerCase()))
-        );
-      }
-
-      if (activeTab === 'starred') {
-        filtered = filtered.filter((doc) => doc.starred);
-      } else if (activeTab === 'recent') {
-        filtered = filtered.sort(
-          (a, b) => dayjs(b.updatedAt).valueOf() - dayjs(a.updatedAt).valueOf()
-        );
-      } else if (activeTab === 'shared') {
-        filtered = filtered.filter((doc) => doc.permission !== 'private');
-      }
-
-      return filtered;
     },
   });
 
@@ -291,8 +161,12 @@ export default function DocumentsPage() {
     queryKey: ['document-path', currentFolderId],
     queryFn: async () => {
       if (!currentFolderId) return [];
-      // 模拟获取路径
-      return [{ id: 'folder-1', title: '项目文档' }];
+      try {
+        const { documentService } = await import('@/services');
+        return await documentService.getBreadcrumbPath(currentFolderId);
+      } catch {
+        return [];
+      }
     },
     enabled: !!currentFolderId,
   });
@@ -300,8 +174,14 @@ export default function DocumentsPage() {
   // 创建文档/文件夹
   const createDocumentMutation = useMutation({
     mutationFn: async (values: any) => {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      return values;
+      const { documentService } = await import('@/services');
+      return await documentService.create({
+        title: values.title,
+        type: values.type === 'folder' ? 'folder' : 'markdown',
+        parentId: currentFolderId,
+        template: values.template,
+        permission: values.permission,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
@@ -309,13 +189,30 @@ export default function DocumentsPage() {
       createForm.resetFields();
       message.success('创建成功');
     },
+    onError: () => {
+      message.error('创建失败');
+    },
   });
 
   // 上传文档
   const uploadDocumentMutation = useMutation({
     mutationFn: async (values: any) => {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      return values;
+      const { documentService } = await import('@/services');
+      const formData = new FormData();
+      if (values.files?.fileList) {
+        values.files.fileList.forEach((file: any) => {
+          if (file.originFileObj) {
+            formData.append('files', file.originFileObj);
+          }
+        });
+      }
+      if (currentFolderId) {
+        formData.append('parentId', currentFolderId);
+      }
+      if (values.permission) {
+        formData.append('permission', values.permission);
+      }
+      return await documentService.upload(formData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
@@ -323,28 +220,37 @@ export default function DocumentsPage() {
       uploadForm.resetFields();
       message.success('上传成功');
     },
+    onError: () => {
+      message.error('上传失败');
+    },
   });
 
   // 切换收藏
   const toggleStarMutation = useMutation({
     mutationFn: async (id: string) => {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return id;
+      const { documentService } = await import('@/services');
+      return await documentService.toggleStar(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
+    },
+    onError: () => {
+      message.error('操作失败');
     },
   });
 
   // 删除文档
   const deleteDocumentMutation = useMutation({
     mutationFn: async (id: string) => {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return id;
+      const { documentService } = await import('@/services');
+      await documentService.delete(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
       message.success('已删除');
+    },
+    onError: () => {
+      message.error('删除失败');
     },
   });
 

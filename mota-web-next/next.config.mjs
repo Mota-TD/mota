@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // 启用React严格模式
-  reactStrictMode: true,
+  // 启用React严格模式 - 开发模式下关闭以提升性能
+  reactStrictMode: false,
   
   // 输出模式：standalone用于Docker部署
   output: 'standalone',
@@ -19,18 +19,32 @@ const nextConfig = {
       },
     ],
     formats: ['image/avif', 'image/webp'],
+    // 禁用图片优化以提升开发速度
+    unoptimized: process.env.NODE_ENV === 'development',
   },
   
   // 实验性功能
   experimental: {
-    // 优化包导入
-    optimizePackageImports: ['antd', '@ant-design/icons', 'lodash-es', 'recharts'],
+    // 优化包导入 - 添加更多重型包
+    optimizePackageImports: [
+      'antd',
+      '@ant-design/icons',
+      'lodash-es',
+      'recharts',
+      'echarts',
+      'echarts-for-react',
+      'd3',
+      'date-fns',
+      'dayjs',
+      'framer-motion',
+      'react-syntax-highlighter',
+    ],
   },
   
   // 环境变量
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
-    NEXT_PUBLIC_WS_URL: process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3001',
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080',
+    NEXT_PUBLIC_WS_URL: process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8080',
   },
   
   // 重定向配置
@@ -44,14 +58,19 @@ const nextConfig = {
     ];
   },
   
-  // 重写配置（API代理）
+  // 重写配置（API代理）- 添加超时处理
   async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/:path*`,
-      },
-    ];
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+    return {
+      beforeFiles: [],
+      afterFiles: [
+        {
+          source: '/api/:path*',
+          destination: `${apiUrl}/api/:path*`,
+        },
+      ],
+      fallback: [],
+    };
   },
   
   // 自定义headers

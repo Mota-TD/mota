@@ -145,95 +145,20 @@ export default function KnowledgePage() {
   // 获取知识库列表
   const { data: knowledgeBases, isLoading: isLoadingBases } = useQuery<KnowledgeBase[]>({
     queryKey: ['knowledge-bases'],
-    queryFn: async () => [
-      {
-        id: '1',
-        name: '产品文档',
-        description: '产品需求、设计文档、用户手册等',
-        icon: '📚',
-        type: 'team',
-        documentCount: 156,
-        memberCount: 12,
-        updatedAt: dayjs().subtract(1, 'hour').toISOString(),
-        starred: true,
-      },
-      {
-        id: '2',
-        name: '技术文档',
-        description: '技术方案、架构设计、API文档等',
-        icon: '💻',
-        type: 'team',
-        documentCount: 89,
-        memberCount: 8,
-        updatedAt: dayjs().subtract(2, 'hour').toISOString(),
-        starred: true,
-      },
-      {
-        id: '3',
-        name: '个人笔记',
-        description: '个人学习笔记和工作记录',
-        icon: '📝',
-        type: 'personal',
-        documentCount: 45,
-        memberCount: 1,
-        updatedAt: dayjs().subtract(1, 'day').toISOString(),
-        starred: false,
-      },
-      {
-        id: '4',
-        name: '公司制度',
-        description: '公司规章制度、流程规范等',
-        icon: '📋',
-        type: 'public',
-        documentCount: 32,
-        memberCount: 50,
-        updatedAt: dayjs().subtract(3, 'day').toISOString(),
-        starred: false,
-      },
-    ],
+    queryFn: async () => {
+      const { knowledgeService } = await import('@/services');
+      return await knowledgeService.getKnowledgeBases();
+    },
   });
 
   // 获取文件夹树
   const { data: folderTree } = useQuery<Folder[]>({
     queryKey: ['folder-tree', selectedKnowledgeBase],
-    queryFn: async () => [
-      {
-        key: '1',
-        title: '需求文档',
-        icon: <FolderOutlined />,
-        documentCount: 25,
-        children: [
-          { key: '1-1', title: 'PRD', isLeaf: true, documentCount: 10 },
-          { key: '1-2', title: '用户故事', isLeaf: true, documentCount: 15 },
-        ],
-      },
-      {
-        key: '2',
-        title: '设计文档',
-        icon: <FolderOutlined />,
-        documentCount: 18,
-        children: [
-          { key: '2-1', title: 'UI设计', isLeaf: true, documentCount: 8 },
-          { key: '2-2', title: '交互设计', isLeaf: true, documentCount: 10 },
-        ],
-      },
-      {
-        key: '3',
-        title: '技术方案',
-        icon: <FolderOutlined />,
-        documentCount: 30,
-        children: [
-          { key: '3-1', title: '架构设计', isLeaf: true, documentCount: 12 },
-          { key: '3-2', title: 'API文档', isLeaf: true, documentCount: 18 },
-        ],
-      },
-      {
-        key: '4',
-        title: '会议记录',
-        icon: <FolderOutlined />,
-        documentCount: 45,
-      },
-    ],
+    queryFn: async () => {
+      if (!selectedKnowledgeBase) return [];
+      const { knowledgeService } = await import('@/services');
+      return await knowledgeService.getFolderTree(selectedKnowledgeBase);
+    },
     enabled: !!selectedKnowledgeBase,
   });
 
@@ -241,88 +166,14 @@ export default function KnowledgePage() {
   const { data: documents, isLoading: isLoadingDocs } = useQuery<Document[]>({
     queryKey: ['documents', selectedKnowledgeBase, selectedFolder, searchKeyword],
     queryFn: async () => {
-      const allDocs: Document[] = [
-        {
-          id: '1',
-          title: '摩塔项目管理系统PRD v2.0',
-          type: 'markdown',
-          size: 256000,
-          folderId: '1-1',
-          createdBy: { id: '1', name: '张三' },
-          createdAt: dayjs().subtract(2, 'day').toISOString(),
-          updatedAt: dayjs().subtract(1, 'hour').toISOString(),
-          viewCount: 128,
-          starred: true,
-          tags: ['PRD', '核心功能'],
-          permission: 'team',
-        },
-        {
-          id: '2',
-          title: '系统架构设计文档',
-          type: 'pdf',
-          size: 1024000,
-          folderId: '3-1',
-          createdBy: { id: '2', name: '李四' },
-          createdAt: dayjs().subtract(5, 'day').toISOString(),
-          updatedAt: dayjs().subtract(2, 'day').toISOString(),
-          viewCount: 89,
-          starred: true,
-          tags: ['架构', '技术方案'],
-          permission: 'team',
-        },
-        {
-          id: '3',
-          title: 'API接口文档',
-          type: 'markdown',
-          size: 128000,
-          folderId: '3-2',
-          createdBy: { id: '2', name: '李四' },
-          createdAt: dayjs().subtract(3, 'day').toISOString(),
-          updatedAt: dayjs().subtract(1, 'day').toISOString(),
-          viewCount: 256,
-          starred: false,
-          tags: ['API', '接口'],
-          permission: 'public',
-        },
-        {
-          id: '4',
-          title: 'UI设计规范',
-          type: 'pdf',
-          size: 2048000,
-          folderId: '2-1',
-          createdBy: { id: '3', name: '王五' },
-          createdAt: dayjs().subtract(7, 'day').toISOString(),
-          updatedAt: dayjs().subtract(3, 'day').toISOString(),
-          viewCount: 67,
-          starred: false,
-          tags: ['UI', '设计规范'],
-          permission: 'team',
-        },
-        {
-          id: '5',
-          title: '项目周会记录 - 2024W01',
-          type: 'word',
-          size: 64000,
-          folderId: '4',
-          createdBy: { id: '1', name: '张三' },
-          createdAt: dayjs().subtract(1, 'day').toISOString(),
-          updatedAt: dayjs().subtract(1, 'day').toISOString(),
-          viewCount: 23,
-          starred: false,
-          tags: ['会议', '周报'],
-          permission: 'team',
-        },
-      ];
-
-      if (searchKeyword) {
-        return allDocs.filter(
-          (doc) =>
-            doc.title.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-            doc.tags.some((tag) => tag.toLowerCase().includes(searchKeyword.toLowerCase()))
-        );
-      }
-
-      return allDocs;
+      if (!selectedKnowledgeBase) return [];
+      const { knowledgeService } = await import('@/services');
+      const docs = await knowledgeService.getDocuments({
+        knowledgeBaseId: selectedKnowledgeBase,
+        folderId: selectedFolder || undefined,
+        keyword: searchKeyword || undefined,
+      });
+      return docs as Document[];
     },
     enabled: !!selectedKnowledgeBase,
   });
@@ -330,29 +181,26 @@ export default function KnowledgePage() {
   // 获取统计数据
   const { data: stats } = useQuery({
     queryKey: ['knowledge-stats'],
-    queryFn: async () => ({
-      totalDocuments: 322,
-      totalViews: 12580,
-      totalStorage: 2.5, // GB
-      recentUpdates: 28,
-    }),
+    queryFn: async () => {
+      const { knowledgeService } = await import('@/services');
+      return await knowledgeService.getStats();
+    },
   });
 
   // 获取AI推荐
   const { data: aiRecommendations } = useQuery({
     queryKey: ['ai-recommendations'],
-    queryFn: async () => [
-      { id: '1', title: '系统架构设计文档', reason: '与您最近查看的内容相关' },
-      { id: '2', title: 'API接口文档', reason: '团队成员正在频繁查看' },
-      { id: '3', title: 'UI设计规范', reason: '最近更新' },
-    ],
+    queryFn: async () => {
+      const { knowledgeService } = await import('@/services');
+      return await knowledgeService.getAIRecommendations();
+    },
   });
 
   // 创建知识库
   const createKnowledgeBaseMutation = useMutation({
     mutationFn: async (values: any) => {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      return values;
+      const { knowledgeService } = await import('@/services');
+      return await knowledgeService.createKnowledgeBase(values);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['knowledge-bases'] });
@@ -365,8 +213,8 @@ export default function KnowledgePage() {
   // 上传文档
   const uploadDocumentMutation = useMutation({
     mutationFn: async (values: any) => {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      return values;
+      const { knowledgeService } = await import('@/services');
+      return await knowledgeService.uploadDocument(values);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
@@ -379,8 +227,12 @@ export default function KnowledgePage() {
   // 切换收藏
   const toggleStarMutation = useMutation({
     mutationFn: async ({ id, type }: { id: string; type: 'base' | 'document' }) => {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return { id, type };
+      const { knowledgeService } = await import('@/services');
+      if (type === 'base') {
+        return await knowledgeService.toggleKnowledgeBaseStar(id);
+      } else {
+        return await knowledgeService.toggleDocumentStar(id);
+      }
     },
     onSuccess: (_, { type }) => {
       if (type === 'base') {
@@ -394,8 +246,8 @@ export default function KnowledgePage() {
   // 删除文档
   const deleteDocumentMutation = useMutation({
     mutationFn: async (id: string) => {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return id;
+      const { knowledgeService } = await import('@/services');
+      return await knowledgeService.deleteDocument(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });

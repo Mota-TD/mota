@@ -17,13 +17,20 @@ interface ApiError {
   details?: Record<string, string[]>;
 }
 
+// 检查是否为开发模式
+const isDevMode = () => {
+  if (typeof window === 'undefined') return false;
+  return (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') &&
+    process.env.NEXT_PUBLIC_AUTO_DEV_MODE !== 'false';
+};
+
 // 创建axios实例
 const createApiClient = (): AxiosInstance => {
   // 使用相对路径，让Next.js代理处理跨域
   // Next.js rewrites 会将 /api/* 代理到后端服务
   const instance = axios.create({
     baseURL: '', // 使用相对路径，通过Next.js代理
-    timeout: 30000,
+    timeout: isDevMode() ? 5000 : 30000, // 开发模式下缩短超时时间
     headers: {
       'Content-Type': 'application/json',
     },
@@ -32,8 +39,11 @@ const createApiClient = (): AxiosInstance => {
   // 请求拦截器
   instance.interceptors.request.use(
     (config) => {
-      // 显示进度条
-      if (typeof window !== 'undefined') {
+      // 开发模式下减少不必要的日志
+      const devMode = isDevMode();
+      
+      // 显示进度条（开发模式下可选择关闭以提升性能）
+      if (typeof window !== 'undefined' && !devMode) {
         NProgress.start();
       }
 
@@ -60,15 +70,17 @@ const createApiClient = (): AxiosInstance => {
   // 响应拦截器
   instance.interceptors.response.use(
     (response) => {
-      NProgress.done();
+      if (!isDevMode()) {
+        NProgress.done();
+      }
 
-      // 调试日志：打印响应信息
-      console.log('[API Response]', {
-        url: response.config.url,
-        status: response.status,
-        data: response.data,
-        headers: response.headers,
-      });
+      // 调试日志：仅在非生产环境打印
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('[API Response]', {
+          url: response.config.url,
+          status: response.status,
+        });
+      }
 
       // 处理业务错误
       const data = response.data as ApiResponse;
@@ -80,21 +92,31 @@ const createApiClient = (): AxiosInstance => {
       return response;
     },
     async (error: AxiosError<ApiError>) => {
-      NProgress.done();
+      if (!isDevMode()) {
+        NProgress.done();
+      }
 
-      // 调试日志：打印错误详情
-      console.error('[API Error]', {
-        url: error.config?.url,
-        method: error.config?.method,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        message: error.message,
-        code: error.code,
-      });
+      const devMode = isDevMode();
+      
+      // 调试日志：简化输出
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn('[API Error]', error.config?.url, error.response?.status || error.code);
+      }
+
+      // 开发模式下，网络错误快速失败，不阻塞UI
+      if (devMode && (error.code === 'ECONNABORTED' || error.code === 'ERR_NETWORK' || !error.response)) {
+        console.log('[API] Network error in dev mode, using mock data');
+        return Promise.reject(new Error('DEV_MODE_NETWORK_ERROR'));
+      }
 
       // 处理401错误（未授权）
       if (error.response?.status === 401) {
+        // 开发模式下不自动重定向，让 auth-provider 处理
+        if (devMode) {
+          console.log('[API] 401 error in dev mode, skipping redirect');
+          return Promise.reject(error);
+        }
+        
         // 尝试刷新token
         const refreshToken = Cookies.get('mota_refresh_token');
         if (refreshToken && error.config) {

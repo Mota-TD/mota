@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   Card,
   Typography,
@@ -44,9 +44,10 @@ import {
   UnorderedListOutlined,
   AppstoreOutlined,
 } from '@ant-design/icons';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
+import { calendarService, type CalendarEvent as ServiceCalendarEvent } from '@/services';
 
 dayjs.extend(isoWeek);
 
@@ -54,7 +55,7 @@ const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { RangePicker } = DatePicker;
 
-// 日历事件类型
+// 本地日历事件类型（用于UI显示）
 interface CalendarEvent {
   id: string;
   title: string;
@@ -67,7 +68,7 @@ interface CalendarEvent {
   location?: string;
   meetingUrl?: string;
   attendees?: Array<{ id: string; name: string; avatar?: string; status: 'accepted' | 'declined' | 'pending' }>;
-  reminder?: number; // 提前多少分钟提醒
+  reminder?: number;
   recurrence?: {
     type: 'daily' | 'weekly' | 'monthly' | 'yearly';
     interval: number;
@@ -79,8 +80,8 @@ interface CalendarEvent {
   createdBy: { id: string; name: string };
 }
 
-// 日历类型
-interface CalendarType {
+// 本地日历类型
+interface Calendar {
   id: string;
   name: string;
   color: string;
@@ -115,125 +116,105 @@ export default function CalendarPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [form] = Form.useForm();
+  const [calendars, setCalendars] = useState<Calendar[]>([]);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // 获取日历列表
-  const { data: calendars } = useQuery<CalendarType[]>({
-    queryKey: ['calendars'],
-    queryFn: async () => {
-      return [
+  // 获取日历列表和事件
+  const fetchCalendarData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const eventsData = await calendarService.getEvents({
+        startDate: currentDate.startOf('month').toISOString(),
+        endDate: currentDate.endOf('month').toISOString(),
+      });
+      
+      // 设置默认日历
+      setCalendars([
         { id: '1', name: '我的日历', color: '#1890ff', type: 'personal', visible: true },
         { id: '2', name: '团队日历', color: '#52c41a', type: 'team', visible: true },
-        { id: '3', name: '摩塔项目', color: '#722ed1', type: 'project', visible: true },
-        { id: '4', name: '中国节假日', color: '#ff4d4f', type: 'subscribed', visible: true },
-      ];
-    },
-  });
+      ]);
+      
+      // 转换事件数据
+      setEvents(eventsData.map((e: ServiceCalendarEvent) => ({
+        id: e.id,
+        title: e.title,
+        description: e.description,
+        startTime: e.startTime,
+        endTime: e.endTime,
+        allDay: e.allDay || false,
+        type: (e.type as 'task' | 'meeting' | 'reminder' | 'holiday' | 'personal') || 'personal',
+        color: e.color || '#1890ff',
+        location: e.location,
+        attendees: e.attendees?.map(a => ({
+          id: a.userId,
+          name: a.nickname || a.username,
+          avatar: a.avatar,
+          status: a.status as 'accepted' | 'declined' | 'pending',
+        })),
+        reminder: e.reminders?.[0]?.minutes,
+        recurrence: e.recurrence ? {
+          type: e.recurrence.frequency,
+          interval: e.recurrence.interval,
+          endDate: e.recurrence.endDate,
+        } : undefined,
+        projectId: e.projectId,
+        projectName: e.projectName,
+        taskId: e.taskId,
+        createdBy: { id: e.creatorId, name: e.creatorName || '未知' },
+      })));
+    } catch (error) {
+      console.error('Failed to fetch calendar data:', error);
+      setCalendars([]);
+      setEvents([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentDate]);
 
-  // 获取日历事件
-  const { data: events } = useQuery<CalendarEvent[]>({
-    queryKey: ['calendar-events', currentDate.format('YYYY-MM'), viewType],
-    queryFn: async () => {
-      return [
-        {
-          id: '1',
-          title: '项目周会',
-          description: '讨论本周进度和下周计划',
-          startTime: currentDate.day(1).hour(10).minute(0).toISOString(),
-          endTime: currentDate.day(1).hour(11).minute(0).toISOString(),
-          allDay: false,
-          type: 'meeting',
-          color: '#52c41a',
-          location: '会议室A',
-          meetingUrl: 'https://meeting.example.com/123',
-          attendees: [
-            { id: '1', name: '张三', status: 'accepted' },
-            { id: '2', name: '李四', status: 'accepted' },
-            { id: '3', name: '王五', status: 'pending' },
-          ],
-          reminder: 15,
-          createdBy: { id: '1', name: '张三' },
-        },
-        {
-          id: '2',
-          title: '完成用户认证模块',
-          startTime: currentDate.day(2).hour(9).minute(0).toISOString(),
-          endTime: currentDate.day(2).hour(18).minute(0).toISOString(),
-          allDay: false,
-          type: 'task',
-          color: '#1890ff',
-          projectId: '1',
-          projectName: '摩塔项目管理系统',
-          taskId: '101',
-          createdBy: { id: '1', name: '张三' },
-        },
-        {
-          id: '3',
-          title: '产品评审会',
-          description: '评审新功能设计方案',
-          startTime: currentDate.day(3).hour(14).minute(0).toISOString(),
-          endTime: currentDate.day(3).hour(16).minute(0).toISOString(),
-          allDay: false,
-          type: 'meeting',
-          color: '#52c41a',
-          location: '大会议室',
-          attendees: [
-            { id: '1', name: '张三', status: 'accepted' },
-            { id: '4', name: '赵六', status: 'accepted' },
-          ],
-          reminder: 30,
-          createdBy: { id: '4', name: '赵六' },
-        },
-        {
-          id: '4',
-          title: '提交周报',
-          startTime: currentDate.day(5).hour(17).minute(0).toISOString(),
-          endTime: currentDate.day(5).hour(17).minute(30).toISOString(),
-          allDay: false,
-          type: 'reminder',
-          color: '#faad14',
-          reminder: 60,
-          recurrence: { type: 'weekly', interval: 1 },
-          createdBy: { id: '1', name: '张三' },
-        },
-        {
-          id: '5',
-          title: '元旦假期',
-          startTime: currentDate.startOf('month').toISOString(),
-          endTime: currentDate.startOf('month').add(1, 'day').toISOString(),
-          allDay: true,
-          type: 'holiday',
-          color: '#ff4d4f',
-          createdBy: { id: 'system', name: '系统' },
-        },
-      ];
-    },
-  });
+  useEffect(() => {
+    fetchCalendarData();
+  }, [fetchCalendarData]);
 
   // 创建事件
   const createEventMutation = useMutation({
     mutationFn: async (values: Partial<CalendarEvent>) => {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await calendarService.createEvent({
+        title: values.title || '',
+        startTime: values.startTime || new Date().toISOString(),
+        endTime: values.endTime || new Date().toISOString(),
+        allDay: values.allDay,
+        type: values.type,
+        description: values.description,
+        location: values.location,
+      });
       return values;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['calendar-events'] });
+      fetchCalendarData();
       setIsCreateModalOpen(false);
       form.resetFields();
       message.success('事件已创建');
+    },
+    onError: () => {
+      message.error('创建事件失败');
     },
   });
 
   // 删除事件
   const deleteEventMutation = useMutation({
     mutationFn: async (eventId: string) => {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await calendarService.deleteEvent(eventId);
       return eventId;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['calendar-events'] });
+      fetchCalendarData();
       setIsDetailModalOpen(false);
       setSelectedEvent(null);
       message.success('事件已删除');
+    },
+    onError: () => {
+      message.error('删除事件失败');
     },
   });
 

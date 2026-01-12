@@ -119,16 +119,12 @@ export default function SearchPage() {
     queryKey: ['search-suggestions', searchText],
     queryFn: async (): Promise<SearchSuggestion[]> => {
       if (!searchText || searchText.length < 2) return [];
-      
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      
-      return [
-        { text: `${searchText} 项目`, type: 'related' },
-        { text: `${searchText} 文档`, type: 'related' },
-        { text: searchText, type: 'history' },
-        { text: '项目管理', type: 'hot', count: 1234 },
-        { text: 'AI助手', type: 'hot', count: 987 },
-      ];
+      try {
+        const { searchService } = await import('@/services');
+        return await searchService.getSuggestions(searchText);
+      } catch {
+        return [];
+      }
     },
     enabled: searchText.length >= 2,
   });
@@ -137,14 +133,12 @@ export default function SearchPage() {
   const { data: searchHistory } = useQuery({
     queryKey: ['search-history'],
     queryFn: async (): Promise<string[]> => {
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      return [
-        '项目进度报告',
-        '技术方案文档',
-        '会议纪要',
-        '需求分析',
-        'API接口文档',
-      ];
+      try {
+        const { searchService } = await import('@/services');
+        return await searchService.getHistory();
+      } catch {
+        return [];
+      }
     },
   });
 
@@ -152,14 +146,12 @@ export default function SearchPage() {
   const { data: hotSearches } = useQuery({
     queryKey: ['hot-searches'],
     queryFn: async (): Promise<{ text: string; count: number }[]> => {
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      return [
-        { text: '项目管理', count: 2345 },
-        { text: 'AI智能', count: 1876 },
-        { text: '文档协作', count: 1543 },
-        { text: '任务分配', count: 1234 },
-        { text: '数据分析', count: 987 },
-      ];
+      try {
+        const { searchService } = await import('@/services');
+        return await searchService.getHotSearches();
+      } catch {
+        return [];
+      }
     },
   });
 
@@ -168,109 +160,18 @@ export default function SearchPage() {
     queryKey: ['search-results', searchText, activeTab, filters, searchMode],
     queryFn: async () => {
       if (!searchText) return null;
-      
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      
-      const mockResults: SearchResult[] = [
-        {
-          id: '1',
-          type: 'project',
-          title: '企业数字化转型项目',
-          content: '本项目旨在推动企业全面数字化转型，包括业务流程优化、系统升级、数据治理等方面...',
-          highlights: ['数字化', '转型', '业务流程'],
-          url: '/projects/1',
-          score: 0.95,
-          createdAt: dayjs().subtract(5, 'day').toISOString(),
-          updatedAt: dayjs().subtract(1, 'hour').toISOString(),
-          metadata: { status: 'active', members: 12 },
-        },
-        {
-          id: '2',
-          type: 'document',
-          title: '技术架构设计文档',
-          content: '本文档详细描述了系统的技术架构设计，包括微服务架构、数据库设计、API设计等...',
-          highlights: ['技术架构', '微服务', 'API'],
-          url: '/documents/2',
-          score: 0.88,
-          createdAt: dayjs().subtract(10, 'day').toISOString(),
-          updatedAt: dayjs().subtract(2, 'day').toISOString(),
-          metadata: { format: 'markdown', size: '15KB' },
-        },
-        {
-          id: '3',
-          type: 'task',
-          title: '完成用户需求分析',
-          content: '收集并分析用户需求，输出需求分析报告，包括功能需求、非功能需求、优先级排序...',
-          highlights: ['需求分析', '用户需求', '功能需求'],
-          url: '/tasks/3',
-          score: 0.82,
-          createdAt: dayjs().subtract(3, 'day').toISOString(),
-          updatedAt: dayjs().subtract(6, 'hour').toISOString(),
-          metadata: { status: 'in_progress', priority: 'high' },
-        },
-        {
-          id: '4',
-          type: 'knowledge',
-          title: '项目管理最佳实践指南',
-          content: '本指南汇总了项目管理的最佳实践，包括敏捷开发、Scrum方法论、看板管理等...',
-          highlights: ['项目管理', '敏捷开发', 'Scrum'],
-          url: '/knowledge/4',
-          score: 0.78,
-          createdAt: dayjs().subtract(30, 'day').toISOString(),
-          updatedAt: dayjs().subtract(7, 'day').toISOString(),
-          metadata: { category: '管理', views: 1234 },
-        },
-        {
-          id: '5',
-          type: 'user',
-          title: '张三 - 项目经理',
-          content: '负责多个重点项目的管理工作，擅长敏捷开发和团队协作...',
-          highlights: ['项目经理', '敏捷开发'],
-          url: '/users/5',
-          score: 0.72,
-          createdAt: dayjs().subtract(100, 'day').toISOString(),
-          updatedAt: dayjs().subtract(1, 'day').toISOString(),
-          metadata: { department: '技术部', role: 'manager' },
-        },
-        {
-          id: '6',
-          type: 'event',
-          title: '项目周会 - 进度汇报',
-          content: '每周一上午10:00，项目组全员参加，汇报本周工作进度和下周计划...',
-          highlights: ['周会', '进度汇报'],
-          url: '/calendar/6',
-          score: 0.68,
-          createdAt: dayjs().subtract(1, 'day').toISOString(),
-          updatedAt: dayjs().subtract(1, 'day').toISOString(),
-          metadata: { time: '10:00', recurring: true },
-        },
-      ];
-
-      // 过滤
-      let filtered = mockResults;
-      if (activeTab !== 'all') {
-        filtered = filtered.filter((r) => r.type === activeTab);
+      try {
+        const { searchService } = await import('@/services');
+        return await searchService.search({
+          query: searchText,
+          type: activeTab !== 'all' ? activeTab : undefined,
+          mode: searchMode,
+          relevanceThreshold: filters.relevanceThreshold,
+          sortBy: filters.sortBy,
+        });
+      } catch {
+        return { results: [], total: 0, took: 0, mode: searchMode };
       }
-      if (filters.types.length > 0) {
-        filtered = filtered.filter((r) => filters.types.includes(r.type));
-      }
-      if (filters.relevanceThreshold > 0) {
-        filtered = filtered.filter((r) => r.score >= filters.relevanceThreshold / 100);
-      }
-
-      // 排序
-      if (filters.sortBy === 'date') {
-        filtered.sort((a, b) => dayjs(b.updatedAt).valueOf() - dayjs(a.updatedAt).valueOf());
-      } else if (filters.sortBy === 'popularity') {
-        filtered.sort((a, b) => (b.metadata.views as number || 0) - (a.metadata.views as number || 0));
-      }
-
-      return {
-        results: filtered,
-        total: filtered.length,
-        took: Math.floor(Math.random() * 100) + 50,
-        mode: searchMode,
-      };
     },
     enabled: !!searchText,
   });

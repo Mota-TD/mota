@@ -1,540 +1,520 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Card,
   Typography,
-  Button,
-  Tabs,
-  Select,
-  DatePicker,
-  Space,
   Row,
   Col,
-  Statistic,
   Table,
   Tag,
+  Space,
+  Select,
+  Button,
+  DatePicker,
+  Statistic,
   Progress,
-  Tooltip,
-  Dropdown,
-  Empty,
+  Tabs,
   Spin,
+  Empty,
 } from 'antd';
 import {
   BarChartOutlined,
   LineChartOutlined,
   PieChartOutlined,
-  AreaChartOutlined,
   DownloadOutlined,
   PrinterOutlined,
-  ShareAltOutlined,
   FilterOutlined,
-  CalendarOutlined,
-  TeamOutlined,
-  ProjectOutlined,
-  ClockCircleOutlined,
   RiseOutlined,
   FallOutlined,
+  ProjectOutlined,
+  TeamOutlined,
   CheckCircleOutlined,
-  ExclamationCircleOutlined,
-  SyncOutlined,
-  FullscreenOutlined,
-  SettingOutlined,
+  ClockCircleOutlined,
+  FileTextOutlined,
+  CalendarOutlined,
+  LoadingOutlined,
 } from '@ant-design/icons';
-import { useQuery } from '@tanstack/react-query';
-import dayjs from 'dayjs';
+import { reportService, type ReportSummary, type MemberReport } from '@/services';
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
-// 报表数据类型
-interface ReportData {
-  overview: {
-    totalProjects: number;
-    completedProjects: number;
-    totalTasks: number;
-    completedTasks: number;
-    totalHours: number;
-    teamMembers: number;
-    projectGrowth: number;
-    taskGrowth: number;
-  };
-  projectProgress: Array<{
-    id: string;
-    name: string;
-    progress: number;
-    status: string;
-    tasks: number;
-    completedTasks: number;
-    dueDate: string;
-  }>;
-  taskDistribution: Array<{
-    status: string;
-    count: number;
-    percentage: number;
-  }>;
-  teamPerformance: Array<{
-    id: string;
-    name: string;
-    completedTasks: number;
-    totalHours: number;
-    efficiency: number;
-    trend: 'up' | 'down' | 'stable';
-  }>;
-  weeklyTrend: Array<{
-    week: string;
-    created: number;
-    completed: number;
-  }>;
+// 统一主题色 - 薄荷绿
+const THEME_COLOR = '#10B981';
+
+// 本地类型定义
+interface ProjectStatItem {
+  name: string;
+  tasks: number;
+  completed: number;
+  hours: number;
+  members: number;
+  status: string;
+}
+
+interface MemberPerformanceItem {
+  name: string;
+  tasks: number;
+  completed: number;
+  hours: number;
+  efficiency: number;
+  rating: number;
+}
+
+interface WeeklyDataItem {
+  week: string;
+  tasks: number;
+  completed: number;
+  hours: number;
 }
 
 export default function ReportsPage() {
-  const [activeTab, setActiveTab] = useState('overview');
-  const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs]>([
-    dayjs().subtract(30, 'day'),
-    dayjs(),
-  ]);
-  const [selectedProject, setSelectedProject] = useState<string>('all');
+  const [reportType, setReportType] = useState('project');
+  const [timeRange, setTimeRange] = useState('month');
+  const [loading, setLoading] = useState(true);
+  const [projectStats, setProjectStats] = useState<ProjectStatItem[]>([]);
+  const [memberPerformance, setMemberPerformance] = useState<MemberPerformanceItem[]>([]);
+  const [weeklyData, setWeeklyData] = useState<WeeklyDataItem[]>([]);
 
   // 获取报表数据
-  const { data: reportData, isLoading } = useQuery<ReportData>({
-    queryKey: ['report-data', dateRange, selectedProject],
-    queryFn: async () => ({
-      overview: {
-        totalProjects: 12,
-        completedProjects: 5,
-        totalTasks: 456,
-        completedTasks: 298,
-        totalHours: 1280,
-        teamMembers: 25,
-        projectGrowth: 15.5,
-        taskGrowth: 8.3,
-      },
-      projectProgress: [
-        {
-          id: '1',
-          name: '摩塔项目管理系统',
-          progress: 65,
-          status: 'in_progress',
-          tasks: 120,
-          completedTasks: 78,
-          dueDate: '2024-03-15',
-        },
-        {
-          id: '2',
-          name: '企业门户网站',
-          progress: 100,
-          status: 'completed',
-          tasks: 45,
-          completedTasks: 45,
-          dueDate: '2024-01-20',
-        },
-        {
-          id: '3',
-          name: '移动App开发',
-          progress: 40,
-          status: 'in_progress',
-          tasks: 80,
-          completedTasks: 32,
-          dueDate: '2024-04-30',
-        },
-        {
-          id: '4',
-          name: '数据分析平台',
-          progress: 25,
-          status: 'at_risk',
-          tasks: 60,
-          completedTasks: 15,
-          dueDate: '2024-02-28',
-        },
-      ],
-      taskDistribution: [
-        { status: '待处理', count: 45, percentage: 9.9 },
-        { status: '进行中', count: 113, percentage: 24.8 },
-        { status: '已完成', count: 298, percentage: 65.3 },
-      ],
-      teamPerformance: [
-        { id: '1', name: '张三', completedTasks: 45, totalHours: 160, efficiency: 92, trend: 'up' },
-        { id: '2', name: '李四', completedTasks: 38, totalHours: 152, efficiency: 88, trend: 'stable' },
-        { id: '3', name: '王五', completedTasks: 42, totalHours: 168, efficiency: 85, trend: 'up' },
-        { id: '4', name: '赵六', completedTasks: 30, totalHours: 140, efficiency: 78, trend: 'down' },
-      ],
-      weeklyTrend: [
-        { week: 'W1', created: 25, completed: 20 },
-        { week: 'W2', created: 30, completed: 28 },
-        { week: 'W3', created: 22, completed: 25 },
-        { week: 'W4', created: 35, completed: 30 },
-      ],
-    }),
-  });
+  const fetchReportData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const summary = await reportService.getReportSummary({
+        startDate: timeRange === 'week' ? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() :
+                   timeRange === 'month' ? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString() :
+                   timeRange === 'quarter' ? new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString() :
+                   new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString(),
+      });
+      
+      // 转换数据格式
+      setProjectStats([]);
+      setMemberPerformance(
+        summary.memberStats?.topPerformers?.map(p => ({
+          name: p.username,
+          tasks: p.completedTasks,
+          completed: p.completedTasks,
+          hours: 0,
+          efficiency: 0,
+          rating: 0,
+        })) || []
+      );
+      setWeeklyData(
+        summary.trendData?.map((t, i) => ({
+          week: `第${i + 1}周`,
+          tasks: t.tasksCreated,
+          completed: t.tasksCompleted,
+          hours: 0,
+        })) || []
+      );
+    } catch (error) {
+      console.error('Failed to fetch report data:', error);
+      setProjectStats([]);
+      setMemberPerformance([]);
+      setWeeklyData([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [timeRange]);
 
-  // 项目进度表格列
+  useEffect(() => {
+    fetchReportData();
+  }, [fetchReportData]);
+
+  const getStatusTag = (status: string) => {
+    switch (status) {
+      case 'on_track':
+        return <Tag color="success">正常</Tag>;
+      case 'at_risk':
+        return <Tag color="warning">风险</Tag>;
+      case 'delayed':
+        return <Tag color="error">延期</Tag>;
+      default:
+        return <Tag>未知</Tag>;
+    }
+  };
+
   const projectColumns = [
     {
       title: '项目名称',
       dataIndex: 'name',
       key: 'name',
-      render: (name: string) => <Text strong>{name}</Text>,
+      render: (text: string) => (
+        <Space>
+          <ProjectOutlined style={{ color: THEME_COLOR }} />
+          <Text strong>{text}</Text>
+        </Space>
+      ),
     },
     {
-      title: '进度',
-      dataIndex: 'progress',
-      key: 'progress',
-      render: (progress: number) => (
-        <Progress
-          percent={progress}
-          size="small"
-          status={progress === 100 ? 'success' : 'active'}
-        />
-      ),
+      title: '任务数',
+      dataIndex: 'tasks',
+      key: 'tasks',
+    },
+    {
+      title: '完成数',
+      dataIndex: 'completed',
+      key: 'completed',
+    },
+    {
+      title: '完成率',
+      key: 'rate',
+      render: (_: any, record: any) => {
+        const rate = Math.round((record.completed / record.tasks) * 100);
+        return <Progress percent={rate} size="small" strokeColor={THEME_COLOR} />;
+      },
+    },
+    {
+      title: '工时',
+      dataIndex: 'hours',
+      key: 'hours',
+      render: (value: number) => `${value}h`,
+    },
+    {
+      title: '成员数',
+      dataIndex: 'members',
+      key: 'members',
     },
     {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
-      render: (status: string) => {
-        const statusConfig: Record<string, { color: string; label: string }> = {
-          completed: { color: 'success', label: '已完成' },
-          in_progress: { color: 'processing', label: '进行中' },
-          at_risk: { color: 'error', label: '有风险' },
-        };
-        return <Tag color={statusConfig[status]?.color}>{statusConfig[status]?.label}</Tag>;
-      },
-    },
-    {
-      title: '任务完成',
-      key: 'tasks',
-      render: (_: any, record: any) => (
-        <Text>
-          {record.completedTasks} / {record.tasks}
-        </Text>
-      ),
-    },
-    {
-      title: '截止日期',
-      dataIndex: 'dueDate',
-      key: 'dueDate',
-      render: (date: string) => dayjs(date).format('YYYY-MM-DD'),
+      render: (status: string) => getStatusTag(status),
     },
   ];
 
-  // 团队绩效表格列
-  const teamColumns = [
+  const memberColumns = [
     {
       title: '成员',
       dataIndex: 'name',
       key: 'name',
+      render: (text: string) => (
+        <Space>
+          <TeamOutlined style={{ color: THEME_COLOR }} />
+          <Text strong>{text}</Text>
+        </Space>
+      ),
     },
     {
-      title: '完成任务',
-      dataIndex: 'completedTasks',
-      key: 'completedTasks',
+      title: '任务数',
+      dataIndex: 'tasks',
+      key: 'tasks',
     },
     {
-      title: '工作时长',
-      dataIndex: 'totalHours',
-      key: 'totalHours',
-      render: (hours: number) => `${hours}h`,
+      title: '完成数',
+      dataIndex: 'completed',
+      key: 'completed',
+    },
+    {
+      title: '工时',
+      dataIndex: 'hours',
+      key: 'hours',
+      render: (value: number) => `${value}h`,
     },
     {
       title: '效率',
       dataIndex: 'efficiency',
       key: 'efficiency',
-      render: (efficiency: number) => (
-        <Progress
-          percent={efficiency}
-          size="small"
-          strokeColor={efficiency >= 85 ? '#52c41a' : efficiency >= 70 ? '#faad14' : '#ff4d4f'}
-        />
+      render: (value: number) => (
+        <Space>
+          {value >= 85 ? (
+            <RiseOutlined style={{ color: '#10B981' }} />
+          ) : (
+            <FallOutlined style={{ color: '#EF4444' }} />
+          )}
+          {value}%
+        </Space>
       ),
     },
     {
-      title: '趋势',
-      dataIndex: 'trend',
-      key: 'trend',
-      render: (trend: string) => {
-        if (trend === 'up') return <RiseOutlined className="text-green-500" />;
-        if (trend === 'down') return <FallOutlined className="text-red-500" />;
-        return <span className="text-gray-400">—</span>;
-      },
+      title: '评分',
+      dataIndex: 'rating',
+      key: 'rating',
+      render: (value: number) => (
+        <Tag color={value >= 4.5 ? 'success' : value >= 4 ? 'processing' : 'warning'}>
+          {value.toFixed(1)}
+        </Tag>
+      ),
     },
   ];
 
-  // 渲染概览
-  const renderOverview = () => (
-    <div className="space-y-6">
-      {/* 统计卡片 */}
-      <Row gutter={16}>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title="项目总数"
-              value={reportData?.overview.totalProjects || 0}
-              prefix={<ProjectOutlined />}
-              suffix={
-                <Text type="secondary" className="text-sm">
-                  <RiseOutlined className="text-green-500" /> {reportData?.overview.projectGrowth}%
-                </Text>
-              }
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title="任务总数"
-              value={reportData?.overview.totalTasks || 0}
-              prefix={<CheckCircleOutlined />}
-              suffix={
-                <Text type="secondary" className="text-sm">
-                  <RiseOutlined className="text-green-500" /> {reportData?.overview.taskGrowth}%
-                </Text>
-              }
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title="工作时长"
-              value={reportData?.overview.totalHours || 0}
-              prefix={<ClockCircleOutlined />}
-              suffix="小时"
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title="团队成员"
-              value={reportData?.overview.teamMembers || 0}
-              prefix={<TeamOutlined />}
-            />
-          </Card>
-        </Col>
-      </Row>
+  // 汇总统计
+  const summary = {
+    totalTasks: projectStats.reduce((sum, p) => sum + (p.tasks || 0), 0),
+    completedTasks: projectStats.reduce((sum, p) => sum + (p.completed || 0), 0),
+    totalHours: projectStats.reduce((sum, p) => sum + (p.hours || 0), 0),
+    totalMembers: memberPerformance.length,
+  };
 
-      {/* 完成率 */}
-      <Row gutter={16}>
-        <Col span={12}>
-          <Card title="项目完成率">
-            <div className="flex items-center justify-center py-8">
-              <Progress
-                type="circle"
-                percent={Math.round(
-                  ((reportData?.overview.completedProjects || 0) /
-                    (reportData?.overview.totalProjects || 1)) *
-                    100
-                )}
-                size={180}
-                strokeWidth={10}
-                format={(percent) => (
-                  <div className="text-center">
-                    <div className="text-3xl font-bold">{percent}%</div>
-                    <div className="text-sm text-gray-500">
-                      {reportData?.overview.completedProjects} / {reportData?.overview.totalProjects}
-                    </div>
-                  </div>
-                )}
-              />
-            </div>
-          </Card>
-        </Col>
-        <Col span={12}>
-          <Card title="任务完成率">
-            <div className="flex items-center justify-center py-8">
-              <Progress
-                type="circle"
-                percent={Math.round(
-                  ((reportData?.overview.completedTasks || 0) /
-                    (reportData?.overview.totalTasks || 1)) *
-                    100
-                )}
-                size={180}
-                strokeWidth={10}
-                strokeColor="#52c41a"
-                format={(percent) => (
-                  <div className="text-center">
-                    <div className="text-3xl font-bold">{percent}%</div>
-                    <div className="text-sm text-gray-500">
-                      {reportData?.overview.completedTasks} / {reportData?.overview.totalTasks}
-                    </div>
-                  </div>
-                )}
-              />
-            </div>
-          </Card>
-        </Col>
-      </Row>
-
-      {/* 任务分布 */}
-      <Card title="任务状态分布">
-        <div className="flex items-center justify-around py-4">
-          {reportData?.taskDistribution.map((item) => (
-            <div key={item.status} className="text-center">
-              <Progress
-                type="circle"
-                percent={item.percentage}
-                size={100}
-                format={() => item.count}
-              />
-              <div className="mt-2 text-sm text-gray-500">{item.status}</div>
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      {/* 周趋势图（简化版） */}
-      <Card title="周任务趋势">
-        <div className="flex h-48 items-end justify-around">
-          {reportData?.weeklyTrend.map((item) => (
-            <div key={item.week} className="flex flex-col items-center">
-              <div className="flex gap-1">
-                <Tooltip title={`创建: ${item.created}`}>
-                  <div
-                    className="w-8 bg-blue-500"
-                    style={{ height: item.created * 4 }}
-                  />
-                </Tooltip>
-                <Tooltip title={`完成: ${item.completed}`}>
-                  <div
-                    className="w-8 bg-green-500"
-                    style={{ height: item.completed * 4 }}
-                  />
-                </Tooltip>
-              </div>
-              <div className="mt-2 text-sm text-gray-500">{item.week}</div>
-            </div>
-          ))}
-        </div>
-        <div className="mt-4 flex justify-center gap-8">
-          <Space>
-            <div className="h-3 w-3 bg-blue-500" />
-            <Text type="secondary">创建</Text>
-          </Space>
-          <Space>
-            <div className="h-3 w-3 bg-green-500" />
-            <Text type="secondary">完成</Text>
-          </Space>
-        </div>
-      </Card>
-    </div>
-  );
-
-  // 渲染项目报表
-  const renderProjectReport = () => (
-    <div className="space-y-6">
-      <Card title="项目进度详情">
-        <Table
-          columns={projectColumns}
-          dataSource={reportData?.projectProgress}
-          rowKey="id"
-          pagination={false}
-        />
-      </Card>
-    </div>
-  );
-
-  // 渲染团队报表
-  const renderTeamReport = () => (
-    <div className="space-y-6">
-      <Card title="团队绩效">
-        <Table
-          columns={teamColumns}
-          dataSource={reportData?.teamPerformance}
-          rowKey="id"
-          pagination={false}
-        />
-      </Card>
-    </div>
-  );
-
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="flex h-96 items-center justify-center">
-        <Spin size="large" />
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
+        <Spin indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />} />
       </div>
     );
   }
 
   return (
-    <div className="reports-page">
-      {/* 页面标题 */}
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <Title level={3} className="mb-1">
-            <BarChartOutlined className="mr-2" />
-            报表分析
-          </Title>
-          <Text type="secondary">查看项目和团队的数据分析报表</Text>
+    <div>
+      {/* 页面头部 */}
+      <div style={{
+        background: `linear-gradient(135deg, #F59E0B 0%, #D97706 100%)`,
+        borderRadius: 16,
+        padding: '20px 24px',
+        marginBottom: 24,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{
+            width: 48,
+            height: 48,
+            borderRadius: 12,
+            background: 'rgba(255,255,255,0.2)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <BarChartOutlined style={{ fontSize: 24, color: '#fff' }} />
+          </div>
+          <div>
+            <Title level={4} style={{ color: '#fff', margin: 0 }}>报表分析</Title>
+            <Text style={{ color: 'rgba(255,255,255,0.8)' }}>项目和团队数据分析报告</Text>
+          </div>
         </div>
         <Space>
-          <RangePicker
-            value={dateRange}
-            onChange={(dates) => dates && setDateRange(dates as [dayjs.Dayjs, dayjs.Dayjs])}
-          />
           <Select
-            value={selectedProject}
-            onChange={setSelectedProject}
-            style={{ width: 200 }}
+            value={timeRange}
+            onChange={setTimeRange}
+            style={{ width: 120 }}
             options={[
-              { value: 'all', label: '全部项目' },
-              { value: '1', label: '摩塔项目管理系统' },
-              { value: '2', label: '企业门户网站' },
+              { value: 'week', label: '本周' },
+              { value: 'month', label: '本月' },
+              { value: 'quarter', label: '本季度' },
+              { value: 'year', label: '本年' },
             ]}
           />
-          <Dropdown
-            menu={{
-              items: [
-                { key: 'pdf', label: '导出PDF', icon: <DownloadOutlined /> },
-                { key: 'excel', label: '导出Excel', icon: <DownloadOutlined /> },
-                { key: 'print', label: '打印', icon: <PrinterOutlined /> },
-                { key: 'share', label: '分享', icon: <ShareAltOutlined /> },
-              ],
-            }}
-          >
-            <Button icon={<DownloadOutlined />}>导出</Button>
-          </Dropdown>
+          <Button icon={<DownloadOutlined />} style={{ background: 'rgba(255,255,255,0.2)', borderColor: 'transparent', color: '#fff' }}>
+            导出报表
+          </Button>
+          <Button icon={<PrinterOutlined />} style={{ background: 'rgba(255,255,255,0.2)', borderColor: 'transparent', color: '#fff' }}>
+            打印
+          </Button>
         </Space>
       </div>
 
+      {/* 汇总统计 */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+        <Col xs={12} sm={6}>
+          <Card style={{ borderRadius: 12 }}>
+            <Statistic
+              title="总任务数"
+              value={summary.totalTasks}
+              prefix={<FileTextOutlined style={{ color: '#3B82F6' }} />}
+            />
+          </Card>
+        </Col>
+        <Col xs={12} sm={6}>
+          <Card style={{ borderRadius: 12 }}>
+            <Statistic
+              title="已完成"
+              value={summary.completedTasks}
+              valueStyle={{ color: '#10B981' }}
+              prefix={<CheckCircleOutlined />}
+            />
+          </Card>
+        </Col>
+        <Col xs={12} sm={6}>
+          <Card style={{ borderRadius: 12 }}>
+            <Statistic
+              title="总工时"
+              value={summary.totalHours}
+              prefix={<ClockCircleOutlined style={{ color: '#8B5CF6' }} />}
+              suffix="h"
+            />
+          </Card>
+        </Col>
+        <Col xs={12} sm={6}>
+          <Card style={{ borderRadius: 12 }}>
+            <Statistic
+              title="完成率"
+              value={Math.round((summary.completedTasks / summary.totalTasks) * 100)}
+              prefix={<RiseOutlined style={{ color: '#F59E0B' }} />}
+              suffix="%"
+            />
+          </Card>
+        </Col>
+      </Row>
+
       {/* 报表内容 */}
-      <Tabs
-        activeKey={activeTab}
-        onChange={setActiveTab}
-        items={[
-          {
-            key: 'overview',
-            label: (
-              <span>
-                <PieChartOutlined />
-                概览
-              </span>
-            ),
-            children: renderOverview(),
-          },
-          {
-            key: 'project',
-            label: (
-              <span>
-                <ProjectOutlined />
-                项目报表
-              </span>
-            ),
-            children: renderProjectReport(),
-          },
-          {
-            key: 'team',
-            label: (
-              <span>
-                <TeamOutlined />
-                团队报表
-              </span>
-            ),
-            children: renderTeamReport(),
-          },
-        ]}
-      />
+      <Card style={{ borderRadius: 12 }}>
+        <Tabs
+          activeKey={reportType}
+          onChange={setReportType}
+          items={[
+            {
+              key: 'project',
+              label: (
+                <span>
+                  <ProjectOutlined /> 项目报表
+                </span>
+              ),
+              children: (
+                <div>
+                  {projectStats.length === 0 ? (
+                    <Empty description="暂无项目报表数据" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                  ) : (
+                    <Table
+                      dataSource={projectStats}
+                      columns={projectColumns}
+                      pagination={false}
+                      rowKey="name"
+                      summary={() => (
+                        <Table.Summary fixed>
+                          <Table.Summary.Row>
+                            <Table.Summary.Cell index={0}>
+                              <Text strong>合计</Text>
+                            </Table.Summary.Cell>
+                            <Table.Summary.Cell index={1}>
+                              <Text strong>{summary.totalTasks}</Text>
+                            </Table.Summary.Cell>
+                            <Table.Summary.Cell index={2}>
+                              <Text strong>{summary.completedTasks}</Text>
+                            </Table.Summary.Cell>
+                            <Table.Summary.Cell index={3}>
+                              <Progress
+                                percent={summary.totalTasks > 0 ? Math.round((summary.completedTasks / summary.totalTasks) * 100) : 0}
+                                size="small"
+                                strokeColor={THEME_COLOR}
+                              />
+                            </Table.Summary.Cell>
+                            <Table.Summary.Cell index={4}>
+                              <Text strong>{summary.totalHours}h</Text>
+                            </Table.Summary.Cell>
+                            <Table.Summary.Cell index={5}>-</Table.Summary.Cell>
+                            <Table.Summary.Cell index={6}>-</Table.Summary.Cell>
+                          </Table.Summary.Row>
+                        </Table.Summary>
+                      )}
+                    />
+                  )}
+                </div>
+              ),
+            },
+            {
+              key: 'member',
+              label: (
+                <span>
+                  <TeamOutlined /> 成员绩效
+                </span>
+              ),
+              children: (
+                memberPerformance.length === 0 ? (
+                  <Empty description="暂无成员绩效数据" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                ) : (
+                  <Table
+                    dataSource={memberPerformance}
+                    columns={memberColumns}
+                    pagination={false}
+                    rowKey="name"
+                  />
+                )
+              ),
+            },
+            {
+              key: 'weekly',
+              label: (
+                <span>
+                  <CalendarOutlined /> 周报统计
+                </span>
+              ),
+              children: (
+                <div>
+                  {weeklyData.length === 0 ? (
+                    <Empty description="暂无周报数据" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                  ) : (
+                    <Row gutter={[16, 16]}>
+                      {weeklyData.map((week, index) => (
+                        <Col xs={24} sm={12} md={6} key={index}>
+                          <Card style={{ borderRadius: 12, background: '#F8FAFC' }}>
+                            <div style={{ textAlign: 'center' }}>
+                              <Text type="secondary">{week.week}</Text>
+                              <div style={{ marginTop: 16 }}>
+                                <Statistic
+                                  title="任务完成"
+                                  value={week.completed || 0}
+                                  suffix={`/ ${week.tasks || 0}`}
+                                  valueStyle={{ fontSize: 24 }}
+                                />
+                              </div>
+                              <Progress
+                                percent={week.tasks > 0 ? Math.round(((week.completed || 0) / week.tasks) * 100) : 0}
+                                strokeColor={THEME_COLOR}
+                                style={{ marginTop: 12 }}
+                              />
+                              <div style={{ marginTop: 12 }}>
+                                <Text type="secondary">工时: {week.hours || 0}h</Text>
+                              </div>
+                            </div>
+                          </Card>
+                        </Col>
+                      ))}
+                    </Row>
+                  )}
+                </div>
+              ),
+            },
+            {
+              key: 'trend',
+              label: (
+                <span>
+                  <LineChartOutlined /> 趋势分析
+                </span>
+              ),
+              children: (
+                <div style={{ padding: 24, textAlign: 'center' }}>
+                  {weeklyData.length === 0 ? (
+                    <Empty description="暂无趋势数据" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                  ) : (
+                    <>
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'flex-end',
+                        gap: 24,
+                        height: 200,
+                        marginBottom: 24,
+                      }}>
+                        {weeklyData.map((week, index) => {
+                          const maxCompleted = Math.max(...weeklyData.map(w => w.completed || 0), 1);
+                          return (
+                            <div key={index} style={{ textAlign: 'center' }}>
+                              <div style={{
+                                width: 60,
+                                height: `${((week.completed || 0) / maxCompleted) * 150}px`,
+                                background: `linear-gradient(180deg, ${THEME_COLOR} 0%, ${THEME_COLOR}80 100%)`,
+                                borderRadius: 8,
+                                marginBottom: 8,
+                                minHeight: 10,
+                              }} />
+                              <Text type="secondary">{week.week}</Text>
+                              <br />
+                              <Text strong>{week.completed || 0}</Text>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <Text type="secondary">任务完成趋势图</Text>
+                    </>
+                  )}
+                </div>
+              ),
+            },
+          ]}
+        />
+      </Card>
     </div>
   );
 }

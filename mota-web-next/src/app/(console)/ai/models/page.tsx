@@ -125,152 +125,24 @@ export default function AIModelsPage() {
   const { data: models, isLoading } = useQuery({
     queryKey: ['ai-models'],
     queryFn: async (): Promise<AIModel[]> => {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      
-      return [
-        {
-          id: '1',
-          name: 'GPT-4 Turbo',
-          provider: 'openai',
-          modelId: 'gpt-4-turbo-preview',
-          description: 'OpenAI最新的GPT-4 Turbo模型，支持128K上下文',
-          status: 'active',
-          isDefault: true,
-          config: {
-            apiKey: 'sk-xxxx...xxxx',
-            apiEndpoint: 'https://api.openai.com/v1',
-            maxTokens: 4096,
-            temperature: 0.7,
-            topP: 1,
-            frequencyPenalty: 0,
-            presencePenalty: 0,
-          },
-          capabilities: ['chat', 'completion', 'vision', 'function'],
-          usage: {
-            totalRequests: 12580,
-            totalTokens: 5678900,
-            avgLatency: 1.2,
-            errorRate: 0.02,
-          },
-          createdAt: dayjs().subtract(30, 'day').toISOString(),
-          updatedAt: dayjs().subtract(1, 'hour').toISOString(),
-        },
-        {
-          id: '2',
-          name: 'Claude 3 Opus',
-          provider: 'anthropic',
-          modelId: 'claude-3-opus-20240229',
-          description: 'Anthropic的Claude 3 Opus模型，擅长复杂推理',
-          status: 'active',
-          isDefault: false,
-          config: {
-            apiKey: 'sk-ant-xxxx...xxxx',
-            apiEndpoint: 'https://api.anthropic.com/v1',
-            maxTokens: 4096,
-            temperature: 0.7,
-            topP: 1,
-            frequencyPenalty: 0,
-            presencePenalty: 0,
-          },
-          capabilities: ['chat', 'completion', 'vision'],
-          usage: {
-            totalRequests: 8920,
-            totalTokens: 3456780,
-            avgLatency: 1.5,
-            errorRate: 0.01,
-          },
-          createdAt: dayjs().subtract(20, 'day').toISOString(),
-          updatedAt: dayjs().subtract(2, 'hour').toISOString(),
-        },
-        {
-          id: '3',
-          name: 'Gemini Pro',
-          provider: 'google',
-          modelId: 'gemini-pro',
-          description: 'Google的Gemini Pro模型，多模态能力强',
-          status: 'inactive',
-          isDefault: false,
-          config: {
-            apiKey: 'AIza...xxxx',
-            apiEndpoint: 'https://generativelanguage.googleapis.com/v1',
-            maxTokens: 2048,
-            temperature: 0.7,
-            topP: 1,
-            frequencyPenalty: 0,
-            presencePenalty: 0,
-          },
-          capabilities: ['chat', 'completion', 'vision', 'embedding'],
-          usage: {
-            totalRequests: 3450,
-            totalTokens: 1234560,
-            avgLatency: 0.8,
-            errorRate: 0.03,
-          },
-          createdAt: dayjs().subtract(15, 'day').toISOString(),
-          updatedAt: dayjs().subtract(5, 'day').toISOString(),
-        },
-        {
-          id: '4',
-          name: 'Azure GPT-4',
-          provider: 'azure',
-          modelId: 'gpt-4',
-          description: 'Azure托管的GPT-4模型，企业级安全',
-          status: 'error',
-          isDefault: false,
-          config: {
-            apiKey: 'xxxx...xxxx',
-            apiEndpoint: 'https://your-resource.openai.azure.com',
-            maxTokens: 4096,
-            temperature: 0.7,
-            topP: 1,
-            frequencyPenalty: 0,
-            presencePenalty: 0,
-          },
-          capabilities: ['chat', 'completion', 'function'],
-          usage: {
-            totalRequests: 1200,
-            totalTokens: 456780,
-            avgLatency: 2.1,
-            errorRate: 0.15,
-          },
-          createdAt: dayjs().subtract(10, 'day').toISOString(),
-          updatedAt: dayjs().subtract(1, 'day').toISOString(),
-        },
-        {
-          id: '5',
-          name: 'Llama 3 70B',
-          provider: 'local',
-          modelId: 'llama-3-70b',
-          description: '本地部署的Llama 3 70B模型',
-          status: 'active',
-          isDefault: false,
-          config: {
-            apiEndpoint: 'http://localhost:8080/v1',
-            maxTokens: 2048,
-            temperature: 0.7,
-            topP: 1,
-            frequencyPenalty: 0,
-            presencePenalty: 0,
-          },
-          capabilities: ['chat', 'completion', 'code'],
-          usage: {
-            totalRequests: 5670,
-            totalTokens: 2345670,
-            avgLatency: 0.5,
-            errorRate: 0.01,
-          },
-          createdAt: dayjs().subtract(7, 'day').toISOString(),
-          updatedAt: dayjs().subtract(3, 'hour').toISOString(),
-        },
-      ];
+      try {
+        const { aiService } = await import('@/services');
+        return await aiService.getModels();
+      } catch {
+        return [];
+      }
     },
   });
 
   // 创建/更新模型
   const saveMutation = useMutation({
     mutationFn: async (values: Partial<AIModel>) => {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      return { ...values, id: editingModel?.id || Date.now().toString() };
+      const { aiService } = await import('@/services');
+      if (editingModel?.id) {
+        return await aiService.updateModel(editingModel.id, values);
+      } else {
+        return await aiService.createModel(values);
+      }
     },
     onSuccess: () => {
       message.success(editingModel ? '模型更新成功' : '模型创建成功');
@@ -279,41 +151,56 @@ export default function AIModelsPage() {
       form.resetFields();
       queryClient.invalidateQueries({ queryKey: ['ai-models'] });
     },
+    onError: () => {
+      message.error(editingModel ? '更新失败' : '创建失败');
+    },
   });
 
   // 删除模型
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      const { aiService } = await import('@/services');
+      await aiService.deleteModel(id);
       return id;
     },
     onSuccess: () => {
       message.success('模型删除成功');
       queryClient.invalidateQueries({ queryKey: ['ai-models'] });
     },
+    onError: () => {
+      message.error('删除失败');
+    },
   });
 
   // 切换模型状态
   const toggleStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: 'active' | 'inactive' }) => {
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      const { aiService } = await import('@/services');
+      await aiService.toggleModelStatus(id, status);
       return { id, status };
     },
     onSuccess: (data) => {
       message.success(`模型已${data.status === 'active' ? '启用' : '禁用'}`);
       queryClient.invalidateQueries({ queryKey: ['ai-models'] });
     },
+    onError: () => {
+      message.error('操作失败');
+    },
   });
 
   // 设为默认模型
   const setDefaultMutation = useMutation({
     mutationFn: async (id: string) => {
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      const { aiService } = await import('@/services');
+      await aiService.setDefaultModel(id);
       return id;
     },
     onSuccess: () => {
       message.success('已设为默认模型');
       queryClient.invalidateQueries({ queryKey: ['ai-models'] });
+    },
+    onError: () => {
+      message.error('设置失败');
     },
   });
 
@@ -324,15 +211,20 @@ export default function AIModelsPage() {
       return;
     }
     
+    if (!selectedModel) {
+      message.warning('请选择模型');
+      return;
+    }
+    
     setTesting(true);
     setTestOutput('');
     
-    // 模拟流式输出
-    const response = `这是对"${testInput}"的测试响应。\n\n模型 ${selectedModel?.name} 正常工作中。\n\n响应时间: ${Math.random() * 2 + 0.5}s\n令牌数: ${Math.floor(Math.random() * 100 + 50)}`;
-    
-    for (let i = 0; i < response.length; i++) {
-      await new Promise((resolve) => setTimeout(resolve, 20));
-      setTestOutput((prev) => prev + response[i]);
+    try {
+      const { aiService } = await import('@/services');
+      const result = await aiService.testModel(selectedModel.id, testInput);
+      setTestOutput(`${result.output}\n\n响应时间: ${result.latency}s\n令牌数: ${result.tokens}`);
+    } catch {
+      setTestOutput('测试失败，请检查模型配置');
     }
     
     setTesting(false);

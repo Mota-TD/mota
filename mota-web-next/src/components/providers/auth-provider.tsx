@@ -21,12 +21,30 @@ interface User {
   email: string;
   phone?: string;
   avatar?: string;
-  tenantId: string;
+  tenantId?: string;
   tenantName?: string;
   departmentId?: string;
   departmentName?: string;
   roles: string[];
   permissions: string[];
+  status?: string;
+  role?: string;
+}
+
+// 后端返回的用户数据类型
+interface BackendUser {
+  id: number | string;
+  username: string;
+  nickname: string;
+  email: string;
+  phone?: string;
+  avatar?: string;
+  status?: string;
+  role?: string;
+  departmentId?: number | string;
+  departmentName?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // 认证上下文类型
@@ -46,62 +64,129 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // 不需要认证的路由
 const publicRoutes = ['/login', '/register', '/forgot-password', '/reset-password'];
 
+// 开发模式模拟用户数据
+const DEV_MOCK_USER: User = {
+  id: 'dev-user-1',
+  username: 'developer',
+  nickname: '开发者',
+  email: 'dev@mota.com',
+  phone: '13800138000',
+  avatar: undefined,
+  tenantId: 'tenant-1',
+  tenantName: '开发租户',
+  departmentId: 'dept-1',
+  departmentName: '技术部',
+  roles: ['admin'],
+  permissions: ['*'],
+  status: 'active',
+  role: 'admin',
+};
+
+// 检查是否为开发模式的函数
+function checkDevMode(): boolean {
+  // 在客户端检查 hostname
+  if (typeof window !== 'undefined') {
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const notDisabled = process.env.NEXT_PUBLIC_AUTO_DEV_MODE !== 'false';
+    return isLocalhost && notDisabled;
+  }
+  // 在服务端使用 NODE_ENV
+  return process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_AUTO_DEV_MODE !== 'false';
+}
+
 interface AuthProviderProps {
   children: ReactNode;
 }
 
+
 export function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter();
   const pathname = usePathname();
+  
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
   // 检查是否已认证
   const isAuthenticated = !!user;
 
-  // 获取当前用户信息
-  const fetchUser = useCallback(async () => {
-    try {
-      const token = Cookies.get('mota_token');
-      if (!token) {
-        setUser(null);
-        return;
-      }
-
-      const response = await apiClient.get<User>('/api/v1/auth/me');
-      setUser(response.data);
-    } catch (error) {
-      console.error('Failed to fetch user:', error);
-      setUser(null);
-      Cookies.remove('mota_token');
-      Cookies.remove('mota_refresh_token');
-    }
-  }, []);
-
-  // 初始化时获取用户信息
+  // 初始化认证状态
   useEffect(() => {
-    const init = async () => {
-      setIsLoading(true);
-      await fetchUser();
+    const initAuth = async () => {
+      // 检查是否为开发模式
+      const isDevMode = checkDevMode();
+      console.log('[Auth] Initializing, dev mode:', isDevMode);
+      
+      const token = Cookies.get('mota_token');
+      
+      // 如果有 token，尝试获取用户信息
+      if (token) {
+        try {
+          const response = await apiClient.get<{ data: BackendUser }>('/api/v1/users/me');
+          const backendUser = response.data.data;
+          if (backendUser) {
+            const userData: User = {
+              id: String(backendUser.id),
+              username: backendUser.username,
+              nickname: backendUser.nickname || backendUser.username,
+              email: backendUser.email || '',
+              phone: backendUser.phone,
+              avatar: backendUser.avatar,
+              status: backendUser.status,
+              role: backendUser.role,
+              departmentId: backendUser.departmentId ? String(backendUser.departmentId) : undefined,
+              departmentName: backendUser.departmentName,
+              roles: backendUser.role ? [backendUser.role] : [],
+              permissions: [],
+            };
+            setUser(userData);
+            console.log('[Auth] User loaded from API');
+          }
+        } catch (error) {
+          console.error('[Auth] Failed to fetch user:', error);
+          // 开发模式下 API 失败时使用模拟用户
+          if (isDevMode) {
+            console.log('[Auth] API failed, using mock user in dev mode');
+            setUser(DEV_MOCK_USER);
+          } else {
+            Cookies.remove('mota_token');
+            Cookies.remove('mota_refresh_token');
+          }
+        }
+      } else if (isDevMode) {
+        // 开发模式且没有 token，使用模拟用户
+        console.log('[Auth] No token, using mock user in dev mode');
+        setUser(DEV_MOCK_USER);
+      }
+      
       setIsLoading(false);
+      setInitialized(true);
     };
-    init();
-  }, [fetchUser]);
+    
+    initAuth();
+  }, []);
 
   // 路由守卫
   useEffect(() => {
-    if (isLoading) return;
+    // 等待初始化完成
+    if (!initialized) {
+      console.log('[Auth] Route guard: waiting for initialization');
+      return;
+    }
 
     const isPublicRoute = publicRoutes.some((route) => pathname.startsWith(route));
+    console.log('[Auth] Route guard:', { isAuthenticated, isPublicRoute, pathname, user: !!user });
 
     if (!isAuthenticated && !isPublicRoute) {
       // 未登录且访问需要认证的页面，跳转到登录页
+      console.log('[Auth] Redirecting to login');
       router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
     } else if (isAuthenticated && isPublicRoute) {
       // 已登录且访问公开页面，跳转到首页
+      console.log('[Auth] Redirecting to dashboard');
       router.push('/dashboard');
     }
-  }, [isAuthenticated, isLoading, pathname, router]);
+  }, [isAuthenticated, initialized, pathname, router, user]);
 
   // 登录
   const login = useCallback(

@@ -184,74 +184,48 @@ export default function TaskDetailPage() {
   const [isStarred, setIsStarred] = useState(false);
 
   // 获取任务详情
-  const { data: task, isLoading } = useQuery<Task>({
+  const { data: task, isLoading } = useQuery<Task | null>({
     queryKey: ['task', taskId],
-    queryFn: async () => {
-      // 模拟API调用
-      return {
-        id: taskId,
-        title: '实现用户认证模块',
-        description: `## 任务描述
-
-实现完整的用户认证模块，包括：
-
-1. **登录功能**
-   - 账号密码登录
-   - 手机验证码登录
-   - SSO单点登录
-
-2. **注册功能**
-   - 个人注册
-   - 企业注册
-   - 邀请注册
-
-3. **密码管理**
-   - 忘记密码
-   - 重置密码
-   - 密码强度校验
-
-## 技术要求
-
-- 使用JWT进行身份验证
-- 支持Token刷新机制
-- 实现路由守卫
-
-## 验收标准
-
-- [ ] 所有登录方式正常工作
-- [ ] 注册流程完整
-- [ ] 密码重置功能可用
-- [ ] 安全性测试通过`,
-        status: 'in_progress',
-        priority: 'high',
-        projectId: '1',
-        projectName: '摩塔项目管理系统',
-        assignee: {
-          id: '1',
-          name: '张三',
-          avatar: undefined,
-        },
-        reporter: {
-          id: '2',
-          name: '李四',
-          avatar: undefined,
-        },
-        startDate: '2026-01-05',
-        dueDate: '2026-01-15',
-        estimatedHours: 40,
-        actualHours: 24,
-        progress: 60,
-        tags: ['前端', '认证', 'P0'],
-        watchers: [
-          { id: '1', name: '张三' },
-          { id: '2', name: '李四' },
-          { id: '3', name: '王五' },
-        ],
-        parentId: null,
-        parentTitle: null,
-        createdAt: '2026-01-05T10:00:00Z',
-        updatedAt: '2026-01-08T08:30:00Z',
-      };
+    queryFn: async (): Promise<Task | null> => {
+      try {
+        const { taskService } = await import('@/services');
+        const detail = await taskService.getTaskDetail(taskId);
+        if (!detail) return null;
+        // 转换为页面需要的格式
+        const taskData: Task = {
+          id: detail.id,
+          title: detail.title,
+          description: detail.description || '',
+          status: (detail.status as Task['status']) || 'todo',
+          priority: (detail.priority as Task['priority']) || 'medium',
+          projectId: detail.projectId || '',
+          projectName: detail.projectName || '',
+          assignee: (detail as any).assignee ? {
+            id: (detail as any).assignee.id,
+            name: (detail as any).assignee.name,
+            avatar: (detail as any).assignee.avatar,
+          } : null,
+          reporter: (detail as any).reporter ? {
+            id: (detail as any).reporter.id,
+            name: (detail as any).reporter.name,
+            avatar: (detail as any).reporter.avatar,
+          } : { id: '', name: '未知' },
+          startDate: detail.startDate || null,
+          dueDate: detail.dueDate || null,
+          estimatedHours: detail.estimatedHours || null,
+          actualHours: detail.actualHours || null,
+          progress: (detail as any).progress || 0,
+          tags: detail.tags || [],
+          watchers: (detail as any).watchers || [],
+          parentId: detail.parentId || null,
+          parentTitle: (detail as any).parentTitle || null,
+          createdAt: detail.createdAt || '',
+          updatedAt: detail.updatedAt || '',
+        };
+        return taskData;
+      } catch {
+        return null;
+      }
     },
   });
 
@@ -259,13 +233,19 @@ export default function TaskDetailPage() {
   const { data: subtasks } = useQuery<Subtask[]>({
     queryKey: ['task', taskId, 'subtasks'],
     queryFn: async () => {
-      return [
-        { id: '1', title: '实现登录页面UI', status: 'done', assignee: { id: '1', name: '张三' }, dueDate: '2026-01-08' },
-        { id: '2', title: '实现注册页面UI', status: 'done', assignee: { id: '1', name: '张三' }, dueDate: '2026-01-09' },
-        { id: '3', title: '实现忘记密码页面', status: 'in_progress', assignee: { id: '1', name: '张三' }, dueDate: '2026-01-10' },
-        { id: '4', title: '集成JWT认证', status: 'todo', assignee: null, dueDate: '2026-01-12' },
-        { id: '5', title: '实现SSO登录', status: 'todo', assignee: null, dueDate: '2026-01-14' },
-      ];
+      try {
+        const { taskService } = await import('@/services');
+        const detail = await taskService.getTaskDetail(taskId);
+        return (detail?.subtasks || []).map((s: any) => ({
+          id: s.id,
+          title: s.title,
+          status: s.status,
+          assignee: s.assignee,
+          dueDate: s.dueDate,
+        }));
+      } catch {
+        return [];
+      }
     },
   });
 
@@ -273,14 +253,18 @@ export default function TaskDetailPage() {
   const { data: checklist } = useQuery<ChecklistItem[]>({
     queryKey: ['task', taskId, 'checklist'],
     queryFn: async () => {
-      return [
-        { id: '1', content: '设计登录页面原型', completed: true, sortOrder: 1 },
-        { id: '2', content: '实现表单验证', completed: true, sortOrder: 2 },
-        { id: '3', content: '对接登录API', completed: true, sortOrder: 3 },
-        { id: '4', content: '实现Token存储', completed: false, sortOrder: 4 },
-        { id: '5', content: '实现自动刷新Token', completed: false, sortOrder: 5 },
-        { id: '6', content: '编写单元测试', completed: false, sortOrder: 6 },
-      ];
+      try {
+        const { taskService } = await import('@/services');
+        const detail = await taskService.getTaskDetail(taskId);
+        return (detail?.checklists?.[0]?.items || []).map((item: any) => ({
+          id: item.id,
+          content: item.content,
+          completed: item.completed,
+          sortOrder: item.sortOrder || 0,
+        }));
+      } catch {
+        return [];
+      }
     },
   });
 
@@ -288,29 +272,19 @@ export default function TaskDetailPage() {
   const { data: comments } = useQuery<Comment[]>({
     queryKey: ['task', taskId, 'comments'],
     queryFn: async () => {
-      return [
-        {
-          id: '1',
-          content: '登录页面UI已经完成，请 @李四 审核一下',
-          author: { id: '1', name: '张三' },
-          createdAt: '2026-01-07T14:30:00Z',
-          mentions: ['李四'],
-        },
-        {
-          id: '2',
-          content: 'UI看起来不错，有几个小建议：\n1. 登录按钮可以再大一点\n2. 错误提示的颜色可以调整',
-          author: { id: '2', name: '李四' },
-          createdAt: '2026-01-07T15:00:00Z',
-          mentions: [],
-        },
-        {
-          id: '3',
-          content: '已根据建议修改，请再次确认',
-          author: { id: '1', name: '张三' },
-          createdAt: '2026-01-07T16:30:00Z',
-          mentions: [],
-        },
-      ];
+      try {
+        const { taskService } = await import('@/services');
+        const detail = await taskService.getTaskDetail(taskId);
+        return (detail?.comments || []).map((c: any) => ({
+          id: c.id,
+          content: c.content,
+          author: c.author || { id: '', name: '未知' },
+          createdAt: c.createdAt,
+          mentions: c.mentions || [],
+        }));
+      } catch {
+        return [];
+      }
     },
   });
 
@@ -318,26 +292,21 @@ export default function TaskDetailPage() {
   const { data: attachments } = useQuery<Attachment[]>({
     queryKey: ['task', taskId, 'attachments'],
     queryFn: async () => {
-      return [
-        {
-          id: '1',
-          name: '登录页面设计稿.fig',
-          size: 2048000,
-          type: 'application/figma',
-          url: '#',
-          uploadedBy: { id: '1', name: '张三' },
-          uploadedAt: '2026-01-06T10:00:00Z',
-        },
-        {
-          id: '2',
-          name: 'API接口文档.pdf',
-          size: 512000,
-          type: 'application/pdf',
-          url: '#',
-          uploadedBy: { id: '2', name: '李四' },
-          uploadedAt: '2026-01-05T14:00:00Z',
-        },
-      ];
+      try {
+        const { taskService } = await import('@/services');
+        const detail = await taskService.getTaskDetail(taskId);
+        return (detail?.attachments || []).map((a: any) => ({
+          id: a.id,
+          name: a.name,
+          size: a.size || 0,
+          type: a.type || '',
+          url: a.url || '',
+          uploadedBy: a.uploadedBy || { id: '', name: '未知' },
+          uploadedAt: a.uploadedAt || '',
+        }));
+      } catch {
+        return [];
+      }
     },
   });
 
@@ -345,40 +314,21 @@ export default function TaskDetailPage() {
   const { data: activities } = useQuery<ActivityLog[]>({
     queryKey: ['task', taskId, 'activities'],
     queryFn: async () => {
-      return [
-        {
-          id: '1',
-          action: 'status_changed',
-          field: '状态',
-          oldValue: '待处理',
-          newValue: '进行中',
-          user: { id: '1', name: '张三' },
-          createdAt: '2026-01-06T09:00:00Z',
-        },
-        {
-          id: '2',
-          action: 'comment_added',
-          user: { id: '1', name: '张三' },
-          createdAt: '2026-01-07T14:30:00Z',
-        },
-        {
-          id: '3',
-          action: 'attachment_added',
-          field: '附件',
-          newValue: '登录页面设计稿.fig',
-          user: { id: '1', name: '张三' },
-          createdAt: '2026-01-06T10:00:00Z',
-        },
-        {
-          id: '4',
-          action: 'progress_updated',
-          field: '进度',
-          oldValue: '40%',
-          newValue: '60%',
-          user: { id: '1', name: '张三' },
-          createdAt: '2026-01-08T08:30:00Z',
-        },
-      ];
+      try {
+        const { taskService } = await import('@/services');
+        const detail = await taskService.getTaskDetail(taskId);
+        return (detail?.activities || []).map((a: any) => ({
+          id: a.id,
+          action: a.action,
+          field: a.field,
+          oldValue: a.oldValue,
+          newValue: a.newValue,
+          user: a.user || { id: '', name: '未知' },
+          createdAt: a.createdAt,
+        }));
+      } catch {
+        return [];
+      }
     },
   });
 
@@ -386,24 +336,36 @@ export default function TaskDetailPage() {
   const { data: dependencies } = useQuery<{ predecessors: Dependency[]; successors: Dependency[] }>({
     queryKey: ['task', taskId, 'dependencies'],
     queryFn: async () => {
-      return {
-        predecessors: [
-          { id: '1', type: 'finish_to_start', taskId: '10', taskTitle: '需求分析', taskStatus: 'done' },
-          { id: '2', type: 'finish_to_start', taskId: '11', taskTitle: 'UI设计', taskStatus: 'done' },
-        ],
-        successors: [
-          { id: '3', type: 'finish_to_start', taskId: '20', taskTitle: '集成测试', taskStatus: 'todo' },
-        ],
-      };
+      try {
+        const { taskService } = await import('@/services');
+        const detail = await taskService.getTaskDetail(taskId) as any;
+        return {
+          predecessors: (detail?.dependencies?.predecessors || []).map((d: any) => ({
+            id: d.id,
+            type: d.type,
+            taskId: d.taskId,
+            taskTitle: d.taskTitle,
+            taskStatus: d.taskStatus,
+          })),
+          successors: (detail?.dependencies?.successors || []).map((d: any) => ({
+            id: d.id,
+            type: d.type,
+            taskId: d.taskId,
+            taskTitle: d.taskTitle,
+            taskStatus: d.taskStatus,
+          })),
+        };
+      } catch {
+        return { predecessors: [], successors: [] };
+      }
     },
   });
 
   // 更新任务状态
   const updateStatusMutation = useMutation({
     mutationFn: async (status: string) => {
-      // 模拟API调用
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      return { status };
+      const { taskService } = await import('@/services');
+      return await taskService.updateTask(taskId, { status });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task', taskId] });
@@ -414,8 +376,8 @@ export default function TaskDetailPage() {
   // 添加评论
   const addCommentMutation = useMutation({
     mutationFn: async (content: string) => {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      return { content };
+      const { taskService } = await import('@/services');
+      return await taskService.addTaskComment(taskId, content);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task', taskId, 'comments'] });
@@ -427,19 +389,26 @@ export default function TaskDetailPage() {
   // 切换检查项状态
   const toggleChecklistMutation = useMutation({
     mutationFn: async ({ id, completed }: { id: string; completed: boolean }) => {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return { id, completed };
+      const { taskService } = await import('@/services');
+      return await taskService.updateChecklistItem(id, completed);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task', taskId, 'checklist'] });
     },
   });
 
-  // 添加检查项
+  // 添加检查项 - 需要先获取 checklistId
   const addChecklistItemMutation = useMutation({
     mutationFn: async (content: string) => {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return { content };
+      const { taskService } = await import('@/services');
+      // 获取任务的第一个 checklist，如果没有则先创建
+      const checklists = await taskService.getTaskChecklists(taskId);
+      let checklistId = checklists?.[0]?.id;
+      if (!checklistId) {
+        const newChecklist = await taskService.createChecklist(taskId, '检查清单');
+        checklistId = newChecklist.id;
+      }
+      return await taskService.addChecklistItem(checklistId, content);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['task', taskId, 'checklist'] });
