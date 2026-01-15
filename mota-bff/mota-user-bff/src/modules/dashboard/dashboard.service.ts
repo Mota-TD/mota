@@ -52,22 +52,18 @@ export class DashboardService {
     const cacheKey = `${this.CACHE_KEY_PREFIX}${tenantId}:${userId}`;
 
     // 尝试从缓存获取
-    const cached = await this.cacheManager.get<DashboardData>(cacheKey);
-    if (cached) {
-      this.logger.debug(`Dashboard data from cache: ${cacheKey}`);
-      return cached;
+    try {
+      const cached = await this.cacheManager.get<DashboardData>(cacheKey);
+      if (cached) {
+        this.logger.debug(`Dashboard data from cache: ${cacheKey}`);
+        return cached;
+      }
+    } catch (cacheError) {
+      this.logger.warn('Cache get failed, proceeding without cache', cacheError);
     }
 
-    // 并行获取各服务数据
-    const [
-      projectStats,
-      taskStats,
-      todayTasks,
-      recentProjects,
-      unreadNotifications,
-      upcomingEvents,
-      aiSuggestions,
-    ] = await Promise.all([
+    // 并行获取各服务数据，使用 Promise.allSettled 确保即使部分服务失败也能返回数据
+    const results = await Promise.allSettled([
       this.getProjectStats(userId, tenantId),
       this.getTaskStats(userId, tenantId),
       this.getTodayTasks(userId, tenantId),
@@ -76,6 +72,19 @@ export class DashboardService {
       this.getUpcomingEvents(userId, tenantId),
       this.getAISuggestions(userId, tenantId),
     ]);
+
+    // 提取结果，失败的使用默认值
+    const projectStats = results[0].status === 'fulfilled'
+      ? results[0].value
+      : { total: 0, active: 0, completed: 0, overdue: 0 };
+    const taskStats = results[1].status === 'fulfilled'
+      ? results[1].value
+      : { total: 0, todo: 0, inProgress: 0, completed: 0, overdue: 0 };
+    const todayTasks = results[2].status === 'fulfilled' ? results[2].value : [];
+    const recentProjects = results[3].status === 'fulfilled' ? results[3].value : [];
+    const unreadNotifications = results[4].status === 'fulfilled' ? results[4].value : 0;
+    const upcomingEvents = results[5].status === 'fulfilled' ? results[5].value : [];
+    const aiSuggestions = results[6].status === 'fulfilled' ? results[6].value : [];
 
     const dashboardData: DashboardData = {
       projectStats,
@@ -87,8 +96,12 @@ export class DashboardService {
       aiSuggestions,
     };
 
-    // 缓存数据
-    await this.cacheManager.set(cacheKey, dashboardData, this.CACHE_TTL * 1000);
+    // 尝试缓存数据
+    try {
+      await this.cacheManager.set(cacheKey, dashboardData, this.CACHE_TTL * 1000);
+    } catch (cacheError) {
+      this.logger.warn('Cache set failed', cacheError);
+    }
 
     return dashboardData;
   }

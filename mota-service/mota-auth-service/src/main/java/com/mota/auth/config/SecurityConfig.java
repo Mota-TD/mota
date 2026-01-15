@@ -18,9 +18,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * 安全配置
+ * 认证服务安全配置
  */
-@Configuration
+@Configuration("authSecurityConfig")
 @EnableWebSecurity
 public class SecurityConfig {
 

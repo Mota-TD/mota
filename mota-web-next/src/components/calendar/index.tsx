@@ -19,6 +19,7 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
+import { calendarService, type CalendarEvent as ServiceCalendarEvent } from '@/services';
 
 dayjs.locale('zh-cn');
 
@@ -220,57 +221,55 @@ const Calendar: React.FC<CalendarProps> = ({
 
   const timeSlots = useMemo(() => generateTimeSlots(), []);
 
-  // 生成模拟数据
-  const generateMockEvents = useCallback((): CalendarEvent[] => {
-    const mockEvents: CalendarEvent[] = [];
-    const now = new Date();
-    const calendarTypes: CalendarType[] = ['personal', 'team', 'project', 'task'];
-    const eventTypes: EventType[] = ['meeting', 'task', 'milestone', 'reminder', 'other'];
-    
-    for (let i = 0; i < 20; i++) {
-      const startDate = new Date(now);
-      startDate.setDate(now.getDate() + Math.floor(Math.random() * 30) - 15);
-      startDate.setHours(Math.floor(Math.random() * 12) + 8, 0, 0, 0);
-      
-      const endDate = new Date(startDate);
-      endDate.setHours(startDate.getHours() + Math.floor(Math.random() * 3) + 1);
-      
-      const calendarType = calendarTypes[Math.floor(Math.random() * calendarTypes.length)];
-      const eventType = eventTypes[Math.floor(Math.random() * eventTypes.length)];
-      
-      mockEvents.push({
-        id: i + 1,
-        title: `${EVENT_TYPE_LABELS[eventType]} ${i + 1}`,
-        description: `这是一个${CALENDAR_TYPE_LABELS[calendarType]}中的${EVENT_TYPE_LABELS[eventType]}事件`,
-        eventType,
-        calendarType,
-        startTime: startDate.toISOString(),
-        endTime: endDate.toISOString(),
-        allDay: Math.random() > 0.8,
-        location: Math.random() > 0.5 ? '会议室A' : undefined,
-        color: CALENDAR_TYPE_COLORS[calendarType],
-        creatorId: userId,
-        visibility: 'project',
-        status: 'active',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        reminderMinutes: REMINDER_OPTIONS[Math.floor(Math.random() * REMINDER_OPTIONS.length)].value,
-        recurrenceRule: Math.random() > 0.8 ? 'weekly' : 'none'
-      });
-    }
-    
-    return mockEvents;
-  }, [userId]);
+  // 将 API 返回的事件转换为组件使用的格式
+  const transformServiceEvent = useCallback((event: ServiceCalendarEvent): CalendarEvent => ({
+    id: parseInt(event.id) || Date.now(),
+    title: event.title,
+    description: event.description,
+    eventType: (event.eventType as EventType) || 'other',
+    calendarType: (event.calendarType as CalendarType) || 'personal',
+    startTime: event.startTime,
+    endTime: event.endTime,
+    allDay: event.allDay,
+    location: event.location,
+    color: event.color || CALENDAR_TYPE_COLORS[(event.calendarType as CalendarType) || 'personal'],
+    creatorId: parseInt(event.creatorId) || userId,
+    visibility: event.visibility || 'project',
+    status: event.status || 'active',
+    createdAt: event.createdAt,
+    updatedAt: event.updatedAt,
+    reminderMinutes: event.reminderMinutes,
+    recurrenceRule: event.recurrence?.frequency || 'none'
+  }), [userId]);
 
   // 加载事件
-  useEffect(() => {
+  const loadEvents = useCallback(async () => {
     setLoading(true);
-    // 模拟API调用
-    setTimeout(() => {
-      setEvents(generateMockEvents());
+    try {
+      const startDate = dayjs(currentDate).startOf('month').subtract(7, 'day').format('YYYY-MM-DD');
+      const endDate = dayjs(currentDate).endOf('month').add(7, 'day').format('YYYY-MM-DD');
+      
+      const serviceEvents = await calendarService.getEvents({
+        startDate,
+        endDate,
+        userId: userId?.toString(),
+        projectId: projectId?.toString(),
+        teamId: teamId?.toString(),
+      });
+      
+      setEvents(serviceEvents.map(transformServiceEvent));
+    } catch (error) {
+      console.error('Failed to load calendar events:', error);
+      // API 失败时显示空列表
+      setEvents([]);
+    } finally {
       setLoading(false);
-    }, 500);
-  }, [generateMockEvents]);
+    }
+  }, [currentDate, userId, projectId, teamId, transformServiceEvent]);
+
+  useEffect(() => {
+    loadEvents();
+  }, [loadEvents]);
 
   // 导航
   const navigate = (direction: 'prev' | 'next' | 'today') => {

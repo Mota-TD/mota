@@ -144,20 +144,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
           }
         } catch (error) {
           console.error('[Auth] Failed to fetch user:', error);
-          // 开发模式下 API 失败时使用模拟用户
-          if (isDevMode) {
-            console.log('[Auth] API failed, using mock user in dev mode');
-            setUser(DEV_MOCK_USER);
-          } else {
-            Cookies.remove('mota_token');
-            Cookies.remove('mota_refresh_token');
-          }
+          // 清除无效的 token
+          Cookies.remove('mota_token');
+          Cookies.remove('mota_refresh_token');
+          // 不再使用模拟用户，让用户重新登录
+          setUser(null);
         }
-      } else if (isDevMode) {
-        // 开发模式且没有 token，使用模拟用户
-        console.log('[Auth] No token, using mock user in dev mode');
-        setUser(DEV_MOCK_USER);
       }
+      // 没有 token 时不使用模拟用户，让用户正常登录
       
       setIsLoading(false);
       setInitialized(true);
@@ -192,31 +186,34 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const login = useCallback(
     async (username: string, password: string) => {
       try {
-        // 后端返回的登录响应格式
+        // BFF 返回的登录响应格式
         interface LoginResponse {
           accessToken: string;
           refreshToken: string;
-          tokenType: string;
-          expiresIn: string;
-          userId: string;
-          username: string;
-          nickname: string;
-          avatar: string | null;
-          orgId: string;
-          orgName: string;
+          expiresIn: number;
+          user: {
+            id: string;
+            username: string;
+            nickname: string;
+            avatar?: string;
+            email: string;
+            tenantId: string;
+            roles: string[];
+            permissions: string[];
+          };
         }
 
-        const response = await apiClient.post<{ data: LoginResponse }>(
+        const response = await apiClient.post<LoginResponse>(
           '/api/v1/auth/login',
           { username, password }
         );
 
-        // 从响应中提取数据
-        const loginData = response.data.data;
-        const { accessToken, refreshToken, expiresIn } = loginData;
+        // BFF 直接返回 LoginResponse，不需要 .data 包装
+        const loginData = response.data;
+        const { accessToken, refreshToken, expiresIn, user: userData } = loginData;
 
         // 保存token到cookie
-        const expiresInSeconds = parseInt(expiresIn, 10) || 86400;
+        const expiresInSeconds = expiresIn || 86400;
         Cookies.set('mota_token', accessToken, {
           expires: expiresInSeconds / (24 * 60 * 60), // 转换为天数
           secure: process.env.NODE_ENV === 'production',
@@ -228,21 +225,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
           sameSite: 'lax',
         });
 
-        // 构建用户对象
-        const userData: User = {
-          id: loginData.userId,
-          username: loginData.username,
-          nickname: loginData.nickname || loginData.username,
-          email: '',
+        // 使用 BFF 返回的用户对象
+        const user: User = {
+          id: userData.id,
+          username: userData.username,
+          nickname: userData.nickname || userData.username,
+          email: userData.email || '',
           phone: '',
-          avatar: loginData.avatar || undefined,
-          tenantId: loginData.orgId,
-          tenantName: loginData.orgName,
-          roles: [],
-          permissions: [],
+          avatar: userData.avatar,
+          tenantId: userData.tenantId,
+          tenantName: '',
+          roles: userData.roles || [],
+          permissions: userData.permissions || [],
         };
 
-        setUser(userData);
+        setUser(user);
 
         // 跳转到之前的页面或首页
         const searchParams = new URLSearchParams(window.location.search);

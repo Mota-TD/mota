@@ -41,6 +41,7 @@ import {
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/zh-cn';
+import { newsService, type NewsArticle, type HotTopic as ServiceHotTopic } from '@/services';
 
 dayjs.extend(relativeTime);
 dayjs.locale('zh-cn');
@@ -118,39 +119,29 @@ const formatPublishTime = (time: string) => {
   return dayjs(time).fromNow();
 };
 
-// 模拟新闻数据
-const generateMockNews = (count: number): AINews[] => {
-  const categories = ['科技', '财经', '政策', '行业', '市场'];
-  const sources = ['新华网', '人民日报', '经济日报', '科技日报', '中国证券报'];
-  const tags = ['人工智能', '大数据', '云计算', '区块链', '5G', '新能源', '半导体'];
-  
-  return Array.from({ length: count }, (_, i) => ({
-    id: i + 1,
-    title: `${categories[i % categories.length]}领域重大突破：${['新技术发布', '政策出台', '市场分析', '行业报告', '专家解读'][i % 5]}`,
-    summary: '这是一段新闻摘要，描述了新闻的主要内容和关键信息，帮助读者快速了解新闻要点...',
-    content: '这是新闻的详细内容，包含了完整的报道信息...',
-    source: sources[i % sources.length],
-    author: `记者${i + 1}`,
-    category: categories[i % categories.length],
-    tags: [tags[i % tags.length], tags[(i + 1) % tags.length]],
-    imageUrl: i % 3 === 0 ? `https://picsum.photos/200/150?random=${i}` : undefined,
-    publishTime: dayjs().subtract(i * 2, 'hour').toISOString(),
-    viewCount: Math.floor(Math.random() * 10000) + 100,
-    isStarred: i % 4 === 0,
-  }));
-};
+// 将 API 返回的新闻数据转换为组件使用的格式
+const transformNewsArticle = (article: NewsArticle): AINews => ({
+  id: article.id,
+  title: article.title,
+  summary: article.summary,
+  content: article.content,
+  source: article.source,
+  author: article.author,
+  category: article.category,
+  tags: article.tags,
+  imageUrl: article.imageUrl,
+  publishTime: article.publishTime,
+  viewCount: article.viewCount,
+  isStarred: article.isFavorited,
+});
 
-// 模拟热门话题
-const generateMockHotTopics = (): HotTopic[] => [
-  { id: 1, name: '人工智能', count: 12580, trend: 'up' },
-  { id: 2, name: '新能源汽车', count: 9876, trend: 'up' },
-  { id: 3, name: '半导体产业', count: 8654, trend: 'stable' },
-  { id: 4, name: '数字经济', count: 7432, trend: 'up' },
-  { id: 5, name: '碳中和', count: 6543, trend: 'down' },
-  { id: 6, name: '元宇宙', count: 5432, trend: 'down' },
-  { id: 7, name: '量子计算', count: 4321, trend: 'stable' },
-  { id: 8, name: '生物医药', count: 3210, trend: 'up' },
-];
+// 将 API 返回的热门话题转换为组件使用的格式
+const transformHotTopic = (topic: ServiceHotTopic): HotTopic => ({
+  id: topic.id,
+  name: topic.name,
+  count: topic.count,
+  trend: topic.trend as 'up' | 'down' | 'stable',
+});
 
 const NewsFeed: React.FC<NewsFeedProps> = ({ userId, projectId }) => {
   const [activeTab, setActiveTab] = useState('recommended');
@@ -184,26 +175,31 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ userId, projectId }) => {
   const loadNews = useCallback(async () => {
     setLoading(true);
     try {
-      // 模拟 API 调用
-      await new Promise(resolve => setTimeout(resolve, 500));
+      let articles: NewsArticle[] = [];
       
-      let result: AINews[];
       switch (activeTab) {
         case 'recommended':
-          result = generateMockNews(15);
+          articles = await newsService.getRecommendedNews(userId, undefined, 15);
           break;
         case 'trending':
-          result = generateMockNews(10).sort((a, b) => b.viewCount - a.viewCount);
+          const searchResult = await newsService.searchNews({ keyword: '', pageSize: 10 });
+          articles = searchResult.list.sort((a, b) => b.viewCount - a.viewCount);
           break;
         case 'favorites':
-          result = generateMockNews(20).filter(n => n.isStarred);
+          const favorites = await newsService.getFavorites(userId);
+          articles = favorites.map(f => f.article).filter((a): a is NewsArticle => !!a);
           break;
         case 'project':
-          result = projectId ? generateMockNews(8) : [];
+          if (projectId) {
+            const projectNews = await newsService.searchNews({ keyword: '', pageSize: 8 });
+            articles = projectNews.list;
+          }
           break;
         default:
-          result = generateMockNews(15);
+          articles = await newsService.getRecommendedNews(userId, undefined, 15);
       }
+      
+      const result = articles.map(transformNewsArticle);
       setNews(result);
       
       // 设置收藏状态
@@ -211,17 +207,20 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ userId, projectId }) => {
       setFavorites(favoriteIds);
     } catch (error) {
       console.error('Failed to load news:', error);
-      message.error('加载新闻失败');
+      // API 失败时显示空列表
+      setNews([]);
     } finally {
       setLoading(false);
     }
-  }, [activeTab, projectId]);
+  }, [activeTab, projectId, userId]);
 
   const loadHotTopics = async () => {
     try {
-      setHotTopics(generateMockHotTopics());
+      const topics = await newsService.getHotTopics(8);
+      setHotTopics(topics.map(transformHotTopic));
     } catch (error) {
       console.error('Failed to load hot topics:', error);
+      setHotTopics([]);
     }
   };
 
@@ -232,13 +231,11 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ userId, projectId }) => {
     }
     setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      const result = generateMockNews(10).filter(n => 
-        n.title.includes(searchKeyword) || n.summary?.includes(searchKeyword)
-      );
-      setNews(result.length > 0 ? result : generateMockNews(5));
+      const result = await newsService.searchNews({ keyword: searchKeyword, pageSize: 10 });
+      setNews(result.list.map(transformNewsArticle));
     } catch (error) {
       message.error('搜索失败');
+      setNews([]);
     } finally {
       setLoading(false);
     }

@@ -205,7 +205,7 @@ export function ConsoleLayout({ children }: ConsoleLayoutProps) {
         {
           key: '/departments',
           icon: <ApartmentOutlined />,
-          label: <Link href="/departments">部门管理</Link>,
+          label: <Link href="/departments">组织管理</Link>,
         },
         {
           key: '/members',

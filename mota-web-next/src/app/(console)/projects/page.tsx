@@ -161,20 +161,21 @@ const priorityConfig: Record<string, { color: string; text: string }> = {
 const transformApiProject = (apiProject: ApiProject): Project => ({
   id: apiProject.id,
   name: apiProject.name,
-  key: `AF-${apiProject.id.slice(0, 4).toUpperCase()}`,
+  key: apiProject.key || `AF-${apiProject.id.slice(0, 4).toUpperCase()}`,
   description: apiProject.description,
   status: apiProject.status === 'paused' ? 'paused' :
           apiProject.status === 'archived' ? 'archived' :
           apiProject.status === 'completed' ? 'completed' :
+          apiProject.status === 'planning' ? 'planning' :
           apiProject.progress < 20 ? 'planning' : 'active',
   priority: apiProject.priority as Project['priority'],
-  progress: apiProject.progress,
+  progress: apiProject.progress || 0,
   color: apiProject.color,
   startDate: apiProject.startDate,
   endDate: apiProject.endDate,
-  starred: 0,
-  memberCount: apiProject.memberCount,
-  issueCount: apiProject.taskCount,
+  starred: apiProject.starred || 0,
+  memberCount: apiProject.memberCount || 0,
+  issueCount: apiProject.taskCount || apiProject.issueCount || 0,
 });
 
 // 获取项目列表
@@ -185,72 +186,8 @@ const fetchProjects = async (): Promise<{ list: Project[]; total: number }> => {
     return { list: projects, total: response.total };
   } catch (error) {
     console.error('获取项目列表失败:', error);
-    // 返回模拟数据
-    return {
-      list: [
-        {
-          id: '1',
-          name: '企业门户网站重构',
-          key: 'AF-0001',
-          description: '对现有企业门户网站进行全面重构，提升用户体验和性能',
-          status: 'active',
-          priority: 'high',
-          progress: 65,
-          color: '#10B981',
-          startDate: '2024-01-01',
-          endDate: '2024-06-30',
-          starred: 1,
-          memberCount: 8,
-          issueCount: 45,
-        },
-        {
-          id: '2',
-          name: '移动端App开发',
-          key: 'AF-0002',
-          description: '开发企业移动端应用，支持iOS和Android平台',
-          status: 'planning',
-          priority: 'medium',
-          progress: 15,
-          color: '#3B82F6',
-          startDate: '2024-02-01',
-          endDate: '2024-08-31',
-          starred: 0,
-          memberCount: 5,
-          issueCount: 23,
-        },
-        {
-          id: '3',
-          name: '数据分析平台',
-          key: 'AF-0003',
-          description: '构建企业级数据分析平台，支持实时数据处理和可视化',
-          status: 'active',
-          priority: 'urgent',
-          progress: 40,
-          color: '#8B5CF6',
-          startDate: '2024-01-15',
-          endDate: '2024-07-15',
-          starred: 1,
-          memberCount: 6,
-          issueCount: 38,
-        },
-        {
-          id: '4',
-          name: '客户关系管理系统',
-          key: 'AF-0004',
-          description: 'CRM系统升级，增加AI智能推荐功能',
-          status: 'completed',
-          priority: 'medium',
-          progress: 100,
-          color: '#F59E0B',
-          startDate: '2023-10-01',
-          endDate: '2024-01-31',
-          starred: 0,
-          memberCount: 4,
-          issueCount: 56,
-        },
-      ],
-      total: 4
-    };
+    // 返回空列表，不再使用模拟数据
+    return { list: [], total: 0 };
   }
 };
 
@@ -530,6 +467,16 @@ export default function ProjectsPage() {
 
   // 看板数据转换
   const kanbanTasks: KanbanTask[] = useMemo(() => {
+    // 优先级映射：后端使用 medium，看板组件使用 normal
+    const mapPriority = (priority?: string): 'low' | 'normal' | 'high' | 'urgent' => {
+      if (!priority) return 'normal';
+      if (priority === 'medium') return 'normal';
+      if (['low', 'normal', 'high', 'urgent'].includes(priority)) {
+        return priority as 'low' | 'normal' | 'high' | 'urgent';
+      }
+      return 'normal';
+    };
+
     return filteredProjects.map(project => {
       let status: KanbanTaskStatus = 'todo';
       if (project.status === 'active') status = 'in_progress';
@@ -542,7 +489,7 @@ export default function ProjectsPage() {
         title: project.name,
         description: project.description,
         status,
-        priority: (project.priority as 'low' | 'normal' | 'high' | 'urgent') || 'normal',
+        priority: mapPriority(project.priority),
         projectId: Number(project.id) || parseInt(project.id),
         projectName: project.key,
         dueDate: project.endDate

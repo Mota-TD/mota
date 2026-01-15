@@ -10,10 +10,12 @@ export interface LoginDto {
 }
 
 export interface TokenPayload {
-  userId: string;
+  userId: string | number;
   username: string;
-  tenantId: string;
-  roles: string[];
+  tenantId?: string;
+  orgId?: string;  // auth-service 使用 orgId
+  roles?: string[];
+  type?: string;   // access 或 refresh
 }
 
 export interface LoginResponse {
@@ -48,15 +50,15 @@ export class AuthService {
   async login(loginDto: LoginDto): Promise<LoginResponse> {
     this.logger.log(`User login attempt: ${loginDto.username}`);
 
-    // 调用用户服务验证用户
+    // 调用认证服务验证用户
     const response = await this.serviceClient.post<any>(
-      'user',
+      'auth',
       '/api/v1/auth/login',
       loginDto,
     );
 
     if (response.code !== 200 || !response.data) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException(response.message || 'Invalid credentials');
     }
 
     const user = response.data;

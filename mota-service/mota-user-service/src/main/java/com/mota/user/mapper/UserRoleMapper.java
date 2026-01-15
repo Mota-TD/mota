@@ -40,4 +40,10 @@ public interface UserRoleMapper extends BaseMapper<UserRole> {
      */
     @Select("SELECT user_id FROM sys_user_role WHERE role_id = #{roleId}")
     List<Long> findUserIdsByRoleId(@Param("roleId") Long roleId);
+
+    /**
+     * 根据角色ID统计用户数量
+     */
+    @Select("SELECT COUNT(*) FROM sys_user_role WHERE role_id = #{roleId}")
+    Long countByRoleId(@Param("roleId") Long roleId);
 }

@@ -64,8 +64,8 @@ export default function MembersPage() {
   const fetchMembers = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await memberService.getMembers();
-      setMemberList(data);
+      const response = await memberService.getMembers();
+      setMemberList(response.records || []);
     } catch (error) {
       console.error('Failed to fetch members:', error);
       message.error('获取成员列表失败');
@@ -78,8 +78,8 @@ export default function MembersPage() {
   // 获取部门列表
   const fetchDepartments = useCallback(async () => {
     try {
-      const data = await departmentService.getDepartments();
-      setDepartments(data);
+      const response = await departmentService.getDepartments();
+      setDepartments(response.list || []);
     } catch (error) {
       console.error('Failed to fetch departments:', error);
       setDepartments([]);
@@ -118,15 +118,15 @@ export default function MembersPage() {
   const columns: ColumnsType<Member> = [
     {
       title: '成员',
-      dataIndex: 'name',
-      key: 'name',
-      render: (name, record) => (
+      dataIndex: 'nickname',
+      key: 'nickname',
+      render: (nickname, record) => (
         <Space>
-          <Avatar style={{ backgroundColor: THEME_COLOR }} icon={<UserOutlined />}>
-            {name.charAt(0)}
+          <Avatar style={{ backgroundColor: THEME_COLOR }} icon={<UserOutlined />} src={record.avatar}>
+            {nickname?.charAt(0)}
           </Avatar>
           <div>
-            <div style={{ fontWeight: 500 }}>{name}</div>
+            <div style={{ fontWeight: 500 }}>{nickname || record.username}</div>
             <Text type="secondary" style={{ fontSize: 12 }}>{record.email}</Text>
           </div>
         </Space>
@@ -134,19 +134,20 @@ export default function MembersPage() {
     },
     {
       title: '部门',
-      dataIndex: 'department',
-      key: 'department',
-      render: (dept) => (
+      dataIndex: 'departmentName',
+      key: 'departmentName',
+      render: (deptName) => (
         <Space>
           <TeamOutlined style={{ color: '#64748B' }} />
-          {dept}
+          {deptName || '-'}
         </Space>
       ),
     },
     {
       title: '职位',
-      dataIndex: 'role',
-      key: 'role',
+      dataIndex: 'position',
+      key: 'position',
+      render: (position) => position || '-',
     },
     {
       title: '联系方式',
@@ -167,8 +168,9 @@ export default function MembersPage() {
     },
     {
       title: '入职日期',
-      dataIndex: 'joinDate',
-      key: 'joinDate',
+      dataIndex: 'joinedAt',
+      key: 'joinedAt',
+      render: (date) => date ? new Date(date).toLocaleDateString() : '-',
     },
     {
       title: '操作',
@@ -196,7 +198,12 @@ export default function MembersPage() {
   ];
 
   const filteredMembers = memberList.filter((member) => {
-    if (searchText && !member.name.includes(searchText) && !member.email.includes(searchText)) {
+    const searchLower = searchText.toLowerCase();
+    const matchesSearch = !searchText ||
+      (member.nickname?.toLowerCase().includes(searchLower)) ||
+      (member.username?.toLowerCase().includes(searchLower)) ||
+      (member.email?.toLowerCase().includes(searchLower));
+    if (!matchesSearch) {
       return false;
     }
     if (departmentFilter && member.departmentId !== departmentFilter) {

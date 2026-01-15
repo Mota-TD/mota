@@ -4,8 +4,9 @@ import { api } from '@/lib/api-client';
 export interface Project {
   id: string;
   name: string;
+  key?: string;  // 项目标识，如 AF-0001
   description: string;
-  status: 'active' | 'completed' | 'archived' | 'paused';
+  status: 'active' | 'completed' | 'archived' | 'paused' | 'planning';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   progress: number;
   icon?: string;
@@ -13,11 +14,13 @@ export interface Project {
   startDate: string;
   endDate: string;
   ownerId: string;
-  ownerName: string;
+  ownerName?: string;
   tenantId: string;
   memberCount: number;
   taskCount: number;
-  completedTaskCount: number;
+  completedTaskCount?: number;
+  issueCount?: number;  // 任务数量（后端字段名）
+  starred?: number;  // 是否收藏
   createdAt: string;
   updatedAt: string;
 }
@@ -110,8 +113,18 @@ export interface ProjectStats {
 export const projectService = {
   // 获取项目列表
   getProjects: async (params?: ProjectListParams): Promise<ProjectListResponse> => {
-    const response = await api.get<ProjectListResponse>('/api/v1/projects', { params });
-    return response.data;
+    // 后端 GET /api/v1/projects 返回的是 List<Project>，不是分页格式
+    // 需要将数组转换为前端期望的分页格式
+    const response = await api.get<Project[]>('/api/v1/projects', { params });
+    const projects = response.data;
+    
+    // 将数组转换为分页响应格式
+    return {
+      records: Array.isArray(projects) ? projects : [],
+      total: Array.isArray(projects) ? projects.length : 0,
+      page: params?.page || 1,
+      pageSize: params?.pageSize || 20,
+    };
   },
 
   // 获取项目详情
@@ -272,6 +285,38 @@ export const projectService = {
   // 完成里程碑
   completeMilestone: async (milestoneId: string): Promise<void> => {
     await api.post(`/api/v1/projects/milestones/${milestoneId}/complete`);
+  },
+
+  // 获取燃尽图数据
+  getBurndownChart: async (projectId: string, sprintId?: number): Promise<{
+    projectName: string;
+    sprintName: string;
+    startDate: string;
+    endDate: string;
+    totalPoints: number;
+    remainingPoints: number;
+    completionPercentage: number;
+    idealLine: Array<{ date: string; value: number; completed?: number }>;
+    actualLine: Array<{ date: string; value: number; completed?: number }>;
+    predictedLine: Array<{ date: string; value: number; completed?: number }>;
+    onTrack: boolean;
+    deviationDays: number;
+  }> => {
+    const response = await api.get<{
+      projectName: string;
+      sprintName: string;
+      startDate: string;
+      endDate: string;
+      totalPoints: number;
+      remainingPoints: number;
+      completionPercentage: number;
+      idealLine: Array<{ date: string; value: number; completed?: number }>;
+      actualLine: Array<{ date: string; value: number; completed?: number }>;
+      predictedLine: Array<{ date: string; value: number; completed?: number }>;
+      onTrack: boolean;
+      deviationDays: number;
+    }>(`/api/v1/projects/${projectId}/burndown`, { params: { sprintId } });
+    return response.data;
   },
 };
 

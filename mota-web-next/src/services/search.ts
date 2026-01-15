@@ -147,15 +147,10 @@ export const searchService = {
     page: number = 1,
     pageSize: number = 20
   ): Promise<SmartSearchResult> {
-    try {
-      const response = await api.get<SmartSearchResult>('/api/v1/search/keyword', {
-        params: { query, type, page, pageSize }
-      });
-      return response.data;
-    } catch {
-      // 返回模拟数据
-      return generateMockSearchResult(query, 'keyword');
-    }
+    const response = await api.get<SmartSearchResult>('/api/v1/search/keyword', {
+      params: { query, type, page, pageSize }
+    });
+    return response.data;
   },
 
   // ==================== SS-002 语义搜索 ====================
@@ -169,14 +164,10 @@ export const searchService = {
     page: number = 1,
     pageSize: number = 20
   ): Promise<SmartSearchResult> {
-    try {
-      const response = await api.get<SmartSearchResult>('/api/v1/search/semantic', {
-        params: { query, type, page, pageSize }
-      });
-      return response.data;
-    } catch {
-      return generateMockSearchResult(query, 'semantic');
-    }
+    const response = await api.get<SmartSearchResult>('/api/v1/search/semantic', {
+      params: { query, type, page, pageSize }
+    });
+    return response.data;
   },
 
   // ==================== SS-003 向量检索 ====================
@@ -207,14 +198,10 @@ export const searchService = {
     page: number = 1,
     pageSize: number = 20
   ): Promise<SmartSearchResult> {
-    try {
-      const response = await api.get<SmartSearchResult>('/api/v1/search/hybrid', {
-        params: { query, type, page, pageSize }
-      });
-      return response.data;
-    } catch {
-      return generateMockSearchResult(query, 'hybrid');
-    }
+    const response = await api.get<SmartSearchResult>('/api/v1/search/hybrid', {
+      params: { query, type, page, pageSize }
+    });
+    return response.data;
   },
 
   // ==================== SS-005 意图识别 ====================
@@ -223,20 +210,10 @@ export const searchService = {
    * 搜索意图识别
    */
   async detectIntent(query: string): Promise<SearchIntent> {
-    try {
-      const response = await api.get<SearchIntent>('/api/v1/search/intent', {
-        params: { query }
-      });
-      return response.data;
-    } catch {
-      return {
-        originalQuery: query,
-        intentCode: 'SEARCH',
-        intentName: '通用搜索',
-        actionType: 'search',
-        confidence: 0.85
-      };
-    }
+    const response = await api.get<SearchIntent>('/api/v1/search/intent', {
+      params: { query }
+    });
+    return response.data;
   },
 
   // ==================== SS-006 自动纠错 ====================
@@ -245,19 +222,10 @@ export const searchService = {
    * 搜索词自动纠错
    */
   async autoCorrect(query: string): Promise<CorrectionResult> {
-    try {
-      const response = await api.get<CorrectionResult>('/api/v1/search/correct', {
-        params: { query }
-      });
-      return response.data;
-    } catch {
-      return {
-        original: query,
-        corrected: query,
-        wasCorrected: false,
-        suggestions: []
-      };
-    }
+    const response = await api.get<CorrectionResult>('/api/v1/search/correct', {
+      params: { query }
+    });
+    return response.data;
   },
 
   // ==================== SS-007 智能补全 ====================
@@ -269,22 +237,11 @@ export const searchService = {
     prefix: string,
     limit: number = 10
   ): Promise<SearchSuggestion[]> {
-    try {
-      const response = await api.get<SearchSuggestion[]>('/api/v1/search/complete', {
-        params: { prefix, limit }
-      });
-      return response.data;
-    } catch {
-      // 返回模拟补全建议
-      if (!prefix || prefix.length < 1) return [];
-      return [
-        { suggestionText: `${prefix}项目管理`, suggestionType: 'completion', frequency: 120 },
-        { suggestionText: `${prefix}任务分配`, suggestionType: 'completion', frequency: 95 },
-        { suggestionText: `${prefix}文档协作`, suggestionType: 'completion', frequency: 78 },
-        { suggestionText: `${prefix}团队协作`, suggestionType: 'completion', frequency: 65 },
-        { suggestionText: `${prefix}进度跟踪`, suggestionType: 'completion', frequency: 52 },
-      ].slice(0, limit);
-    }
+    if (!prefix || prefix.length < 1) return [];
+    const response = await api.get<SearchSuggestion[]>('/api/v1/search/complete', {
+      params: { prefix, limit }
+    });
+    return response.data || [];
   },
 
   // ==================== SS-008 相关推荐 ====================
@@ -296,20 +253,10 @@ export const searchService = {
     query: string,
     limit: number = 10
   ): Promise<SearchRelatedQuery[]> {
-    try {
-      const response = await api.get<SearchRelatedQuery[]>('/api/v1/search/related', {
-        params: { query, limit }
-      });
-      return response.data;
-    } catch {
-      return [
-        { id: 1, sourceQuery: query, relatedQuery: `${query} 最佳实践`, relationType: 'related', relevanceScore: 0.92, clickCount: 156 },
-        { id: 2, sourceQuery: query, relatedQuery: `${query} 教程`, relationType: 'related', relevanceScore: 0.88, clickCount: 134 },
-        { id: 3, sourceQuery: query, relatedQuery: `${query} 案例`, relationType: 'related', relevanceScore: 0.85, clickCount: 98 },
-        { id: 4, sourceQuery: query, relatedQuery: `${query} 工具`, relationType: 'related', relevanceScore: 0.82, clickCount: 87 },
-        { id: 5, sourceQuery: query, relatedQuery: `${query} 方法`, relationType: 'related', relevanceScore: 0.78, clickCount: 65 },
-      ].slice(0, limit);
-    }
+    const response = await api.get<SearchRelatedQuery[]>('/api/v1/search/related', {
+      params: { query, limit }
+    });
+    return response.data || [];
   },
 
   /**
@@ -319,25 +266,10 @@ export const searchService = {
     period: string = 'daily',
     limit: number = 10
   ): Promise<SearchHotWord[]> {
-    try {
-      const response = await api.get<SearchHotWord[]>('/api/v1/search/hot', {
-        params: { period, limit }
-      });
-      return response.data;
-    } catch {
-      return [
-        { id: 1, word: '项目管理', periodType: period, periodDate: new Date().toISOString().split('T')[0], searchCount: 1256, trendScore: 95, isTrending: true },
-        { id: 2, word: '敏捷开发', periodType: period, periodDate: new Date().toISOString().split('T')[0], searchCount: 987, trendScore: 88, isTrending: true },
-        { id: 3, word: '任务看板', periodType: period, periodDate: new Date().toISOString().split('T')[0], searchCount: 876, trendScore: 82, isTrending: false },
-        { id: 4, word: '甘特图', periodType: period, periodDate: new Date().toISOString().split('T')[0], searchCount: 765, trendScore: 75, isTrending: true },
-        { id: 5, word: '团队协作', periodType: period, periodDate: new Date().toISOString().split('T')[0], searchCount: 654, trendScore: 68, isTrending: false },
-        { id: 6, word: 'OKR目标', periodType: period, periodDate: new Date().toISOString().split('T')[0], searchCount: 543, trendScore: 62, isTrending: true },
-        { id: 7, word: '知识库', periodType: period, periodDate: new Date().toISOString().split('T')[0], searchCount: 432, trendScore: 55, isTrending: false },
-        { id: 8, word: '文档管理', periodType: period, periodDate: new Date().toISOString().split('T')[0], searchCount: 321, trendScore: 48, isTrending: false },
-        { id: 9, word: '日程安排', periodType: period, periodDate: new Date().toISOString().split('T')[0], searchCount: 234, trendScore: 42, isTrending: true },
-        { id: 10, word: '数据报表', periodType: period, periodDate: new Date().toISOString().split('T')[0], searchCount: 198, trendScore: 35, isTrending: false },
-      ].slice(0, limit);
-    }
+    const response = await api.get<SearchHotWord[]>('/api/v1/search/hot', {
+      params: { period, limit }
+    });
+    return response.data || [];
   },
 
   // ==================== 用户偏好与历史 ====================
@@ -346,52 +278,26 @@ export const searchService = {
    * 获取搜索历史
    */
   async getSearchHistory(limit: number = 20): Promise<SearchLog[]> {
-    try {
-      const response = await api.get<SearchLog[]>('/api/v1/search/history', {
-        params: { limit }
-      });
-      return response.data;
-    } catch {
-      return [
-        { id: 1, userId: 1, queryText: '项目进度报告', queryType: 'hybrid', resultCount: 15, searchTimeMs: 45, isSuccessful: true, createdAt: new Date(Date.now() - 3600000).toISOString() },
-        { id: 2, userId: 1, queryText: '任务分配方案', queryType: 'keyword', resultCount: 23, searchTimeMs: 32, isSuccessful: true, createdAt: new Date(Date.now() - 7200000).toISOString() },
-        { id: 3, userId: 1, queryText: '团队协作工具', queryType: 'semantic', resultCount: 18, searchTimeMs: 58, isSuccessful: true, createdAt: new Date(Date.now() - 86400000).toISOString() },
-        { id: 4, userId: 1, queryText: '敏捷开发流程', queryType: 'hybrid', resultCount: 12, searchTimeMs: 41, isSuccessful: true, createdAt: new Date(Date.now() - 172800000).toISOString() },
-        { id: 5, userId: 1, queryText: '知识库管理', queryType: 'keyword', resultCount: 8, searchTimeMs: 28, isSuccessful: true, createdAt: new Date(Date.now() - 259200000).toISOString() },
-      ].slice(0, limit);
-    }
+    const response = await api.get<SearchLog[]>('/api/v1/search/history', {
+      params: { limit }
+    });
+    return response.data || [];
   },
 
   /**
    * 清除搜索历史
    */
   async clearSearchHistory(): Promise<{ success: boolean; message: string }> {
-    try {
-      const response = await api.delete<{ success: boolean; message: string }>('/api/v1/search/history');
-      return response.data;
-    } catch {
-      return { success: true, message: '搜索历史已清除' };
-    }
+    const response = await api.delete<{ success: boolean; message: string }>('/api/v1/search/history');
+    return response.data;
   },
 
   /**
    * 获取用户搜索偏好
    */
   async getUserPreference(): Promise<UserSearchPreference> {
-    try {
-      const response = await api.get<UserSearchPreference>('/api/v1/search/preference');
-      return response.data;
-    } catch {
-      return {
-        userId: 1,
-        defaultSearchType: 'hybrid',
-        enableAutoCorrect: true,
-        enableSuggestion: true,
-        enableHistory: true,
-        historyRetentionDays: 30,
-        preferredResultCount: 20
-      };
-    }
+    const response = await api.get<UserSearchPreference>('/api/v1/search/preference');
+    return response.data;
   },
 
   /**
@@ -400,12 +306,8 @@ export const searchService = {
   async saveUserPreference(
     preference: Partial<UserSearchPreference>
   ): Promise<{ success: boolean; message: string }> {
-    try {
-      const response = await api.post<{ success: boolean; message: string }>('/api/v1/search/preference', preference);
-      return response.data;
-    } catch {
-      return { success: true, message: '偏好设置已保存' };
-    }
+    const response = await api.post<{ success: boolean; message: string }>('/api/v1/search/preference', preference);
+    return response.data;
   },
 
   // ==================== 统一搜索入口 ====================
@@ -420,14 +322,10 @@ export const searchService = {
     page: number = 1,
     pageSize: number = 20
   ): Promise<SmartSearchResult> {
-    try {
-      const response = await api.get<SmartSearchResult>('/api/v1/search', {
-        params: { query, mode, type, page, pageSize }
-      });
-      return response.data;
-    } catch {
-      return generateMockSearchResult(query, mode);
-    }
+    const response = await api.get<SmartSearchResult>('/api/v1/search', {
+      params: { query, mode, type, page, pageSize }
+    });
+    return response.data;
   },
 
   // ==================== 旧版兼容方法 ====================
@@ -471,12 +369,8 @@ export const searchService = {
    * 旧版获取历史（兼容）
    */
   async getHistory(): Promise<string[]> {
-    try {
-      const response = await api.get<string[]>('/api/v1/search/history/simple');
-      return response.data || [];
-    } catch {
-      return ['项目进度报告', '任务分配方案', '团队协作工具', '敏捷开发流程', '知识库管理'];
-    }
+    const response = await api.get<string[]>('/api/v1/search/history/simple');
+    return response.data || [];
   },
 
   /**
@@ -486,76 +380,3 @@ export const searchService = {
     await api.delete('/api/v1/search/history');
   },
 };
-
-// ==================== 辅助函数 ====================
-
-/**
- * 生成模拟搜索结果
- */
-function generateMockSearchResult(query: string, searchType: string): SmartSearchResult {
-  const mockItems: SearchResultItem[] = [
-    {
-      id: 1,
-      type: 'project',
-      title: `${query}相关项目 - 企业级项目管理平台`,
-      content: `这是一个关于${query}的项目，包含完整的项目管理功能，支持任务分配、进度跟踪、团队协作等核心功能。`,
-      score: 0.95,
-      highlights: [`<em>${query}</em>相关项目`, `关于<em>${query}</em>的项目`],
-      metadata: { projectId: 'P001', status: 'active', members: 12 }
-    },
-    {
-      id: 2,
-      type: 'task',
-      title: `${query}任务 - 需求分析与设计`,
-      content: `针对${query}的需求分析任务，包括用户调研、竞品分析、功能设计等工作内容。`,
-      score: 0.88,
-      highlights: [`<em>${query}</em>任务`, `针对<em>${query}</em>的需求`],
-      metadata: { taskId: 'T001', priority: 'high', assignee: '张三' }
-    },
-    {
-      id: 3,
-      type: 'document',
-      title: `${query}技术文档 - 最佳实践指南`,
-      content: `详细介绍${query}的技术实现方案和最佳实践，帮助团队快速上手和规范开发流程。`,
-      score: 0.82,
-      highlights: [`<em>${query}</em>技术文档`, `介绍<em>${query}</em>的技术`],
-      metadata: { docId: 'D001', version: '2.0', author: '李四' }
-    },
-    {
-      id: 4,
-      type: 'knowledge',
-      title: `${query}知识库 - 常见问题解答`,
-      content: `收集整理了关于${query}的常见问题和解决方案，方便团队成员快速查阅和学习。`,
-      score: 0.75,
-      highlights: [`<em>${query}</em>知识库`, `关于<em>${query}</em>的常见问题`],
-      metadata: { kbId: 'K001', category: 'FAQ', views: 1256 }
-    },
-    {
-      id: 5,
-      type: 'event',
-      title: `${query}培训会议 - 团队能力提升`,
-      content: `组织关于${query}的培训会议，邀请专家分享经验，提升团队整体能力水平。`,
-      score: 0.68,
-      highlights: [`<em>${query}</em>培训会议`, `关于<em>${query}</em>的培训`],
-      metadata: { eventId: 'E001', date: '2024-01-20', participants: 25 }
-    },
-  ];
-
-  return {
-    query,
-    correctedQuery: undefined,
-    wasCorrected: false,
-    searchType,
-    detectedIntent: {
-      originalQuery: query,
-      intentCode: 'SEARCH',
-      intentName: '通用搜索',
-      actionType: 'search',
-      confidence: 0.85
-    },
-    expandedTerms: [`${query}管理`, `${query}工具`, `${query}方案`],
-    items: mockItems,
-    totalCount: mockItems.length,
-    searchTimeMs: Math.floor(Math.random() * 50) + 20
-  };
-}

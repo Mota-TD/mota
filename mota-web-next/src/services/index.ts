@@ -210,3 +210,12 @@ export type {
   DocumentListResponse,
   BreadcrumbItem
 } from './document';
+
+export { roleService, DATA_SCOPE_OPTIONS } from './role';
+export type {
+  Role,
+  RoleListParams,
+  RoleListResponse,
+  CreateRoleRequest,
+  UpdateRoleRequest
+} from './role';

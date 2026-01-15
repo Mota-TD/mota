@@ -30,7 +30,7 @@ const createApiClient = (): AxiosInstance => {
   // Next.js rewrites 会将 /api/* 代理到后端服务
   const instance = axios.create({
     baseURL: '', // 使用相对路径，通过Next.js代理
-    timeout: isDevMode() ? 5000 : 30000, // 开发模式下缩短超时时间
+    timeout: 30000, // 30秒超时
     headers: {
       'Content-Type': 'application/json',
     },
@@ -79,12 +79,16 @@ const createApiClient = (): AxiosInstance => {
         console.log('[API Response]', {
           url: response.config.url,
           status: response.status,
+          data: response.data,
         });
       }
 
       // 处理业务错误
       const data = response.data as ApiResponse;
-      if (data.code !== 0 && data.code !== 200) {
+      
+      // 如果响应没有 code 字段（BFF 直接返回数据的情况），直接返回
+      // 只有当 code 字段存在且不是成功状态码时才认为是业务错误
+      if (data.code !== undefined && data.code !== 0 && data.code !== 200) {
         console.error('[API Business Error]', { code: data.code, message: data.message });
         return Promise.reject(new Error(data.message || '请求失败'));
       }
@@ -96,26 +100,33 @@ const createApiClient = (): AxiosInstance => {
         NProgress.done();
       }
 
-      const devMode = isDevMode();
-      
       // 调试日志：简化输出
       if (process.env.NODE_ENV !== 'production') {
         console.warn('[API Error]', error.config?.url, error.response?.status || error.code);
       }
 
-      // 开发模式下，网络错误快速失败，不阻塞UI
-      if (devMode && (error.code === 'ECONNABORTED' || error.code === 'ERR_NETWORK' || !error.response)) {
-        console.log('[API] Network error in dev mode, using mock data');
-        return Promise.reject(new Error('DEV_MODE_NETWORK_ERROR'));
-      }
-
       // 处理401错误（未授权）
       if (error.response?.status === 401) {
-        // 开发模式下不自动重定向，让 auth-provider 处理
-        if (devMode) {
-          console.log('[API] 401 error in dev mode, skipping redirect');
+        // 检查当前是否已经在登录页面，避免无限重定向
+        const isLoginPage = typeof window !== 'undefined' &&
+          (window.location.pathname === '/login' || window.location.pathname.startsWith('/login'));
+        
+        if (isLoginPage) {
+          // 已经在登录页面，不需要重定向，只需要清除 token
+          Cookies.remove('mota_token');
+          Cookies.remove('mota_refresh_token');
           return Promise.reject(error);
         }
+        
+        // 清除无效的 token
+        Cookies.remove('mota_token');
+        Cookies.remove('mota_refresh_token');
+        
+        // 清除 localStorage 中的认证信息
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('mota-auth-storage');
+        }
+        
         
         // 尝试刷新token
         const refreshToken = Cookies.get('mota_refresh_token');

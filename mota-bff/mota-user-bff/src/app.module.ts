@@ -1,9 +1,8 @@
-import { Module } from '@nestjs/common';
+import { Module, Logger } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { HttpModule } from '@nestjs/axios';
-import { redisStore } from 'cache-manager-redis-yet';
 
 // 配置
 import configuration from './config/configuration';
@@ -17,9 +16,12 @@ import { KnowledgeModule } from './modules/knowledge/knowledge.module';
 import { AIModule } from './modules/ai/ai.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { CalendarModule } from './modules/calendar/calendar.module';
+import { RoleModule } from './modules/role/role.module';
 
 // 公共服务
 import { ServiceClientModule } from './common/service-client/service-client.module';
+
+const logger = new Logger('AppModule');
 
 @Module({
   imports: [
@@ -30,32 +32,32 @@ import { ServiceClientModule } from './common/service-client/service-client.modu
       envFilePath: ['.env.local', '.env'],
     }),
 
-    // 缓存模块（Redis）
+    // 缓存模块（内存缓存，避免 Redis 依赖问题）
     CacheModule.registerAsync({
       isGlobal: true,
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        store: await redisStore({
-          socket: {
-            host: configService.get('redis.host'),
-            port: configService.get('redis.port'),
-          },
-          password: configService.get('redis.password'),
+      useFactory: async (configService: ConfigService) => {
+        // 使用内存缓存，避免 Redis 连接问题
+        logger.log('Using in-memory cache store');
+        return {
           ttl: configService.get('cache.ttl') * 1000,
-        }),
-      }),
+          max: configService.get('cache.max') || 1000,
+        };
+      },
       inject: [ConfigService],
     }),
 
     // 限流模块
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => [
-        {
-          ttl: configService.get('throttle.ttl'),
-          limit: configService.get('throttle.limit'),
-        },
-      ],
+      useFactory: (configService: ConfigService) => ({
+        throttlers: [
+          {
+            ttl: configService.get('throttle.ttl') || 60000,
+            limit: configService.get('throttle.limit') || 100,
+          },
+        ],
+      }),
       inject: [ConfigService],
     }),
 
@@ -81,6 +83,7 @@ import { ServiceClientModule } from './common/service-client/service-client.modu
     AIModule,
     NotificationModule,
     CalendarModule,
+    RoleModule,
   ],
 })
 export class AppModule {}

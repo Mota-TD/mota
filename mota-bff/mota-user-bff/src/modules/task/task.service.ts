@@ -82,11 +82,11 @@ export class TaskService {
 
     const result: TaskDetail = {
       task: taskResponse.data,
-      subtasks: subtasksResponse.data || [],
-      comments: commentsResponse.data || [],
-      attachments: attachmentsResponse.data || [],
-      dependencies: dependenciesResponse.data || [],
-      history: historyResponse.data || [],
+      subtasks: Array.isArray(subtasksResponse.data) ? subtasksResponse.data : [],
+      comments: Array.isArray(commentsResponse.data) ? commentsResponse.data : [],
+      attachments: Array.isArray(attachmentsResponse.data) ? attachmentsResponse.data : [],
+      dependencies: Array.isArray(dependenciesResponse.data) ? dependenciesResponse.data : [],
+      history: Array.isArray(historyResponse.data) ? historyResponse.data : [],
     };
 
     // 缓存结果（5分钟）
@@ -120,8 +120,8 @@ export class TaskService {
     ]);
 
     const result: TaskBoard = {
-      columns: columnsResponse.data || [],
-      tasks: tasksResponse.data || [],
+      columns: Array.isArray(columnsResponse.data) ? columnsResponse.data : [],
+      tasks: Array.isArray(tasksResponse.data) ? tasksResponse.data : [],
     };
 
     // 缓存结果（2分钟）
@@ -260,8 +260,9 @@ export class TaskService {
 
     // 清除相关缓存
     await this.cacheManager.del(`task:detail:${taskId}`);
-    if (taskResponse.data?.projectId) {
-      await this.cacheManager.del(`task:board:${taskResponse.data.projectId}`);
+    const taskData = taskResponse.data as { projectId?: string } | undefined;
+    if (taskData?.projectId) {
+      await this.cacheManager.del(`task:board:${taskData.projectId}`);
     }
   }
 

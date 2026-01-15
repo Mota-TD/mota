@@ -8,14 +8,14 @@ import '@/styles/globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: 'Mota - 智能项目管理平台',
-    template: '%s | Mota',
+    default: 'MOTA - AI驱动的团队协作平台',
+    template: '%s | MOTA',
   },
-  description: 'Mota是一款AI驱动的智能项目管理平台，提供项目管理、任务协作、知识库、AI助手等功能',
-  keywords: ['项目管理', '任务协作', 'AI助手', '知识库', '团队协作', 'Mota'],
-  authors: [{ name: 'Mota Team' }],
-  creator: 'Mota',
-  publisher: 'Mota',
+  description: 'MOTA是一款AI驱动的智能团队协作平台，提供AI项目管理、AI任务协作、AI知识库、AI助手等功能',
+  keywords: ['项目管理', '任务协作', 'AI助手', '知识库', '团队协作', 'MOTA'],
+  authors: [{ name: 'MOTA Team' }],
+  creator: 'MOTA',
+  publisher: 'MOTA',
   robots: {
     index: true,
     follow: true,
@@ -28,22 +28,22 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'zh_CN',
     url: 'https://mota.com',
-    siteName: 'Mota',
-    title: 'Mota - 智能项目管理平台',
-    description: 'AI驱动的智能项目管理平台',
+    siteName: 'MOTA',
+    title: 'MOTA - AI驱动的团队协作平台',
+    description: 'AI驱动的智能团队协作平台',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Mota',
+        alt: 'MOTA',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Mota - 智能项目管理平台',
-    description: 'AI驱动的智能项目管理平台',
+    title: 'MOTA - AI驱动的团队协作平台',
+    description: 'AI驱动的智能团队协作平台',
     images: ['/og-image.png'],
   },
 };

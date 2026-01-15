@@ -17,11 +17,11 @@ services:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=${DEPLOY_ENV:-prod}
-      - NACOS_SERVER=${NACOS_SERVER:-nacos:8848}
-      - NACOS_SERVER_ADDR=${NACOS_SERVER:-nacos:8848}
+      - NACOS_SERVER=${NACOS_SERVER:-mota-nacos:8848}
+      - NACOS_SERVER_ADDR=${NACOS_SERVER:-mota-nacos:8848}
       - NACOS_NAMESPACE=${NACOS_NAMESPACE:-}
       - NACOS_GROUP=${NACOS_GROUP:-DEFAULT_GROUP}
-      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_HOST=${REDIS_HOST:-mota-redis}
       - REDIS_PORT=${REDIS_PORT:-6379}
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - JWT_SECRET=${JWT_SECRET}
@@ -50,15 +50,15 @@ services:
       - "8081:8081"
     environment:
       - SPRING_PROFILES_ACTIVE=${DEPLOY_ENV:-prod}
-      - NACOS_SERVER=${NACOS_SERVER:-nacos:8848}
-      - NACOS_SERVER_ADDR=${NACOS_SERVER:-nacos:8848}
+      - NACOS_SERVER=${NACOS_SERVER:-mota-nacos:8848}
+      - NACOS_SERVER_ADDR=${NACOS_SERVER:-mota-nacos:8848}
       - NACOS_NAMESPACE=${NACOS_NAMESPACE:-}
-      - DB_HOST=${MYSQL_HOST:-mysql}
+      - DB_HOST=${MYSQL_HOST:-mota-mysql}
       - DB_PORT=${MYSQL_PORT:-3306}
       - DB_NAME=mota_user
       - DB_USERNAME=${MYSQL_USER:-mota}
       - DB_PASSWORD=${MYSQL_PASSWORD:-mota123}
-      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_HOST=${REDIS_HOST:-mota-redis}
       - REDIS_PORT=${REDIS_PORT:-6379}
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - JWT_SECRET=${JWT_SECRET}
@@ -92,21 +92,21 @@ services:
       - "8087:8087"
     environment:
       - SPRING_PROFILES_ACTIVE=${DEPLOY_ENV:-prod}
-      - NACOS_SERVER=${NACOS_SERVER:-nacos:8848}
-      - NACOS_SERVER_ADDR=${NACOS_SERVER:-nacos:8848}
+      - NACOS_SERVER=${NACOS_SERVER:-mota-nacos:8848}
+      - NACOS_SERVER_ADDR=${NACOS_SERVER:-mota-nacos:8848}
       - NACOS_NAMESPACE=${NACOS_NAMESPACE:-}
-      - DB_HOST=${MYSQL_HOST:-mysql}
+      - DB_HOST=${MYSQL_HOST:-mota-mysql}
       - DB_PORT=${MYSQL_PORT:-3306}
       - DB_NAME=mota_user
       - DB_USERNAME=${MYSQL_USER:-mota}
       - DB_PASSWORD=${MYSQL_PASSWORD:-mota123}
-      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_HOST=${REDIS_HOST:-mota-redis}
       - REDIS_PORT=${REDIS_PORT:-6379}
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - TZ=${TZ:-Asia/Shanghai}
       - JAVA_OPTS=-Xms256m -Xmx512m -XX:+UseG1GC
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8087/actuator/health"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8087/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -133,18 +133,18 @@ services:
       - "8082:8082"
     environment:
       - SPRING_PROFILES_ACTIVE=${DEPLOY_ENV:-prod}
-      - NACOS_SERVER=${NACOS_SERVER:-nacos:8848}
-      - NACOS_SERVER_ADDR=${NACOS_SERVER:-nacos:8848}
+      - NACOS_SERVER=${NACOS_SERVER:-mota-nacos:8848}
+      - NACOS_SERVER_ADDR=${NACOS_SERVER:-mota-nacos:8848}
       - NACOS_NAMESPACE=${NACOS_NAMESPACE:-}
-      - DB_HOST=${MYSQL_HOST:-mysql}
+      - DB_HOST=${MYSQL_HOST:-mota-mysql}
       - DB_PORT=${MYSQL_PORT:-3306}
       - DB_NAME=mota_project
       - DB_USERNAME=${MYSQL_USER:-mota}
       - DB_PASSWORD=${MYSQL_PASSWORD:-mota123}
-      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_HOST=${REDIS_HOST:-mota-redis}
       - REDIS_PORT=${REDIS_PORT:-6379}
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
-      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS:-mota-kafka:9092}
       - TZ=${TZ:-Asia/Shanghai}
       - JAVA_OPTS=-Xms512m -Xmx1g -XX:+UseG1GC
     healthcheck:
@@ -175,20 +175,20 @@ services:
       - "8083:8083"
     environment:
       - SPRING_PROFILES_ACTIVE=${DEPLOY_ENV:-prod}
-      - NACOS_SERVER=${NACOS_SERVER:-nacos:8848}
-      - NACOS_SERVER_ADDR=${NACOS_SERVER:-nacos:8848}
+      - NACOS_SERVER=${NACOS_SERVER:-mota-nacos:8848}
+      - NACOS_SERVER_ADDR=${NACOS_SERVER:-mota-nacos:8848}
       - NACOS_NAMESPACE=${NACOS_NAMESPACE:-}
-      - DB_HOST=${MYSQL_HOST:-mysql}
+      - DB_HOST=${MYSQL_HOST:-mota-mysql}
       - DB_PORT=${MYSQL_PORT:-3306}
       - DB_NAME=mota_ai
       - DB_USERNAME=${MYSQL_USER:-mota}
       - DB_PASSWORD=${MYSQL_PASSWORD:-mota123}
-      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_HOST=${REDIS_HOST:-mota-redis}
       - REDIS_PORT=${REDIS_PORT:-6379}
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
-      - MILVUS_HOST=${MILVUS_HOST:-milvus}
+      - MILVUS_HOST=${MILVUS_HOST:-mota-milvus}
       - MILVUS_PORT=${MILVUS_PORT:-19530}
-      - ES_HOST=${ES_HOST:-elasticsearch}
+      - ES_HOST=${ES_HOST:-mota-elasticsearch}
       - ES_PORT=${ES_PORT:-9200}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - OPENAI_API_BASE=${OPENAI_API_BASE:-https://api.openai.com/v1}
@@ -224,21 +224,21 @@ services:
       - "8084:8084"
     environment:
       - SPRING_PROFILES_ACTIVE=${DEPLOY_ENV:-prod}
-      - NACOS_SERVER=${NACOS_SERVER:-nacos:8848}
-      - NACOS_SERVER_ADDR=${NACOS_SERVER:-nacos:8848}
+      - NACOS_SERVER=${NACOS_SERVER:-mota-nacos:8848}
+      - NACOS_SERVER_ADDR=${NACOS_SERVER:-mota-nacos:8848}
       - NACOS_NAMESPACE=${NACOS_NAMESPACE:-}
-      - DB_HOST=${MYSQL_HOST:-mysql}
+      - DB_HOST=${MYSQL_HOST:-mota-mysql}
       - DB_PORT=${MYSQL_PORT:-3306}
       - DB_NAME=mota_knowledge
       - DB_USERNAME=${MYSQL_USER:-mota}
       - DB_PASSWORD=${MYSQL_PASSWORD:-mota123}
-      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_HOST=${REDIS_HOST:-mota-redis}
       - REDIS_PORT=${REDIS_PORT:-6379}
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
-      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-http://minio:9000}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-http://mota-minio:9000}
       - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-mota_admin}
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-mota_password}
-      - ES_HOST=${ES_HOST:-elasticsearch}
+      - ES_HOST=${ES_HOST:-mota-elasticsearch}
       - ES_PORT=${ES_PORT:-9200}
       - TZ=${TZ:-Asia/Shanghai}
       - JAVA_OPTS=-Xms256m -Xmx512m -XX:+UseG1GC
@@ -270,18 +270,18 @@ services:
       - "8085:8085"
     environment:
       - SPRING_PROFILES_ACTIVE=${DEPLOY_ENV:-prod}
-      - NACOS_SERVER=${NACOS_SERVER:-nacos:8848}
-      - NACOS_SERVER_ADDR=${NACOS_SERVER:-nacos:8848}
+      - NACOS_SERVER=${NACOS_SERVER:-mota-nacos:8848}
+      - NACOS_SERVER_ADDR=${NACOS_SERVER:-mota-nacos:8848}
       - NACOS_NAMESPACE=${NACOS_NAMESPACE:-}
-      - DB_HOST=${MYSQL_HOST:-mysql}
+      - DB_HOST=${MYSQL_HOST:-mota-mysql}
       - DB_PORT=${MYSQL_PORT:-3306}
       - DB_NAME=mota_notify
       - DB_USERNAME=${MYSQL_USER:-mota}
       - DB_PASSWORD=${MYSQL_PASSWORD:-mota123}
-      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_HOST=${REDIS_HOST:-mota-redis}
       - REDIS_PORT=${REDIS_PORT:-6379}
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
-      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS:-mota-kafka:9092}
       - MAIL_HOST=${MAIL_HOST:-}
       - MAIL_PORT=${MAIL_PORT:-465}
       - MAIL_USERNAME=${MAIL_USERNAME:-}
@@ -316,15 +316,15 @@ services:
       - "8086:8086"
     environment:
       - SPRING_PROFILES_ACTIVE=${DEPLOY_ENV:-prod}
-      - NACOS_SERVER=${NACOS_SERVER:-nacos:8848}
-      - NACOS_SERVER_ADDR=${NACOS_SERVER:-nacos:8848}
+      - NACOS_SERVER=${NACOS_SERVER:-mota-nacos:8848}
+      - NACOS_SERVER_ADDR=${NACOS_SERVER:-mota-nacos:8848}
       - NACOS_NAMESPACE=${NACOS_NAMESPACE:-}
-      - DB_HOST=${MYSQL_HOST:-mysql}
+      - DB_HOST=${MYSQL_HOST:-mota-mysql}
       - DB_PORT=${MYSQL_PORT:-3306}
       - DB_NAME=mota_calendar
       - DB_USERNAME=${MYSQL_USER:-mota}
       - DB_PASSWORD=${MYSQL_PASSWORD:-mota123}
-      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_HOST=${REDIS_HOST:-mota-redis}
       - REDIS_PORT=${REDIS_PORT:-6379}
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - TZ=${TZ:-Asia/Shanghai}

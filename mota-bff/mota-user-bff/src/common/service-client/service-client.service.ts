@@ -26,7 +26,7 @@ export class ServiceClientService {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
   ) {
-    this.serviceUrls = this.configService.get('services');
+    this.serviceUrls = this.configService.get('services') || {};
     this.defaultTimeout = this.configService.get('http.timeout') || 30000;
   }
 
@@ -51,24 +51,26 @@ export class ServiceClientService {
     options?: RequestOptions,
     userContext?: { userId?: string; tenantId?: string; token?: string },
   ): AxiosRequestConfig {
-    const config: AxiosRequestConfig = {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options?.headers,
-      },
-      params: options?.params,
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...options?.headers,
     };
 
     // 添加用户上下文头
     if (userContext?.userId) {
-      config.headers['X-User-Id'] = userContext.userId;
+      headers['X-User-Id'] = userContext.userId;
     }
     if (userContext?.tenantId) {
-      config.headers['X-Tenant-Id'] = userContext.tenantId;
+      headers['X-Tenant-Id'] = userContext.tenantId;
     }
     if (userContext?.token) {
-      config.headers['Authorization'] = `Bearer ${userContext.token}`;
+      headers['Authorization'] = `Bearer ${userContext.token}`;
     }
+
+    const config: AxiosRequestConfig = {
+      headers,
+      params: options?.params,
+    };
 
     return config;
   }

@@ -3,7 +3,7 @@ chcp 65001 >nul 2>&1
 setlocal enabledelayedexpansion
 
 echo ========================================
-echo    Mota 平台一键启动脚本
+echo    MOTAI（摩塔智能） 服务端一键启动脚本
 echo ========================================
 echo.
 

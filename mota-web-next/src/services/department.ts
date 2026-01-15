@@ -7,15 +7,18 @@ export interface Department {
   description?: string;
   parentId?: string;
   parentName?: string;
+  managerId?: string;
+  managerName?: string;
   leaderId?: string;
   leaderName?: string;
   leaderAvatar?: string;
-  memberCount: number;
-  level: number;
-  sortOrder: number;
-  status: 'active' | 'inactive';
-  createdAt: string;
-  updatedAt: string;
+  memberCount?: number;
+  level?: number;
+  sortOrder?: number;
+  status?: number | 'active' | 'inactive';
+  createdAt?: string;
+  updatedAt?: string;
+  orgId?: string;
 }
 
 export interface DepartmentTree extends Department {
@@ -59,10 +62,10 @@ export interface DepartmentListParams {
 }
 
 export interface DepartmentListResponse {
-  records: Department[];
+  list: Department[];
   total: number;
-  page: number;
-  pageSize: number;
+  page?: number;
+  pageSize?: number;
 }
 
 export interface CreateDepartmentRequest {

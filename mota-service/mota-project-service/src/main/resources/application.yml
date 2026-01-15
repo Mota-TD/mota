@@ -1,5 +1,5 @@
 server:
-  port: 8084
+  port: ${SERVER_PORT:8082}
   servlet:
     encoding:
       charset: UTF-8
@@ -33,9 +33,22 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
       database: 1
       redisson:
-        file: classpath:redisson.yml
+        config: |
+          singleServerConfig:
+            address: "redis://${REDIS_HOST:localhost}:${REDIS_PORT:6379}"
+            password: ${REDIS_PASSWORD:}
+            database: 1
+            connectionPoolSize: 64
+            connectionMinimumIdleSize: 24
+            connectTimeout: 10000
+            timeout: 3000
+            retryAttempts: 3
+            retryInterval: 1500
+          threads: 16
+          nettyThreads: 32
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml

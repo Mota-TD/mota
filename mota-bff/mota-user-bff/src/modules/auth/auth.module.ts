@@ -11,12 +11,19 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get('jwt.secret'),
-        signOptions: {
-          expiresIn: configService.get('jwt.expiresIn'),
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        // JWT 密钥是 Base64 编码的，需要解码后使用
+        const base64Secret = configService.get('jwt.secret') || '';
+        const secretKey = Buffer.from(base64Secret, 'base64');
+        
+        return {
+          secret: secretKey,
+          signOptions: {
+            expiresIn: configService.get('jwt.expiresIn'),
+            algorithm: 'HS512', // 与 auth-service 保持一致
+          },
+        };
+      },
       inject: [ConfigService],
     }),
   ],

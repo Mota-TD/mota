@@ -620,28 +620,13 @@ export const aiService = {
     contextType?: string,
     contextId?: number
   ): Promise<ChatSession> => {
-    try {
-      const response = await api.post<ChatSession>('/api/v1/ai/assistant/sessions', {
-        sessionType,
-        title,
-        contextType,
-        contextId
-      });
-      return response.data;
-    } catch {
-      // 返回模拟数据
-      return {
-        id: `session_${Date.now()}`,
-        title: title || '新对话',
-        messages: [],
-        model: 'doubao-pro-32k',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        messageCount: 0,
-        isPinned: false,
-        isArchived: false,
-      };
-    }
+    const response = await api.post<ChatSession>('/api/v1/ai/assistant/sessions', {
+      sessionType,
+      title,
+      contextType,
+      contextId
+    });
+    return response.data;
   },
 
   // 获取用户会话列表
@@ -670,64 +655,17 @@ export const aiService = {
     message: string,
     contentType: string = 'text'
   ): Promise<ChatResponse> => {
-    try {
-      const response = await api.post<ChatResponse>(`/api/v1/ai/assistant/sessions/${sessionId}/messages`, {
-        message,
-        contentType
-      });
-      return response.data;
-    } catch {
-      // 返回模拟响应
-      const userMsg: ChatMessage = {
-        id: `msg_${Date.now()}_user`,
-        role: 'user',
-        content: message,
-        timestamp: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-      };
-      const assistantMsg: ChatMessage = {
-        id: `msg_${Date.now()}_assistant`,
-        role: 'assistant',
-        content: '抱歉，AI 服务暂时不可用，请稍后再试。',
-        timestamp: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-      };
-      return {
-        message: assistantMsg,
-        sessionId,
-        userMessage: userMsg,
-        assistantMessage: assistantMsg,
-      };
-    }
+    const response = await api.post<ChatResponse>(`/api/v1/ai/assistant/sessions/${sessionId}/messages`, {
+      message,
+      contentType
+    });
+    return response.data;
   },
 
   // 快速对话
   quickChat: async (message: string): Promise<ChatResponse> => {
-    try {
-      const response = await api.post<ChatResponse>('/api/v1/ai/assistant/chat', { message });
-      return response.data;
-    } catch {
-      const userMsg: ChatMessage = {
-        id: `msg_${Date.now()}_user`,
-        role: 'user',
-        content: message,
-        timestamp: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-      };
-      const assistantMsg: ChatMessage = {
-        id: `msg_${Date.now()}_assistant`,
-        role: 'assistant',
-        content: '抱歉，AI 服务暂时不可用，请稍后再试。',
-        timestamp: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-      };
-      return {
-        message: assistantMsg,
-        sessionId: `session_${Date.now()}`,
-        userMessage: userMsg,
-        assistantMessage: assistantMsg,
-      };
-    }
+    const response = await api.post<ChatResponse>('/api/v1/ai/assistant/chat', { message });
+    return response.data;
   },
 
   // 获取工作建议
@@ -746,15 +684,11 @@ export const aiService = {
     accepted: boolean,
     comment?: string
   ): Promise<{ success: boolean; message: string }> => {
-    try {
-      const response = await api.put<{ success: boolean; message: string }>(
-        `/api/v1/ai/assistant/suggestions/work/${suggestionId}/feedback`,
-        { accepted, comment }
-      );
-      return response.data;
-    } catch {
-      return { success: true, message: accepted ? '已采纳建议' : '已忽略建议' };
-    }
+    const response = await api.put<{ success: boolean; message: string }>(
+      `/api/v1/ai/assistant/suggestions/work/${suggestionId}/feedback`,
+      { accepted, comment }
+    );
+    return response.data;
   },
 
   // 翻译文本
@@ -763,30 +697,12 @@ export const aiService = {
     sourceLanguage: string,
     targetLanguage: string
   ): Promise<AITranslation> => {
-    try {
-      const response = await api.post<AITranslation>('/api/v1/ai/assistant/translate', {
-        text,
-        sourceLanguage,
-        targetLanguage
-      });
-      return response.data;
-    } catch {
-      // 返回模拟翻译结果
-      return {
-        id: Date.now(),
-        userId: 1,
-        sourceType: 'text',
-        sourceLanguage,
-        targetLanguage,
-        sourceText: text,
-        translatedText: `[翻译服务暂不可用] ${text}`,
-        wordCount: text.length,
-        translationEngine: 'mock',
-        translationTimeMs: 100,
-        isReviewed: false,
-        createdAt: new Date().toISOString(),
-      };
-    }
+    const response = await api.post<AITranslation>('/api/v1/ai/assistant/translate', {
+      text,
+      sourceLanguage,
+      targetLanguage
+    });
+    return response.data;
   },
 
   // 生成文本摘要
@@ -794,19 +710,8 @@ export const aiService = {
     text: string,
     summaryType: string = 'brief'
   ): Promise<DocumentSummaryResult> => {
-    try {
-      const response = await api.post<DocumentSummaryResult>('/api/v1/ai/assistant/summary/text', { text, summaryType });
-      return response.data;
-    } catch {
-      // 返回模拟摘要结果
-      return {
-        summaryType,
-        summary: '摘要服务暂不可用',
-        keyPoints: ['服务暂不可用'],
-        wordCount: text.length,
-        summaryWordCount: 10,
-      };
-    }
+    const response = await api.post<DocumentSummaryResult>('/api/v1/ai/assistant/summary/text', { text, summaryType });
+    return response.data;
   },
 
   // 获取日程建议
@@ -821,12 +726,8 @@ export const aiService = {
 
   // 应用日程建议
   applyScheduleSuggestion: async (suggestionId: number): Promise<{ success: boolean; message: string }> => {
-    try {
-      const response = await api.post<{ success: boolean; message: string }>(`/api/v1/ai/assistant/suggestions/schedule/${suggestionId}/apply`, {});
-      return response.data;
-    } catch {
-      return { success: true, message: '已应用日程建议' };
-    }
+    const response = await api.post<{ success: boolean; message: string }>(`/api/v1/ai/assistant/suggestions/schedule/${suggestionId}/apply`, {});
+    return response.data;
   },
 
   // 生成工作报告
@@ -835,29 +736,12 @@ export const aiService = {
     reportScope: string,
     scopeId?: number
   ): Promise<AIWorkReport> => {
-    try {
-      const response = await api.post<AIWorkReport>('/api/v1/ai/assistant/reports', {
-        reportType,
-        reportScope,
-        scopeId
-      });
-      return response.data;
-    } catch {
-      // 返回模拟报告
-      return {
-        id: Date.now(),
-        userId: 1,
-        reportType,
-        reportScope,
-        scopeId,
-        reportTitle: `${reportType === 'daily' ? '日报' : reportType === 'weekly' ? '周报' : '月报'} - ${new Date().toLocaleDateString()}`,
-        reportContent: '报告生成服务暂不可用',
-        isDraft: true,
-        isSent: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-    }
+    const response = await api.post<AIWorkReport>('/api/v1/ai/assistant/reports', {
+      reportType,
+      reportScope,
+      scopeId
+    });
+    return response.data;
   },
 
   // 获取报告列表
@@ -872,106 +756,46 @@ export const aiService = {
 
   // 获取AI助手配置
   getAssistantConfig: async (): Promise<AIAssistantConfig> => {
-    try {
-      const response = await api.get<AIAssistantConfig>('/api/v1/ai/assistant/config');
-      return response.data;
-    } catch {
-      // 返回默认配置
-      return {
-        assistantName: 'AI助手',
-        defaultModel: 'doubao-pro-32k',
-        temperature: 0.7,
-        maxTokens: 4096,
-        enableContext: true,
-        contextWindow: 10,
-        enableSuggestions: true,
-        enableAutoSummary: false,
-        preferredLanguage: 'zh',
-      };
-    }
+    const response = await api.get<AIAssistantConfig>('/api/v1/ai/assistant/config');
+    return response.data;
   },
 
   // 保存AI助手配置
   saveAssistantConfig: async (config: Partial<AIAssistantConfig>): Promise<{ success: boolean; message: string }> => {
-    try {
-      const response = await api.put<{ success: boolean; message: string }>('/api/v1/ai/assistant/config', config);
-      return response.data;
-    } catch {
-      return { success: true, message: '配置已保存' };
-    }
+    const response = await api.put<{ success: boolean; message: string }>('/api/v1/ai/assistant/config', config);
+    return response.data;
   },
 
   // ==================== AI 模型训练相关 ====================
 
   // 获取训练统计
   getTrainingStats: async (): Promise<TrainingStats> => {
-    try {
-      const response = await api.get<TrainingStats>('/api/v1/ai/training/stats');
-      return response.data;
-    } catch {
-      // 返回模拟数据
-      return {
-        totalDocuments: 156,
-        totalTokens: '2.5M',
-        lastTraining: '2024-01-15 14:30',
-        modelVersion: 'v2.1.0',
-        accuracy: 94.5,
-      };
-    }
+    const response = await api.get<TrainingStats>('/api/v1/ai/training/stats');
+    return response.data;
   },
 
   // 获取训练历史
   getTrainingHistory: async (): Promise<TrainingHistory[]> => {
-    try {
-      const response = await api.get<TrainingHistory[]>('/api/v1/ai/training/history');
-      return response.data || [];
-    } catch {
-      // 返回模拟数据
-      return [
-        { id: 1, version: 'v2.1.0', date: '2024-01-15 14:30', documents: 156, accuracy: 94.5, status: 'completed', duration: 3600 },
-        { id: 2, version: 'v2.0.0', date: '2024-01-10 10:00', documents: 142, accuracy: 92.3, status: 'completed', duration: 3200 },
-        { id: 3, version: 'v1.9.0', date: '2024-01-05 09:15', documents: 128, accuracy: 90.1, status: 'completed', duration: 2800 },
-        { id: 4, version: 'v1.8.0', date: '2023-12-28 16:45', documents: 115, accuracy: 88.7, status: 'completed', duration: 2500 },
-      ];
-    }
+    const response = await api.get<TrainingHistory[]>('/api/v1/ai/training/history');
+    return response.data || [];
   },
 
   // 获取知识库文档列表（培训用）
   getTrainingDocuments: async (): Promise<TrainingDocument[]> => {
-    try {
-      const response = await api.get<TrainingDocument[]>('/api/v1/ai/training/documents');
-      return response.data || [];
-    } catch {
-      // 返回模拟数据
-      return [
-        { id: 1, name: '产品使用手册.pdf', size: '2.5 MB', uploadTime: '2024-01-15 10:30', status: 'indexed', type: 'pdf' },
-        { id: 2, name: '技术架构文档.docx', size: '1.8 MB', uploadTime: '2024-01-14 15:20', status: 'indexed', type: 'docx' },
-        { id: 3, name: '常见问题解答.md', size: '256 KB', uploadTime: '2024-01-13 09:45', status: 'indexed', type: 'md' },
-        { id: 4, name: '业务流程说明.pdf', size: '3.2 MB', uploadTime: '2024-01-12 14:00', status: 'indexed', type: 'pdf' },
-        { id: 5, name: 'API接口文档.json', size: '512 KB', uploadTime: '2024-01-11 11:30', status: 'pending', type: 'json' },
-        { id: 6, name: '培训资料汇总.txt', size: '128 KB', uploadTime: '2024-01-10 16:15', status: 'processing', type: 'txt' },
-      ];
-    }
+    const response = await api.get<TrainingDocument[]>('/api/v1/ai/training/documents');
+    return response.data || [];
   },
 
   // 删除知识库文档（培训用）
   deleteTrainingDocument: async (id: number): Promise<{ success: boolean; message: string }> => {
-    try {
-      const response = await api.delete<{ success: boolean; message: string }>(`/api/v1/ai/training/documents/${id}`);
-      return response.data;
-    } catch {
-      return { success: true, message: '文档已删除' };
-    }
+    const response = await api.delete<{ success: boolean; message: string }>(`/api/v1/ai/training/documents/${id}`);
+    return response.data;
   },
 
   // 开始训练
   startTraining: async (): Promise<{ success: boolean; message: string; taskId?: string }> => {
-    try {
-      const response = await api.post<{ success: boolean; message: string; taskId?: string }>('/api/v1/ai/training/start');
-      return response.data;
-    } catch {
-      return { success: true, message: '训练已启动', taskId: `task_${Date.now()}` };
-    }
+    const response = await api.post<{ success: boolean; message: string; taskId?: string }>('/api/v1/ai/training/start');
+    return response.data;
   },
 
   // 获取训练进度
@@ -986,44 +810,24 @@ export const aiService = {
 
   // 保存训练设置
   saveTrainingSettings: async (settings: TrainingSettings): Promise<{ success: boolean; message: string }> => {
-    try {
-      const response = await api.post<{ success: boolean; message: string }>('/api/v1/ai/training/settings', settings);
-      return response.data;
-    } catch {
-      return { success: true, message: '设置已保存' };
-    }
+    const response = await api.post<{ success: boolean; message: string }>('/api/v1/ai/training/settings', settings);
+    return response.data;
   },
 
   // 保存业务配置
   saveBusinessConfig: async (config: BusinessConfig): Promise<{ success: boolean; message: string }> => {
-    try {
-      const response = await api.post<{ success: boolean; message: string }>('/api/v1/ai/training/business-config', config);
-      return response.data;
-    } catch {
-      return { success: true, message: '配置已保存' };
-    }
+    const response = await api.post<{ success: boolean; message: string }>('/api/v1/ai/training/business-config', config);
+    return response.data;
   },
 
   // 上传训练文档
   uploadTrainingDocument: async (file: File): Promise<TrainingDocument> => {
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const response = await api.post<TrainingDocument>('/api/v1/ai/training/documents/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      return response.data;
-    } catch {
-      // 返回模拟数据
-      return {
-        id: Date.now(),
-        name: file.name,
-        size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
-        uploadTime: new Date().toLocaleString(),
-        status: 'pending',
-        type: file.name.split('.').pop() || 'unknown',
-      };
-    }
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post<TrainingDocument>('/api/v1/ai/training/documents/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
   },
 
   // ==================== 项目协同 AI 功能 ====================
@@ -1052,71 +856,23 @@ export const aiService = {
     model?: string;
     generatedAt: string;
   }> => {
-    try {
-      const response = await api.post<{
-        suggestions: Array<{
-          id: string;
-          name: string;
-          description: string;
-          suggestedDepartment?: string;
-          suggestedPriority: string;
-          estimatedDays: number;
-          dependencies?: string[];
-        }>;
-        totalEstimatedDays: number;
-        riskAssessment: string;
-        source: 'ai' | 'mock';
-        model?: string;
-        generatedAt: string;
-      }>('/api/v1/ai/project/decompose', data);
-      return response.data;
-    } catch {
-      // 返回模拟数据
-      return {
-        suggestions: [
-          {
-            id: '1',
-            name: '需求分析',
-            description: '收集和分析项目需求',
-            suggestedDepartment: '产品部',
-            suggestedPriority: 'high',
-            estimatedDays: 5,
-            dependencies: []
-          },
-          {
-            id: '2',
-            name: '技术方案设计',
-            description: '设计技术架构和实现方案',
-            suggestedDepartment: '技术部',
-            suggestedPriority: 'high',
-            estimatedDays: 7,
-            dependencies: ['1']
-          },
-          {
-            id: '3',
-            name: '开发实现',
-            description: '按照技术方案进行开发',
-            suggestedDepartment: '技术部',
-            suggestedPriority: 'medium',
-            estimatedDays: 20,
-            dependencies: ['2']
-          },
-          {
-            id: '4',
-            name: '测试验收',
-            description: '进行功能测试和验收',
-            suggestedDepartment: '测试部',
-            suggestedPriority: 'medium',
-            estimatedDays: 10,
-            dependencies: ['3']
-          }
-        ],
-        totalEstimatedDays: 42,
-        riskAssessment: '项目整体风险可控，建议关注需求变更和技术难点',
-        source: 'mock',
-        generatedAt: new Date().toISOString()
-      };
-    }
+    const response = await api.post<{
+      suggestions: Array<{
+        id: string;
+        name: string;
+        description: string;
+        suggestedDepartment?: string;
+        suggestedPriority: string;
+        estimatedDays: number;
+        dependencies?: string[];
+      }>;
+      totalEstimatedDays: number;
+      riskAssessment: string;
+      source: 'ai' | 'mock';
+      model?: string;
+      generatedAt: string;
+    }>('/api/v1/ai/project/decompose', data);
+    return response.data;
   },
 
   // AI 进度预测 - 基于历史数据预测项目完成时间
@@ -1128,26 +884,15 @@ export const aiService = {
     confidence: number;
     factors: string[];
   }> => {
-    try {
-      const response = await api.get<{
-        projectId: string;
-        currentProgress: number;
-        predictedProgress: number;
-        predictedCompletionDate: string;
-        confidence: number;
-        factors: string[];
-      }>(`/api/v1/ai/project/${projectId}/predict`);
-      return response.data;
-    } catch {
-      return {
-        projectId,
-        currentProgress: 45,
-        predictedProgress: 52,
-        predictedCompletionDate: new Date(Date.now() + 30 * 24 * 3600000).toISOString(),
-        confidence: 0.78,
-        factors: ['团队效率稳定', '无重大阻塞', '资源充足']
-      };
-    }
+    const response = await api.get<{
+      projectId: string;
+      currentProgress: number;
+      predictedProgress: number;
+      predictedCompletionDate: string;
+      confidence: number;
+      factors: string[];
+    }>(`/api/v1/ai/project/${projectId}/predict`);
+    return response.data;
   },
 
   // AI 风险预警 - 自动识别可能延期的任务
@@ -1161,42 +906,17 @@ export const aiService = {
     suggestions: string[];
     createdAt: string;
   }>> => {
-    try {
-      const response = await api.get<Array<{
-        id: string;
-        type: 'delay' | 'resource' | 'dependency' | 'quality';
-        severity: 'low' | 'medium' | 'high' | 'critical';
-        title: string;
-        description: string;
-        affectedTasks: string[];
-        suggestions: string[];
-        createdAt: string;
-      }>>(`/api/v1/ai/project/${projectId}/risks`);
-      return response.data;
-    } catch {
-      return [
-        {
-          id: '1',
-          type: 'delay',
-          severity: 'medium',
-          title: '任务进度滞后',
-          description: '部分任务进度落后于计划',
-          affectedTasks: ['task-1', 'task-2'],
-          suggestions: ['增加资源投入', '调整任务优先级'],
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: '2',
-          type: 'resource',
-          severity: 'low',
-          title: '资源分配不均',
-          description: '部分成员工作负载过高',
-          affectedTasks: ['task-3'],
-          suggestions: ['重新分配任务', '考虑增加人手'],
-          createdAt: new Date().toISOString()
-        }
-      ];
-    }
+    const response = await api.get<Array<{
+      id: string;
+      type: 'delay' | 'resource' | 'dependency' | 'quality';
+      severity: 'low' | 'medium' | 'high' | 'critical';
+      title: string;
+      description: string;
+      affectedTasks: string[];
+      suggestions: string[];
+      createdAt: string;
+    }>>(`/api/v1/ai/project/${projectId}/risks`);
+    return response.data || [];
   },
 
   // AI 智能报告 - 自动生成项目进度报告
@@ -1221,46 +941,25 @@ export const aiService = {
     };
     generatedAt: string;
   }> => {
-    try {
-      const response = await api.post<{
-        id: string;
-        projectId: string;
-        projectName: string;
-        reportType: string;
-        summary: string;
-        highlights: string[];
-        issues: string[];
-        nextSteps: string[];
-        statistics: {
-          totalTasks: number;
-          completedTasks: number;
-          inProgressTasks: number;
-          overdueTasks: number;
-          progressChange: number;
-        };
-        generatedAt: string;
-      }>(`/api/v1/ai/project/${projectId}/report`, { reportType });
-      return response.data;
-    } catch {
-      return {
-        id: `report_${Date.now()}`,
-        projectId,
-        projectName: '项目名称',
-        reportType,
-        summary: '本周项目整体进展顺利，完成了主要功能开发。',
-        highlights: ['完成核心功能开发', '通过代码审查', '性能优化完成'],
-        issues: ['部分测试用例未通过', '文档需要更新'],
-        nextSteps: ['修复测试问题', '完善文档', '准备上线'],
-        statistics: {
-          totalTasks: 50,
-          completedTasks: 35,
-          inProgressTasks: 10,
-          overdueTasks: 2,
-          progressChange: 15
-        },
-        generatedAt: new Date().toISOString()
+    const response = await api.post<{
+      id: string;
+      projectId: string;
+      projectName: string;
+      reportType: string;
+      summary: string;
+      highlights: string[];
+      issues: string[];
+      nextSteps: string[];
+      statistics: {
+        totalTasks: number;
+        completedTasks: number;
+        inProgressTasks: number;
+        overdueTasks: number;
+        progressChange: number;
       };
-    }
+      generatedAt: string;
+    }>(`/api/v1/ai/project/${projectId}/report`, { reportType });
+    return response.data;
   },
 
   // 获取 AI 建议的任务优先级
@@ -1271,18 +970,11 @@ export const aiService = {
     suggestedPriority: string;
     reason: string;
   }> => {
-    try {
-      const response = await api.post<{
-        suggestedPriority: string;
-        reason: string;
-      }>('/api/v1/ai/project/suggest-priority', { taskDescription, deadline });
-      return response.data;
-    } catch {
-      return {
-        suggestedPriority: 'medium',
-        reason: '根据任务描述和截止日期，建议设置为中等优先级'
-      };
-    }
+    const response = await api.post<{
+      suggestedPriority: string;
+      reason: string;
+    }>('/api/v1/ai/project/suggest-priority', { taskDescription, deadline });
+    return response.data;
   },
 
   // AI 智能分配 - 根据成员能力和工作负载建议任务分配
@@ -1295,37 +987,16 @@ export const aiService = {
       reason: string;
     }>;
   }> => {
-    try {
-      const response = await api.get<{
-        suggestedAssignees: Array<{
-          userId: string;
-          userName: string;
-          matchScore: number;
-          currentWorkload: number;
-          reason: string;
-        }>;
-      }>(`/api/v1/ai/project/task/${taskId}/suggest-assignee`);
-      return response.data;
-    } catch {
-      return {
-        suggestedAssignees: [
-          {
-            userId: '1',
-            userName: '张三',
-            matchScore: 95,
-            currentWorkload: 60,
-            reason: '技能匹配度高，当前工作负载适中'
-          },
-          {
-            userId: '2',
-            userName: '李四',
-            matchScore: 85,
-            currentWorkload: 40,
-            reason: '有相关经验，工作负载较低'
-          }
-        ]
-      };
-    }
+    const response = await api.get<{
+      suggestedAssignees: Array<{
+        userId: string;
+        userName: string;
+        matchScore: number;
+        currentWorkload: number;
+        reason: string;
+      }>;
+    }>(`/api/v1/ai/project/task/${taskId}/suggest-assignee`);
+    return response.data;
   },
 
   // AI 工作计划生成 - 根据部门任务自动生成工作计划建议
@@ -1339,42 +1010,17 @@ export const aiService = {
     resourceRequirements: string;
     risks: string[];
   }> => {
-    try {
-      const response = await api.get<{
-        summary: string;
-        milestones: Array<{
-          name: string;
-          targetDate: string;
-          deliverables: string[];
-        }>;
-        resourceRequirements: string;
-        risks: string[];
-      }>(`/api/v1/ai/project/department-task/${departmentTaskId}/work-plan-suggestion`);
-      return response.data;
-    } catch {
-      return {
-        summary: '建议分三个阶段完成任务，每个阶段设置明确的交付物',
-        milestones: [
-          {
-            name: '第一阶段：需求确认',
-            targetDate: new Date(Date.now() + 7 * 24 * 3600000).toISOString(),
-            deliverables: ['需求文档', '原型设计']
-          },
-          {
-            name: '第二阶段：开发实现',
-            targetDate: new Date(Date.now() + 21 * 24 * 3600000).toISOString(),
-            deliverables: ['功能代码', '单元测试']
-          },
-          {
-            name: '第三阶段：测试上线',
-            targetDate: new Date(Date.now() + 30 * 24 * 3600000).toISOString(),
-            deliverables: ['测试报告', '上线文档']
-          }
-        ],
-        resourceRequirements: '需要2名开发人员，1名测试人员',
-        risks: ['需求变更风险', '技术难点风险']
-      };
-    }
+    const response = await api.get<{
+      summary: string;
+      milestones: Array<{
+        name: string;
+        targetDate: string;
+        deliverables: string[];
+      }>;
+      resourceRequirements: string;
+      risks: string[];
+    }>(`/api/v1/ai/project/department-task/${departmentTaskId}/work-plan-suggestion`);
+    return response.data;
   },
 };
 

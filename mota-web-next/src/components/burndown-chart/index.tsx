@@ -14,9 +14,9 @@ import {
   Space,
   Statistic,
   Row,
-  Col,
-  message
+  Col
 } from 'antd';
+import { projectService } from '@/services';
 import {
   LineChartOutlined,
   CheckCircleOutlined,
@@ -103,75 +103,47 @@ const BurndownChart: React.FC<BurndownChartProps> = ({
     if (!projectId) return;
     setLoading(true);
     try {
-      // 模拟 API 调用
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // 调用真实 API 获取燃尽图数据
+      const burndownData = await projectService.getBurndownChart(String(projectId), sprintId);
       
-      // 生成模拟数据
-      const today = new Date();
-      const startDate = new Date(today);
-      startDate.setDate(startDate.getDate() - 7);
-      const endDate = new Date(today);
-      endDate.setDate(endDate.getDate() + 7);
+      // 转换 API 返回的数据格式
+      const idealLine: BurndownDataPoint[] = burndownData.idealLine?.map((item: { date: string; value: number; completed?: number }) => ({
+        date: item.date,
+        value: item.value,
+        completed: item.completed || 0
+      })) || [];
       
-      const totalPoints = 50;
-      const completedByDate: { date: string; completed: number }[] = [];
+      const actualLine: BurndownDataPoint[] = burndownData.actualLine?.map((item: { date: string; value: number; completed?: number }) => ({
+        date: item.date,
+        value: item.value,
+        completed: item.completed || 0
+      })) || [];
       
-      let current = new Date(startDate);
-      while (current <= today) {
-        completedByDate.push({
-          date: current.toISOString().split('T')[0],
-          completed: Math.floor(Math.random() * 5) + 2
-        });
-        current.setDate(current.getDate() + 1);
-      }
-      
-      // 计算累计完成数
-      let cumulative = 0;
-      const actualLine = completedByDate.map(item => {
-        cumulative += item.completed;
-        return {
-          date: item.date,
-          value: totalPoints - cumulative,
-          completed: item.completed
-        };
-      });
-
-      // 计算理想燃尽线
-      const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-      const dailyBurn = totalPoints / totalDays;
-      
-      const idealLine: BurndownDataPoint[] = [];
-      for (let i = 0; i <= totalDays; i++) {
-        const date = new Date(startDate);
-        date.setDate(date.getDate() + i);
-        idealLine.push({
-          date: date.toISOString().split('T')[0],
-          value: Math.max(0, totalPoints - dailyBurn * i),
-          completed: Math.round(dailyBurn)
-        });
-      }
-
-      const remaining = totalPoints - cumulative;
-      const completionPercentage = totalPoints > 0 ? ((totalPoints - remaining) / totalPoints) * 100 : 0;
+      const predictedLine: BurndownDataPoint[] = burndownData.predictedLine?.map((item: { date: string; value: number; completed?: number }) => ({
+        date: item.date,
+        value: item.value,
+        completed: item.completed || 0
+      })) || [];
 
       setData({
         projectId: Number(projectId),
-        projectName: title || '项目燃尽图',
-        sprintName: title || 'Sprint 1',
-        startDate: startDate.toISOString().split('T')[0],
-        endDate: endDate.toISOString().split('T')[0],
-        totalPoints,
-        remainingPoints: remaining,
-        completionPercentage,
+        projectName: burndownData.projectName || title || '项目燃尽图',
+        sprintName: burndownData.sprintName || title || 'Sprint 1',
+        startDate: burndownData.startDate,
+        endDate: burndownData.endDate,
+        totalPoints: burndownData.totalPoints,
+        remainingPoints: burndownData.remainingPoints,
+        completionPercentage: burndownData.completionPercentage,
         idealLine,
         actualLine,
-        predictedLine: [],
-        onTrack: remaining <= (totalPoints * 0.5),
-        deviationDays: Math.floor(Math.random() * 3) - 1
+        predictedLine,
+        onTrack: burndownData.onTrack,
+        deviationDays: burndownData.deviationDays
       });
     } catch (error) {
       console.error('Load burndown chart error:', error);
-      message.error('加载燃尽图数据失败');
+      // API 失败时显示空状态，不使用模拟数据
+      setData(null);
     } finally {
       setLoading(false);
     }
@@ -255,9 +227,9 @@ const BurndownChart: React.FC<BurndownChartProps> = ({
 
     return {
       tooltip: {
-        trigger: 'axis',
+        trigger: 'axis' as const,
         axisPointer: {
-          type: 'cross'
+          type: 'cross' as const
         }
       },
       legend: {
@@ -290,21 +262,21 @@ const BurndownChart: React.FC<BurndownChartProps> = ({
       series: [
         {
           name: '理想燃尽线',
-          type: 'line',
+          type: 'line' as const,
           data: dates.map(d => idealMap.get(d) ?? null),
           lineStyle: {
             color: '#1677ff',
             width: 2,
-            type: 'dashed'
+            type: 'dashed' as const
           },
           itemStyle: {
             color: '#1677ff'
           },
-          symbol: 'none'
+          symbol: 'none' as const
         },
         {
           name: '实际燃尽线',
-          type: 'line',
+          type: 'line' as const,
           data: dates.map(d => actualMap.get(d) ?? null),
           lineStyle: {
             color: THEME_COLOR,
@@ -313,22 +285,22 @@ const BurndownChart: React.FC<BurndownChartProps> = ({
           itemStyle: {
             color: THEME_COLOR
           },
-          symbol: 'circle',
+          symbol: 'circle' as const,
           symbolSize: 6
         },
         {
           name: '预测燃尽线',
-          type: 'line',
+          type: 'line' as const,
           data: dates.map(d => predictedMap.get(d) ?? null),
           lineStyle: {
             color: '#faad14',
             width: 2,
-            type: 'dashed'
+            type: 'dashed' as const
           },
           itemStyle: {
             color: '#faad14'
           },
-          symbol: 'none'
+          symbol: 'none' as const
         }
       ]
     };
