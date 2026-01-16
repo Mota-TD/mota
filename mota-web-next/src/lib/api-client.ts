@@ -118,17 +118,7 @@ const createApiClient = (): AxiosInstance => {
           return Promise.reject(error);
         }
         
-        // 清除无效的 token
-        Cookies.remove('mota_token');
-        Cookies.remove('mota_refresh_token');
-        
-        // 清除 localStorage 中的认证信息
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('mota-auth-storage');
-        }
-        
-        
-        // 尝试刷新token
+        // 尝试刷新token（不立即清除 token）
         const refreshToken = Cookies.get('mota_refresh_token');
         if (refreshToken && error.config) {
           try {
@@ -143,18 +133,23 @@ const createApiClient = (): AxiosInstance => {
             // 重试原请求
             error.config.headers.Authorization = `Bearer ${accessToken}`;
             return instance.request(error.config);
-          } catch {
+          } catch (refreshError) {
             // 刷新失败，清除token并跳转登录页
+            console.error('[API] Token refresh failed:', refreshError);
             Cookies.remove('mota_token');
             Cookies.remove('mota_refresh_token');
             if (typeof window !== 'undefined') {
+              localStorage.removeItem('mota_user');
               window.location.href = '/login';
             }
           }
         } else {
-          // 没有refresh token，跳转登录页
+          // 没有refresh token，清除token并跳转登录页
+          console.log('[API] No refresh token available');
           Cookies.remove('mota_token');
+          Cookies.remove('mota_refresh_token');
           if (typeof window !== 'undefined') {
+            localStorage.removeItem('mota_user');
             window.location.href = '/login';
           }
         }
@@ -167,8 +162,9 @@ const createApiClient = (): AxiosInstance => {
         }
       }
 
-      // 处理404错误
+      // 处理404错误 - 不要因为 API 端点不存在就清除认证信息
       if (error.response?.status === 404) {
+        console.warn('[API] Resource not found:', error.config?.url);
         return Promise.reject(new Error('请求的资源不存在'));
       }
 

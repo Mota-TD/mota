@@ -9,18 +9,20 @@ import {
   Query,
   UseGuards,
   Request,
+  Version,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { NotificationService } from './notification.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('notification')
-@Controller('notifications')
+@Controller('v1/notifications')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 
+  @Version('1')
   @Get()
   @ApiOperation({ summary: '获取通知列表' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -32,6 +34,7 @@ export class NotificationController {
     );
   }
 
+  @Version('1')
   @Get('unread-count')
   @ApiOperation({ summary: '获取未读通知数量' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -43,6 +46,7 @@ export class NotificationController {
     return { count };
   }
 
+  @Version('1')
   @Get('stats')
   @ApiOperation({ summary: '获取通知统计' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -53,6 +57,7 @@ export class NotificationController {
     );
   }
 
+  @Version('1')
   @Put(':id/read')
   @ApiOperation({ summary: '标记通知为已读' })
   @ApiResponse({ status: 200, description: '标记成功' })
@@ -68,6 +73,7 @@ export class NotificationController {
     return { message: 'Marked as read' };
   }
 
+  @Version('1')
   @Put('read-all')
   @ApiOperation({ summary: '标记所有通知为已读' })
   @ApiResponse({ status: 200, description: '标记成功' })
@@ -79,6 +85,7 @@ export class NotificationController {
     return { message: 'All marked as read' };
   }
 
+  @Version('1')
   @Delete(':id')
   @ApiOperation({ summary: '删除通知' })
   @ApiResponse({ status: 200, description: '删除成功' })
@@ -94,6 +101,7 @@ export class NotificationController {
     return { message: 'Notification deleted' };
   }
 
+  @Version('1')
   @Post('batch-delete')
   @ApiOperation({ summary: '批量删除通知' })
   @ApiResponse({ status: 200, description: '删除成功' })
@@ -109,6 +117,7 @@ export class NotificationController {
     return { message: 'Notifications deleted' };
   }
 
+  @Version('1')
   @Get('settings')
   @ApiOperation({ summary: '获取通知设置' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -119,6 +128,7 @@ export class NotificationController {
     );
   }
 
+  @Version('1')
   @Put('settings')
   @ApiOperation({ summary: '更新通知设置' })
   @ApiResponse({ status: 200, description: '更新成功' })
@@ -133,6 +143,7 @@ export class NotificationController {
     );
   }
 
+  @Version('1')
   @Get('subscriptions')
   @ApiOperation({ summary: '获取订阅列表' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -143,6 +154,7 @@ export class NotificationController {
     );
   }
 
+  @Version('1')
   @Post('subscriptions')
   @ApiOperation({ summary: '订阅通知' })
   @ApiResponse({ status: 201, description: '订阅成功' })
@@ -159,6 +171,7 @@ export class NotificationController {
     );
   }
 
+  @Version('1')
   @Delete('subscriptions')
   @ApiOperation({ summary: '取消订阅' })
   @ApiResponse({ status: 200, description: '取消成功' })
@@ -176,6 +189,7 @@ export class NotificationController {
     return { message: 'Unsubscribed' };
   }
 
+  @Version('1')
   @Put('do-not-disturb')
   @ApiOperation({ summary: '设置免打扰' })
   @ApiResponse({ status: 200, description: '设置成功' })

@@ -9,18 +9,20 @@ import {
   Query,
   UseGuards,
   Request,
+  Version,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { CalendarService } from './calendar.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('calendar')
-@Controller('calendar')
+@Controller('v1/calendar')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class CalendarController {
   constructor(private readonly calendarService: CalendarService) {}
 
+  @Version('1')
   @Get('calendars')
   @ApiOperation({ summary: '获取日历列表' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -31,6 +33,7 @@ export class CalendarController {
     );
   }
 
+  @Version('1')
   @Get('view')
   @ApiOperation({ summary: '获取日历视图数据' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -47,6 +50,7 @@ export class CalendarController {
     );
   }
 
+  @Version('1')
   @Post('calendars')
   @ApiOperation({ summary: '创建日历' })
   @ApiResponse({ status: 201, description: '创建成功' })
@@ -58,6 +62,7 @@ export class CalendarController {
     );
   }
 
+  @Version('1')
   @Put('calendars/:id')
   @ApiOperation({ summary: '更新日历' })
   @ApiResponse({ status: 200, description: '更新成功' })
@@ -74,6 +79,7 @@ export class CalendarController {
     );
   }
 
+  @Version('1')
   @Delete('calendars/:id')
   @ApiOperation({ summary: '删除日历' })
   @ApiResponse({ status: 200, description: '删除成功' })
@@ -89,6 +95,7 @@ export class CalendarController {
     return { message: 'Calendar deleted' };
   }
 
+  @Version('1')
   @Get('events/today')
   @ApiOperation({ summary: '获取今日事件' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -99,6 +106,7 @@ export class CalendarController {
     );
   }
 
+  @Version('1')
   @Get('events/upcoming')
   @ApiOperation({ summary: '获取即将到来的事件' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -113,6 +121,7 @@ export class CalendarController {
     );
   }
 
+  @Version('1')
   @Get('events/:id')
   @ApiOperation({ summary: '获取事件详情' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -127,6 +136,7 @@ export class CalendarController {
     );
   }
 
+  @Version('1')
   @Post('events')
   @ApiOperation({ summary: '创建事件' })
   @ApiResponse({ status: 201, description: '创建成功' })
@@ -138,6 +148,7 @@ export class CalendarController {
     );
   }
 
+  @Version('1')
   @Put('events/:id')
   @ApiOperation({ summary: '更新事件' })
   @ApiResponse({ status: 200, description: '更新成功' })
@@ -154,6 +165,7 @@ export class CalendarController {
     );
   }
 
+  @Version('1')
   @Delete('events/:id')
   @ApiOperation({ summary: '删除事件' })
   @ApiResponse({ status: 200, description: '删除成功' })
@@ -169,6 +181,7 @@ export class CalendarController {
     return { message: 'Event deleted' };
   }
 
+  @Version('1')
   @Post('calendars/:id/share')
   @ApiOperation({ summary: '共享日历' })
   @ApiResponse({ status: 200, description: '共享成功' })
@@ -187,6 +200,7 @@ export class CalendarController {
     );
   }
 
+  @Version('1')
   @Delete('calendars/:id/share/:targetUserId')
   @ApiOperation({ summary: '取消共享日历' })
   @ApiResponse({ status: 200, description: '取消成功' })
@@ -204,6 +218,7 @@ export class CalendarController {
     return { message: 'Unshared' };
   }
 
+  @Version('1')
   @Post('calendars/subscribe')
   @ApiOperation({ summary: '订阅外部日历' })
   @ApiResponse({ status: 201, description: '订阅成功' })
@@ -220,6 +235,7 @@ export class CalendarController {
     );
   }
 
+  @Version('1')
   @Post('calendars/:id/sync')
   @ApiOperation({ summary: '同步外部日历' })
   @ApiResponse({ status: 200, description: '同步成功' })
@@ -234,6 +250,7 @@ export class CalendarController {
     );
   }
 
+  @Version('1')
   @Put('events/:id/reminders')
   @ApiOperation({ summary: '设置事件提醒' })
   @ApiResponse({ status: 200, description: '设置成功' })
@@ -250,6 +267,7 @@ export class CalendarController {
     );
   }
 
+  @Version('1')
   @Post('events/:id/respond')
   @ApiOperation({ summary: '响应事件邀请' })
   @ApiResponse({ status: 200, description: '响应成功' })

@@ -8,18 +8,20 @@ import {
   Query,
   UseGuards,
   Request,
+  Version,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AIService } from './ai.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('ai')
-@Controller('ai')
+@Controller('v1/ai')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class AIController {
   constructor(private readonly aiService: AIService) {}
 
+  @Version('1')
   @Post('chat')
   @ApiOperation({ summary: '发送聊天消息' })
   @ApiResponse({ status: 200, description: '发送成功' })
@@ -38,6 +40,7 @@ export class AIController {
     );
   }
 
+  @Version('1')
   @Post('chat/stream')
   @ApiOperation({ summary: '流式聊天' })
   @ApiResponse({ status: 200, description: '发送成功' })
@@ -56,6 +59,7 @@ export class AIController {
     );
   }
 
+  @Version('1')
   @Get('chat/sessions')
   @ApiOperation({ summary: '获取聊天会话列表' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -67,6 +71,7 @@ export class AIController {
     );
   }
 
+  @Version('1')
   @Get('chat/sessions/:id')
   @ApiOperation({ summary: '获取聊天会话详情' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -81,6 +86,7 @@ export class AIController {
     );
   }
 
+  @Version('1')
   @Delete('chat/sessions/:id')
   @ApiOperation({ summary: '删除聊天会话' })
   @ApiResponse({ status: 200, description: '删除成功' })
@@ -96,6 +102,7 @@ export class AIController {
     return { message: 'Session deleted' };
   }
 
+  @Version('1')
   @Post('suggestions')
   @ApiOperation({ summary: '获取AI建议' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -112,6 +119,7 @@ export class AIController {
     );
   }
 
+  @Version('1')
   @Get('tasks/:taskId/suggestions')
   @ApiOperation({ summary: '获取任务建议' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -126,6 +134,7 @@ export class AIController {
     );
   }
 
+  @Version('1')
   @Get('projects/:projectId/suggestions')
   @ApiOperation({ summary: '获取项目建议' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -140,6 +149,7 @@ export class AIController {
     );
   }
 
+  @Version('1')
   @Post('smart-search')
   @ApiOperation({ summary: '智能搜索' })
   @ApiResponse({ status: 200, description: '搜索成功' })
@@ -156,6 +166,7 @@ export class AIController {
     );
   }
 
+  @Version('1')
   @Post('documents/:documentId/summarize')
   @ApiOperation({ summary: '文档摘要' })
   @ApiResponse({ status: 200, description: '生成成功' })
@@ -170,6 +181,7 @@ export class AIController {
     );
   }
 
+  @Version('1')
   @Post('translate')
   @ApiOperation({ summary: '文本翻译' })
   @ApiResponse({ status: 200, description: '翻译成功' })
@@ -186,6 +198,7 @@ export class AIController {
     );
   }
 
+  @Version('1')
   @Get('usage/stats')
   @ApiOperation({ summary: '获取AI使用统计' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -200,6 +213,7 @@ export class AIController {
     );
   }
 
+  @Version('1')
   @Get('models')
   @ApiOperation({ summary: '获取可用的AI模型列表' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -210,6 +224,7 @@ export class AIController {
     );
   }
 
+  @Version('1')
   @Post('generate')
   @ApiOperation({ summary: '生成内容' })
   @ApiResponse({ status: 200, description: '生成成功' })

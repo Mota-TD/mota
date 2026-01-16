@@ -7,6 +7,7 @@ import {
   Request,
   HttpCode,
   HttpStatus,
+  Version,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -22,6 +23,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Version('1')
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: '用户登录' })
@@ -31,6 +33,7 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
+  @Version('1')
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: '刷新Token' })
@@ -42,16 +45,8 @@ export class AuthController {
     return this.authService.refreshToken(refreshToken);
   }
 
-  @Get('me')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: '获取当前用户信息' })
-  @ApiResponse({ status: 200, description: '获取成功' })
-  @ApiResponse({ status: 401, description: '未认证' })
-  async getCurrentUser(@Request() req: any): Promise<any> {
-    return this.authService.getCurrentUser(req.user.userId, req.user.tenantId);
-  }
 
+  @Version('1')
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)

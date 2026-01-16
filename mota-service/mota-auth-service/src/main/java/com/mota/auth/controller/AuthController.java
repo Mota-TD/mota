@@ -50,9 +50,15 @@ public class AuthController {
 
     @Operation(summary = "刷新Token")
     @PostMapping("/refresh")
-    public Result<LoginResponse> refresh(@RequestParam(value = "refreshToken") String refreshToken) {
-        LoginResponse response = authService.refreshToken(refreshToken);
+    public Result<LoginResponse> refresh(@RequestBody RefreshTokenRequest request) {
+        LoginResponse response = authService.refreshToken(request.getRefreshToken());
         return Result.success(response);
+    }
+    
+    // 内部类用于接收刷新token请求
+    @lombok.Data
+    public static class RefreshTokenRequest {
+        private String refreshToken;
     }
 
     @Operation(summary = "获取验证码")

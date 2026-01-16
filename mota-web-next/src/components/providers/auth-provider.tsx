@@ -110,6 +110,34 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // 检查是否已认证
   const isAuthenticated = !!user;
 
+  // 从 localStorage 加载用户信息
+  const loadUserFromStorage = (): User | null => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const storedUser = localStorage.getItem('mota_user');
+      if (storedUser) {
+        return JSON.parse(storedUser);
+      }
+    } catch (error) {
+      console.error('[Auth] Failed to load user from storage:', error);
+    }
+    return null;
+  };
+
+  // 保存用户信息到 localStorage
+  const saveUserToStorage = (userData: User | null) => {
+    if (typeof window === 'undefined') return;
+    try {
+      if (userData) {
+        localStorage.setItem('mota_user', JSON.stringify(userData));
+      } else {
+        localStorage.removeItem('mota_user');
+      }
+    } catch (error) {
+      console.error('[Auth] Failed to save user to storage:', error);
+    }
+  };
+
   // 初始化认证状态
   useEffect(() => {
     const initAuth = async () => {
@@ -121,6 +149,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       // 如果有 token，尝试获取用户信息
       if (token) {
+        // 先从本地存储加载用户信息，提供即时的用户体验
+        const cachedUser = loadUserFromStorage();
+        if (cachedUser) {
+          setUser(cachedUser);
+          console.log('[Auth] User loaded from cache');
+        }
+        
         try {
           const response = await apiClient.get<{ data: BackendUser }>('/api/v1/users/me');
           const backendUser = response.data.data;
@@ -140,15 +175,75 @@ export function AuthProvider({ children }: AuthProviderProps) {
               permissions: [],
             };
             setUser(userData);
+            saveUserToStorage(userData);
             console.log('[Auth] User loaded from API');
           }
         } catch (error) {
           console.error('[Auth] Failed to fetch user:', error);
-          // 清除无效的 token
-          Cookies.remove('mota_token');
-          Cookies.remove('mota_refresh_token');
-          // 不再使用模拟用户，让用户重新登录
-          setUser(null);
+          
+          // 如果已经有缓存的用户信息，保持登录状态（API 可能暂时不可用）
+          if (cachedUser) {
+            console.log('[Auth] API unavailable, using cached user data');
+            // 保持使用缓存的用户信息，不清除 token
+            // 这样用户可以继续使用应用，等待 API 恢复
+          } else {
+            // 没有缓存的用户信息，尝试刷新 token
+            const refreshToken = Cookies.get('mota_refresh_token');
+            if (refreshToken) {
+              try {
+                console.log('[Auth] Attempting to refresh token...');
+                const refreshResponse = await apiClient.post<{
+                  accessToken: string;
+                  expiresIn: number;
+                }>('/api/v1/auth/refresh', { refreshToken });
+                
+                const { accessToken, expiresIn } = refreshResponse.data;
+                
+                // 保存新的访问令牌
+                Cookies.set('mota_token', accessToken, {
+                  expires: expiresIn / (24 * 60 * 60),
+                  secure: process.env.NODE_ENV === 'production',
+                  sameSite: 'lax',
+                });
+                
+                // 重新获取用户信息
+                const userResponse = await apiClient.get<{ data: BackendUser }>('/api/v1/users/me');
+                const backendUser = userResponse.data.data;
+                if (backendUser) {
+                  const userData: User = {
+                    id: String(backendUser.id),
+                    username: backendUser.username,
+                    nickname: backendUser.nickname || backendUser.username,
+                    email: backendUser.email || '',
+                    phone: backendUser.phone,
+                    avatar: backendUser.avatar,
+                    status: backendUser.status,
+                    role: backendUser.role,
+                    departmentId: backendUser.departmentId ? String(backendUser.departmentId) : undefined,
+                    departmentName: backendUser.departmentName,
+                    roles: backendUser.role ? [backendUser.role] : [],
+                    permissions: [],
+                  };
+                  setUser(userData);
+                  saveUserToStorage(userData);
+                  console.log('[Auth] User loaded after token refresh');
+                }
+              } catch (refreshError) {
+                console.error('[Auth] Token refresh failed:', refreshError);
+                // 刷新也失败，清除所有认证信息
+                Cookies.remove('mota_token');
+                Cookies.remove('mota_refresh_token');
+                saveUserToStorage(null);
+                setUser(null);
+              }
+            } else {
+              // 没有 refresh token 且没有缓存，清除 token
+              console.log('[Auth] No refresh token or cached user, clearing tokens');
+              Cookies.remove('mota_token');
+              saveUserToStorage(null);
+              setUser(null);
+            }
+          }
         }
       }
       // 没有 token 时不使用模拟用户，让用户正常登录
@@ -240,6 +335,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         };
 
         setUser(user);
+        saveUserToStorage(user);
 
         // 跳转到之前的页面或首页
         const searchParams = new URLSearchParams(window.location.search);
@@ -262,6 +358,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } finally {
       Cookies.remove('mota_token');
       Cookies.remove('mota_refresh_token');
+      saveUserToStorage(null);
       setUser(null);
       router.push('/login');
     }

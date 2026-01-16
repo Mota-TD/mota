@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Request, Delete, Logger } from '@nestjs/common';
+import { Controller, Get, UseGuards, Request, Delete, Logger, Version } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { DashboardService, DashboardData } from './dashboard.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -11,6 +11,7 @@ export class DashboardController {
 
   constructor(private readonly dashboardService: DashboardService) {}
 
+  @Version('1')
   @Get()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '获取仪表盘聚合数据' })
@@ -22,6 +23,7 @@ export class DashboardController {
     return this.dashboardService.getDashboardData(userId, tenantId);
   }
 
+  @Version('1')
   @Delete('cache')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '清除仪表盘缓存' })

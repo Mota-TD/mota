@@ -9,6 +9,7 @@ import configuration from './config/configuration';
 
 // 公共模块
 import { AuthModule } from './modules/auth/auth.module';
+import { UserModule } from './modules/user/user.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { ProjectModule } from './modules/project/project.module';
 import { TaskModule } from './modules/task/task.module';
@@ -76,6 +77,7 @@ const logger = new Logger('AppModule');
 
     // 业务模块
     AuthModule,
+    UserModule,
     DashboardModule,
     ProjectModule,
     TaskModule,

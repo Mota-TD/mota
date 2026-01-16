@@ -9,18 +9,20 @@ import {
   Query,
   UseGuards,
   Request,
+  Version,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { TaskService } from './task.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('task')
-@Controller('tasks')
+@Controller('v1/tasks')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
+  @Version('1')
   @Get()
   @ApiOperation({ summary: '获取任务列表' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -32,6 +34,7 @@ export class TaskController {
     );
   }
 
+  @Version('1')
   @Get('my')
   @ApiOperation({ summary: '获取我的任务' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -43,6 +46,7 @@ export class TaskController {
     );
   }
 
+  @Version('1')
   @Get('today')
   @ApiOperation({ summary: '获取今日任务' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -53,6 +57,7 @@ export class TaskController {
     );
   }
 
+  @Version('1')
   @Get('overdue')
   @ApiOperation({ summary: '获取逾期任务' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -63,6 +68,7 @@ export class TaskController {
     );
   }
 
+  @Version('1')
   @Get('board/:projectId')
   @ApiOperation({ summary: '获取看板视图数据' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -77,6 +83,7 @@ export class TaskController {
     );
   }
 
+  @Version('1')
   @Get(':id')
   @ApiOperation({ summary: '获取任务详情（聚合数据）' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -91,6 +98,7 @@ export class TaskController {
     );
   }
 
+  @Version('1')
   @Post()
   @ApiOperation({ summary: '创建任务' })
   @ApiResponse({ status: 201, description: '创建成功' })
@@ -102,6 +110,7 @@ export class TaskController {
     );
   }
 
+  @Version('1')
   @Put(':id')
   @ApiOperation({ summary: '更新任务' })
   @ApiResponse({ status: 200, description: '更新成功' })
@@ -118,6 +127,7 @@ export class TaskController {
     );
   }
 
+  @Version('1')
   @Put(':id/status')
   @ApiOperation({ summary: '更新任务状态' })
   @ApiResponse({ status: 200, description: '更新成功' })
@@ -134,6 +144,7 @@ export class TaskController {
     );
   }
 
+  @Version('1')
   @Delete(':id')
   @ApiOperation({ summary: '删除任务' })
   @ApiResponse({ status: 200, description: '删除成功' })
@@ -149,6 +160,7 @@ export class TaskController {
     return { message: 'Task deleted' };
   }
 
+  @Version('1')
   @Post(':id/comments')
   @ApiOperation({ summary: '添加任务评论' })
   @ApiResponse({ status: 201, description: '添加成功' })
@@ -165,6 +177,7 @@ export class TaskController {
     );
   }
 
+  @Version('1')
   @Post(':id/subtasks')
   @ApiOperation({ summary: '添加子任务' })
   @ApiResponse({ status: 201, description: '添加成功' })
@@ -181,6 +194,7 @@ export class TaskController {
     );
   }
 
+  @Version('1')
   @Put('batch')
   @ApiOperation({ summary: '批量更新任务' })
   @ApiResponse({ status: 200, description: '更新成功' })

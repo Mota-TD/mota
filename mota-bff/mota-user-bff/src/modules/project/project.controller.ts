@@ -9,18 +9,20 @@ import {
   Query,
   UseGuards,
   Request,
+  Version,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ProjectService } from './project.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('project')
-@Controller('projects')
+@Controller('v1/projects')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 
+  @Version('1')
   @Get()
   @ApiOperation({ summary: '获取项目列表' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -32,6 +34,7 @@ export class ProjectController {
     );
   }
 
+  @Version('1')
   @Get(':id')
   @ApiOperation({ summary: '获取项目详情（聚合数据）' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -46,6 +49,7 @@ export class ProjectController {
     );
   }
 
+  @Version('1')
   @Post()
   @ApiOperation({ summary: '创建项目' })
   @ApiResponse({ status: 201, description: '创建成功' })
@@ -57,6 +61,7 @@ export class ProjectController {
     );
   }
 
+  @Version('1')
   @Put(':id')
   @ApiOperation({ summary: '更新项目' })
   @ApiResponse({ status: 200, description: '更新成功' })
@@ -73,6 +78,7 @@ export class ProjectController {
     );
   }
 
+  @Version('1')
   @Delete(':id')
   @ApiOperation({ summary: '删除项目' })
   @ApiResponse({ status: 200, description: '删除成功' })

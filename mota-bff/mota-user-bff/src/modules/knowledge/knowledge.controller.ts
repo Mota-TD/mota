@@ -9,18 +9,20 @@ import {
   Query,
   UseGuards,
   Request,
+  Version,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { KnowledgeService } from './knowledge.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('knowledge')
-@Controller('knowledge')
+@Controller('v1/knowledge')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class KnowledgeController {
   constructor(private readonly knowledgeService: KnowledgeService) {}
 
+  @Version('1')
   @Get('bases')
   @ApiOperation({ summary: '获取知识库列表' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -32,6 +34,7 @@ export class KnowledgeController {
     );
   }
 
+  @Version('1')
   @Post('bases')
   @ApiOperation({ summary: '创建知识库' })
   @ApiResponse({ status: 201, description: '创建成功' })
@@ -43,6 +46,7 @@ export class KnowledgeController {
     );
   }
 
+  @Version('1')
   @Get('bases/:id/documents')
   @ApiOperation({ summary: '获取知识库文档列表' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -59,6 +63,7 @@ export class KnowledgeController {
     );
   }
 
+  @Version('1')
   @Post('bases/:id/documents')
   @ApiOperation({ summary: '创建文档' })
   @ApiResponse({ status: 201, description: '创建成功' })
@@ -75,6 +80,7 @@ export class KnowledgeController {
     );
   }
 
+  @Version('1')
   @Get('bases/:id/graph')
   @ApiOperation({ summary: '获取知识图谱' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -89,6 +95,7 @@ export class KnowledgeController {
     );
   }
 
+  @Version('1')
   @Get('documents/recent')
   @ApiOperation({ summary: '获取最近访问的文档' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -103,6 +110,7 @@ export class KnowledgeController {
     );
   }
 
+  @Version('1')
   @Get('documents/favorites')
   @ApiOperation({ summary: '获取收藏的文档' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -113,6 +121,7 @@ export class KnowledgeController {
     );
   }
 
+  @Version('1')
   @Get('documents/:id')
   @ApiOperation({ summary: '获取文档详情（聚合数据）' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -127,6 +136,7 @@ export class KnowledgeController {
     );
   }
 
+  @Version('1')
   @Put('documents/:id')
   @ApiOperation({ summary: '更新文档' })
   @ApiResponse({ status: 200, description: '更新成功' })
@@ -143,6 +153,7 @@ export class KnowledgeController {
     );
   }
 
+  @Version('1')
   @Delete('documents/:id')
   @ApiOperation({ summary: '删除文档' })
   @ApiResponse({ status: 200, description: '删除成功' })
@@ -158,6 +169,7 @@ export class KnowledgeController {
     return { message: 'Document deleted' };
   }
 
+  @Version('1')
   @Post('documents/:id/favorite')
   @ApiOperation({ summary: '收藏/取消收藏文档' })
   @ApiResponse({ status: 200, description: '操作成功' })
@@ -172,6 +184,7 @@ export class KnowledgeController {
     );
   }
 
+  @Version('1')
   @Get('documents/:id/versions/:versionId')
   @ApiOperation({ summary: '获取文档版本' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -188,6 +201,7 @@ export class KnowledgeController {
     );
   }
 
+  @Version('1')
   @Post('documents/:id/versions/:versionId/restore')
   @ApiOperation({ summary: '恢复文档版本' })
   @ApiResponse({ status: 200, description: '恢复成功' })
@@ -204,6 +218,7 @@ export class KnowledgeController {
     );
   }
 
+  @Version('1')
   @Post('search')
   @ApiOperation({ summary: '搜索知识库' })
   @ApiResponse({ status: 200, description: '搜索成功' })
