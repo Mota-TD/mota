@@ -85,38 +85,40 @@ public class MybatisPlusConfig {
             public void insertFill(MetaObject metaObject) {
                 LocalDateTime now = LocalDateTime.now();
                 
-                // 填充时间字段
-                this.strictInsertFill(metaObject, "createdAt", LocalDateTime.class, now);
-                this.strictInsertFill(metaObject, "updatedAt", LocalDateTime.class, now);
-                this.strictInsertFill(metaObject, "createTime", LocalDateTime.class, now);
-                this.strictInsertFill(metaObject, "updateTime", LocalDateTime.class, now);
+                // 填充时间字段（通用字段，大部分表都有）
+                this.fillStrategy(metaObject, "createdAt", now);
+                this.fillStrategy(metaObject, "updatedAt", now);
+                this.fillStrategy(metaObject, "createTime", now);
+                this.fillStrategy(metaObject, "updateTime", now);
 
-                // 填充用户字段
+                // 填充用户字段（仅当字段存在且有值时）
                 Long userId = UserContext.getUserId();
                 if (userId != null) {
-                    this.strictInsertFill(metaObject, "createdBy", Long.class, userId);
-                    this.strictInsertFill(metaObject, "updatedBy", Long.class, userId);
-                    this.strictInsertFill(metaObject, "createBy", Long.class, userId);
-                    this.strictInsertFill(metaObject, "updateBy", Long.class, userId);
+                    this.fillStrategy(metaObject, "createdBy", userId);
+                    this.fillStrategy(metaObject, "updatedBy", userId);
+                    this.fillStrategy(metaObject, "createBy", userId);
+                    this.fillStrategy(metaObject, "updateBy", userId);
                 }
 
-                // 填充部门字段
+                // 填充部门字段（仅当字段存在且有值时）
                 Long deptId = UserContext.getDeptId();
                 if (deptId != null) {
-                    this.strictInsertFill(metaObject, "deptId", Long.class, deptId);
+                    this.fillStrategy(metaObject, "deptId", deptId);
                 }
 
-                // 填充租户字段
-                Long tenantId = TenantContext.getTenantId();
-                if (tenantId != null) {
-                    this.strictInsertFill(metaObject, "tenantId", Long.class, tenantId);
+                // 填充租户字段（仅在启用多租户且字段存在时）
+                if (tenantEnabled) {
+                    Long tenantId = TenantContext.getTenantId();
+                    if (tenantId != null) {
+                        this.fillStrategy(metaObject, "tenantId", tenantId);
+                    }
                 }
 
-                // 填充删除标记
-                this.strictInsertFill(metaObject, "deleted", Integer.class, 0);
+                // 填充删除标记（仅当字段存在时）
+                this.fillStrategy(metaObject, "deleted", 0);
 
-                // 填充版本号
-                this.strictInsertFill(metaObject, "version", Integer.class, 1);
+                // 填充版本号（仅当字段存在时）
+                this.fillStrategy(metaObject, "version", 1);
             }
 
             @Override
@@ -124,15 +126,45 @@ public class MybatisPlusConfig {
                 LocalDateTime now = LocalDateTime.now();
                 
                 // 填充更新时间
-                this.strictUpdateFill(metaObject, "updatedAt", LocalDateTime.class, now);
-                this.strictUpdateFill(metaObject, "updateTime", LocalDateTime.class, now);
+                this.fillStrategy(metaObject, "updatedAt", now);
+                this.fillStrategy(metaObject, "updateTime", now);
 
                 // 填充更新人
                 Long userId = UserContext.getUserId();
                 if (userId != null) {
-                    this.strictUpdateFill(metaObject, "updatedBy", Long.class, userId);
-                    this.strictUpdateFill(metaObject, "updateBy", Long.class, userId);
+                    this.fillStrategy(metaObject, "updatedBy", userId);
+                    this.fillStrategy(metaObject, "updateBy", userId);
                 }
+            }
+            
+            /**
+             * 安全填充策略：只有当实体类有对应的setter方法时才填充
+             *
+             * 优点：
+             * 1. 防止字段不存在导致的SQL错误
+             * 2. 支持不同表有不同字段的灵活设计
+             * 3. 向后兼容，不影响现有功能
+             *
+             * 注意事项：
+             * 1. 如果实体类忘记添加字段，不会报错（静默失败）
+             * 2. 建议配合 @TableField(fill = FieldFill.INSERT) 注解使用
+             * 3. 对于必须填充的字段，应在实体类中明确声明
+             *
+             * @param metaObject 元对象
+             * @param fieldName 字段名
+             * @param fieldVal 字段值
+             * @return MetaObjectHandler
+             */
+            public MetaObjectHandler fillStrategy(MetaObject metaObject, String fieldName, Object fieldVal) {
+                // 检查实体类是否有该字段的setter方法
+                if (metaObject.hasSetter(fieldName)) {
+                    this.setFieldValByName(fieldName, fieldVal, metaObject);
+                } else {
+                    // 可选：添加日志记录，便于调试
+                    log.debug("字段 [{}] 在实体 [{}] 中不存在，跳过自动填充",
+                             fieldName, metaObject.getOriginalObject().getClass().getSimpleName());
+                }
+                return this;
             }
         };
     }

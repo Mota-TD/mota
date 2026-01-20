@@ -6,6 +6,9 @@
 -- 创建 Nacos 配置数据库
 CREATE DATABASE IF NOT EXISTS `nacos_config` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- 创建认证服务数据库
+CREATE DATABASE IF NOT EXISTS `mota_auth` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- 创建用户服务数据库
 CREATE DATABASE IF NOT EXISTS `mota_user` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -39,8 +42,13 @@ CREATE DATABASE IF NOT EXISTS `mota_report` DEFAULT CHARACTER SET utf8mb4 COLLAT
 -- 创建搜索服务数据库
 CREATE DATABASE IF NOT EXISTS `mota_search` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- 创建 mota_auth 用户并授权
+CREATE USER IF NOT EXISTS 'mota_auth'@'%' IDENTIFIED BY 'mota123';
+GRANT ALL PRIVILEGES ON `mota_auth`.* TO 'mota_auth'@'%';
+
 -- 授权 mota 用户访问所有数据库
 GRANT ALL PRIVILEGES ON `nacos_config`.* TO 'mota'@'%';
+GRANT ALL PRIVILEGES ON `mota_auth`.* TO 'mota'@'%';
 GRANT ALL PRIVILEGES ON `mota_user`.* TO 'mota'@'%';
 GRANT ALL PRIVILEGES ON `mota_tenant`.* TO 'mota'@'%';
 GRANT ALL PRIVILEGES ON `mota_project`.* TO 'mota'@'%';

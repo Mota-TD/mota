@@ -9,6 +9,17 @@ export interface LoginDto {
   tenantCode?: string;
 }
 
+export interface RegisterDto {
+  username: string;
+  email?: string;
+  phone: string;
+  password: string;
+  confirmPassword: string;
+  enterpriseName: string;
+  industryId: string | number;
+  inviteCode?: string;
+}
+
 export interface TokenPayload {
   userId: string | number;
   username: string;
@@ -154,5 +165,43 @@ export class AuthService {
   async logout(userId: string): Promise<void> {
     this.logger.log(`User logout: ${userId}`);
     // 可以在这里实现Token黑名单等逻辑
+  }
+
+  /**
+   * 用户注册
+   */
+  async register(registerDto: RegisterDto): Promise<any> {
+    this.logger.log(`User registration attempt: ${registerDto.username}`);
+
+    // 调用认证服务注册用户
+    const response = await this.serviceClient.post<any>(
+      'auth',
+      '/api/v1/auth/register',
+      registerDto,
+    );
+
+    if (response.code !== 200) {
+      throw new Error(response.message || 'Registration failed');
+    }
+
+    return response.data;
+  }
+
+  /**
+   * 获取行业列表
+   */
+  async getIndustries(): Promise<any> {
+    this.logger.log('Fetching industries list');
+    
+    const response = await this.serviceClient.get<any>(
+      'auth',
+      '/api/v1/auth/industries',
+    );
+
+    if (response.code !== 200) {
+      throw new Error(response.message || 'Failed to fetch industries');
+    }
+
+    return response.data;
   }
 }

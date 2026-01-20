@@ -10,24 +10,26 @@ spring:
   application:
     name: mota-auth-service
   profiles:
-    active: dev
+    active: ${SPRING_PROFILES_ACTIVE:dev}
   config:
     import: optional:nacos:${spring.application.name}.yml
   cloud:
     nacos:
       discovery:
+        enabled: ${NACOS_ENABLED:true}
         server-addr: ${NACOS_SERVER:localhost:8848}
         namespace: ${NACOS_NAMESPACE:}
         group: ${NACOS_GROUP:DEFAULT_GROUP}
       config:
+        enabled: ${NACOS_ENABLED:true}
         server-addr: ${NACOS_SERVER:localhost:8848}
         namespace: ${NACOS_NAMESPACE:}
         group: ${NACOS_GROUP:DEFAULT_GROUP}
         file-extension: yml
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${DB_HOST:${MYSQL_HOST:mota-mysql}}:${DB_PORT:${MYSQL_PORT:3306}}/${DB_NAME:mota_user}?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-    username: ${DB_USERNAME:${MYSQL_USER:mota}}
+    url: jdbc:mysql://${DB_HOST:${MYSQL_HOST:mota-mysql}}:${DB_PORT:${MYSQL_PORT:3306}}/${DB_NAME:mota_auth}?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:${MYSQL_USER:mota_auth}}
     password: ${DB_PASSWORD:${MYSQL_PASSWORD:mota123}}
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
@@ -79,6 +81,7 @@ jwt:
 logging:
   level:
     com.mota: debug
+    com.mota.common.mybatis.config.MybatisPlusConfig: debug  # MyBatis Plus 字段填充日志
     org.springframework.security: debug
 
 # Actuator配置
@@ -97,3 +100,8 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     path: /doc.html
+
+# Mota配置
+mota:
+  tenant:
+    enabled: false  # 暂时禁用多租户功能

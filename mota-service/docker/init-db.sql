@@ -86,6 +86,7 @@ CREATE TABLE IF NOT EXISTS sys_user (
     avatar VARCHAR(500) COMMENT '头像URL',
     status INT DEFAULT 1 COMMENT '状态（0-禁用，1-启用）',
     enterprise_id BIGINT COMMENT '企业ID',
+    tenant_id BIGINT COMMENT '租户ID',
     org_id VARCHAR(50) COMMENT '组织ID',
     org_name VARCHAR(100) COMMENT '组织名称',
     role VARCHAR(50) COMMENT '角色',
@@ -102,12 +103,14 @@ CREATE TABLE IF NOT EXISTS sys_user (
     UNIQUE KEY uk_email (email),
     INDEX idx_org_id (org_id),
     INDEX idx_department_id (department_id),
-    INDEX idx_status (status)
+    INDEX idx_status (status),
+    INDEX idx_tenant_id (tenant_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户表';
 
 -- 企业表
 CREATE TABLE IF NOT EXISTS enterprise (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    tenant_id BIGINT COMMENT '租户ID(每个企业是一个独立租户)',
     org_id VARCHAR(50) NOT NULL UNIQUE COMMENT '组织ID',
     name VARCHAR(200) NOT NULL COMMENT '企业名称',
     short_name VARCHAR(100) COMMENT '企业简称',
@@ -130,11 +133,16 @@ CREATE TABLE IF NOT EXISTS enterprise (
     expired_at TIMESTAMP COMMENT '服务到期时间',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_by BIGINT COMMENT '创建人ID',
+    updated_by BIGINT COMMENT '更新人ID',
     deleted INT DEFAULT 0 COMMENT '删除标记',
+    version INT DEFAULT 1 COMMENT '乐观锁版本号',
     INDEX idx_org_id (org_id),
     INDEX idx_industry (industry_id),
     INDEX idx_admin (admin_user_id),
-    INDEX idx_status (status)
+    INDEX idx_status (status),
+    INDEX idx_tenant_id (tenant_id),
+    INDEX idx_created_by (created_by)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='企业表';
 
 -- 企业成员表
@@ -3109,7 +3117,97 @@ CREATE TABLE IF NOT EXISTS department (
 -- 初始化数据
 -- =====================================================
 
--- 初始化行业数据（一级行业）
+-- 初始化行业数据到 mota_auth 数据库（认证服务使用）
+USE mota_auth;
+
+INSERT INTO industry (id, code, name, parent_id, level, sort_order, status) VALUES
+(1, 'IT', '互联网/IT', NULL, 1, 1, 1),
+(2, 'FINANCE', '金融/银行', NULL, 1, 2, 1),
+(3, 'MANUFACTURING', '制造业', NULL, 1, 3, 1),
+(4, 'EDUCATION', '教育/培训', NULL, 1, 4, 1),
+(5, 'HEALTHCARE', '医疗/健康', NULL, 1, 5, 1),
+(6, 'RETAIL', '零售/电商', NULL, 1, 6, 1),
+(7, 'REALESTATE', '房地产/建筑', NULL, 1, 7, 1),
+(8, 'GOVERNMENT', '政府/公共事业', NULL, 1, 8, 1),
+(9, 'OTHER', '其他', NULL, 1, 99, 1)
+ON DUPLICATE KEY UPDATE name = VALUES(name);
+
+-- 初始化行业数据（二级行业）
+-- 互联网/IT 二级行业
+INSERT INTO industry (code, name, parent_id, level, sort_order, status) VALUES
+('IT_SOFTWARE', '软件开发', 1, 2, 1, 1),
+('IT_INTERNET', '互联网服务', 1, 2, 2, 1),
+('IT_AI', '人工智能', 1, 2, 3, 1),
+('IT_BIGDATA', '大数据', 1, 2, 4, 1),
+('IT_CLOUD', '云计算', 1, 2, 5, 1),
+('IT_SECURITY', '网络安全', 1, 2, 6, 1),
+('IT_GAME', '游戏', 1, 2, 7, 1),
+('IT_ECOMMERCE', '电子商务', 1, 2, 8, 1)
+ON DUPLICATE KEY UPDATE name = VALUES(name);
+
+-- 金融/银行 二级行业
+INSERT INTO industry (code, name, parent_id, level, sort_order, status) VALUES
+('FINANCE_BANK', '银行', 2, 2, 1, 1),
+('FINANCE_SECURITIES', '证券', 2, 2, 2, 1),
+('FINANCE_INSURANCE', '保险', 2, 2, 3, 1),
+('FINANCE_FUND', '基金', 2, 2, 4, 1),
+('FINANCE_INVESTMENT', '投资', 2, 2, 5, 1),
+('FINANCE_FINTECH', '金融科技', 2, 2, 6, 1)
+ON DUPLICATE KEY UPDATE name = VALUES(name);
+
+-- 制造业 二级行业
+INSERT INTO industry (code, name, parent_id, level, sort_order, status) VALUES
+('MFG_AUTO', '汽车制造', 3, 2, 1, 1),
+('MFG_ELECTRONICS', '电子制造', 3, 2, 2, 1),
+('MFG_MACHINERY', '机械设备', 3, 2, 3, 1),
+('MFG_CHEMICAL', '化工', 3, 2, 4, 1),
+('MFG_FOOD', '食品加工', 3, 2, 5, 1),
+('MFG_TEXTILE', '纺织服装', 3, 2, 6, 1)
+ON DUPLICATE KEY UPDATE name = VALUES(name);
+
+-- 教育/培训 二级行业
+INSERT INTO industry (code, name, parent_id, level, sort_order, status) VALUES
+('EDU_K12', 'K12教育', 4, 2, 1, 1),
+('EDU_HIGHER', '高等教育', 4, 2, 2, 1),
+('EDU_VOCATIONAL', '职业培训', 4, 2, 3, 1),
+('EDU_ONLINE', '在线教育', 4, 2, 4, 1),
+('EDU_LANGUAGE', '语言培训', 4, 2, 5, 1)
+ON DUPLICATE KEY UPDATE name = VALUES(name);
+
+-- 医疗/健康 二级行业
+INSERT INTO industry (code, name, parent_id, level, sort_order, status) VALUES
+('HEALTH_HOSPITAL', '医院', 5, 2, 1, 1),
+('HEALTH_PHARMA', '制药', 5, 2, 2, 1),
+('HEALTH_DEVICE', '医疗器械', 5, 2, 3, 1),
+('HEALTH_MANAGEMENT', '健康管理', 5, 2, 4, 1),
+('HEALTH_BIOTECH', '生物技术', 5, 2, 5, 1)
+ON DUPLICATE KEY UPDATE name = VALUES(name);
+
+-- 零售/电商 二级行业
+INSERT INTO industry (code, name, parent_id, level, sort_order, status) VALUES
+('RETAIL_GENERAL', '综合零售', 6, 2, 1, 1),
+('RETAIL_PLATFORM', '电商平台', 6, 2, 2, 1),
+('RETAIL_FMCG', '快消品', 6, 2, 3, 1),
+('RETAIL_LUXURY', '奢侈品', 6, 2, 4, 1)
+ON DUPLICATE KEY UPDATE name = VALUES(name);
+
+-- 房地产/建筑 二级行业
+INSERT INTO industry (code, name, parent_id, level, sort_order, status) VALUES
+('RE_DEVELOPMENT', '房地产开发', 7, 2, 1, 1),
+('RE_CONSTRUCTION', '建筑工程', 7, 2, 2, 1),
+('RE_PROPERTY', '物业管理', 7, 2, 3, 1),
+('RE_DECORATION', '装修装饰', 7, 2, 4, 1)
+ON DUPLICATE KEY UPDATE name = VALUES(name);
+
+-- 政府/公共事业 二级行业
+INSERT INTO industry (code, name, parent_id, level, sort_order, status) VALUES
+('GOV_AGENCY', '政府机关', 8, 2, 1, 1),
+('GOV_SERVICE', '公共服务', 8, 2, 2, 1),
+('GOV_ENERGY', '能源', 8, 2, 3, 1),
+('GOV_TRANSPORT', '交通运输', 8, 2, 4, 1)
+ON DUPLICATE KEY UPDATE name = VALUES(name);
+
+-- 初始化行业数据到 mota_user 数据库（用户服务使用）
 USE mota_user;
 
 INSERT INTO industry (id, code, name, parent_id, level, sort_order, status) VALUES

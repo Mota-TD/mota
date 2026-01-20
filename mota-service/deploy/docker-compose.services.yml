@@ -50,13 +50,14 @@ services:
       - "8081:8081"
     environment:
       - SPRING_PROFILES_ACTIVE=${DEPLOY_ENV:-prod}
+      - NACOS_ENABLED=false
       - NACOS_SERVER=${NACOS_SERVER:-mota-nacos:8848}
       - NACOS_SERVER_ADDR=${NACOS_SERVER:-mota-nacos:8848}
       - NACOS_NAMESPACE=${NACOS_NAMESPACE:-}
       - DB_HOST=${MYSQL_HOST:-mota-mysql}
       - DB_PORT=${MYSQL_PORT:-3306}
-      - DB_NAME=mota_user
-      - DB_USERNAME=${MYSQL_USER:-mota}
+      - DB_NAME=mota_auth
+      - DB_USERNAME=mota_auth
       - DB_PASSWORD=${MYSQL_PASSWORD:-mota123}
       - REDIS_HOST=${REDIS_HOST:-mota-redis}
       - REDIS_PORT=${REDIS_PORT:-6379}

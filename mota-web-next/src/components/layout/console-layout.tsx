@@ -288,7 +288,8 @@ export function ConsoleLayout({ children }: ConsoleLayoutProps) {
   ];
 
   return (
-    <Layout style={{ minHeight: '100vh', minWidth: '1440px' }}>
+    <div style={{ overflowX: 'auto', width: '100%' }}>
+      <Layout style={{ minHeight: '100vh', minWidth: '1440px' }}>
       {/* 侧边栏 */}
       <Sider
         trigger={null}
@@ -454,6 +455,7 @@ export function ConsoleLayout({ children }: ConsoleLayoutProps) {
           {children}
         </Content>
       </Layout>
-    </Layout>
+      </Layout>
+    </div>
   );
 }

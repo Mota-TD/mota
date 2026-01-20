@@ -37,24 +37,24 @@ interface RegisterFormData {
   password: string;
   confirmPassword: string;
   enterpriseName: string;
-  industryId: number;
+  industryId: string | number;
   inviteCode?: string;
   agreement: boolean;
 }
 
 // 行业类型
 interface Industry {
-  id: number;
+  id: string | number;
   name: string;
   code: string;
-  parentId?: number | null;
+  parentId?: string | number | null;
   level?: number;
   children?: Industry[];
 }
 
 // Cascader 选项类型
 interface CascaderOption {
-  value: number;
+  value: string | number;
   label: string;
   children?: CascaderOption[];
 }
@@ -370,11 +370,11 @@ export default function RegisterPage() {
                   <Form.Item
                     name="industryId"
                     rules={[{ required: true, message: '请选择所属行业' }]}
-                    getValueFromEvent={(value: number[]) => {
+                    getValueFromEvent={(value: (string | number)[]) => {
                       // 返回最后一级选中的值（二级行业ID，如果没有二级则返回一级）
                       return value && value.length > 0 ? value[value.length - 1] : undefined;
                     }}
-                    getValueProps={(value: number) => {
+                    getValueProps={(value: string | number) => {
                       // 根据ID找到完整的级联路径
                       if (!value) return { value: undefined };
                       
