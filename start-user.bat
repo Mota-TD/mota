@@ -1,7 +1,7 @@
 @echo off
 chcp 65001 >nul
 echo ========================================
-echo   MOTAI（摩塔智能） 前端端开发环境启动脚本
+echo   MOTAI（摩塔智能） 前端开发环境启动脚本
 echo ========================================
 echo.
 
@@ -32,21 +32,66 @@ if errorlevel 1 (
     pause
     exit /b 1
 )
-echo [信息] Node.js 检查通过
+for /f "tokens=*" %%i in ('node --version') do set NODE_VERSION=%%i
+echo [信息] Node.js 版本: %NODE_VERSION%
 
-:: 检查 BFF 的 node_modules 是否存在
+:: ========================================
+:: 检查 BFF 依赖
+:: ========================================
+echo.
+echo [检查] BFF 依赖状态...
+set "BFF_NEED_INSTALL=0"
+
+:: 检查 node_modules 是否存在
 if not exist "%BFF_DIR%\node_modules" (
-    echo.
-    echo [信息] BFF 依赖未安装，正在安装...
-    cd /d "%BFF_DIR%"
-    call npm install
-    if errorlevel 1 (
-        echo [错误] BFF 依赖安装失败
-        pause
-        exit /b 1
-    )
+    echo [信息] BFF node_modules 不存在，需要安装依赖
+    set "BFF_NEED_INSTALL=1"
+    goto :bff_install
 )
 
+:: 检查 package-lock.json 是否存在
+if not exist "%BFF_DIR%\package-lock.json" (
+    echo [信息] BFF package-lock.json 不存在，需要安装依赖
+    set "BFF_NEED_INSTALL=1"
+    goto :bff_install
+)
+
+:: 比较 package.json 和 package-lock.json 的修改时间
+:: 如果 package.json 比 package-lock.json 新，说明依赖可能有更新
+for %%A in ("%BFF_DIR%\package.json") do set "PKG_TIME=%%~tA"
+for %%A in ("%BFF_DIR%\package-lock.json") do set "LOCK_TIME=%%~tA"
+
+:: 使用 PowerShell 比较文件时间
+powershell -Command "if ((Get-Item '%BFF_DIR%\package.json').LastWriteTime -gt (Get-Item '%BFF_DIR%\package-lock.json').LastWriteTime) { exit 1 } else { exit 0 }" >nul 2>&1
+if errorlevel 1 (
+    echo [信息] BFF package.json 已更新，需要更新依赖
+    set "BFF_NEED_INSTALL=1"
+    goto :bff_install
+)
+
+:: 检查 node_modules 中是否缺少关键依赖
+if not exist "%BFF_DIR%\node_modules\@nestjs\core" (
+    echo [信息] BFF 缺少关键依赖 @nestjs/core，需要安装
+    set "BFF_NEED_INSTALL=1"
+    goto :bff_install
+)
+
+echo [信息] BFF 依赖已是最新状态
+goto :bff_env_check
+
+:bff_install
+echo.
+echo [安装] 正在安装/更新 BFF 依赖...
+cd /d "%BFF_DIR%"
+call npm install
+if errorlevel 1 (
+    echo [错误] BFF 依赖安装失败
+    pause
+    exit /b 1
+)
+echo [成功] BFF 依赖安装完成
+
+:bff_env_check
 :: 检查 BFF 的 .env 文件是否存在
 if not exist "%BFF_DIR%\.env" (
     echo.
@@ -97,18 +142,68 @@ if not exist "%BFF_DIR%\.env" (
     echo [信息] 已创建默认 .env 文件
 )
 
-:: 检查前端的 node_modules 是否存在
+:: ========================================
+:: 检查前端依赖
+:: ========================================
+echo.
+echo [检查] 前端依赖状态...
+set "WEB_NEED_INSTALL=0"
+
+:: 检查 node_modules 是否存在
 if not exist "%WEB_DIR%\node_modules" (
-    echo.
-    echo [信息] 前端依赖未安装，正在安装...
-    cd /d "%WEB_DIR%"
-    call npm install
-    if errorlevel 1 (
-        echo [错误] 前端依赖安装失败
-        pause
-        exit /b 1
-    )
+    echo [信息] 前端 node_modules 不存在，需要安装依赖
+    set "WEB_NEED_INSTALL=1"
+    goto :web_install
 )
+
+:: 检查 package-lock.json 是否存在
+if not exist "%WEB_DIR%\package-lock.json" (
+    echo [信息] 前端 package-lock.json 不存在，需要安装依赖
+    set "WEB_NEED_INSTALL=1"
+    goto :web_install
+)
+
+:: 比较 package.json 和 package-lock.json 的修改时间
+powershell -Command "if ((Get-Item '%WEB_DIR%\package.json').LastWriteTime -gt (Get-Item '%WEB_DIR%\package-lock.json').LastWriteTime) { exit 1 } else { exit 0 }" >nul 2>&1
+if errorlevel 1 (
+    echo [信息] 前端 package.json 已更新，需要更新依赖
+    set "WEB_NEED_INSTALL=1"
+    goto :web_install
+)
+
+:: 检查 node_modules 中是否缺少关键依赖
+if not exist "%WEB_DIR%\node_modules\next" (
+    echo [信息] 前端缺少关键依赖 next，需要安装
+    set "WEB_NEED_INSTALL=1"
+    goto :web_install
+)
+
+if not exist "%WEB_DIR%\node_modules\react" (
+    echo [信息] 前端缺少关键依赖 react，需要安装
+    set "WEB_NEED_INSTALL=1"
+    goto :web_install
+)
+
+echo [信息] 前端依赖已是最新状态
+goto :start_services
+
+:web_install
+echo.
+echo [安装] 正在安装/更新前端依赖...
+cd /d "%WEB_DIR%"
+call npm install
+if errorlevel 1 (
+    echo [错误] 前端依赖安装失败
+    pause
+    exit /b 1
+)
+echo [成功] 前端依赖安装完成
+
+:start_services
+echo.
+echo ========================================
+echo   依赖检查完成，准备启动服务
+echo ========================================
 
 echo.
 echo [1/2] 启动 BFF 服务 (端口 3001)...

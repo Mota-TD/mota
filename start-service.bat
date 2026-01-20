@@ -3,7 +3,8 @@ chcp 65001 >nul 2>&1
 setlocal enabledelayedexpansion
 
 echo ========================================
-echo    MOTAI（摩塔智能） 服务端一键启动脚本
+echo    MOTAI - Mo Ta Intelligent
+echo    服务端一键启动脚本
 echo ========================================
 echo.
 
@@ -18,10 +19,10 @@ set "SERVICE_DIR=%ROOT_DIR%mota-service"
 echo 请选择启动模式:
 echo.
 echo   [前端]
-echo   1. 启动前端开发服务器 (使用 Mock 数据，无需后端)
+echo   1. 启动前端开发服务器 (使用 Mock 数据,无需后端)
 echo   2. 构建前端生产版本
 echo.
-echo   [后端 - Docker 轻量版] (推荐，国内网络友好)
+echo   [后端 - Docker 轻量版] (推荐,国内网络友好)
 echo   3. 启动轻量版中间件 (MySQL + Redis + Nacos)
 echo.
 echo   [后端 - Docker 完整版] (需要良好网络)
@@ -34,9 +35,12 @@ echo   7. 停止所有服务
 echo   8. 查看服务状态
 echo   9. 查看服务日志
 echo.
+echo   [工具]
+echo   m. 配置 Docker 镜像加速器 (解决网络问题)
+echo.
 echo   0. 退出
 echo.
-set /p MODE=请输入选项 (0-9): 
+set /p MODE=请输入选项 (0-9/m):
 
 if "%MODE%"=="0" goto END
 if "%MODE%"=="1" goto START_FRONTEND
@@ -48,6 +52,7 @@ if "%MODE%"=="6" goto START_SERVICES
 if "%MODE%"=="7" goto STOP_ALL
 if "%MODE%"=="8" goto STATUS
 if "%MODE%"=="9" goto LOGS
+if /i "%MODE%"=="m" goto SETUP_MIRROR
 
 echo [错误] 无效选项
 echo.
@@ -148,6 +153,11 @@ if errorlevel 1 (
     goto MENU
 )
 echo [信息] Docker 环境检查通过
+echo.
+echo [提示] 如果拉取镜像失败,请配置 Docker 镜像加速器:
+echo        Docker Desktop - Settings - Docker Engine - 添加:
+echo        "registry-mirrors": ["https://docker.1ms.run"]
+echo.
 goto :eof
 
 :CHECK_ENV_FILE
@@ -177,10 +187,30 @@ call :CHECK_ENV_FILE
 
 echo.
 echo [信息] 启动轻量版中间件 (MySQL+Redis+Nacos)...
+echo.
+echo 请选择镜像源:
+echo   1. 默认源 (Docker Hub)
+echo   2. 国内镜像源 (阿里云,推荐国内用户)
+echo.
+set /p MIRROR_CHOICE=请输入选项 (1/2):
+
 cd /d "%DEPLOY_DIR%"
-docker-compose -f docker-compose.lite.yml up -d
+
+if "%MIRROR_CHOICE%"=="2" (
+    echo [信息] 使用国内镜像源启动...
+    docker-compose -f docker-compose.lite-cn.yml up -d
+) else (
+    echo [信息] 使用默认源启动...
+    docker-compose -f docker-compose.lite.yml up -d
+)
+
 if errorlevel 1 (
     echo [错误] 轻量版中间件启动失败
+    echo.
+    echo [解决方案] 请尝试:
+    echo   1. 选择国内镜像源 (选项 2)
+    echo   2. 配置 Docker 镜像加速器 (主菜单选项 m)
+    echo   3. 检查 Docker Desktop 是否正常运行
     pause
     goto MENU
 )
@@ -209,10 +239,18 @@ call :CHECK_ENV_FILE
 
 echo.
 echo [步骤 1/3] 启动完整版中间件...
+echo [提示] 首次启动需要下载镜像,可能需要较长时间...
+echo [提示] 如遇网络问题,请配置 Docker 镜像加速器
+echo.
 cd /d "%DEPLOY_DIR%"
 docker-compose -f docker-compose.middleware.yml up -d
 if errorlevel 1 (
     echo [错误] 中间件启动失败
+    echo.
+    echo [解决方案] 网络问题请尝试:
+    echo   1. 配置 Docker 镜像加速器
+    echo   2. 使用 VPN 或代理
+    echo   3. 选择轻量版中间件 (选项 3)
     pause
     goto MENU
 )
@@ -284,10 +322,17 @@ call :CHECK_ENV_FILE
 
 echo.
 echo [信息] 启动完整版中间件...
+echo [提示] 首次启动需要下载镜像,可能需要较长时间...
+echo.
 cd /d "%DEPLOY_DIR%"
 docker-compose -f docker-compose.middleware.yml up -d
 if errorlevel 1 (
     echo [错误] 中间件启动失败
+    echo.
+    echo [解决方案] 网络问题请尝试:
+    echo   1. 配置 Docker 镜像加速器
+    echo   2. 使用 VPN 或代理
+    echo   3. 选择轻量版中间件 (选项 3)
     pause
     goto MENU
 )
@@ -449,6 +494,57 @@ if "%LOG_CHOICE%"=="4" docker-compose -f docker-compose.middleware.yml logs -f -
 if "%LOG_CHOICE%"=="5" docker-compose -f docker-compose.middleware.yml logs -f --tail=100 elasticsearch
 
 goto LOGS
+
+:SETUP_MIRROR
+echo.
+echo ========================================
+echo   Docker 镜像加速器配置
+echo ========================================
+echo.
+echo 推荐的镜像加速器地址:
+echo   - https://docker.1ms.run (推荐)
+echo   - https://docker.xuanyuan.me
+echo   - https://docker.rainbond.cc
+echo.
+echo 配置方法:
+echo   1. 打开 Docker Desktop
+echo   2. 点击 Settings (设置)
+echo   3. 选择 Docker Engine
+echo   4. 在 JSON 配置中添加:
+echo.
+echo   "registry-mirrors": ["https://docker.1ms.run"]
+echo.
+echo   5. 点击 Apply and Restart
+echo.
+
+set /p AUTO_CONFIG=是否自动创建配置文件? (y/n):
+
+if /i "%AUTO_CONFIG%"=="y" (
+    echo.
+    echo [信息] 创建 Docker 配置文件...
+    
+    set "DOCKER_CONFIG_DIR=%USERPROFILE%\.docker"
+    if not exist "!DOCKER_CONFIG_DIR!" (
+        mkdir "!DOCKER_CONFIG_DIR!"
+    )
+    
+    (
+        echo {
+        echo   "registry-mirrors": [
+        echo     "https://docker.1ms.run",
+        echo     "https://docker.xuanyuan.me"
+        echo   ]
+        echo }
+    ) > "%USERPROFILE%\.docker\daemon.json"
+    
+    echo [成功] 配置文件已创建: %USERPROFILE%\.docker\daemon.json
+    echo.
+    echo [重要] 请重启 Docker Desktop 使配置生效!
+)
+
+echo.
+pause
+goto MENU
 
 :END
 endlocal
