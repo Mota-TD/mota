@@ -42,7 +42,12 @@ public class TenantLineHandlerImpl implements TenantLineHandler {
             "sys_login_log",        // 登录日志
             "sys_operation_log",    // 操作日志
             // 其他公共表
-            "flyway_schema_history" // Flyway版本控制表
+            "flyway_schema_history", // Flyway版本控制表
+            // 用户级别表（不需要租户隔离）
+            "user_view_config",     // 用户视图配置表
+            // 组织级别表（使用 org_id 而非 tenant_id）
+            "department",           // 部门表
+            "sys_user"              // 用户表
     ));
 
     @Override

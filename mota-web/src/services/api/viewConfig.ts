@@ -38,41 +38,41 @@ export interface ViewConfigData {
 // ========== 视图配置CRUD ==========
 
 export const createViewConfig = (config: Partial<ViewConfig>) => {
-  return request.post<ViewConfig>('/api/view-configs', config);
+  return request.post<ViewConfig>('/api/v1/view-configs', config);
 };
 
 export const updateViewConfig = (id: number, config: Partial<ViewConfig>) => {
-  return request.put<ViewConfig>(`/api/view-configs/${id}`, config);
+  return request.put<ViewConfig>(`/api/v1/view-configs/${id}`, config);
 };
 
 export const deleteViewConfig = (id: number) => {
-  return request.del<boolean>(`/api/view-configs/${id}`);
+  return request.del<boolean>(`/api/v1/view-configs/${id}`);
 };
 
 export const getViewConfig = (id: number) => {
-  return request.get<ViewConfig>(`/api/view-configs/${id}`);
+  return request.get<ViewConfig>(`/api/v1/view-configs/${id}`);
 };
 
 // ========== 视图配置查询 ==========
 
 export const getUserViewConfigs = (userId: number) => {
-  return request.get<ViewConfig[]>(`/api/view-configs/user/${userId}`);
+  return request.get<ViewConfig[]>(`/api/v1/view-configs/user/${userId}`);
 };
 
 export const getUserViewConfigsByType = (userId: number, viewType: ViewType) => {
-  return request.get<ViewConfig[]>(`/api/view-configs/user/${userId}/type/${viewType}`);
+  return request.get<ViewConfig[]>(`/api/v1/view-configs/user/${userId}/type/${viewType}`);
 };
 
 export const getDefaultViewConfig = (userId: number, viewType: ViewType) => {
-  return request.get<ViewConfig>(`/api/view-configs/user/${userId}/type/${viewType}/default`);
+  return request.get<ViewConfig>(`/api/v1/view-configs/user/${userId}/type/${viewType}/default`);
 };
 
 export const getProjectViewConfigs = (projectId: number) => {
-  return request.get<ViewConfig[]>(`/api/view-configs/project/${projectId}`);
+  return request.get<ViewConfig[]>(`/api/v1/view-configs/project/${projectId}`);
 };
 
 export const getSharedViewConfigs = (viewType?: ViewType) => {
-  let url = '/api/view-configs/shared';
+  let url = '/api/v1/view-configs/shared';
   if (viewType) url += `?viewType=${viewType}`;
   return request.get<ViewConfig[]>(url);
 };
@@ -80,39 +80,39 @@ export const getSharedViewConfigs = (viewType?: ViewType) => {
 // ========== 视图配置管理 ==========
 
 export const setDefaultViewConfig = (id: number, userId: number, viewType: ViewType) => {
-  return request.put<void>(`/api/view-configs/${id}/default?userId=${userId}&viewType=${viewType}`);
+  return request.put<void>(`/api/v1/view-configs/${id}/default?userId=${userId}&viewType=${viewType}`);
 };
 
 export const unsetDefaultViewConfig = (userId: number, viewType: ViewType) => {
-  return request.del<void>(`/api/view-configs/user/${userId}/type/${viewType}/default`);
+  return request.del<void>(`/api/v1/view-configs/user/${userId}/type/${viewType}/default`);
 };
 
 export const setViewConfigShared = (id: number, isShared: boolean) => {
-  return request.put<void>(`/api/view-configs/${id}/shared?isShared=${isShared}`);
+  return request.put<void>(`/api/v1/view-configs/${id}/shared?isShared=${isShared}`);
 };
 
 export const isViewNameExists = (userId: number, name: string) => {
-  return request.get<boolean>(`/api/view-configs/check-name?userId=${userId}&name=${encodeURIComponent(name)}`);
+  return request.get<boolean>(`/api/v1/view-configs/check-name?userId=${userId}&name=${encodeURIComponent(name)}`);
 };
 
 // ========== 视图配置快捷操作 ==========
 
 export const saveCurrentView = (userId: number, viewType: ViewType, name: string, config: ViewConfigData) => {
-  return request.post<ViewConfig>(`/api/view-configs/save-current?userId=${userId}&viewType=${viewType}&name=${encodeURIComponent(name)}`, config);
+  return request.post<ViewConfig>(`/api/v1/view-configs/save-current?userId=${userId}&viewType=${viewType}&name=${encodeURIComponent(name)}`, config);
 };
 
 export const applyViewConfig = (id: number) => {
-  return request.get<ViewConfigData>(`/api/view-configs/${id}/apply`);
+  return request.get<ViewConfigData>(`/api/v1/view-configs/${id}/apply`);
 };
 
 export const duplicateViewConfig = (id: number, newName?: string) => {
-  let url = `/api/view-configs/${id}/duplicate`;
+  let url = `/api/v1/view-configs/${id}/duplicate`;
   if (newName) url += `?newName=${encodeURIComponent(newName)}`;
   return request.post<ViewConfig>(url);
 };
 
 export const resetToDefault = (userId: number, viewType: ViewType) => {
-  return request.del<void>(`/api/view-configs/user/${userId}/type/${viewType}/reset`);
+  return request.del<void>(`/api/v1/view-configs/user/${userId}/type/${viewType}/reset`);
 };
 
 // ========== 辅助函数 ==========
