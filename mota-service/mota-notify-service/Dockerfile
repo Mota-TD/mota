@@ -20,7 +20,7 @@ RUN apk add --no-cache tzdata curl && \
 RUN addgroup -g 1000 mota && \
     adduser -u 1000 -G mota -s /bin/sh -D mota
 
-# 复制jar�?
+# 复制jar�?
 COPY target/*.jar app.jar
 
 # 设置文件权限
@@ -32,7 +32,7 @@ USER mota
 # 暴露端口
 EXPOSE 8086
 
-# 健康检�?
+# 健康检�?
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:8086/actuator/health || exit 1
 

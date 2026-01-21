@@ -72,15 +72,25 @@ public class TaskController {
         Long currentUserId = null;
         try {
             currentUserId = SecurityUtils.getUserId();
+            log.info("从SecurityUtils获取用户ID成功: {}", currentUserId);
         } catch (Exception e) {
             // 如果未登录，默认使用用户ID 1（开发环境）
+            log.warn("从SecurityUtils获取用户ID失败，使用默认用户ID 1: {}", e.getMessage());
             currentUserId = 1L;
         }
-        Page<Task> pageParam = new Page<>(page, pageSize);
-        IPage<Task> result = taskService.pageTasks(
-                pageParam, null, null, currentUserId, status, priority
-        );
-        return Result.success(result);
+        try {
+            log.info("查询用户任务, userId: {}, page: {}, pageSize: {}, status: {}, priority: {}",
+                    currentUserId, page, pageSize, status, priority);
+            Page<Task> pageParam = new Page<>(page, pageSize);
+            IPage<Task> result = taskService.pageTasks(
+                    pageParam, null, null, currentUserId, status, priority
+            );
+            log.info("查询用户任务成功, 返回记录数: {}", result.getRecords().size());
+            return Result.success(result);
+        } catch (Exception e) {
+            log.error("查询用户任务失败, userId: {}, error: {}", currentUserId, e.getMessage(), e);
+            throw e;
+        }
     }
 
     /**

@@ -105,14 +105,19 @@ public class MilestoneController {
                 log.info("Got userId from SecurityUtils: {}", currentUserId);
             } catch (Exception e) {
                 // 如果未登录，默认使用用户ID 1（开发环境）
-                log.warn("Failed to get userId from SecurityUtils, using default 1L", e);
+                log.warn("Failed to get userId from SecurityUtils, using default 1L: {}", e.getMessage(), e);
                 currentUserId = 1L;
             }
         }
-        log.info("Querying milestone tasks for userId: {}", currentUserId);
-        List<MilestoneTask> tasks = milestoneTaskService.getByAssigneeId(currentUserId);
-        log.info("Found {} milestone tasks for userId: {}", tasks.size(), currentUserId);
-        return Result.success(tasks);
+        try {
+            log.info("Querying milestone tasks for userId: {}", currentUserId);
+            List<MilestoneTask> tasks = milestoneTaskService.getByAssigneeId(currentUserId);
+            log.info("Found {} milestone tasks for userId: {}", tasks.size(), currentUserId);
+            return Result.success(tasks);
+        } catch (Exception e) {
+            log.error("Failed to query milestone tasks for userId: {}, error: {}", currentUserId, e.getMessage(), e);
+            throw e;
+        }
     }
 
     /**
@@ -269,6 +274,29 @@ public class MilestoneController {
             @Parameter(description = "里程碑ID", required = true) @PathVariable Long id) {
         Milestone milestone = milestoneService.delayMilestone(id);
         return Result.success(milestone);
+    }
+
+    /**
+     * 更新里程碑进度（供任务服务调用）
+     */
+    @Operation(summary = "更新里程碑进度", description = "根据任务完成情况更新里程碑进度")
+    @ApiResponse(responseCode = "200", description = "更新成功")
+    @PutMapping("/{id}/progress")
+    public Result<Void> updateMilestoneProgress(
+            @Parameter(description = "里程碑ID", required = true) @PathVariable Long id,
+            @Parameter(description = "进度值") @RequestParam(required = false) Integer progress) {
+        if (progress != null) {
+            // 直接设置进度值
+            Milestone milestone = milestoneService.getById(id);
+            if (milestone != null) {
+                milestone.setProgress(progress);
+                milestoneService.updateById(milestone);
+            }
+        } else {
+            // 根据任务自动计算进度
+            milestoneService.updateMilestoneProgress(id);
+        }
+        return Result.success();
     }
 
     /**

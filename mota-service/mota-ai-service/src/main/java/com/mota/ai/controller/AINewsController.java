@@ -5,6 +5,7 @@ import com.mota.ai.entity.AINews;
 import com.mota.ai.service.AINewsService;
 import com.mota.common.core.result.Result;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
 /**
  * AI新闻控制器
  */
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/ai/news")
 @RequiredArgsConstructor
@@ -27,8 +29,16 @@ public class AINewsController {
             @RequestParam(required = false) String category,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size) {
-        IPage<AINews> news = aiNewsService.getNewsList(category, page, size);
-        return Result.success(news);
+        try {
+            log.info("获取新闻列表, category: {}, page: {}, size: {}", category, page, size);
+            IPage<AINews> news = aiNewsService.getNewsList(category, page, size);
+            log.info("获取新闻列表成功, 返回记录数: {}", news.getRecords().size());
+            return Result.success(news);
+        } catch (Exception e) {
+            log.error("获取新闻列表失败, category: {}, page: {}, size: {}, error: {}",
+                    category, page, size, e.getMessage(), e);
+            throw e;
+        }
     }
 
     /**

@@ -44,6 +44,7 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
       database: 3
       timeout: 10000ms
       lettuce:
@@ -52,10 +53,6 @@ spring:
           max-wait: -1ms
           max-idle: 8
           min-idle: 0
-  # Redisson配置 (redisson-spring-boot-starter)
-  redis:
-    redisson:
-      file: classpath:redisson.yml
 
   # 文件上传配置
   servlet:

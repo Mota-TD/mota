@@ -1,5 +1,5 @@
 @echo off
-chcp 65001 >nul 2>&1
+chcp 65001 >nul
 setlocal enabledelayedexpansion
 
 echo ========================================
@@ -10,7 +10,7 @@ echo.
 
 :: 设置目录
 set "ROOT_DIR=%~dp0"
-set "WEB_DIR=%ROOT_DIR%mota-web-next"
+set "WEB_DIR=%ROOT_DIR%mota-web"
 set "DEPLOY_DIR=%ROOT_DIR%mota-service\deploy"
 set "SERVICE_DIR=%ROOT_DIR%mota-service"
 
@@ -100,7 +100,7 @@ echo.
 echo   按 Ctrl+C 停止服务
 echo ========================================
 echo.
-call npm run dev:open
+call npm run dev
 goto END
 
 :BUILD_FRONTEND
@@ -130,7 +130,7 @@ if errorlevel 1 (
     goto MENU
 )
 echo.
-echo [成功] 构建完成，输出目录: .next
+echo [成功] 构建完成，输出目录: dist
 pause
 goto MENU
 
@@ -234,13 +234,8 @@ goto MENU
 
 :START_ALL
 echo.
-echo [调试] 进入 START_ALL 流程
 call :CHECK_DOCKER
-if errorlevel 1 (
-    echo [错误] Docker 检查失败
-    pause
-    goto MENU
-)
+if errorlevel 1 goto MENU
 call :CHECK_ENV_FILE
 
 echo.
@@ -248,112 +243,57 @@ echo [步骤 1/3] 启动完整版中间件...
 echo [提示] 首次启动需要下载镜像,可能需要较长时间...
 echo [提示] 如遇网络问题,请配置 Docker 镜像加速器
 echo.
-echo [调试] 切换到部署目录: %DEPLOY_DIR%
 cd /d "%DEPLOY_DIR%"
-echo [调试] 当前目录: %CD%
-echo [调试] 执行命令: docker-compose -f docker-compose.middleware.yml up -d
-echo.
 docker-compose -f docker-compose.middleware.yml up -d
-set MIDDLEWARE_EXIT_CODE=!errorlevel!
-echo.
-echo [调试] 中间件启动命令退出码: !MIDDLEWARE_EXIT_CODE!
-if !MIDDLEWARE_EXIT_CODE! neq 0 (
-    echo [错误] 中间件启动失败 ^(退出码: !MIDDLEWARE_EXIT_CODE!^)
+if errorlevel 1 (
+    echo.
+    echo [错误] 中间件启动失败
     echo.
     echo [解决方案] 网络问题请尝试:
     echo   1. 配置 Docker 镜像加速器
     echo   2. 使用 VPN 或代理
-    echo   3. 选择轻量版中间件 ^(选项 3^)
+    echo   3. 选择轻量版中间件 (选项 3)
     pause
     goto MENU
 )
 
 echo.
-echo [调试] 中间件启动成功,开始等待就绪...
-echo [信息] 等待中间件就绪 (60秒)...
-echo [调试] 开始 60 秒倒计时...
+echo [信息] 中间件启动成功,等待就绪 (60秒)...
 timeout /t 60 /nobreak >nul 2>&1
-if errorlevel 1 (
-    echo [警告] timeout 命令执行异常,继续执行...
-)
-echo [调试] 等待完成
 
 echo.
 echo [步骤 2/3] 编译 Java 项目...
-echo [调试] 切换到服务目录: %SERVICE_DIR%
 cd /d "%SERVICE_DIR%"
-echo [调试] 当前目录: %CD%
-echo [调试] 检查 mvnw.cmd 是否存在...
-:: 优先使用 Maven Wrapper，如果不存在则使用系统 Maven
 if exist "mvnw.cmd" (
     echo [信息] 使用 Maven Wrapper 编译...
-    echo [调试] 执行命令: mvnw.cmd clean package -DskipTests
-    call mvnw.cmd clean package -DskipTests 2>&1
-    set MAVEN_EXIT_CODE=!errorlevel!
-    echo.
-    echo [调试] Maven 编译退出码: !MAVEN_EXIT_CODE!
-    if !MAVEN_EXIT_CODE! neq 0 (
-        echo [警告] Maven Wrapper 编译失败 ^(退出码: !MAVEN_EXIT_CODE!^)
-        echo [信息] 尝试直接启动已有镜像...
-    ) else (
-        echo [调试] Maven 编译成功
+    call mvnw.cmd clean package -DskipTests
+    if errorlevel 1 (
+        echo [警告] Maven 编译失败，尝试直接启动已有镜像...
     )
 ) else (
-    echo [调试] mvnw.cmd 不存在,检查系统 Maven...
     mvn --version >nul 2>&1
     if errorlevel 1 (
-        echo [警告] Maven 未安装且 Maven Wrapper 不存在
-        echo [提示] 请安装 Maven 3.6+: https://maven.apache.org/
-        echo [提示] 或者确保项目中存在 mvnw.cmd 文件
-        echo [信息] 尝试直接启动已有镜像...
+        echo [警告] Maven 未安装，尝试直接启动已有镜像...
     ) else (
         echo [信息] 使用系统 Maven 编译...
-        echo [调试] 执行命令: mvn clean package -DskipTests
-        call mvn clean package -DskipTests 2>&1
-        set MAVEN_EXIT_CODE=!errorlevel!
-        echo.
-        echo [调试] Maven 编译退出码: !MAVEN_EXIT_CODE!
-        if !MAVEN_EXIT_CODE! neq 0 (
-            echo [警告] Maven 编译失败 ^(退出码: !MAVEN_EXIT_CODE!^)
-            echo [信息] 尝试直接启动已有镜像...
-        ) else (
-            echo [调试] Maven 编译成功
+        call mvn clean package -DskipTests
+        if errorlevel 1 (
+            echo [警告] Maven 编译失败，尝试直接启动已有镜像...
         )
     )
 )
 
 echo.
 echo [步骤 3/3] 启动微服务...
-echo [调试] 切换到部署目录: %DEPLOY_DIR%
 cd /d "%DEPLOY_DIR%"
-echo [调试] 当前目录: %CD%
-echo [调试] 检查 docker-compose.services.yml 是否存在...
-if not exist "docker-compose.services.yml" (
-    echo [错误] 找不到 docker-compose.services.yml 文件
-    echo [调试] 当前目录内容:
-    dir /b
+docker-compose -f docker-compose.services.yml up -d --build
+if errorlevel 1 (
+    echo.
+    echo [错误] 微服务启动失败
+    echo [提示] 请确保中间件已正常运行
     pause
     goto MENU
 )
-echo [调试] 执行命令: docker-compose -f docker-compose.services.yml up -d --build
-echo.
-docker-compose -f docker-compose.services.yml up -d --build 2>&1
-set SERVICES_EXIT_CODE=!errorlevel!
-echo.
-echo [调试] 微服务启动命令退出码: !SERVICES_EXIT_CODE!
-if !SERVICES_EXIT_CODE! neq 0 (
-    echo [错误] 微服务启动失败 ^(退出码: !SERVICES_EXIT_CODE!^)
-    echo.
-    echo [调试信息] 检查 Docker 网络:
-    docker network ls 2>nul | findstr mota
-    echo.
-    echo [调试信息] 检查运行中的容器:
-    docker ps -a 2>nul | findstr mota
-    echo.
-    pause
-    goto MENU
-)
-echo [调试] 微服务启动成功
 
 echo.
 echo ========================================
@@ -425,7 +365,6 @@ call :CHECK_DOCKER
 echo.
 echo [步骤 1/2] 编译 Java 项目...
 cd /d "%SERVICE_DIR%"
-:: 优先使用 Maven Wrapper，如果不存在则使用系统 Maven
 if exist "mvnw.cmd" (
     echo [信息] 使用 Maven Wrapper 编译...
     call mvnw.cmd clean package -DskipTests

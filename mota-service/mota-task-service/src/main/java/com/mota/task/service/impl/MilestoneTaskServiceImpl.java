@@ -1,0 +1,522 @@
+package com.mota.task.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mota.common.core.exception.BusinessException;
+import com.mota.common.core.result.Result;
+import com.mota.task.dto.request.MilestoneTaskProgressUpdateRequest;
+import com.mota.task.entity.MilestoneTask;
+import com.mota.task.entity.MilestoneTaskAttachment;
+import com.mota.task.entity.MilestoneTaskProgressRecord;
+import com.mota.task.feign.ProjectServiceClient;
+import com.mota.task.feign.dto.MilestoneDTO;
+import com.mota.task.mapper.MilestoneTaskAttachmentMapper;
+import com.mota.task.mapper.MilestoneTaskMapper;
+import com.mota.task.mapper.MilestoneTaskProgressRecordMapper;
+import com.mota.task.service.MilestoneTaskService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * 里程碑任务服务实现
+ */
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class MilestoneTaskServiceImpl extends ServiceImpl<MilestoneTaskMapper, MilestoneTask> implements MilestoneTaskService {
+
+    private final MilestoneTaskAttachmentMapper attachmentMapper;
+    private final MilestoneTaskProgressRecordMapper progressRecordMapper;
+    private final ObjectMapper objectMapper;
+    private final ProjectServiceClient projectServiceClient;
+
+    @Override
+    public List<MilestoneTask> getByMilestoneId(Long milestoneId) {
+        return baseMapper.selectByMilestoneId(milestoneId);
+    }
+
+    @Override
+    public List<MilestoneTask> getByAssigneeId(Long assigneeId) {
+        return baseMapper.selectByAssigneeId(assigneeId);
+    }
+
+    @Override
+    public List<MilestoneTask> getByProjectId(Long projectId) {
+        return baseMapper.selectByProjectId(projectId);
+    }
+
+    @Override
+    public MilestoneTask getDetailById(Long id) {
+        MilestoneTask task = getById(id);
+        if (task == null) {
+            throw new BusinessException("任务不存在");
+        }
+        
+        // 加载子任务
+        try {
+            List<MilestoneTask> subTasks = baseMapper.selectByParentTaskId(id);
+            task.setSubTasks(subTasks);
+        } catch (Exception e) {
+            log.warn("Failed to load subtasks for task {}: {}", id, e.getMessage());
+            task.setSubTasks(List.of());
+        }
+        
+        // 加载附件（可能表不存在，忽略错误）
+        try {
+            List<MilestoneTaskAttachment> attachments = attachmentMapper.selectByTaskId(id);
+            task.setAttachments(attachments);
+        } catch (Exception e) {
+            log.warn("Failed to load attachments for task {}: {}", id, e.getMessage());
+            task.setAttachments(List.of());
+        }
+        
+        return task;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public MilestoneTask createTask(MilestoneTask task) {
+        // 从里程碑获取 project_id
+        if (task.getProjectId() == null && task.getMilestoneId() != null) {
+            try {
+                Result<MilestoneDTO> result = projectServiceClient.getMilestoneById(task.getMilestoneId());
+                if (result.isSuccess() && result.getData() != null) {
+                    task.setProjectId(result.getData().getProjectId());
+                }
+            } catch (Exception e) {
+                log.warn("Failed to get milestone info: {}", e.getMessage());
+            }
+        }
+        
+        // 设置默认值
+        if (!StringUtils.hasText(task.getStatus())) {
+            task.setStatus(MilestoneTask.Status.PENDING);
+        }
+        if (task.getProgress() == null) {
+            task.setProgress(0);
+        }
+        if (task.getSortOrder() == null) {
+            // 获取当前里程碑最大排序号
+            LambdaQueryWrapper<MilestoneTask> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(MilestoneTask::getMilestoneId, task.getMilestoneId());
+            wrapper.isNull(MilestoneTask::getParentTaskId);
+            wrapper.orderByDesc(MilestoneTask::getSortOrder);
+            wrapper.last("LIMIT 1");
+            MilestoneTask last = getOne(wrapper);
+            task.setSortOrder(last != null ? last.getSortOrder() + 1 : 0);
+        }
+        
+        save(task);
+        
+        // 更新里程碑进度
+        updateMilestoneProgressAsync(task.getMilestoneId());
+        
+        return task;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public MilestoneTask createSubTask(Long parentTaskId, MilestoneTask task) {
+        MilestoneTask parentTask = getById(parentTaskId);
+        if (parentTask == null) {
+            throw new BusinessException("父任务不存在");
+        }
+        
+        task.setParentTaskId(parentTaskId);
+        task.setMilestoneId(parentTask.getMilestoneId());
+        task.setProjectId(parentTask.getProjectId());
+        
+        // 设置默认值
+        if (!StringUtils.hasText(task.getStatus())) {
+            task.setStatus(MilestoneTask.Status.PENDING);
+        }
+        if (task.getProgress() == null) {
+            task.setProgress(0);
+        }
+        if (task.getSortOrder() == null) {
+            // 获取当前父任务下最大排序号
+            LambdaQueryWrapper<MilestoneTask> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(MilestoneTask::getParentTaskId, parentTaskId);
+            wrapper.orderByDesc(MilestoneTask::getSortOrder);
+            wrapper.last("LIMIT 1");
+            MilestoneTask last = getOne(wrapper);
+            task.setSortOrder(last != null ? last.getSortOrder() + 1 : 0);
+        }
+        
+        save(task);
+        
+        // 更新父任务进度
+        updateParentTaskProgress(parentTaskId);
+        
+        // 更新里程碑进度
+        updateMilestoneProgressAsync(task.getMilestoneId());
+        
+        return task;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public MilestoneTask updateTask(MilestoneTask task) {
+        MilestoneTask existing = getById(task.getId());
+        if (existing == null) {
+            throw new BusinessException("任务不存在");
+        }
+        
+        if (StringUtils.hasText(task.getName())) {
+            existing.setName(task.getName());
+        }
+        if (task.getDescription() != null) {
+            existing.setDescription(task.getDescription());
+        }
+        if (task.getDueDate() != null) {
+            existing.setDueDate(task.getDueDate());
+        }
+        if (task.getAssigneeId() != null) {
+            existing.setAssigneeId(task.getAssigneeId());
+        }
+        if (task.getPriority() != null) {
+            existing.setPriority(task.getPriority());
+        }
+        if (task.getSortOrder() != null) {
+            existing.setSortOrder(task.getSortOrder());
+        }
+        
+        updateById(existing);
+        return existing;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateTaskProgress(Long taskId, Integer progress) {
+        MilestoneTask task = getById(taskId);
+        if (task == null) {
+            return false;
+        }
+        
+        task.setProgress(progress);
+        
+        // 如果进度为100，自动完成任务
+        if (progress >= 100) {
+            task.setStatus(MilestoneTask.Status.COMPLETED);
+            task.setCompletedAt(LocalDateTime.now());
+        } else if (progress > 0) {
+            task.setStatus(MilestoneTask.Status.IN_PROGRESS);
+        }
+        
+        updateById(task);
+        
+        // 更新父任务进度
+        if (task.getParentTaskId() != null) {
+            updateParentTaskProgress(task.getParentTaskId());
+        }
+        
+        // 更新里程碑进度
+        updateMilestoneProgressAsync(task.getMilestoneId());
+        
+        return true;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateTaskStatus(Long taskId, String status) {
+        MilestoneTask task = getById(taskId);
+        if (task == null) {
+            return false;
+        }
+        
+        task.setStatus(status);
+        
+        if (MilestoneTask.Status.COMPLETED.equals(status)) {
+            task.setProgress(100);
+            task.setCompletedAt(LocalDateTime.now());
+        }
+        
+        updateById(task);
+        
+        // 更新父任务进度
+        if (task.getParentTaskId() != null) {
+            updateParentTaskProgress(task.getParentTaskId());
+        }
+        
+        // 更新里程碑进度
+        updateMilestoneProgressAsync(task.getMilestoneId());
+        
+        return true;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteTask(Long id) {
+        MilestoneTask task = getById(id);
+        if (task == null) {
+            throw new BusinessException("任务不存在");
+        }
+        
+        Long milestoneId = task.getMilestoneId();
+        Long parentTaskId = task.getParentTaskId();
+        
+        // 删除子任务
+        LambdaQueryWrapper<MilestoneTask> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(MilestoneTask::getParentTaskId, id);
+        remove(wrapper);
+        
+        // 删除任务
+        removeById(id);
+        
+        // 更新父任务进度
+        if (parentTaskId != null) {
+            updateParentTaskProgress(parentTaskId);
+        }
+        
+        // 更新里程碑进度
+        updateMilestoneProgressAsync(milestoneId);
+        
+        return true;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public MilestoneTask completeTask(Long id) {
+        MilestoneTask task = getById(id);
+        if (task == null) {
+            throw new BusinessException("任务不存在");
+        }
+        
+        task.setStatus(MilestoneTask.Status.COMPLETED);
+        task.setProgress(100);
+        task.setCompletedAt(LocalDateTime.now());
+        
+        updateById(task);
+        
+        // 更新父任务进度
+        if (task.getParentTaskId() != null) {
+            updateParentTaskProgress(task.getParentTaskId());
+        }
+        
+        // 更新里程碑进度
+        updateMilestoneProgressAsync(task.getMilestoneId());
+        
+        return task;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean assignTask(Long taskId, Long userId) {
+        MilestoneTask task = getById(taskId);
+        if (task == null) {
+            return false;
+        }
+        
+        task.setAssigneeId(userId);
+        return updateById(task);
+    }
+
+    @Override
+    public List<MilestoneTask> getSubTasks(Long parentTaskId) {
+        return baseMapper.selectByParentTaskId(parentTaskId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public MilestoneTaskAttachment addAttachment(Long taskId, MilestoneTaskAttachment attachment) {
+        MilestoneTask task = getById(taskId);
+        if (task == null) {
+            throw new BusinessException("任务不存在");
+        }
+        
+        attachment.setTaskId(taskId);
+        if (!StringUtils.hasText(attachment.getAttachmentType())) {
+            attachment.setAttachmentType(MilestoneTaskAttachment.AttachmentType.OTHER);
+        }
+        
+        attachmentMapper.insert(attachment);
+        return attachment;
+    }
+
+    @Override
+    public List<MilestoneTaskAttachment> getAttachments(Long taskId) {
+        return attachmentMapper.selectByTaskId(taskId);
+    }
+
+    @Override
+    public List<MilestoneTaskAttachment> getExecutionPlans(Long taskId) {
+        LambdaQueryWrapper<MilestoneTaskAttachment> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(MilestoneTaskAttachment::getTaskId, taskId);
+        wrapper.eq(MilestoneTaskAttachment::getAttachmentType, MilestoneTaskAttachment.AttachmentType.EXECUTION_PLAN);
+        wrapper.eq(MilestoneTaskAttachment::getDeleted, 0);
+        wrapper.orderByDesc(MilestoneTaskAttachment::getCreatedAt);
+        return attachmentMapper.selectList(wrapper);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteAttachment(Long attachmentId) {
+        return attachmentMapper.deleteById(attachmentId) > 0;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public MilestoneTaskProgressRecord updateTaskProgressEnhanced(Long taskId, MilestoneTaskProgressUpdateRequest request, Long userId) {
+        MilestoneTask task = getById(taskId);
+        if (task == null) {
+            throw new BusinessException("任务不存在");
+        }
+        
+        Integer previousProgress = task.getProgress() != null ? task.getProgress() : 0;
+        Integer currentProgress = request.getProgress();
+        
+        // 创建进度记录
+        MilestoneTaskProgressRecord record = new MilestoneTaskProgressRecord();
+        record.setTaskId(taskId);
+        record.setPreviousProgress(previousProgress);
+        record.setCurrentProgress(currentProgress);
+        record.setDescription(request.getDescription());
+        record.setUpdatedBy(userId);
+        
+        // 处理附件列表，转换为JSON
+        if (!CollectionUtils.isEmpty(request.getAttachments())) {
+            try {
+                record.setAttachments(objectMapper.writeValueAsString(request.getAttachments()));
+            } catch (JsonProcessingException e) {
+                log.error("Failed to serialize attachments", e);
+                record.setAttachments("[]");
+            }
+        }
+        
+        progressRecordMapper.insert(record);
+        
+        // 更新任务进度
+        task.setProgress(currentProgress);
+        
+        // 如果进度为100，自动完成任务
+        if (currentProgress >= 100) {
+            task.setStatus(MilestoneTask.Status.COMPLETED);
+            task.setCompletedAt(LocalDateTime.now());
+        } else if (currentProgress > 0) {
+            task.setStatus(MilestoneTask.Status.IN_PROGRESS);
+        }
+        
+        updateById(task);
+        
+        // 更新父任务进度
+        if (task.getParentTaskId() != null) {
+            updateParentTaskProgress(task.getParentTaskId());
+        }
+        
+        // 更新里程碑进度
+        updateMilestoneProgressAsync(task.getMilestoneId());
+        
+        return record;
+    }
+
+    @Override
+    public List<MilestoneTaskProgressRecord> getProgressHistory(Long taskId) {
+        MilestoneTask task = getById(taskId);
+        if (task == null) {
+            throw new BusinessException("任务不存在");
+        }
+        
+        try {
+            return progressRecordMapper.selectByTaskId(taskId);
+        } catch (Exception e) {
+            log.warn("Failed to load progress history for task {}: {}", taskId, e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public int countByMilestoneId(Long milestoneId) {
+        return baseMapper.countByMilestoneId(milestoneId);
+    }
+
+    @Override
+    public int countCompletedByMilestoneId(Long milestoneId) {
+        return baseMapper.countCompletedByMilestoneId(milestoneId);
+    }
+
+    @Override
+    public int calculateMilestoneProgress(Long milestoneId) {
+        List<MilestoneTask> tasks = getByMilestoneId(milestoneId);
+        if (tasks.isEmpty()) {
+            return 0;
+        }
+        
+        // 只计算顶级任务的进度
+        List<MilestoneTask> topLevelTasks = tasks.stream()
+                .filter(t -> t.getParentTaskId() == null)
+                .toList();
+        
+        if (topLevelTasks.isEmpty()) {
+            return 0;
+        }
+        
+        int totalProgress = topLevelTasks.stream()
+                .mapToInt(t -> t.getProgress() != null ? t.getProgress() : 0)
+                .sum();
+        
+        return totalProgress / topLevelTasks.size();
+    }
+
+    /**
+     * 更新父任务进度
+     */
+    private void updateParentTaskProgress(Long parentTaskId) {
+        MilestoneTask parentTask = getById(parentTaskId);
+        if (parentTask == null) {
+            return;
+        }
+        
+        // 获取所有子任务
+        List<MilestoneTask> subTasks = baseMapper.selectByParentTaskId(parentTaskId);
+        if (subTasks.isEmpty()) {
+            return;
+        }
+        
+        // 计算平均进度
+        int totalProgress = subTasks.stream()
+                .mapToInt(t -> t.getProgress() != null ? t.getProgress() : 0)
+                .sum();
+        int avgProgress = totalProgress / subTasks.size();
+        
+        parentTask.setProgress(avgProgress);
+        
+        // 检查是否所有子任务都完成
+        boolean allCompleted = subTasks.stream()
+                .allMatch(t -> MilestoneTask.Status.COMPLETED.equals(t.getStatus()));
+        
+        if (allCompleted) {
+            parentTask.setStatus(MilestoneTask.Status.COMPLETED);
+            parentTask.setCompletedAt(LocalDateTime.now());
+        } else if (avgProgress > 0) {
+            parentTask.setStatus(MilestoneTask.Status.IN_PROGRESS);
+        }
+        
+        updateById(parentTask);
+    }
+
+    /**
+     * 异步更新里程碑进度（通过 Feign 调用项目服务）
+     */
+    private void updateMilestoneProgressAsync(Long milestoneId) {
+        if (milestoneId == null) {
+            return;
+        }
+        
+        try {
+            int progress = calculateMilestoneProgress(milestoneId);
+            projectServiceClient.updateMilestoneProgress(milestoneId, progress);
+        } catch (Exception e) {
+            log.warn("Failed to update milestone progress: {}", e.getMessage());
+        }
+    }
+}

@@ -44,6 +44,7 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
       database: 2
       timeout: 10000ms
       lettuce:
@@ -52,10 +53,20 @@ spring:
           max-wait: -1ms
           max-idle: 8
           min-idle: 0
-  # Redisson配置
+  # Redisson配置（在application.yml中配置以支持Spring占位符解析）
   redis:
     redisson:
-      file: classpath:redisson.yml
+      config: |
+        singleServerConfig:
+          address: "redis://${REDIS_HOST:localhost}:${REDIS_PORT:6379}"
+          password: ${REDIS_PASSWORD:null}
+          database: 2
+          connectionMinimumIdleSize: 1
+          connectionPoolSize: 10
+          connectTimeout: 10000
+          timeout: 3000
+          retryAttempts: 3
+          retryInterval: 1500
 
 # MyBatis-Plus配置
 mybatis-plus:

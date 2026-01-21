@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -25,6 +26,7 @@ import java.util.List;
  * 项目控制器
  * 提供项目管理的完整生命周期API
  */
+@Slf4j
 @Tag(name = "项目管理", description = "项目的创建、查询、更新、删除等操作")
 @RestController
 @RequestMapping("/api/v1/projects")
@@ -58,8 +60,13 @@ public class ProjectController {
     public Result<List<Project>> list(
             @Parameter(description = "搜索关键字") @RequestParam(value = "keyword", required = false) String keyword,
             @Parameter(description = "项目状态") @RequestParam(value = "status", required = false) String status) {
-        List<Project> projects = projectService.getProjectList(keyword, status);
-        return Result.success(projects);
+        try {
+            List<Project> projects = projectService.getProjectList(keyword, status);
+            return Result.success(projects);
+        } catch (Exception e) {
+            log.error("获取项目列表失败, keyword: {}, status: {}, error: {}", keyword, status, e.getMessage(), e);
+            throw e;
+        }
     }
 
     /**

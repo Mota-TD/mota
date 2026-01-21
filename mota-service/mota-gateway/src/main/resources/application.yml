@@ -7,7 +7,7 @@ server:
       force: true
   # Netty 配置
   netty:
-    connection-timeout: 30000
+    connection-timeout: 60000
 
 spring:
   application:
@@ -31,6 +31,12 @@ spring:
         group: ${NACOS_GROUP:DEFAULT_GROUP}
         file-extension: yml
         refresh-enabled: true
+    httpclient:
+      connect-timeout: 60000
+      response-timeout: 60000
+      pool:
+        max-connections: 500
+        max-idle-time: 60000
     gateway:
       discovery:
         locator:
@@ -77,6 +83,15 @@ spring:
           uri: lb://mota-project-service
           predicates:
             - Path=/api/v1/milestones/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
+        # 里程碑任务服务（独立任务服务）
+        - id: mota-milestone-task-service
+          uri: lb://mota-task-service
+          predicates:
+            - Path=/api/v1/milestone-tasks/**
           filters:
             - StripPrefix=0
             - AuthFilter

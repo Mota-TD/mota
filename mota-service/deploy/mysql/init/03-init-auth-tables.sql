@@ -217,6 +217,20 @@ CREATE TABLE IF NOT EXISTS `enterprise_invitation` (
     INDEX `idx_expired` (`expired_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='企业邀请表';
 
+-- 插入默认管理员用户
+-- 密码: Test123456 (BCrypt加密)
+INSERT INTO `sys_user` (`id`, `username`, `email`, `phone`, `password_hash`, `nickname`, `status`, `org_id`, `org_name`, `created_at`, `updated_at`, `deleted`) VALUES
+(1, 'admin', 'admin@mota.com', '13800138000', '$2a$10$Wjc4G3uU81rxSz6TlUdYb..DV7wc42tqPdaqhVNAYZeCBrvQoE6Hq', '系统管理员', 1, 'ORG001', '摩塔科技', NOW(), NOW(), 0);
+
+-- 插入默认企业
+INSERT INTO `enterprise` (`id`, `tenant_id`, `org_id`, `name`, `short_name`, `industry_id`, `industry_name`, `admin_user_id`, `member_count`, `max_members`, `status`, `verified`, `created_at`, `updated_at`, `deleted`) VALUES
+(1, 1, 'ORG001', '摩塔科技', '摩塔', 1, '互联网/IT', 1, 1, 100, 1, 1, NOW(), NOW(), 0);
+
+-- 插入默认企业成员关系
+INSERT INTO `enterprise_member` (`id`, `enterprise_id`, `user_id`, `role`, `status`, `joined_at`, `created_at`, `updated_at`, `deleted`) VALUES
+(1, 1, 1, 'super_admin', 1, NOW(), NOW(), NOW(), 0);
+
 -- 输出结果
 SELECT 'mota_auth 数据库表初始化完成!' AS message;
 SELECT COUNT(*) AS total_industries FROM `industry`;
+SELECT COUNT(*) AS total_users FROM `sys_user`;

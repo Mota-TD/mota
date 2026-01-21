@@ -5,6 +5,7 @@ import com.mota.common.core.result.Result;
 import com.mota.project.entity.Activity;
 import com.mota.project.mapper.ActivityMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import java.util.Map;
 /**
  * 活动动态控制器
  */
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/activities")
 @RequiredArgsConstructor
@@ -61,12 +63,18 @@ public class ActivityController {
     @GetMapping("/recent")
     public Result<List<Activity>> recent(
             @RequestParam(value = "limit", defaultValue = "6") Integer limit) {
-        
-        LambdaQueryWrapper<Activity> wrapper = new LambdaQueryWrapper<>();
-        wrapper.orderByDesc(Activity::getCreatedAt);
-        wrapper.last("LIMIT " + limit);
-        
-        List<Activity> activities = activityMapper.selectList(wrapper);
-        return Result.success(activities);
+        try {
+            log.info("获取最近活动动态, limit: {}", limit);
+            LambdaQueryWrapper<Activity> wrapper = new LambdaQueryWrapper<>();
+            wrapper.orderByDesc(Activity::getCreatedAt);
+            wrapper.last("LIMIT " + limit);
+            
+            List<Activity> activities = activityMapper.selectList(wrapper);
+            log.info("获取最近活动动态成功, 返回记录数: {}", activities.size());
+            return Result.success(activities);
+        } catch (Exception e) {
+            log.error("获取最近活动动态失败, limit: {}, error: {}", limit, e.getMessage(), e);
+            throw e;
+        }
     }
 }

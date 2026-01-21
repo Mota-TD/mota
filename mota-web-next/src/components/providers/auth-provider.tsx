@@ -281,20 +281,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const login = useCallback(
     async (username: string, password: string) => {
       try {
-        // BFF 返回的登录响应格式
+        // 微服务返回的登录响应格式
         interface LoginResponse {
-          accessToken: string;
-          refreshToken: string;
-          expiresIn: number;
-          user: {
-            id: string;
-            username: string;
-            nickname: string;
-            avatar?: string;
-            email: string;
-            tenantId: string;
-            roles: string[];
-            permissions: string[];
+          code: number;
+          message: string;
+          data: {
+            accessToken: string;
+            refreshToken: string;
+            expiresIn: number;
+            tokenType: string;
           };
         }
 
@@ -303,9 +298,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
           { username, password }
         );
 
-        // BFF 直接返回 LoginResponse，不需要 .data 包装
-        const loginData = response.data;
-        const { accessToken, refreshToken, expiresIn, user: userData } = loginData;
+        // 微服务返回格式：{ code, message, data: { accessToken, refreshToken, expiresIn } }
+        const loginData = response.data.data;
+        const { accessToken, refreshToken, expiresIn } = loginData;
 
         // 保存token到cookie
         const expiresInSeconds = expiresIn || 86400;
@@ -320,18 +315,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
           sameSite: 'lax',
         });
 
-        // 使用 BFF 返回的用户对象
+        // 登录成功后，需要获取用户信息
+        // 从 token 中解析用户 ID
+        const tokenPayload = JSON.parse(atob(accessToken.split('.')[1]));
+        const userId = tokenPayload.sub || tokenPayload.userId || tokenPayload.id;
+        
+        // 获取完整的用户信息
+        const userResponse = await apiClient.get<{ code: number; data: BackendUser }>(
+          `/api/v1/users/${userId}`
+        );
+        
+        const backendUser = userResponse.data.data;
         const user: User = {
-          id: userData.id,
-          username: userData.username,
-          nickname: userData.nickname || userData.username,
-          email: userData.email || '',
-          phone: '',
-          avatar: userData.avatar,
-          tenantId: userData.tenantId,
-          tenantName: '',
-          roles: userData.roles || [],
-          permissions: userData.permissions || [],
+          id: String(backendUser.id),
+          username: backendUser.username,
+          nickname: backendUser.nickname || backendUser.username,
+          email: backendUser.email || '',
+          phone: backendUser.phone,
+          avatar: backendUser.avatar,
+          status: backendUser.status,
+          role: backendUser.role,
+          departmentId: backendUser.departmentId ? String(backendUser.departmentId) : undefined,
+          departmentName: backendUser.departmentName,
+          roles: backendUser.role ? [backendUser.role] : [],
+          permissions: [],
         };
 
         setUser(user);

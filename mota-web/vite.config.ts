@@ -15,62 +15,12 @@ export default defineConfig({
     port: 3000,
     open: true,
     proxy: {
-      // 代理认证 API 请求到认证服务 (8081)
-      '/api/v1/auth': {
-        target: 'http://127.0.0.1:8081',
-        changeOrigin: true,
-        secure: false,
-        configure: (proxy, _options) => {
-          proxy.on('error', (err, _req, _res) => {
-            console.log('auth proxy error', err);
-          });
-          proxy.on('proxyReq', (proxyReq, req, _res) => {
-            console.log('Auth Request:', req.method, req.url, '-> target:', proxyReq.path);
-          });
-          proxy.on('proxyRes', (proxyRes, req, _res) => {
-            console.log('Auth Response:', proxyRes.statusCode, req.url);
-          });
-        },
-      },
-      // 代理 AI 相关 API 请求到 AI 服务 (8083)
-      '/api/v1/ai': {
-        target: 'http://127.0.0.1:8083',
-        changeOrigin: true,
-        secure: false,
-        configure: (proxy, _options) => {
-          proxy.on('error', (err, _req, _res) => {
-            console.log('ai proxy error', err);
-          });
-          proxy.on('proxyReq', (proxyReq, req, _res) => {
-            console.log('AI Request:', req.method, req.url, '-> target:', proxyReq.path);
-          });
-          proxy.on('proxyRes', (proxyRes, req, _res) => {
-            console.log('AI Response:', proxyRes.statusCode, req.url);
-          });
-        },
-      },
-      // 代理 AI 新闻 API 请求到项目服务 (8084) - 新闻功能在项目服务中
-      '/api/ai/news': {
-        target: 'http://127.0.0.1:8084',
-        changeOrigin: true,
-        secure: false,
-        configure: (proxy, _options) => {
-          proxy.on('error', (err, _req, _res) => {
-            console.log('ai news proxy error', err);
-          });
-          proxy.on('proxyReq', (proxyReq, req, _res) => {
-            console.log('AI News Request:', req.method, req.url, '-> target:', proxyReq.path);
-          });
-          proxy.on('proxyRes', (proxyRes, req, _res) => {
-            console.log('AI News Response:', proxyRes.statusCode, req.url);
-          });
-        },
-      },
-      // 代理其他 API 请求到项目服务 (8084)
+      // 代理所有 API 请求到网关 (8080)
       '/api': {
-        target: 'http://127.0.0.1:8084',
+        target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
+        ws: true,
         configure: (proxy, _options) => {
           proxy.on('error', (err, req, res) => {
             console.log('project proxy error:', err.message);

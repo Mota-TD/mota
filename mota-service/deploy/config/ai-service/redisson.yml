@@ -1,0 +1,12 @@
+# Redisson配置文件 - Docker环境专用
+# 使用硬编码的 Redis 地址，因为 Redisson 的独立配置文件不支持 Spring 占位符
+singleServerConfig:
+  address: "redis://mota-redis:6379"
+  password: "your_redis_password_here"
+  database: 2
+  connectionMinimumIdleSize: 1
+  connectionPoolSize: 10
+  connectTimeout: 10000
+  timeout: 3000
+  retryAttempts: 3
+  retryInterval: 1500

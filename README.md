@@ -1,4 +1,4 @@
-# 🚀 Mota - AI驱动的智能项目管理平台
+# 🚀 Mota - AI驱动的团队协作平台
 
 <p align="center">
   <img src="docs/images/home.png" alt="Mota Logo" width="800"/>
@@ -80,7 +80,7 @@
 │                         客户端层                                  │
 ├─────────────┬─────────────┬─────────────┬─────────────────────────┤
 │  Web端      │  移动App    │  管理后台   │  第三方集成              │
-│  Next.js 14 │  Expo       │  Ant Design │  企微/钉钉/飞书         │
+│  Vite+React │  Expo       │  Ant Design │  企微/钉钉/飞书         │
 │             │  React Native│  Pro        │                        │
 └─────────────┴─────────────┴─────────────┴─────────────────────────┘
                               │
@@ -90,13 +90,6 @@
 │  Nginx (反向代理 + 负载均衡 + SSL)                                │
 │  Spring Cloud Gateway (路由 + 认证 + 限流 + 熔断)                 │
 └─────────────────────────────────────────────────────────────────┘
-                              │
-┌─────────────────────────────────────────────────────────────────┐
-│                         BFF层                                     │
-├─────────────┬─────────────┬─────────────────────────────────────┤
-│  user-bff   │  app-bff    │  admin-bff                          │
-│  (NestJS)   │  (NestJS)   │  (NestJS)                           │
-└─────────────┴─────────────┴─────────────────────────────────────┘
                               │
 ┌─────────────────────────────────────────────────────────────────┐
 │                       微服务层                                    │
@@ -115,14 +108,15 @@
 └───────┴───────┴───────┴───────┴───────┴───────┴────────────────┘
 ```
 
+> **架构说明**：前端直接通过 API Gateway 调用微服务，简化了架构层次，提升了性能和可维护性。
+
 ### 技术栈
 
 | 层级 | 技术选型 |
 |------|---------|
-| **前端 Web** | Next.js 14, React 18, TypeScript, Ant Design 5, TanStack Query, Zustand |
+| **前端 Web** | Vite 5, React 18, TypeScript, Ant Design 5, React Router 6, Zustand |
 | **移动端** | Expo, React Native, React Navigation |
 | **管理后台** | Ant Design Pro |
-| **BFF 层** | NestJS, TypeScript |
 | **微服务** | Spring Boot 3, Spring Cloud, MyBatis-Plus |
 | **数据库** | MySQL 8.0, Redis 7.2, Elasticsearch 8.11, Milvus 2.3 |
 | **消息队列** | Apache Kafka |
@@ -148,17 +142,22 @@ mota/
 │   ├── UI设计规范/            # UI 设计规范
 │   └── images/               # 文档图片
 │
-├── mota-web-next/            # 前端 Web 项目 (Next.js 14)
+├── mota-web/                 # 前端 Web 项目 (Vite + React)
 │   ├── src/
-│   │   ├── app/              # 页面路由 (App Router)
-│   │   │   ├── (auth)/       # 认证页面
-│   │   │   └── (console)/    # 控制台页面
+│   │   ├── pages/            # 页面组件
 │   │   ├── components/       # 公共组件
+│   │   ├── modules/          # 业务模块
+│   │   ├── layouts/          # 布局组件
+│   │   ├── router/           # 路由配置
+│   │   ├── services/         # API 服务
+│   │   ├── store/            # 状态管理
 │   │   ├── hooks/            # 自定义 Hooks
-│   │   ├── lib/              # 工具库
-│   │   ├── providers/        # Context Providers
-│   │   └── stores/           # 状态管理
+│   │   └── utils/            # 工具函数
+│   ├── vite.config.ts        # Vite 配置
 │   └── package.json
+│
+├── mota-web-next/            # 前端 Web 项目 (Next.js 14) - 已废弃
+│   └── README.md             # 查看废弃说明
 │
 ├── mota-service/             # 后端微服务 (Spring Cloud)
 │   ├── deploy/               # 部署配置
@@ -176,13 +175,17 @@ mota/
 │   ├── mota-calendar-service/# 日历服务
 │   └── mota-common/          # 公共模块
 │
-├── mota-bff/                 # BFF 聚合层 (NestJS)
-│   ├── mota-user-bff/        # 用户端 BFF
-│   ├── mota-app-bff/         # 移动端 BFF
-│   └── mota-admin-bff/       # 管理端 BFF
+├── mota-bff/                 # BFF 聚合层 (已废弃)
+│   ├── mota-user-bff/        # 用户端 BFF (已废弃)
+│   ├── mota-app-bff/         # 移动端 BFF (已废弃)
+│   └── mota-admin-bff/       # 管理端 BFF (已废弃)
 │
 └── mota-admin/               # 运营管理后台 (待开发)
 ```
+
+> **注意**：
+> - `mota-bff` 目录已废弃，前端现在直接通过 API Gateway 调用微服务。详见 [BFF层移除迁移方案](docs/BFF层移除迁移方案.md)
+> - `mota-web-next` 目录已废弃，项目已迁移至 Vite + React 架构（`mota-web`）。详见 [前端技术栈迁移说明](docs/前端技术栈迁移说明.md)
 
 ---
 
@@ -250,16 +253,24 @@ chmod +x start.sh
 
 ```bash
 # 1. 进入前端项目目录
-cd mota/mota-web-next
+cd mota/mota-web
 
-# 2. 安装依赖
+# 2. 配置环境变量（可选，已有默认配置）
+# 查看 .env 文件，确认配置正确
+
+# 3. 安装依赖
 npm install
 
-# 3. 启动开发服务器
+# 4. 启动开发服务器
 npm run dev
 
-# 4. 访问 http://localhost:3000
+# 5. 访问 http://localhost:3000
 ```
+
+> **重要**：
+> - 前端使用 Vite 开发服务器，支持热更新
+> - 已配置代理，自动转发 API 请求到后端服务
+> - 内置 Mock 数据，无需后端即可预览功能
 
 #### 启动完整后端服务
 
@@ -292,7 +303,7 @@ docker-compose -f docker-compose.services.yml ps
 
 | 服务 | 地址 | 说明 |
 |------|------|------|
-| **前端 Web** | http://localhost:3000 | Next.js 开发服务器 |
+| **前端 Web** | http://localhost:3000 | Vite 开发服务器 |
 | **API 网关** | http://localhost:8080 | Spring Cloud Gateway |
 | **Nacos 控制台** | http://localhost:8848/nacos | 服务注册与配置中心 |
 | **MinIO 控制台** | http://localhost:9001 | 对象存储管理 |
@@ -335,7 +346,7 @@ docker-compose -f docker-compose.services.yml ps
 ### 前端开发
 
 ```bash
-cd mota/mota-web-next
+cd mota/mota-web
 
 # 开发模式
 npm run dev
@@ -380,7 +391,7 @@ mvn spring-boot:run
 |------|------|------|
 | 第一阶段 | 基础设施搭建 | ✅ 已完成 |
 | 第二阶段 | 后端服务重构 | ✅ 已完成 |
-| 第三阶段 | 前端 Web 端重构 | ✅ 已完成 |
+| 第三阶段 | 前端 Web 端重构 (Vite + React) | ✅ 已完成 |
 | 第四阶段 | 移动 App 开发 | ⏳ 待实施 |
 | 第五阶段 | 运营管理后台 | ⏳ 待实施 |
 | 第六阶段 | 监控与运维体系 | ⏳ 待实施 |

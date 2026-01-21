@@ -46,6 +46,9 @@ CREATE DATABASE IF NOT EXISTS `mota_search` DEFAULT CHARACTER SET utf8mb4 COLLAT
 CREATE USER IF NOT EXISTS 'mota_auth'@'%' IDENTIFIED BY 'mota123';
 GRANT ALL PRIVILEGES ON `mota_auth`.* TO 'mota_auth'@'%';
 
+-- 创建 mota 用户并授权访问所有数据库
+CREATE USER IF NOT EXISTS 'mota'@'%' IDENTIFIED BY 'mota123';
+
 -- 授权 mota 用户访问所有数据库
 GRANT ALL PRIVILEGES ON `nacos_config`.* TO 'mota'@'%';
 GRANT ALL PRIVILEGES ON `mota_auth`.* TO 'mota'@'%';

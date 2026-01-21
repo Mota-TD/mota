@@ -2,7 +2,7 @@
 singleServerConfig:
   address: "redis://${REDIS_HOST:localhost}:${REDIS_PORT:6379}"
   password: ${REDIS_PASSWORD:}
-  database: 4
+  database: 0
   connectionMinimumIdleSize: 1
   connectionPoolSize: 10
   connectTimeout: 10000
