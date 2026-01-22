@@ -47,7 +47,10 @@ public class TenantLineHandlerImpl implements TenantLineHandler {
             "user_view_config",     // 用户视图配置表
             // 组织级别表（使用 org_id 而非 tenant_id）
             "department",           // 部门表
-            "sys_user"              // 用户表
+            "sys_user",             // 用户表
+            // 关联表（无 tenant_id 列）
+            "sys_role_permission",  // 角色权限关联表
+            "sys_user_role"         // 用户角色关联表
     ));
 
     @Override

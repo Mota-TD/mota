@@ -1,0 +1,59 @@
+# =====================================================
+# Mota User Service Dockerfile - 多阶段构建
+# 构建上下文应该是 mota-service 目录
+# =====================================================
+
+# 第一阶段：构建
+FROM eclipse-temurin:21-jdk-alpine AS builder
+
+WORKDIR /build
+
+# 安装 Maven
+RUN apk add --no-cache maven
+
+# 复制整个项目（包括所有模块）
+COPY . .
+
+# 构建项目（跳过测试）
+RUN mvn clean package -pl mota-user-service -am -DskipTests
+
+# 第二阶段：运行
+FROM eclipse-temurin:21-jre-alpine
+
+LABEL maintainer="Mota Team"
+LABEL description="Mota User Service - 用户管理服务"
+
+# 设置工作目录
+WORKDIR /app
+
+# 设置时区
+ENV TZ=Asia/Shanghai
+RUN apk add --no-cache tzdata curl && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone
+
+# 创建非root用户
+RUN addgroup -g 1000 mota && \
+    adduser -u 1000 -G mota -s /bin/sh -D mota
+
+# 从构建阶段复制jar文件
+COPY --from=builder /build/mota-user-service/target/*.jar app.jar
+
+# 设置文件权限
+RUN chown -R mota:mota /app
+
+# 切换到非root用户
+USER mota
+
+# 暴露端口
+EXPOSE 8087
+
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8087/actuator/health || exit 1
+
+# JVM参数
+ENV JAVA_OPTS="-Xms256m -Xmx512m -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:+HeapDumpOnOutOfMemoryError"
+
+# 启动命令
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar app.jar"]

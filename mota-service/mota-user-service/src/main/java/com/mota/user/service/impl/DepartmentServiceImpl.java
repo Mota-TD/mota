@@ -1,7 +1,7 @@
 package com.mota.user.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.mota.common.core.context.UserContext;
+import com.mota.common.core.context.TenantContext;
 import com.mota.common.core.exception.BusinessException;
 import com.mota.user.entity.Department;
 import com.mota.user.mapper.DepartmentMapper;
@@ -43,10 +43,8 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<Department> listByOrgId(String orgId) {
-        // 如果是 "default"，返回当前用户所属组织的部门
-        if ("default".equals(orgId)) {
-            orgId = UserContext.getOrgId();
-        }
+        // 如果是 "default"，返回当前租户的部门
+        // orgId 参数在多租户模式下会被自动过滤，这里不需要额外处理
         
         LambdaQueryWrapper<Department> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Department::getDeleted, 0)

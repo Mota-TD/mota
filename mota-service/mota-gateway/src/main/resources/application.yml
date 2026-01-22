@@ -61,6 +61,15 @@ spring:
             - StripPrefix=0
             - AuthFilter
 
+        # 角色管理 - 路由到用户服务
+        - id: mota-role-service
+          uri: lb://mota-user-service
+          predicates:
+            - Path=/api/v1/roles/**
+          filters:
+            - StripPrefix=0
+            - AuthFilter
+
         # ==================== 项目服务 ====================
         - id: mota-project-service
           uri: lb://mota-project-service
