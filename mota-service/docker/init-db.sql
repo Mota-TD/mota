@@ -3139,6 +3139,7 @@ CREATE TABLE IF NOT EXISTS sys_permission (
 -- 角色表
 CREATE TABLE IF NOT EXISTS sys_role (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT '角色ID',
+    tenant_id BIGINT DEFAULT 0 COMMENT '租户ID',
     name VARCHAR(100) NOT NULL COMMENT '角色名称',
     code VARCHAR(50) NOT NULL COMMENT '角色编码',
     sort INT DEFAULT 0 COMMENT '显示顺序',
@@ -3148,9 +3149,14 @@ CREATE TABLE IF NOT EXISTS sys_role (
     remark VARCHAR(500) DEFAULT NULL COMMENT '备注',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    created_by BIGINT DEFAULT NULL COMMENT '创建人ID',
+    updated_by BIGINT DEFAULT NULL COMMENT '更新人ID',
+    dept_id BIGINT DEFAULT NULL COMMENT '部门ID',
     deleted TINYINT DEFAULT 0 COMMENT '删除标志（0未删除 1已删除）',
+    version INT DEFAULT 0 COMMENT '乐观锁版本号',
     PRIMARY KEY (id),
     UNIQUE KEY uk_code (code),
+    KEY idx_tenant_id (tenant_id),
     KEY idx_status (status),
     KEY idx_deleted (deleted)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='角色表';
