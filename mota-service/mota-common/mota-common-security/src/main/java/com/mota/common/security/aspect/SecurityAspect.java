@@ -171,10 +171,18 @@ public class SecurityAspect {
 
     /**
      * 通配符匹配
-     * 支持 * 通配符，如 system:user:* 可以匹配 system:user:add
+     * 支持 * 通配符：
+     * - 单独的 * 表示所有权限
+     * - system:user:* 可以匹配 system:user:add
+     * - system:* 可以匹配 system:user:add
      */
     private boolean matchWildcard(Set<String> userPermissions, String requiredPermission) {
         for (String userPermission : userPermissions) {
+            // 单独的 * 表示拥有所有权限
+            if ("*".equals(userPermission)) {
+                return true;
+            }
+            // 以 * 结尾的通配符匹配
             if (userPermission.endsWith("*")) {
                 String prefix = userPermission.substring(0, userPermission.length() - 1);
                 if (requiredPermission.startsWith(prefix)) {

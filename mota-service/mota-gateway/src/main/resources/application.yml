@@ -52,8 +52,9 @@ spring:
             - StripPrefix=0
 
         # ==================== 用户服务 ====================
+        # 用户管理功能已集成到项目服务中
         - id: mota-user-service
-          uri: lb://mota-user-service
+          uri: lb://mota-project-service
           predicates:
             - Path=/api/v1/users/**
           filters:

@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +24,7 @@ import java.util.Map;
 /**
  * 执行任务 Controller
  */
+@Slf4j
 @Tag(name = "任务管理", description = "执行任务的增删改查和状态管理")
 @RestController
 @RequestMapping("/api/v1/tasks")

@@ -95,20 +95,29 @@ public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> 
                             Object orgIdObj = claims.get("orgId");
                             Object tenantIdObj = claims.get("tenantId");
                             Object rolesObj = claims.get("roles");
+                            Object permissionsObj = claims.get("permissions");
                             
                             String userId = userIdObj != null ? String.valueOf(userIdObj) : "";
                             String username = usernameObj != null ? String.valueOf(usernameObj) : "";
                             String orgId = orgIdObj != null ? String.valueOf(orgIdObj) : "";
                             String tenantId = tenantIdObj != null ? String.valueOf(tenantIdObj) : "";
                             String roles = rolesObj != null ? String.valueOf(rolesObj) : "";
+                            String permissions = permissionsObj != null ? String.valueOf(permissionsObj) : "";
+                            
+                            // 调试日志：打印 JWT 中的角色和权限信息
+                            log.info("JWT解析结果: userId={}, username={}, roles='{}', permissions='{}', rolesObj类型={}",
+                                    userId, username, roles, permissions,
+                                    rolesObj != null ? rolesObj.getClass().getName() : "null");
                             
                             // 将用户信息添加到请求头，传递给下游服务
+                            // 注意：请求头名称必须与 CommonConstants 中定义的一致
                             ServerHttpRequest mutatedRequest = request.mutate()
                                     .header("X-User-Id", userId)
                                     .header("X-Username", username)
                                     .header("X-Org-Id", orgId)
                                     .header("X-Tenant-Id", tenantId)
-                                    .header("X-User-Roles", roles)
+                                    .header("X-Roles", roles)           // 修正：与 CommonConstants.HEADER_ROLES 一致
+                                    .header("X-Permissions", permissions) // 与 CommonConstants.HEADER_PERMISSIONS 一致
                                     .header("X-Request-Id", generateRequestId())
                                     .build();
 

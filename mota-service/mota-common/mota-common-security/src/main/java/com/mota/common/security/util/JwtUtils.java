@@ -29,13 +29,32 @@ public class JwtUtils {
     private Long refreshExpiration;
 
     /**
-     * 生成访问令牌
+     * 生成访问令牌（基础版本，不含角色和权限）
      */
     public String generateAccessToken(Long userId, String username, String orgId) {
+        return generateAccessToken(userId, username, orgId, null, null, null);
+    }
+
+    /**
+     * 生成访问令牌（完整版本，包含角色和权限）
+     *
+     * @param userId 用户ID
+     * @param username 用户名
+     * @param orgId 组织ID
+     * @param tenantId 租户ID
+     * @param roles 角色列表（逗号分隔）
+     * @param permissions 权限列表（逗号分隔）
+     * @return JWT Token
+     */
+    public String generateAccessToken(Long userId, String username, String orgId,
+                                       Long tenantId, String roles, String permissions) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
         claims.put("username", username);
         claims.put("orgId", orgId);
+        claims.put("tenantId", tenantId != null ? tenantId : 1L);
+        claims.put("roles", roles != null ? roles : "");
+        claims.put("permissions", permissions != null ? permissions : "");
         claims.put("type", "access");
         return generateToken(claims, expiration);
     }

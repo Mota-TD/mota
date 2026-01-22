@@ -95,19 +95,70 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException(ResultCode.ACCOUNT_DISABLED);
         }
 
-        // 生成Token
+        // 查询用户所属企业和角色信息
+        Long tenantId = 1L; // 默认租户ID
+        String roles = "";
+        String permissions = "";
+        
+        log.info("登录调试: userId={}, orgId='{}', orgIdIsNull={}, orgIdIsEmpty={}",
+                user.getId(), user.getOrgId(), user.getOrgId() == null,
+                user.getOrgId() != null ? user.getOrgId().isEmpty() : "N/A");
+        
+        // 根据orgId查询企业信息
+        if (user.getOrgId() != null && !user.getOrgId().isEmpty()) {
+            Enterprise enterprise = enterpriseMapper.findByOrgId(user.getOrgId());
+            log.info("登录调试: 查询企业结果 enterprise={}", enterprise != null ? enterprise.getId() : "null");
+            if (enterprise != null) {
+                tenantId = enterprise.getId(); // 使用企业ID作为租户ID
+                
+                // 查询用户在该企业的成员信息
+                List<EnterpriseMember> members = enterpriseMemberMapper.findByUserId(user.getId());
+                log.info("登录调试: 查询成员结果 members.size={}", members != null ? members.size() : 0);
+                if (members != null && !members.isEmpty()) {
+                    // 获取用户角色列表
+                    StringBuilder roleBuilder = new StringBuilder();
+                    for (EnterpriseMember member : members) {
+                        if (member.getEnterpriseId().equals(enterprise.getId())) {
+                            if (roleBuilder.length() > 0) {
+                                roleBuilder.append(",");
+                            }
+                            roleBuilder.append(member.getRole());
+                            
+                            // 如果是超级管理员或管理员，添加admin角色
+                            if ("super_admin".equals(member.getRole()) || "admin".equals(member.getRole())) {
+                                if (roleBuilder.length() > 0) {
+                                    roleBuilder.append(",");
+                                }
+                                roleBuilder.append("admin");
+                            }
+                        }
+                    }
+                    roles = roleBuilder.toString();
+                    
+                    // 根据角色生成权限列表
+                    permissions = generatePermissionsByRole(roles);
+                }
+            }
+        }
+
+        // 生成Token（包含角色和权限信息）
         String accessToken = jwtUtils.generateAccessToken(
-                user.getId(), 
-                user.getUsername(), 
-                user.getOrgId()
+                user.getId(),
+                user.getUsername(),
+                user.getOrgId(),
+                tenantId,
+                roles,
+                permissions
         );
         String refreshToken = jwtUtils.generateRefreshToken(
-                user.getId(), 
+                user.getId(),
                 user.getUsername()
         );
 
         // 更新最后登录时间
         userMapper.updateLastLoginTime(user.getId());
+
+        log.info("用户登录成功: username={}, roles={}, tenantId={}", user.getUsername(), roles, tenantId);
 
         // 构建响应
         return LoginResponse.builder()
@@ -122,6 +173,43 @@ public class AuthServiceImpl implements AuthService {
                 .orgId(user.getOrgId())
                 .orgName(user.getOrgName())
                 .build();
+    }
+
+    /**
+     * 根据角色生成权限列表
+     *
+     * @param roles 角色列表（逗号分隔）
+     * @return 权限列表（逗号分隔）
+     */
+    private String generatePermissionsByRole(String roles) {
+        if (roles == null || roles.isEmpty()) {
+            return "";
+        }
+        
+        StringBuilder permissions = new StringBuilder();
+        
+        // 如果包含admin角色，赋予所有权限
+        if (roles.contains("admin") || roles.contains("super_admin")) {
+            permissions.append("*"); // 通配符表示所有权限
+            return permissions.toString();
+        }
+        
+        // 普通成员的基础权限
+        if (roles.contains("member")) {
+            permissions.append("system:user:query,"); // 查询用户
+            permissions.append("project:view,"); // 查看项目
+            permissions.append("project:task:view,"); // 查看任务
+            permissions.append("project:task:create,"); // 创建任务
+            permissions.append("project:task:update"); // 更新任务
+        }
+        
+        // 移除末尾的逗号
+        String result = permissions.toString();
+        if (result.endsWith(",")) {
+            result = result.substring(0, result.length() - 1);
+        }
+        
+        return result;
     }
 
     @Override
