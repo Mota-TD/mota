@@ -59,6 +59,7 @@ const SystemManagement = lazy(() => import('@/pages/system'))
 
 // 组织架构页面
 const Departments = lazy(() => import('@/pages/departments'))
+const Roles = lazy(() => import('@/pages/roles'))
 
 // 企业管理页面
 const EnterpriseManagement = lazy(() => import('@/pages/enterprise'))
@@ -402,6 +403,25 @@ export const routes: RouteObject[] = [
         element: (
           <Suspense fallback={<Loading />}>
             <Departments />
+          </Suspense>
+        )
+      },
+    ]
+  },
+  // 角色管理路由
+  {
+    path: '/roles',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ConsoleLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <Roles />
           </Suspense>
         )
       },

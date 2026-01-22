@@ -32,7 +32,8 @@ import {
   AppstoreOutlined,
   SettingOutlined,
   ApiOutlined,
-  HomeOutlined
+  HomeOutlined,
+  SafetyCertificateOutlined
 } from '@ant-design/icons'
 import { useAuthStore } from '@/store/auth'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
@@ -77,6 +78,10 @@ const routeBreadcrumbMap: Record<string, { title: string; icon?: React.ReactNode
   '/departments': [
     { title: '组织架构', icon: <ApartmentOutlined /> },
     { title: '部门管理', icon: <ApartmentOutlined /> }
+  ],
+  '/roles': [
+    { title: '组织架构', icon: <ApartmentOutlined /> },
+    { title: '角色管理', icon: <SafetyCertificateOutlined /> }
   ],
   '/help': [{ title: '帮助中心', icon: <QuestionCircleOutlined /> }],
   '/ai/assistant': [
@@ -333,6 +338,11 @@ const ConsoleLayout = () => {
           key: '/departments',
           icon: <ApartmentOutlined />,
           label: '部门管理',
+        },
+        {
+          key: '/roles',
+          icon: <SafetyCertificateOutlined />,
+          label: '角色管理',
         },
         {
           key: '/members',
