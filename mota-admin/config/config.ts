@@ -166,15 +166,16 @@ export default defineConfig({
       projectName: 'swagger',
     },
   ],
-  mock: {
-    include: ['mock/**/*', 'src/pages/**/_mock.ts'],
-  },
+  // Mock配置已禁用，使用真实API
+  // mock: {
+  //   include: ['mock/**/*', 'src/pages/**/_mock.ts'],
+  // },
   /**
-   * @name 是否开启 mako
-   * @description 使用 mako 极速研发
+   * @name 禁用 mako
+   * @description mako 在某些情况下会出现编译问题，禁用后使用默认构建
    * @doc https://umijs.org/docs/api/config#mako
    */
-  mako: {},
+  // mako: {},  // 禁用mako，使用默认webpack构建
   esbuildMinifyIIFE: true,
   requestRecord: {},
   exportStatic: {},
