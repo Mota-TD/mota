@@ -2,7 +2,7 @@
  * 租户管理相关类型定义
  */
 
-import { StatusEnum } from './common';
+import type { StatusEnum } from './common';
 
 /**
  * 租户信息

@@ -2,7 +2,7 @@
  * 用户管理相关类型定义
  */
 
-import { StatusEnum, RoleEnum } from './common';
+import type { RoleEnum, StatusEnum } from './common';
 
 /**
  * 用户基础信息
@@ -43,7 +43,8 @@ export interface CreateUserParams {
 /**
  * 用户更新请求
  */
-export interface UpdateUserParams extends Partial<Omit<CreateUserParams, 'password'>> {
+export interface UpdateUserParams
+  extends Partial<Omit<CreateUserParams, 'password'>> {
   id: string;
   status?: StatusEnum;
   avatar?: string;

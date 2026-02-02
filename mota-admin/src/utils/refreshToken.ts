@@ -4,11 +4,11 @@
 
 import { refreshToken as refreshTokenApi } from '@/services/auth';
 import {
-  getToken,
+  clearLoginInfo,
   getRefreshToken,
+  getToken,
   isTokenExpired,
   saveLoginInfo,
-  clearLoginInfo,
 } from './token';
 
 // 是否正在刷新token
@@ -27,7 +27,9 @@ function subscribeTokenRefresh(callback: (token: string) => void) {
  * 通知所有等待的请求
  */
 function onRefreshed(token: string) {
-  refreshSubscribers.forEach((callback) => callback(token));
+  for (const callback of refreshSubscribers) {
+    callback(token);
+  }
   refreshSubscribers = [];
 }
 
@@ -36,7 +38,7 @@ function onRefreshed(token: string) {
  */
 export async function tryRefreshToken(): Promise<string | null> {
   const refreshToken = getRefreshToken();
-  
+
   if (!refreshToken) {
     clearLoginInfo();
     return null;
@@ -55,16 +57,16 @@ export async function tryRefreshToken(): Promise<string | null> {
 
   try {
     const response = await refreshTokenApi({ refreshToken });
-    
+
     if (response.code === 0 && response.data) {
       const { token, refreshToken: newRefreshToken, expiresIn } = response.data;
-      
+
       // 保存新的token信息
       saveLoginInfo(token, newRefreshToken, expiresIn);
-      
+
       // 通知所有等待的请求
       onRefreshed(token);
-      
+
       return token;
     } else {
       // 刷新失败，清除登录信息
@@ -85,7 +87,7 @@ export async function tryRefreshToken(): Promise<string | null> {
  */
 export async function checkAndRefreshToken(): Promise<boolean> {
   const token = getToken();
-  
+
   if (!token) {
     return false;
   }

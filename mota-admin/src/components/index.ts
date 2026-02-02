@@ -5,10 +5,19 @@
 /**
  * 布局组件
  */
+
+import ErrorBoundary from './ErrorBoundary';
 import Footer from './Footer';
+import PageLoading from './PageLoading';
 import { Question, SelectLang } from './RightContent';
 import { AvatarDropdown, AvatarName } from './RightContent/AvatarDropdown';
-import PageLoading from './PageLoading';
-import ErrorBoundary from './ErrorBoundary';
 
-export { AvatarDropdown, AvatarName, Footer, Question, SelectLang, PageLoading, ErrorBoundary };
+export {
+  AvatarDropdown,
+  AvatarName,
+  Footer,
+  Question,
+  SelectLang,
+  PageLoading,
+  ErrorBoundary,
+};

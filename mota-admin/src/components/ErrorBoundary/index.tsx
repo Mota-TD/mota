@@ -3,7 +3,7 @@
  */
 
 import { Button, Result } from 'antd';
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { Component, type ErrorInfo, type ReactNode } from 'react';
 
 interface Props {
   children: ReactNode;

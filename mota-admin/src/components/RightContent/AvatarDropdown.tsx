@@ -5,7 +5,7 @@ import {
 } from '@ant-design/icons';
 import { history, useModel } from '@umijs/max';
 import type { MenuProps } from 'antd';
-import { Spin, message } from 'antd';
+import { message, Spin } from 'antd';
 import { createStyles } from 'antd-style';
 import React from 'react';
 import { flushSync } from 'react-dom';
@@ -59,12 +59,12 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({
     } finally {
       // 清除本地token信息
       clearLoginInfo();
-      
+
       const { search, pathname } = window.location;
       const searchParams = new URLSearchParams({
         redirect: pathname + search,
       });
-      
+
       // 跳转到登录页
       if (window.location.pathname !== '/user/login') {
         history.replace({

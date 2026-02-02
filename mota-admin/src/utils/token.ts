@@ -65,7 +65,7 @@ export function getTokenExpire(): number | null {
 export function isTokenExpired(): boolean {
   const expireTime = getTokenExpire();
   if (!expireTime) return true;
-  
+
   // 提前5分钟判断为过期，用于刷新token
   return Date.now() > expireTime - 5 * 60 * 1000;
 }
@@ -80,7 +80,11 @@ export function hasToken(): boolean {
 /**
  * 保存完整的登录信息
  */
-export function saveLoginInfo(token: string, refreshToken: string, expiresIn: number): void {
+export function saveLoginInfo(
+  token: string,
+  refreshToken: string,
+  expiresIn: number,
+): void {
   setToken(token);
   setRefreshToken(refreshToken);
   setTokenExpire(expiresIn);

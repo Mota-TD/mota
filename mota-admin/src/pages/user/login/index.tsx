@@ -1,19 +1,10 @@
-import {
-  LockOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import {
   LoginForm,
   ProFormCheckbox,
   ProFormText,
 } from '@ant-design/pro-components';
-import {
-  Helmet,
-  SelectLang,
-  useIntl,
-  useModel,
-  history,
-} from '@umijs/max';
+import { Helmet, history, SelectLang, useIntl, useModel } from '@umijs/max';
 import { Alert, App } from 'antd';
 import { createStyles } from 'antd-style';
 import React, { useState } from 'react';
@@ -59,7 +50,6 @@ const useStyles = createStyles(({ token }) => {
   };
 });
 
-
 const Lang = () => {
   const { styles } = useStyles();
 
@@ -87,7 +77,7 @@ const LoginMessage: React.FC<{
 
 const Login: React.FC = () => {
   const [loginError, setLoginError] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
+  const [_loading, setLoading] = useState<boolean>(false);
   const { initialState, setInitialState } = useModel('@@initialState');
   const { styles } = useStyles();
   const { message } = App.useApp();
@@ -118,25 +108,25 @@ const Login: React.FC = () => {
       });
 
       if (response.code === 0 && response.data) {
-        const { token, refreshToken, expiresIn, user } = response.data;
-        
+        const { token, refreshToken, expiresIn } = response.data;
+
         // 保存token信息
         saveLoginInfo(token, refreshToken, expiresIn);
-        
+
         const defaultLoginSuccessMessage = intl.formatMessage({
           id: 'pages.login.success',
           defaultMessage: '登录成功！',
         });
         message.success(defaultLoginSuccessMessage);
-        
+
         // 获取用户信息
         await fetchUserInfo();
-        
+
         // 跳转到首页或redirect参数指定的页面
         const urlParams = new URL(window.location.href).searchParams;
         const redirect = urlParams.get('redirect') || '/';
         history.push(redirect);
-        
+
         return;
       } else {
         // 登录失败
@@ -187,10 +177,8 @@ const Login: React.FC = () => {
             await handleSubmit(values as API.LoginParams);
           }}
         >
-          {loginError && (
-            <LoginMessage content={loginError} />
-          )}
-          
+          {loginError && <LoginMessage content={loginError} />}
+
           <ProFormText
             name="username"
             fieldProps={{

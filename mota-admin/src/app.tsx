@@ -12,10 +12,14 @@ import {
   SelectLang,
 } from '@/components';
 import { getCurrentUser } from '@/services/auth';
+import {
+  checkAndRefreshToken,
+  startTokenRefreshTimer,
+  stopTokenRefreshTimer,
+} from '@/utils/refreshToken';
+import { clearLoginInfo, getToken } from '@/utils/token';
 import defaultSettings from '../config/defaultSettings';
 import { errorConfig } from './requestErrorConfig';
-import { getToken, clearLoginInfo } from '@/utils/token';
-import { startTokenRefreshTimer, stopTokenRefreshTimer, checkAndRefreshToken } from '@/utils/refreshToken';
 import '@ant-design/v5-patch-for-react-19';
 
 const isDev = process.env.NODE_ENV === 'development';
@@ -46,7 +50,7 @@ export async function getInitialState(): Promise<{
       if (response.code === 0 && response.data) {
         return response.data;
       }
-      
+
       throw new Error('Failed to fetch user info');
     } catch (_error) {
       console.error('Fetch user info error:', _error);
@@ -57,9 +61,11 @@ export async function getInitialState(): Promise<{
   };
   // 如果不是登录页面，执行
   const { location } = history;
-  const isLoginPage = [loginPath, '/user/register', '/user/register-result'].includes(
-    location.pathname,
-  );
+  const isLoginPage = [
+    loginPath,
+    '/user/register',
+    '/user/register-result',
+  ].includes(location.pathname);
 
   if (!isLoginPage) {
     const token = getToken();
@@ -72,7 +78,7 @@ export async function getInitialState(): Promise<{
     }
 
     const currentUser = await fetchUserInfo();
-    
+
     // 启动token自动刷新定时器
     if (currentUser && !refreshTimer) {
       refreshTimer = startTokenRefreshTimer();

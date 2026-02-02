@@ -2,7 +2,7 @@
  * 认证授权相关类型定义
  */
 
-import { RoleEnum } from './common';
+import type { RoleEnum } from './common';
 
 /**
  * 登录请求参数
