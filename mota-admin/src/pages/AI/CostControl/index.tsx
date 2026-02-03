@@ -233,7 +233,7 @@ const CostControl: React.FC = () => {
           type: 'line',
           data: actual,
           smooth: true,
-          itemStyle: { color: '#1890ff' },
+          itemStyle: { color: '#10B981' },
           areaStyle: {
             color: {
               type: 'linear',
@@ -242,8 +242,8 @@ const CostControl: React.FC = () => {
               x2: 0,
               y2: 1,
               colorStops: [
-                { offset: 0, color: 'rgba(24, 144, 255, 0.3)' },
-                { offset: 1, color: 'rgba(24, 144, 255, 0.05)' },
+                { offset: 0, color: 'rgba(16, 185, 129, 0.3)' },
+                { offset: 1, color: 'rgba(16, 185, 129, 0.05)' },
               ],
             },
           },
@@ -254,9 +254,9 @@ const CostControl: React.FC = () => {
           data: budget,
           lineStyle: {
             type: 'dashed',
-            color: '#ff4d4f',
+            color: '#EF4444',
           },
-          itemStyle: { color: '#ff4d4f' },
+          itemStyle: { color: '#EF4444' },
         },
       ],
     };
@@ -530,7 +530,7 @@ const CostControl: React.FC = () => {
               value={statsData.currentSpend}
               prefix="$"
               precision={2}
-              valueStyle={{ color: '#cf1322' }}
+              valueStyle={{ color: '#EF4444' }}
             />
             <Progress
               percent={(statsData.currentSpend / statsData.totalBudget) * 100}
@@ -547,7 +547,7 @@ const CostControl: React.FC = () => {
               value={statsData.remainingBudget}
               prefix="$"
               precision={2}
-              valueStyle={{ color: '#3f8600' }}
+              valueStyle={{ color: '#22C55E' }}
             />
           </Card>
         </Col>
@@ -562,7 +562,7 @@ const CostControl: React.FC = () => {
                 </span>
               }
               valueStyle={{
-                color: statsData.pendingAlerts > 0 ? '#cf1322' : '#000',
+                color: statsData.pendingAlerts > 0 ? '#EF4444' : '#000',
               }}
             />
           </Card>
@@ -681,14 +681,14 @@ const CostControl: React.FC = () => {
                   title="预计节省"
                   value={item.potential}
                   prefix="$"
-                  valueStyle={{ fontSize: 20, color: '#3f8600' }}
+                  valueStyle={{ fontSize: 20, color: '#22C55E' }}
                 />
               }
             >
               <List.Item.Meta
                 avatar={
                   <CheckCircleOutlined
-                    style={{ fontSize: 24, color: '#52c41a' }}
+                    style={{ fontSize: 24, color: '#22C55E' }}
                   />
                 }
                 title={item.title}

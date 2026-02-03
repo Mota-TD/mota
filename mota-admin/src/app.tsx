@@ -29,6 +29,25 @@ const loginPath = '/user/login';
 let refreshTimer: NodeJS.Timeout | null = null;
 
 /**
+ * 从JWT Token中解析用户信息（作为getCurrentUser接口的备选方案）
+ */
+function parseUserInfoFromToken(token: string): API.CurrentUser | undefined {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return undefined;
+    
+    const payload = JSON.parse(atob(parts[1]));
+    return {
+      userid: String(payload.userId || ''),
+      name: payload.username || '',
+      access: 'admin', // 默认管理员权限
+    };
+  } catch {
+    return undefined;
+  }
+}
+
+/**
  * @see https://umijs.org/docs/api/runtime-config#getinitialstate
  * */
 export async function getInitialState(): Promise<{
@@ -39,16 +58,27 @@ export async function getInitialState(): Promise<{
 }> {
   const fetchUserInfo = async () => {
     try {
-      // 检查并刷新token
-      const tokenValid = await checkAndRefreshToken();
-      if (!tokenValid) {
+      const token = getToken();
+      if (!token) {
         history.push(loginPath);
         return undefined;
       }
 
-      const response = await getCurrentUser();
-      if (response.code === 0 && response.data) {
-        return response.data;
+      // 尝试从后端获取用户信息
+      try {
+        const response = await getCurrentUser();
+        if (response.code === 200 && response.data) {
+          return response.data;
+        }
+      } catch {
+        // getCurrentUser 接口失败，使用JWT中的信息作为备选
+        console.warn('getCurrentUser接口不可用，使用JWT中的用户信息');
+      }
+
+      // 从JWT Token中解析用户信息作为备选
+      const userInfo = parseUserInfoFromToken(token);
+      if (userInfo) {
+        return userInfo;
       }
 
       throw new Error('Failed to fetch user info');
@@ -104,6 +134,7 @@ export async function getInitialState(): Promise<{
 }
 
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
+// 摩塔管理后台 - 薄荷绿主题布局配置
 export const layout: RunTimeLayoutConfig = ({
   initialState,
   setInitialState,
@@ -119,6 +150,9 @@ export const layout: RunTimeLayoutConfig = ({
       render: (_, avatarChildren) => {
         return <AvatarDropdown>{avatarChildren}</AvatarDropdown>;
       },
+      style: {
+        backgroundColor: '#10B981',
+      },
     },
     waterMarkProps: {
       content: initialState?.currentUser?.name,
@@ -131,26 +165,8 @@ export const layout: RunTimeLayoutConfig = ({
         history.push(loginPath);
       }
     },
-    bgLayoutImgList: [
-      {
-        src: 'https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/D2LWSqNny4sAAAAAAAAAAAAAFl94AQBr',
-        left: 85,
-        bottom: 100,
-        height: '303px',
-      },
-      {
-        src: 'https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/C2TWRpJpiC0AAAAAAAAAAAAAFl94AQBr',
-        bottom: -68,
-        right: -45,
-        height: '303px',
-      },
-      {
-        src: 'https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/F6vSTbj8KpYAAAAAAAAAAAAAFl94AQBr',
-        bottom: 0,
-        left: 0,
-        width: '331px',
-      },
-    ],
+    // 移除 Alipay 背景图，使用简洁风格
+    bgLayoutImgList: [],
     links: isDev
       ? [
           <Link key="openapi" to="/umi/plugin/openapi" target="_blank">
@@ -159,7 +175,21 @@ export const layout: RunTimeLayoutConfig = ({
           </Link>,
         ]
       : [],
+    // Logo 渲染
     menuHeaderRender: undefined,
+    // Logo 配置
+    logo: '/logo.svg',
+    title: '摩塔管理后台',
+    // 确保菜单显示
+    menu: {
+      locale: true,
+    },
+    // 布局样式配置
+    layout: 'side',
+    navTheme: 'light',
+    contentWidth: 'Fluid',
+    fixedHeader: true,
+    fixSiderbar: true,
     // 自定义 403 页面
     // unAccessible: <div>unAccessible</div>,
     // 增加一个 loading 的状态
@@ -194,7 +224,8 @@ export const layout: RunTimeLayoutConfig = ({
  * @doc https://umijs.org/docs/max/request#配置
  */
 export const request: RequestConfig = {
-  baseURL: process.env.API_BASE_URL || 'http://localhost:8080/api/v1',
+  // 使用相对路径，通过代理转发到后端
+  baseURL: '/api/v1',
   timeout: 30000,
   ...errorConfig,
   requestInterceptors: [

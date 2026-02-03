@@ -1,27 +1,53 @@
 import type { ProLayoutProps } from '@ant-design/pro-components';
 
 /**
- * @name
+ * @name 摩塔管理后台 - 全局设置
+ * @description 基于 mota-web 的薄荷绿主题色系
  */
 const Settings: ProLayoutProps & {
   pwa?: boolean;
   logo?: string;
 } = {
   navTheme: 'light',
-  // 拂晓蓝
-  colorPrimary: '#1890ff',
-  layout: 'mix',
+  // 薄荷绿主题色 (Mint Green)
+  colorPrimary: '#10B981',
+  layout: 'side',
   contentWidth: 'Fluid',
-  fixedHeader: false,
+  fixedHeader: true,
   fixSiderbar: true,
   colorWeak: false,
-  title: 'Ant Design Pro',
+  title: '摩塔管理后台',
   pwa: true,
-  logo: 'https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg',
+  logo: '/logo.svg',
   iconfontUrl: '',
   token: {
-    // 参见ts声明，demo 见文档，通过token 修改样式
-    //https://procomponents.ant.design/components/layout#%E9%80%9A%E8%BF%87-token-%E4%BF%AE%E6%94%B9%E6%A0%B7%E5%BC%8F
+    // ProLayout Token 配置 - 薄荷绿主题
+    // 参考: https://procomponents.ant.design/components/layout#通过-token-修改样式
+    header: {
+      colorBgHeader: '#ffffff',
+      colorHeaderTitle: '#1E293B',
+      colorTextMenu: '#475569',
+      colorTextMenuSecondary: '#64748B',
+      colorTextMenuSelected: '#10B981',
+      colorBgMenuItemSelected: 'rgba(16, 185, 129, 0.1)',
+      colorTextMenuActive: '#10B981',
+      colorTextRightActionsItem: '#475569',
+    },
+    sider: {
+      colorMenuBackground: '#ffffff',
+      colorMenuItemDivider: '#F1F5F9',
+      colorTextMenu: '#475569',
+      colorTextMenuSelected: '#10B981',
+      colorTextMenuItemHover: '#10B981',
+      colorTextMenuActive: '#10B981',
+      colorBgMenuItemSelected: 'rgba(16, 185, 129, 0.1)',
+      colorBgMenuItemHover: 'rgba(16, 185, 129, 0.08)',
+      colorBgMenuItemCollapsedElevated: '#ffffff',
+    },
+    pageContainer: {
+      paddingBlockPageContainerContent: 24,
+      paddingInlinePageContainerContent: 24,
+    },
   },
 };
 

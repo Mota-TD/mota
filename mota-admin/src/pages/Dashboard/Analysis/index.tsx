@@ -131,21 +131,21 @@ const DashboardAnalysis: React.FC = () => {
         type: 'line',
         smooth: true,
         data: [85, 83, 84, 86, 85, 87],
-        itemStyle: { color: '#1890ff' },
+        itemStyle: { color: '#10B981' },
       },
       {
         name: '7日留存',
         type: 'line',
         smooth: true,
         data: [68, 65, 67, 70, 68, 72],
-        itemStyle: { color: '#52c41a' },
+        itemStyle: { color: '#0EA5E9' },
       },
       {
         name: '30日留存',
         type: 'line',
         smooth: true,
         data: [45, 42, 44, 48, 46, 50],
-        itemStyle: { color: '#faad14' },
+        itemStyle: { color: '#F59E0B' },
       },
     ],
   };
@@ -205,7 +205,7 @@ const DashboardAnalysis: React.FC = () => {
       left: 'center',
       bottom: '5%',
       inRange: {
-        color: ['#e0f3f8', '#abd9e9', '#74add1', '#4575b4', '#313695'],
+        color: ['#d1fae5', '#6ee7b7', '#34d399', '#10b981', '#047857'],
       },
     },
     series: [
@@ -367,8 +367,8 @@ const DashboardAnalysis: React.FC = () => {
             x2: 1,
             y2: 0,
             colorStops: [
-              { offset: 0, color: '#1890ff' },
-              { offset: 1, color: '#096dd9' },
+              { offset: 0, color: '#10B981' },
+              { offset: 1, color: '#059669' },
             ],
           },
         },
@@ -461,7 +461,7 @@ const DashboardAnalysis: React.FC = () => {
       dataIndex: 'growth',
       key: 'growth',
       render: (val: string) => (
-        <span style={{ color: '#52c41a', fontWeight: 'bold' }}>{val}</span>
+        <span style={{ color: '#22C55E', fontWeight: 'bold' }}>{val}</span>
       ),
     },
   ];
@@ -499,7 +499,7 @@ const DashboardAnalysis: React.FC = () => {
               value={15.8}
               precision={1}
               suffix="%"
-              valueStyle={{ color: '#1890ff' }}
+              valueStyle={{ color: '#10B981' }}
             />
           </Card>
         </Col>
@@ -510,7 +510,7 @@ const DashboardAnalysis: React.FC = () => {
               value={1288}
               precision={2}
               prefix="¥"
-              valueStyle={{ color: '#52c41a' }}
+              valueStyle={{ color: '#0EA5E9' }}
             />
           </Card>
         </Col>
@@ -521,7 +521,7 @@ const DashboardAnalysis: React.FC = () => {
               value={5678}
               precision={2}
               prefix="¥"
-              valueStyle={{ color: '#faad14' }}
+              valueStyle={{ color: '#F59E0B' }}
             />
           </Card>
         </Col>
@@ -532,7 +532,7 @@ const DashboardAnalysis: React.FC = () => {
               value={156}
               precision={2}
               prefix="¥"
-              valueStyle={{ color: '#722ed1' }}
+              valueStyle={{ color: '#8B5CF6' }}
             />
           </Card>
         </Col>

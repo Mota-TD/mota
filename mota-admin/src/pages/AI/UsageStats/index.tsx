@@ -115,13 +115,13 @@ const UsageStats: React.FC = () => {
               x2: 0,
               y2: 1,
               colorStops: [
-                { offset: 0, color: 'rgba(24, 144, 255, 0.3)' },
-                { offset: 1, color: 'rgba(24, 144, 255, 0.05)' },
+                { offset: 0, color: 'rgba(16, 185, 129, 0.3)' },
+                { offset: 1, color: 'rgba(16, 185, 129, 0.05)' },
               ],
             },
           },
           itemStyle: {
-            color: '#1890ff',
+            color: '#10B981',
           },
           lineStyle: {
             width: 2,
@@ -181,8 +181,8 @@ const UsageStats: React.FC = () => {
               x2: 0,
               y2: 1,
               colorStops: [
-                { offset: 0, color: '#52c41a' },
-                { offset: 1, color: '#52c41a80' },
+                { offset: 0, color: '#0EA5E9' },
+                { offset: 1, color: '#0EA5E980' },
               ],
             },
           },
@@ -294,7 +294,7 @@ const UsageStats: React.FC = () => {
           smooth: true,
           data: costs,
           itemStyle: {
-            color: '#fa8c16',
+            color: '#F59E0B',
           },
           lineStyle: {
             width: 2,
@@ -307,8 +307,8 @@ const UsageStats: React.FC = () => {
               x2: 0,
               y2: 1,
               colorStops: [
-                { offset: 0, color: 'rgba(250, 140, 22, 0.3)' },
-                { offset: 1, color: 'rgba(250, 140, 22, 0.05)' },
+                { offset: 0, color: 'rgba(245, 158, 11, 0.3)' },
+                { offset: 1, color: 'rgba(245, 158, 11, 0.05)' },
               ],
             },
           },
@@ -374,8 +374,8 @@ const UsageStats: React.FC = () => {
               x2: 1,
               y2: 0,
               colorStops: [
-                { offset: 0, color: '#1890ff' },
-                { offset: 1, color: '#36cfc9' },
+                { offset: 0, color: '#10B981' },
+                { offset: 1, color: '#0EA5E9' },
               ],
             },
           },
@@ -439,7 +439,7 @@ const UsageStats: React.FC = () => {
       width: 120,
       sorter: true,
       render: (text) => (
-        <span style={{ color: (text as number) >= 95 ? '#52c41a' : '#faad14' }}>
+        <span style={{ color: (text as number) >= 95 ? '#22C55E' : '#F59E0B' }}>
           {(text as number).toFixed(2)}%
         </span>
       ),
@@ -522,7 +522,7 @@ const UsageStats: React.FC = () => {
                 )
               }
               valueStyle={{
-                color: statsData.callsGrowth > 0 ? '#3f8600' : '#cf1322',
+                color: statsData.callsGrowth > 0 ? '#22C55E' : '#EF4444',
               }}
             />
             <div style={{ marginTop: 8, fontSize: 12, color: '#999' }}>
@@ -547,7 +547,7 @@ const UsageStats: React.FC = () => {
                 )
               }
               valueStyle={{
-                color: statsData.tokensGrowth > 0 ? '#3f8600' : '#cf1322',
+                color: statsData.tokensGrowth > 0 ? '#22C55E' : '#EF4444',
               }}
             />
             <div style={{ marginTop: 8, fontSize: 12, color: '#999' }}>
@@ -563,7 +563,7 @@ const UsageStats: React.FC = () => {
               prefix="$"
               precision={2}
               valueStyle={{
-                color: statsData.costGrowth < 0 ? '#3f8600' : '#cf1322',
+                color: statsData.costGrowth < 0 ? '#22C55E' : '#EF4444',
               }}
             />
             <div style={{ marginTop: 8, fontSize: 12, color: '#999' }}>
@@ -586,7 +586,7 @@ const UsageStats: React.FC = () => {
                 )
               }
               valueStyle={{
-                color: statsData.responseTimeGrowth < 0 ? '#3f8600' : '#cf1322',
+                color: statsData.responseTimeGrowth < 0 ? '#22C55E' : '#EF4444',
               }}
             />
             <div style={{ marginTop: 8, fontSize: 12, color: '#999' }}>

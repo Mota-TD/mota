@@ -398,7 +398,7 @@ const AIModelList: React.FC = () => {
               title="启用模型"
               value={mockData.filter((m) => m.status === 'enabled').length}
               suffix="个"
-              valueStyle={{ color: '#3f8600' }}
+              valueStyle={{ color: '#22C55E' }}
             />
           </Card>
         </Col>

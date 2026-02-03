@@ -66,7 +66,7 @@ const DashboardOverview: React.FC = () => {
         type: 'line',
         smooth: true,
         data: [120, 232, 301, 434, 590, 730, 820],
-        itemStyle: { color: '#1890ff' },
+        itemStyle: { color: '#10B981' },
         areaStyle: {
           color: {
             type: 'linear',
@@ -75,8 +75,8 @@ const DashboardOverview: React.FC = () => {
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: 'rgba(24, 144, 255, 0.3)' },
-              { offset: 1, color: 'rgba(24, 144, 255, 0.05)' },
+              { offset: 0, color: 'rgba(16, 185, 129, 0.3)' },
+              { offset: 1, color: 'rgba(16, 185, 129, 0.05)' },
             ],
           },
         },
@@ -86,14 +86,14 @@ const DashboardOverview: React.FC = () => {
         type: 'line',
         smooth: true,
         data: [220, 282, 391, 544, 690, 830, 920],
-        itemStyle: { color: '#52c41a' },
+        itemStyle: { color: '#0EA5E9' },
       },
       {
         name: '付费用户',
         type: 'line',
         smooth: true,
         data: [20, 42, 61, 94, 120, 153, 180],
-        itemStyle: { color: '#faad14' },
+        itemStyle: { color: '#F59E0B' },
       },
     ],
   };
@@ -143,10 +143,10 @@ const DashboardOverview: React.FC = () => {
           show: false,
         },
         data: [
-          { value: 156, name: '基础版', itemStyle: { color: '#5470c6' } },
-          { value: 234, name: '专业版', itemStyle: { color: '#91cc75' } },
-          { value: 123, name: '企业版', itemStyle: { color: '#fac858' } },
-          { value: 45, name: '旗舰版', itemStyle: { color: '#ee6666' } },
+          { value: 156, name: '基础版', itemStyle: { color: '#10B981' } },
+          { value: 234, name: '专业版', itemStyle: { color: '#0EA5E9' } },
+          { value: 123, name: '企业版', itemStyle: { color: '#F59E0B' } },
+          { value: 45, name: '旗舰版', itemStyle: { color: '#8B5CF6' } },
         ],
       },
     ],
@@ -188,21 +188,21 @@ const DashboardOverview: React.FC = () => {
         type: 'bar',
         stack: 'total',
         data: [320, 332, 301, 334, 390, 330, 320],
-        itemStyle: { color: '#1890ff' },
+        itemStyle: { color: '#10B981' },
       },
       {
         name: '图像识别',
         type: 'bar',
         stack: 'total',
         data: [120, 132, 101, 134, 90, 230, 210],
-        itemStyle: { color: '#52c41a' },
+        itemStyle: { color: '#0EA5E9' },
       },
       {
         name: '语音识别',
         type: 'bar',
         stack: 'total',
         data: [220, 182, 191, 234, 290, 330, 310],
-        itemStyle: { color: '#faad14' },
+        itemStyle: { color: '#F59E0B' },
       },
     ],
   };
@@ -249,8 +249,8 @@ const DashboardOverview: React.FC = () => {
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: '#1890ff' },
-              { offset: 1, color: '#096dd9' },
+              { offset: 0, color: '#10B981' },
+              { offset: 1, color: '#059669' },
             ],
           },
         },
@@ -274,15 +274,15 @@ const DashboardOverview: React.FC = () => {
               value={12345}
               prefix={<UserOutlined />}
               suffix={
-                <span style={{ fontSize: 14, color: '#52c41a', marginLeft: 8 }}>
+                <span style={{ fontSize: 14, color: '#22C55E', marginLeft: 8 }}>
                   <ArrowUpOutlined /> 12.5%
                 </span>
               }
-              valueStyle={{ color: '#1890ff' }}
+              valueStyle={{ color: '#10B981' }}
             />
             <Progress
               percent={75}
-              strokeColor="#1890ff"
+              strokeColor="#10B981"
               showInfo={false}
               style={{ marginTop: 8 }}
             />
@@ -296,15 +296,15 @@ const DashboardOverview: React.FC = () => {
               value={8901}
               prefix={<UserOutlined />}
               suffix={
-                <span style={{ fontSize: 14, color: '#52c41a', marginLeft: 8 }}>
+                <span style={{ fontSize: 14, color: '#22C55E', marginLeft: 8 }}>
                   <ArrowUpOutlined /> 8.3%
                 </span>
               }
-              valueStyle={{ color: '#52c41a' }}
+              valueStyle={{ color: '#0EA5E9' }}
             />
             <Progress
               percent={72}
-              strokeColor="#52c41a"
+              strokeColor="#0EA5E9"
               showInfo={false}
               style={{ marginTop: 8 }}
             />
@@ -318,15 +318,15 @@ const DashboardOverview: React.FC = () => {
               value={456}
               prefix={<TeamOutlined />}
               suffix={
-                <span style={{ fontSize: 14, color: '#52c41a', marginLeft: 8 }}>
+                <span style={{ fontSize: 14, color: '#22C55E', marginLeft: 8 }}>
                   <ArrowUpOutlined /> 5.6%
                 </span>
               }
-              valueStyle={{ color: '#faad14' }}
+              valueStyle={{ color: '#F59E0B' }}
             />
             <Progress
               percent={68}
-              strokeColor="#faad14"
+              strokeColor="#F59E0B"
               showInfo={false}
               style={{ marginTop: 8 }}
             />
@@ -340,11 +340,11 @@ const DashboardOverview: React.FC = () => {
               value={98765}
               prefix={<RobotOutlined />}
               suffix="次"
-              valueStyle={{ color: '#722ed1' }}
+              valueStyle={{ color: '#8B5CF6' }}
             />
             <Progress
               percent={85}
-              strokeColor="#722ed1"
+              strokeColor="#8B5CF6"
               showInfo={false}
               style={{ marginTop: 8 }}
             />
@@ -362,7 +362,7 @@ const DashboardOverview: React.FC = () => {
               prefix={<DollarOutlined />}
               precision={2}
               suffix="元"
-              valueStyle={{ color: '#cf1322' }}
+              valueStyle={{ color: '#EF4444' }}
             />
           </Card>
         </Col>
@@ -374,7 +374,7 @@ const DashboardOverview: React.FC = () => {
               prefix={<DollarOutlined />}
               precision={2}
               suffix={
-                <span style={{ fontSize: 14, color: '#52c41a', marginLeft: 8 }}>
+                <span style={{ fontSize: 14, color: '#22C55E', marginLeft: 8 }}>
                   <ArrowUpOutlined /> 18.2%
                 </span>
               }
@@ -389,7 +389,7 @@ const DashboardOverview: React.FC = () => {
               prefix={<DollarOutlined />}
               precision={2}
               suffix={
-                <span style={{ fontSize: 14, color: '#52c41a', marginLeft: 8 }}>
+                <span style={{ fontSize: 14, color: '#22C55E', marginLeft: 8 }}>
                   <ArrowUpOutlined /> 25.6%
                 </span>
               }
@@ -402,7 +402,7 @@ const DashboardOverview: React.FC = () => {
               title="续费率"
               value={87.5}
               suffix="%"
-              valueStyle={{ color: '#52c41a' }}
+              valueStyle={{ color: '#22C55E' }}
             />
           </Card>
         </Col>
@@ -473,7 +473,7 @@ const DashboardOverview: React.FC = () => {
                     style={{
                       fontSize: 24,
                       fontWeight: 'bold',
-                      color: '#52c41a',
+                      color: '#22C55E',
                     }}
                   >
                     99.9%
@@ -487,7 +487,7 @@ const DashboardOverview: React.FC = () => {
                     style={{
                       fontSize: 24,
                       fontWeight: 'bold',
-                      color: '#1890ff',
+                      color: '#10B981',
                     }}
                   >
                     45ms
@@ -503,7 +503,7 @@ const DashboardOverview: React.FC = () => {
                     style={{
                       fontSize: 24,
                       fontWeight: 'bold',
-                      color: '#faad14',
+                      color: '#F59E0B',
                     }}
                   >
                     1,234
@@ -517,7 +517,7 @@ const DashboardOverview: React.FC = () => {
                     style={{
                       fontSize: 24,
                       fontWeight: 'bold',
-                      color: '#722ed1',
+                      color: '#8B5CF6',
                     }}
                   >
                     5,678

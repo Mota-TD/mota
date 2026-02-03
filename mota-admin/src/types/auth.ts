@@ -10,20 +10,25 @@ import type { RoleEnum } from './common';
 export interface LoginParams {
   username: string;
   password: string;
-  type?: 'account' | 'mobile';
-  autoLogin?: boolean;
   captcha?: string;
+  captchaKey?: string;
+  rememberMe?: boolean;
 }
 
 /**
  * 登录响应数据
  */
 export interface LoginResult {
-  token: string;
+  accessToken: string;
   refreshToken: string;
-  expiresIn: number;
+  expiresIn: string | number;
   tokenType: string;
-  user: UserInfo;
+  userId: string;
+  username: string;
+  nickname: string;
+  avatar?: string;
+  orgId: string;
+  orgName: string;
 }
 
 /**

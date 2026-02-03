@@ -183,7 +183,7 @@ const PackageList: React.FC = () => {
       render: (_, record) => (
         <span
           style={{
-            color: record.price === 0 ? '#999' : '#1890ff',
+            color: record.price === 0 ? '#999' : '#10B981',
             fontWeight: 'bold',
           }}
         >
@@ -243,7 +243,7 @@ const PackageList: React.FC = () => {
         <Badge
           count={record.usageCount}
           showZero
-          color={record.usageCount > 0 ? '#52c41a' : '#d9d9d9'}
+          color={record.usageCount > 0 ? '#22C55E' : '#d9d9d9'}
           overflowCount={999}
         />
       ),
@@ -296,7 +296,7 @@ const PackageList: React.FC = () => {
                 actionRef.current?.reload();
               }}
             >
-              <a style={{ color: '#faad14' }}>禁用</a>
+              <a style={{ color: '#F59E0B' }}>禁用</a>
             </Popconfirm>
           ) : (
             <Popconfirm
@@ -306,7 +306,7 @@ const PackageList: React.FC = () => {
                 actionRef.current?.reload();
               }}
             >
-              <a style={{ color: '#52c41a' }}>启用</a>
+              <a style={{ color: '#22C55E' }}>启用</a>
             </Popconfirm>
           )}
           <Popconfirm
@@ -325,7 +325,7 @@ const PackageList: React.FC = () => {
               actionRef.current?.reload();
             }}
           >
-            <a style={{ color: '#ff4d4f' }}>
+            <a style={{ color: '#EF4444' }}>
               <DeleteOutlined /> 删除
             </a>
           </Popconfirm>
@@ -349,7 +349,7 @@ const PackageList: React.FC = () => {
               title="启用套餐"
               value={stats.active}
               suffix="个"
-              valueStyle={{ color: '#3f8600' }}
+              valueStyle={{ color: '#22C55E' }}
             />
           </Card>
         </Col>
@@ -365,7 +365,7 @@ const PackageList: React.FC = () => {
               value={stats.revenue}
               prefix="¥"
               precision={2}
-              valueStyle={{ color: '#cf1322' }}
+              valueStyle={{ color: '#EF4444' }}
             />
           </Card>
         </Col>

@@ -1,84 +1,108 @@
+import {
+  RobotOutlined,
+  TeamOutlined,
+  BarChartOutlined,
+  SafetyCertificateOutlined,
+  AppstoreOutlined,
+  FileTextOutlined
+} from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
-import { useModel } from '@umijs/max';
-import { Card, theme } from 'antd';
+import { useModel, history } from '@umijs/max';
+import { Card, theme, Row, Col, Button, Space } from 'antd';
 import React from 'react';
 
 /**
- * 每个单独的卡片，为了复用样式抽成了组件
- * @param param0
- * @returns
+ * 功能卡片组件
  */
-const InfoCard: React.FC<{
+const FeatureCard: React.FC<{
   title: string;
-  index: number;
+  icon: React.ReactNode;
   desc: string;
   href: string;
-}> = ({ title, href, index, desc }) => {
-  const { useToken } = theme;
-
-  const { token } = useToken();
+  color: string;
+}> = ({ title, href, icon, desc, color }) => {
+  const { token } = theme.useToken();
 
   return (
-    <div
+    <Card
+      hoverable
       style={{
-        backgroundColor: token.colorBgContainer,
-        boxShadow: token.boxShadow,
-        borderRadius: '8px',
-        fontSize: '14px',
-        color: token.colorTextSecondary,
-        lineHeight: '22px',
-        padding: '16px 19px',
-        minWidth: '220px',
-        flex: 1,
+        borderRadius: '12px',
+        height: '100%',
+        border: '1px solid #E2E8F0',
+        transition: 'all 0.3s ease',
       }}
+      styles={{
+        body: {
+          padding: '24px',
+        },
+      }}
+      onClick={() => history.push(href)}
     >
       <div
         style={{
+          width: 56,
+          height: 56,
+          borderRadius: '12px',
+          background: `linear-gradient(135deg, ${color}15 0%, ${color}25 100%)`,
           display: 'flex',
-          gap: '4px',
           alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 16,
+          fontSize: 24,
+          color: color,
         }}
       >
-        <div
-          style={{
-            width: 48,
-            height: 48,
-            lineHeight: '22px',
-            backgroundSize: '100%',
-            textAlign: 'center',
-            padding: '8px 16px 16px 12px',
-            color: '#FFF',
-            fontWeight: 'bold',
-            backgroundImage:
-              "url('https://gw.alipayobjects.com/zos/bmw-prod/daaf8d50-8e6d-4251-905d-676a24ddfa12.svg')",
-          }}
-        >
-          {index}
-        </div>
-        <div
-          style={{
-            fontSize: '16px',
-            color: token.colorText,
-            paddingBottom: 8,
-          }}
-        >
-          {title}
-        </div>
+        {icon}
+      </div>
+      <div
+        style={{
+          fontSize: '16px',
+          fontWeight: 600,
+          color: token.colorText,
+          marginBottom: 8,
+        }}
+      >
+        {title}
       </div>
       <div
         style={{
           fontSize: '14px',
           color: token.colorTextSecondary,
-          textAlign: 'justify',
           lineHeight: '22px',
-          marginBottom: 8,
         }}
       >
         {desc}
       </div>
-      <a href={href} target="_blank" rel="noreferrer">
-        了解更多 {'>'}
-      </a>
+    </Card>
+  );
+};
+
+/**
+ * 统计卡片组件
+ */
+const StatCard: React.FC<{
+  title: string;
+  value: string;
+  trend?: string;
+  color: string;
+}> = ({ title, value, trend, color }) => {
+  return (
+    <div
+      style={{
+        padding: '20px 24px',
+        background: `linear-gradient(135deg, ${color}08 0%, ${color}15 100%)`,
+        borderRadius: '12px',
+        border: `1px solid ${color}20`,
+      }}
+    >
+      <div style={{ fontSize: 14, color: '#64748B', marginBottom: 8 }}>{title}</div>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+        <span style={{ fontSize: 28, fontWeight: 700, color }}>{value}</span>
+        {trend && (
+          <span style={{ fontSize: 12, color: '#22C55E', fontWeight: 500 }}>{trend}</span>
+        )}
+      </div>
     </div>
   );
 };
@@ -86,79 +110,188 @@ const InfoCard: React.FC<{
 const Welcome: React.FC = () => {
   const { token } = theme.useToken();
   const { initialState } = useModel('@@initialState');
+  
   return (
-    <PageContainer>
+    <PageContainer
+      header={{
+        title: '工作台',
+        subTitle: '欢迎使用摩塔管理后台',
+      }}
+    >
+      {/* 欢迎横幅 */}
       <Card
         style={{
-          borderRadius: 8,
+          borderRadius: 12,
+          marginBottom: 24,
+          border: 'none',
+          background: 'linear-gradient(135deg, #047857 0%, #10B981 50%, #0d9488 100%)',
+          position: 'relative',
+          overflow: 'hidden',
         }}
         styles={{
           body: {
-            backgroundImage:
-              initialState?.settings?.navTheme === 'realDark'
-                ? 'background-image: linear-gradient(75deg, #1A1B1F 0%, #191C1F 100%)'
-                : 'background-image: linear-gradient(75deg, #FBFDFF 0%, #F5F7FF 100%)',
+            padding: '40px',
+            position: 'relative',
+            zIndex: 1,
           },
         }}
       >
+        {/* 背景装饰 */}
         <div
           style={{
-            backgroundPosition: '100% -30%',
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: '274px auto',
-            backgroundImage:
-              "url('https://gw.alipayobjects.com/mdn/rms_a9745b/afts/img/A*BuFmQqsB2iAAAAAAAAAAAAAAARQnAQ')",
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '50%',
+            height: '100%',
+            background: 'radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.15) 0%, transparent 50%)',
           }}
-        >
-          <div
-            style={{
-              fontSize: '20px',
-              color: token.colorTextHeading,
-            }}
-          >
-            欢迎使用 Ant Design Pro
-          </div>
-          <p
-            style={{
-              fontSize: '14px',
-              color: token.colorTextSecondary,
-              lineHeight: '22px',
-              marginTop: 16,
-              marginBottom: 32,
-              width: '65%',
-            }}
-          >
-            Ant Design Pro 是一个整合了 umi，Ant Design 和 ProComponents
-            的脚手架方案。致力于在设计规范和基础组件的基础上，继续向上构建，提炼出典型模板/业务组件/配套设计资源，进一步提升企业级中后台产品设计研发过程中的『用户』和『设计者』的体验。
-          </p>
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 16,
-            }}
-          >
-            <InfoCard
-              index={1}
-              href="https://umijs.org/docs/introduce/introduce"
-              title="了解 umi"
-              desc="umi 是一个可扩展的企业级前端应用框架,umi 以路由为基础的，同时支持配置式路由和约定式路由，保证路由的功能完备，并以此进行功能扩展。"
-            />
-            <InfoCard
-              index={2}
-              title="了解 ant design"
-              href="https://ant.design"
-              desc="antd 是基于 Ant Design 设计体系的 React UI 组件库，主要用于研发企业级中后台产品。"
-            />
-            <InfoCard
-              index={3}
-              title="了解 Pro Components"
-              href="https://procomponents.ant.design"
-              desc="ProComponents 是一个基于 Ant Design 做了更高抽象的模板组件，以 一个组件就是一个页面为开发理念，为中后台开发带来更好的体验。"
-            />
-          </div>
-        </div>
+        />
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            right: '10%',
+            transform: 'translateY(-50%)',
+            width: '200px',
+            height: '200px',
+            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 70%)',
+            borderRadius: '50%',
+            filter: 'blur(40px)',
+          }}
+        />
+        
+        <Row align="middle" gutter={24}>
+          <Col flex="1">
+            <div
+              style={{
+                fontSize: '28px',
+                fontWeight: 700,
+                color: '#fff',
+                marginBottom: 12,
+              }}
+            >
+              欢迎回来，{initialState?.currentUser?.name || '管理员'} 👋
+            </div>
+            <p
+              style={{
+                fontSize: '16px',
+                color: 'rgba(255, 255, 255, 0.85)',
+                lineHeight: '1.8',
+                marginBottom: 24,
+                maxWidth: '600px',
+              }}
+            >
+              摩塔管理后台提供完整的租户管理、用户管理、内容审核、AI调度等企业级SaaS运营功能，
+              助力企业高效运营和智能化转型。
+            </p>
+            <Space size={12}>
+              <Button
+                type="primary"
+                size="large"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  borderColor: 'rgba(255, 255, 255, 0.3)',
+                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+                }}
+                onClick={() => history.push('/dashboard/overview')}
+              >
+                查看数据概览
+              </Button>
+              <Button
+                size="large"
+                style={{
+                  background: '#fff',
+                  color: '#10B981',
+                  borderColor: '#fff',
+                }}
+                onClick={() => history.push('/tenant/list')}
+              >
+                租户管理
+              </Button>
+            </Space>
+          </Col>
+        </Row>
       </Card>
+
+      {/* 快速统计 */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+        <Col xs={24} sm={12} md={6}>
+          <StatCard title="总用户数" value="12,345" trend="+12.5%" color="#10B981" />
+        </Col>
+        <Col xs={24} sm={12} md={6}>
+          <StatCard title="活跃租户" value="456" trend="+8.3%" color="#0EA5E9" />
+        </Col>
+        <Col xs={24} sm={12} md={6}>
+          <StatCard title="今日AI调用" value="98,765" color="#F59E0B" />
+        </Col>
+        <Col xs={24} sm={12} md={6}>
+          <StatCard title="系统可用率" value="99.9%" color="#22C55E" />
+        </Col>
+      </Row>
+
+      {/* 功能入口 */}
+      <div style={{ marginBottom: 16 }}>
+        <h3 style={{ fontSize: 18, fontWeight: 600, color: token.colorText, marginBottom: 16 }}>
+          快速导航
+        </h3>
+      </div>
+      <Row gutter={[16, 16]}>
+        <Col xs={24} sm={12} lg={8}>
+          <FeatureCard
+            icon={<TeamOutlined />}
+            title="租户管理"
+            href="/tenant/list"
+            desc="管理平台租户，查看租户详情、套餐配置和使用统计，支持租户的创建、编辑和停用操作。"
+            color="#10B981"
+          />
+        </Col>
+        <Col xs={24} sm={12} lg={8}>
+          <FeatureCard
+            icon={<RobotOutlined />}
+            title="AI服务管理"
+            href="/ai/model-list"
+            desc="管理AI模型配置，监控API调用量和成本，设置调用限额和计费规则。"
+            color="#0EA5E9"
+          />
+        </Col>
+        <Col xs={24} sm={12} lg={8}>
+          <FeatureCard
+            icon={<BarChartOutlined />}
+            title="数据分析"
+            href="/dashboard/analysis"
+            desc="深度数据分析，用户行为漏斗、留存分析、热力图和多维度报表。"
+            color="#F59E0B"
+          />
+        </Col>
+        <Col xs={24} sm={12} lg={8}>
+          <FeatureCard
+            icon={<FileTextOutlined />}
+            title="内容审核"
+            href="/content/audit"
+            desc="内容安全审核，新闻稿件管理，模板配置，支持AI辅助审核。"
+            color="#8B5CF6"
+          />
+        </Col>
+        <Col xs={24} sm={12} lg={8}>
+          <FeatureCard
+            icon={<SafetyCertificateOutlined />}
+            title="系统监控"
+            href="/dashboard/monitor"
+            desc="实时系统监控，CPU、内存使用率，API请求统计，服务状态和告警管理。"
+            color="#EF4444"
+          />
+        </Col>
+        <Col xs={24} sm={12} lg={8}>
+          <FeatureCard
+            icon={<AppstoreOutlined />}
+            title="套餐管理"
+            href="/tenant/package-list"
+            desc="管理服务套餐，配置功能模块、使用配额和定价策略。"
+            color="#F97316"
+          />
+        </Col>
+      </Row>
     </PageContainer>
   );
 };

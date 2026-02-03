@@ -110,7 +110,7 @@ export default defineConfig({
   },
   /**
    * @name antd 插件
-   * @description 内置了 babel import 插件
+   * @description 内置了 babel import 插件 - 摩塔薄荷绿主题
    * @doc https://umijs.org/docs/max/antd#antd
    */
   antd: {
@@ -119,7 +119,154 @@ export default defineConfig({
       theme: {
         cssVar: true,
         token: {
-          fontFamily: 'AlibabaSans, sans-serif',
+          // 字体
+          fontFamily: 'Inter, AlibabaSans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+          
+          // 主色 - 薄荷绿 (Mint Green)
+          colorPrimary: '#10B981',
+          colorPrimaryHover: '#34D399',
+          colorPrimaryActive: '#059669',
+          colorPrimaryBg: 'rgba(16, 185, 129, 0.1)',
+          colorPrimaryBgHover: 'rgba(16, 185, 129, 0.15)',
+          colorPrimaryBorder: '#34D399',
+          colorPrimaryBorderHover: '#10B981',
+          colorPrimaryText: '#10B981',
+          colorPrimaryTextHover: '#34D399',
+          colorPrimaryTextActive: '#059669',
+          
+          // 成功色
+          colorSuccess: '#22C55E',
+          colorSuccessBg: '#F0FDF4',
+          colorSuccessBorder: '#86EFAC',
+          
+          // 警告色
+          colorWarning: '#F59E0B',
+          colorWarningBg: '#FFFBEB',
+          colorWarningBorder: '#FCD34D',
+          
+          // 错误色
+          colorError: '#EF4444',
+          colorErrorBg: '#FEF2F2',
+          colorErrorBorder: '#FCA5A5',
+          
+          // 信息色 - 天空蓝
+          colorInfo: '#0EA5E9',
+          colorInfoBg: '#F0F9FF',
+          colorInfoBorder: '#7DD3FC',
+          
+          // 链接色
+          colorLink: '#10B981',
+          colorLinkHover: '#34D399',
+          colorLinkActive: '#059669',
+          
+          // 文字色
+          colorText: '#1E293B',
+          colorTextSecondary: '#475569',
+          colorTextTertiary: '#64748B',
+          colorTextQuaternary: '#94A3B8',
+          colorTextPlaceholder: '#CBD5E1',
+          colorTextDisabled: '#CBD5E1',
+          
+          // 边框色
+          colorBorder: '#E2E8F0',
+          colorBorderSecondary: '#F1F5F9',
+          
+          // 填充色
+          colorFill: '#F1F5F9',
+          colorFillSecondary: '#F8FAFC',
+          colorFillTertiary: '#FFFFFF',
+          colorFillQuaternary: '#FFFFFF',
+          
+          // 背景色
+          colorBgContainer: '#FFFFFF',
+          colorBgElevated: '#FFFFFF',
+          colorBgLayout: '#F8FAFC',
+          colorBgSpotlight: '#F1F5F9',
+          colorBgMask: 'rgba(0, 0, 0, 0.45)',
+          
+          // 圆角
+          borderRadius: 8,
+          borderRadiusSM: 6,
+          borderRadiusLG: 12,
+          borderRadiusXS: 4,
+          
+          // 控件高度
+          controlHeight: 36,
+          controlHeightSM: 28,
+          controlHeightLG: 44,
+          
+          // 线宽
+          lineWidth: 1,
+          lineWidthBold: 2,
+          
+          // 阴影
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+          boxShadowSecondary: '0 8px 24px rgba(0, 0, 0, 0.12)',
+        },
+        components: {
+          Button: {
+            primaryShadow: '0 4px 16px rgba(16, 185, 129, 0.2)',
+            fontWeight: 500,
+          },
+          Card: {
+            borderRadiusLG: 12,
+          },
+          Table: {
+            headerBg: '#F8FAFC',
+            headerColor: '#475569',
+            rowHoverBg: 'rgba(16, 185, 129, 0.08)',
+          },
+          Menu: {
+            itemSelectedBg: 'rgba(16, 185, 129, 0.1)',
+            itemSelectedColor: '#10B981',
+            itemHoverBg: 'rgba(16, 185, 129, 0.08)',
+            itemHoverColor: '#10B981',
+          },
+          Input: {
+            activeBorderColor: '#10B981',
+            hoverBorderColor: '#34D399',
+            activeShadow: '0 0 0 2px rgba(16, 185, 129, 0.1)',
+          },
+          Select: {
+            optionSelectedBg: 'rgba(16, 185, 129, 0.1)',
+            optionSelectedColor: '#10B981',
+          },
+          Tabs: {
+            inkBarColor: '#10B981',
+            itemSelectedColor: '#10B981',
+            itemHoverColor: '#34D399',
+          },
+          Progress: {
+            defaultColor: '#10B981',
+          },
+          Switch: {
+            colorPrimary: '#10B981',
+            colorPrimaryHover: '#34D399',
+          },
+          Checkbox: {
+            colorPrimary: '#10B981',
+            colorPrimaryHover: '#34D399',
+          },
+          Radio: {
+            colorPrimary: '#10B981',
+            colorPrimaryHover: '#34D399',
+          },
+          Pagination: {
+            itemActiveBg: '#10B981',
+          },
+          Badge: {
+            colorError: '#EF4444',
+          },
+          Tag: {
+            defaultBg: '#F1F5F9',
+            defaultColor: '#475569',
+          },
+          Modal: {
+            borderRadiusLG: 12,
+          },
+          Drawer: {
+            borderRadiusLG: 12,
+          },
         },
       },
     },

@@ -253,7 +253,7 @@ const OrderList: React.FC = () => {
       search: false,
       render: (_, record) => (
         <span
-          style={{ color: record.discountAmount > 0 ? '#ff4d4f' : undefined }}
+          style={{ color: record.discountAmount > 0 ? '#EF4444' : undefined }}
         >
           {record.discountAmount > 0
             ? `-¥${record.discountAmount.toFixed(2)}`
@@ -268,7 +268,7 @@ const OrderList: React.FC = () => {
       search: false,
       sorter: true,
       render: (_, record) => (
-        <span style={{ color: '#1890ff', fontWeight: 'bold', fontSize: 14 }}>
+        <span style={{ color: '#10B981', fontWeight: 'bold', fontSize: 14 }}>
           ¥{record.actualAmount.toFixed(2)}
         </span>
       ),
@@ -352,7 +352,7 @@ const OrderList: React.FC = () => {
               onClick={() => {
                 message.info('支付功能开发中');
               }}
-              style={{ color: '#52c41a' }}
+              style={{ color: '#22C55E' }}
             >
               <CheckCircleOutlined /> 支付
             </a>
@@ -377,7 +377,7 @@ const OrderList: React.FC = () => {
               title="已支付"
               value={stats.paid}
               suffix="笔"
-              valueStyle={{ color: '#3f8600' }}
+              valueStyle={{ color: '#22C55E' }}
             />
           </Card>
         </Col>
@@ -387,7 +387,7 @@ const OrderList: React.FC = () => {
               title="待支付"
               value={stats.pending}
               suffix="笔"
-              valueStyle={{ color: '#faad14' }}
+              valueStyle={{ color: '#F59E0B' }}
             />
           </Card>
         </Col>
@@ -398,7 +398,7 @@ const OrderList: React.FC = () => {
               value={stats.revenue}
               prefix="¥"
               precision={2}
-              valueStyle={{ color: '#cf1322' }}
+              valueStyle={{ color: '#EF4444' }}
             />
           </Card>
         </Col>
@@ -415,7 +415,7 @@ const OrderList: React.FC = () => {
                 precision={2}
                 prefix="¥"
                 suffix={
-                  <span style={{ fontSize: 14, color: '#52c41a' }}>
+                  <span style={{ fontSize: 14, color: '#22C55E' }}>
                     <ArrowUpOutlined /> {recentRevenue.growth}%
                   </span>
                 }
@@ -437,7 +437,7 @@ const OrderList: React.FC = () => {
               <div style={{ marginBottom: 8 }}>订单完成率</div>
               <Progress
                 percent={(stats.paid / stats.total) * 100}
-                strokeColor="#52c41a"
+                strokeColor="#22C55E"
                 format={(percent) => `${percent?.toFixed(1)}%`}
               />
               <div style={{ marginTop: 8, color: '#999', fontSize: 12 }}>
@@ -572,7 +572,7 @@ const OrderList: React.FC = () => {
               </ProDescriptions.Item>
               <ProDescriptions.Item label="实付金额" span={2}>
                 <span
-                  style={{ color: '#1890ff', fontWeight: 'bold', fontSize: 16 }}
+                  style={{ color: '#10B981', fontWeight: 'bold', fontSize: 16 }}
                 >
                   ¥{currentOrder.actualAmount.toFixed(2)}
                 </span>

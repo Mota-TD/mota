@@ -96,7 +96,7 @@ const DashboardMonitor: React.FC = () => {
         type: 'line',
         smooth: true,
         data: cpuData,
-        itemStyle: { color: '#1890ff' },
+        itemStyle: { color: '#10B981' },
         areaStyle: {
           color: {
             type: 'linear',
@@ -105,8 +105,8 @@ const DashboardMonitor: React.FC = () => {
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: 'rgba(24, 144, 255, 0.5)' },
-              { offset: 1, color: 'rgba(24, 144, 255, 0.1)' },
+              { offset: 0, color: 'rgba(16, 185, 129, 0.5)' },
+              { offset: 1, color: 'rgba(16, 185, 129, 0.1)' },
             ],
           },
         },
@@ -159,7 +159,7 @@ const DashboardMonitor: React.FC = () => {
         type: 'line',
         smooth: true,
         data: memoryData,
-        itemStyle: { color: '#52c41a' },
+        itemStyle: { color: '#0EA5E9' },
         areaStyle: {
           color: {
             type: 'linear',
@@ -168,8 +168,8 @@ const DashboardMonitor: React.FC = () => {
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: 'rgba(82, 196, 26, 0.5)' },
-              { offset: 1, color: 'rgba(82, 196, 26, 0.1)' },
+              { offset: 0, color: 'rgba(14, 165, 233, 0.5)' },
+              { offset: 1, color: 'rgba(14, 165, 233, 0.1)' },
             ],
           },
         },
@@ -216,14 +216,14 @@ const DashboardMonitor: React.FC = () => {
         type: 'bar',
         stack: 'total',
         data: [320, 332, 301, 334, 390, 330],
-        itemStyle: { color: '#52c41a' },
+        itemStyle: { color: '#22C55E' },
       },
       {
         name: '失败',
         type: 'bar',
         stack: 'total',
         data: [12, 8, 15, 6, 10, 8],
-        itemStyle: { color: '#ff4d4f' },
+        itemStyle: { color: '#EF4444' },
       },
     ],
   };
@@ -272,10 +272,10 @@ const DashboardMonitor: React.FC = () => {
           show: false,
         },
         data: [
-          { value: 856, name: '<50ms', itemStyle: { color: '#52c41a' } },
-          { value: 234, name: '50-100ms', itemStyle: { color: '#1890ff' } },
-          { value: 123, name: '100-200ms', itemStyle: { color: '#faad14' } },
-          { value: 45, name: '>200ms', itemStyle: { color: '#ff4d4f' } },
+          { value: 856, name: '<50ms', itemStyle: { color: '#22C55E' } },
+          { value: 234, name: '50-100ms', itemStyle: { color: '#10B981' } },
+          { value: 123, name: '100-200ms', itemStyle: { color: '#F59E0B' } },
+          { value: 45, name: '>200ms', itemStyle: { color: '#EF4444' } },
         ],
       },
     ],
@@ -440,7 +440,7 @@ const DashboardMonitor: React.FC = () => {
           <Card>
             <div style={{ textAlign: 'center' }}>
               <div
-                style={{ fontSize: 28, fontWeight: 'bold', color: '#52c41a' }}
+                style={{ fontSize: 28, fontWeight: 'bold', color: '#22C55E' }}
               >
                 99.9%
               </div>
@@ -454,7 +454,7 @@ const DashboardMonitor: React.FC = () => {
           <Card>
             <div style={{ textAlign: 'center' }}>
               <div
-                style={{ fontSize: 28, fontWeight: 'bold', color: '#1890ff' }}
+                style={{ fontSize: 28, fontWeight: 'bold', color: '#10B981' }}
               >
                 {cpuData[cpuData.length - 1]?.toFixed(1) || 0}%
               </div>
@@ -472,7 +472,7 @@ const DashboardMonitor: React.FC = () => {
           <Card>
             <div style={{ textAlign: 'center' }}>
               <div
-                style={{ fontSize: 28, fontWeight: 'bold', color: '#52c41a' }}
+                style={{ fontSize: 28, fontWeight: 'bold', color: '#0EA5E9' }}
               >
                 {memoryData[memoryData.length - 1]?.toFixed(1) || 0}%
               </div>
@@ -486,7 +486,7 @@ const DashboardMonitor: React.FC = () => {
           <Card>
             <div style={{ textAlign: 'center' }}>
               <div
-                style={{ fontSize: 28, fontWeight: 'bold', color: '#faad14' }}
+                style={{ fontSize: 28, fontWeight: 'bold', color: '#F59E0B' }}
               >
                 1,234
               </div>

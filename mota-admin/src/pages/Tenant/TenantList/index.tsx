@@ -198,7 +198,7 @@ const TenantList: React.FC = () => {
                 }
               }}
             >
-              <a style={{ color: '#faad14' }}>暂停</a>
+              <a style={{ color: '#F59E0B' }}>暂停</a>
             </Popconfirm>
           ) : (
             <Popconfirm
@@ -213,7 +213,7 @@ const TenantList: React.FC = () => {
                 }
               }}
             >
-              <a style={{ color: '#52c41a' }}>启用</a>
+              <a style={{ color: '#22C55E' }}>启用</a>
             </Popconfirm>
           )}
           <Popconfirm
@@ -228,7 +228,7 @@ const TenantList: React.FC = () => {
               }
             }}
           >
-            <a style={{ color: '#ff4d4f' }}>删除</a>
+            <a style={{ color: '#EF4444' }}>删除</a>
           </Popconfirm>
         </Space>
       ),

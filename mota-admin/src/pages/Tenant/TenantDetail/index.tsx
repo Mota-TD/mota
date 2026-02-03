@@ -112,7 +112,7 @@ const TenantDetail: React.FC = () => {
           {
             value: tenant ? Number((tenant.storageUsed / 1024).toFixed(2)) : 0,
             name: '已使用',
-            itemStyle: { color: '#1890ff' },
+            itemStyle: { color: '#10B981' },
           },
           {
             value: tenant
@@ -175,7 +175,7 @@ const TenantDetail: React.FC = () => {
           {
             value: tenant?.aiQuotaUsed || 0,
             name: '已使用',
-            itemStyle: { color: '#52c41a' },
+            itemStyle: { color: '#0EA5E9' },
           },
           {
             value: tenant ? tenant.aiQuotaLimit - tenant.aiQuotaUsed : 0,
@@ -226,7 +226,7 @@ const TenantDetail: React.FC = () => {
         data: Array.from({ length: 30 }, () =>
           Math.floor(Math.random() * 50 + 20),
         ),
-        itemStyle: { color: '#1890ff' },
+        itemStyle: { color: '#10B981' },
       },
       {
         name: 'AI调用',
@@ -235,14 +235,14 @@ const TenantDetail: React.FC = () => {
         data: Array.from({ length: 30 }, () =>
           Math.floor(Math.random() * 500 + 200),
         ),
-        itemStyle: { color: '#52c41a' },
+        itemStyle: { color: '#0EA5E9' },
       },
       {
         name: '存储使用(GB)',
         type: 'line',
         smooth: true,
         data: Array.from({ length: 30 }, (_, i) => Math.floor(i * 2 + 50)),
-        itemStyle: { color: '#faad14' },
+        itemStyle: { color: '#F59E0B' },
       },
     ],
   };
@@ -347,7 +347,7 @@ const TenantDetail: React.FC = () => {
               title="用户数"
               value={tenant?.userCount || 0}
               suffix={`/ ${tenant?.maxUsers}`}
-              valueStyle={{ color: '#1890ff' }}
+              valueStyle={{ color: '#10B981' }}
             />
             <Progress
               percent={
@@ -357,7 +357,7 @@ const TenantDetail: React.FC = () => {
                     )
                   : 0
               }
-              strokeColor="#1890ff"
+              strokeColor="#10B981"
               style={{ marginTop: 8 }}
             />
           </div>
@@ -367,7 +367,7 @@ const TenantDetail: React.FC = () => {
               value={(tenant?.storageUsed || 0) / 1024}
               suffix={`GB / ${(tenant?.storageLimit || 0) / 1024}GB`}
               precision={2}
-              valueStyle={{ color: '#52c41a' }}
+              valueStyle={{ color: '#0EA5E9' }}
             />
             <Progress
               percent={
@@ -380,7 +380,7 @@ const TenantDetail: React.FC = () => {
                     )
                   : 0
               }
-              strokeColor="#52c41a"
+              strokeColor="#0EA5E9"
               style={{ marginTop: 8 }}
             />
           </div>
@@ -389,7 +389,7 @@ const TenantDetail: React.FC = () => {
               title="AI配额"
               value={tenant?.aiQuotaUsed || 0}
               suffix={`/ ${tenant?.aiQuotaLimit}`}
-              valueStyle={{ color: '#faad14' }}
+              valueStyle={{ color: '#F59E0B' }}
             />
             <Progress
               percent={
@@ -402,7 +402,7 @@ const TenantDetail: React.FC = () => {
                     )
                   : 0
               }
-              strokeColor="#faad14"
+              strokeColor="#F59E0B"
               style={{ marginTop: 8 }}
             />
           </div>

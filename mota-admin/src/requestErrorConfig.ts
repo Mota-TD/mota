@@ -16,6 +16,8 @@ enum ErrorShowType {
 interface ResponseStructure {
   success: boolean;
   data: any;
+  code?: number;
+  message?: string;
   errorCode?: number;
   errorMessage?: string;
   showType?: ErrorShowType;
@@ -31,12 +33,15 @@ export const errorConfig: RequestConfig = {
   errorConfig: {
     // 错误抛出
     errorThrower: (res) => {
-      const { success, data, errorCode, errorMessage, showType } =
+      const { success, data, code, message: resMessage, errorCode, errorMessage, showType } =
         res as unknown as ResponseStructure;
       if (!success) {
-        const error: any = new Error(errorMessage);
+        // 兼容后端 message 和 errorMessage 两种字段名
+        const errMsg = errorMessage || resMessage || '请求失败';
+        const errCode = errorCode || code;
+        const error: any = new Error(errMsg);
         error.name = 'BizError';
-        error.info = { errorCode, errorMessage, showType, data };
+        error.info = { errorCode: errCode, errorMessage: errMsg, showType, data };
         throw error; // 抛出自制的错误
       }
     },
@@ -113,23 +118,13 @@ export const errorConfig: RequestConfig = {
   },
 
   // 请求拦截器
-  requestInterceptors: [
-    (config: RequestOptions) => {
-      // 拦截请求配置，进行个性化处理。
-      const url = config?.url?.concat('?token=123');
-      return { ...config, url };
-    },
-  ],
+  requestInterceptors: [],
 
   // 响应拦截器
   responseInterceptors: [
     (response) => {
       // 拦截响应数据，进行个性化处理
-      const { data } = response as unknown as ResponseStructure;
-
-      if (data?.success === false) {
-        message.error('请求失败！');
-      }
+      // 注意：不在这里显示错误，让各个页面自己处理错误提示
       return response;
     },
   ],

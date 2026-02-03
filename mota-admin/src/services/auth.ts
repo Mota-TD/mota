@@ -22,6 +22,7 @@ export async function login(params: LoginParams) {
   return request<ApiResponse<LoginResult>>('/auth/login', {
     method: 'POST',
     data: params,
+    skipErrorHandler: true, // 登录接口跳过全局错误处理，由登录页面自行处理
   });
 }
 
