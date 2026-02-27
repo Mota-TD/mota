@@ -1,147 +1,163 @@
 <template>
-  <view class="project-list-container">
-    <!-- 搜索栏 -->
-    <view class="search-bar">
-      <view class="search-input">
+  <view class="project-list">
+    <!-- 导航栏 -->
+    <NavBar 
+      title="项目管理" 
+      :show-back="false"
+    >
+      <template #right>
+        <BaseButton 
+          variant="primary" 
+          size="sm" 
+          icon="➕" 
+          text="新建" 
+          @click="createProject"
+        />
+      </template>
+    </NavBar>
+
+    <!-- 搜索和筛选 -->
+    <view class="filters">
+      <view class="search-box">
         <text class="search-icon">🔍</text>
-        <input
-          v-model="searchKeyword"
-          class="input"
-          type="text"
+        <input 
+          v-model="searchQuery" 
+          class="search-input" 
           placeholder="搜索项目..."
-          @confirm="onSearch"
+          @input="handleSearch"
+        />
+        <BaseButton 
+          v-if="searchQuery" 
+          variant="ghost" 
+          size="sm" 
+          icon="✕" 
+          @click="clearSearch"
         />
       </view>
-      <view class="filter-btn" @click="showFilterPopup = true">
-        <text class="icon">⚙️</text>
-      </view>
-    </view>
 
-    <!-- 统计卡片 -->
-    <view class="stats-cards">
-      <view class="stat-card">
-        <text class="stat-value">{{ stats.total }}</text>
-        <text class="stat-label">全部项目</text>
-      </view>
-      <view class="stat-card">
-        <text class="stat-value">{{ stats.inProgress }}</text>
-        <text class="stat-label">进行中</text>
-      </view>
-      <view class="stat-card">
-        <text class="stat-value">{{ stats.completed }}</text>
-        <text class="stat-label">已完成</text>
+      <view class="filter-tabs">
+        <view 
+          v-for="tab in tabs" 
+          :key="tab.value"
+          :class="['tab-item', { 'active': activeTab === tab.value }]"
+          @click="setActiveTab(tab.value)"
+        >
+          <text class="tab-text">{{ tab.label }}</text>
+          <Badge 
+            v-if="tab.count > 0" 
+            :content="tab.count" 
+            size="sm" 
+            variant="primary"
+          />
+        </view>
       </view>
     </view>
 
     <!-- 项目列表 -->
-    <scroll-view
-      class="project-list"
-      scroll-y
-      @scrolltolower="onLoadMore"
-    >
-      <view v-if="loading && projects.length === 0" class="loading-state">
+    <scroll-view class="content" scroll-y>
+      <!-- 加载状态 -->
+      <view v-if="projectStore.isLoading" class="loading-state">
+        <view class="loading-spinner"></view>
         <text class="loading-text">加载中...</text>
       </view>
 
-      <view v-else-if="projects.length === 0" class="empty-state">
+      <!-- 空状态 -->
+      <view v-else-if="filteredProjects.length === 0" class="empty-state">
         <text class="empty-icon">📁</text>
         <text class="empty-text">暂无项目</text>
-        <button class="create-btn" @click="onCreateProject">创建项目</button>
+        <text class="empty-desc">创建您的第一个项目开始协作</text>
+        <BaseButton 
+          variant="primary" 
+          text="创建项目" 
+          @click="createProject"
+          class="mt-md"
+        />
       </view>
 
-      <view v-else>
-        <view
-          v-for="project in projects"
+      <!-- 项目列表 -->
+      <view v-else class="projects-grid">
+        <Card 
+          v-for="project in filteredProjects" 
           :key="project.id"
           class="project-card"
-          @click="onProjectClick(project.id)"
+          :hoverable="true"
+          :clickable="true"
+          @click="openProject(project.id)"
         >
-          <view class="card-header">
-            <text class="project-name">{{ project.name }}</text>
-            <view class="status-badge" :class="`status-${project.status}`">
-              {{ getStatusText(project.status) }}
+          <view class="project-header">
+            <view class="project-avatar">{{ project.icon }}</view>
+            <view class="project-info">
+              <text class="project-name">{{ project.name }}</text>
+              <view class="project-meta">
+                <Badge 
+                  :variant="getStatusVariant(project.status)"
+                  :content="getStatusText(project.status)"
+                  size="sm"
+                />
+                <text class="project-date">{{ formatDate(project.updatedAt) }}</text>
+              </view>
             </view>
           </view>
 
-          <text v-if="project.description" class="project-desc">
-            {{ project.description }}
-          </text>
-
-          <view class="project-meta">
-            <view class="meta-item">
-              <text class="meta-icon">👤</text>
-              <text class="meta-text">{{ project.ownerName }}</text>
-            </view>
-            <view class="meta-item">
-              <text class="meta-icon">👥</text>
-              <text class="meta-text">{{ project.memberCount }} 人</text>
-            </view>
-            <view class="meta-item">
-              <text class="meta-icon">✅</text>
-              <text class="meta-text">
-                {{ project.completedTaskCount }}/{{ project.taskCount }}
-              </text>
-            </view>
+          <view class="project-description">
+            <text>{{ project.description }}</text>
           </view>
 
-          <view class="progress-bar">
-            <view class="progress-fill" :style="{ width: project.progress + '%' }"></view>
-          </view>
-          <text class="progress-text">{{ project.progress }}%</text>
-        </view>
+          <view class="project-footer">
+            <view class="project-progress">
+              <text class="progress-label">进度</text>
+              <view class="progress-bar">
+                <view 
+                  class="progress-fill" 
+                  :style="{ width: project.progress + '%' }"
+                ></view>
+              </view>
+              <text class="progress-value">{{ project.progress }}%</text>
+            </view>
 
-        <view v-if="hasMore" class="load-more">
-          <text class="load-more-text">{{ loadingMore ? '加载中...' : '加载更多' }}</text>
-        </view>
+            <view class="project-actions">
+              <BaseButton 
+                variant="ghost" 
+                size="sm" 
+                icon="⋯" 
+                @click.stop="showProjectMenu(project)"
+              />
+            </view>
+          </view>
+        </Card>
+      </view>
+
+      <!-- 底部统计 -->
+      <view class="stats-footer">
+        <text class="stats-text">
+          共 {{ projectStore.projectStats.total }} 个项目，
+          {{ projectStore.projectStats.active }} 个进行中
+        </text>
       </view>
     </scroll-view>
 
-    <!-- 创建按钮 -->
-    <view class="fab" @click="onCreateProject">
-      <text class="fab-icon">+</text>
-    </view>
-
-    <!-- 筛选弹窗 -->
-    <view v-if="showFilterPopup" class="popup-mask" @click="showFilterPopup = false">
-      <view class="popup-content" @click.stop>
-        <view class="popup-header">
-          <text class="popup-title">筛选</text>
-          <text class="popup-close" @click="showFilterPopup = false">✕</text>
+    <!-- 项目操作菜单 -->
+    <view 
+      v-if="showMenu" 
+      class="action-menu"
+      @click="hideProjectMenu"
+    >
+      <view class="menu-content" @click.stop>
+        <view class="menu-item" @click="editProject">
+          <text class="menu-icon">✏️</text>
+          <text class="menu-text">编辑项目</text>
         </view>
-        
-        <view class="filter-section">
-          <text class="filter-label">状态</text>
-          <view class="filter-options">
-            <view
-              v-for="status in statusOptions"
-              :key="status.value"
-              class="filter-option"
-              :class="{ active: filterStatus === status.value }"
-              @click="filterStatus = status.value"
-            >
-              {{ status.label }}
-            </view>
-          </view>
+        <view class="menu-item" @click="archiveProject">
+          <text class="menu-icon">📁</text>
+          <text class="menu-text">归档项目</text>
         </view>
-
-        <view class="filter-section">
-          <text class="filter-label">优先级</text>
-          <view class="filter-options">
-            <view
-              v-for="priority in priorityOptions"
-              :key="priority.value"
-              class="filter-option"
-              :class="{ active: filterPriority === priority.value }"
-              @click="filterPriority = priority.value"
-            >
-              {{ priority.label }}
-            </view>
-          </view>
+        <view class="menu-item danger" @click="deleteProject">
+          <text class="menu-icon">🗑️</text>
+          <text class="menu-text">删除项目</text>
         </view>
-
-        <view class="popup-actions">
-          <button class="action-btn reset" @click="onResetFilter">重置</button>
-          <button class="action-btn confirm" @click="onConfirmFilter">确定</button>
+        <view class="menu-divider"></view>
+        <view class="menu-item" @click="hideProjectMenu">
+          <text class="menu-text">取消</text>
         </view>
       </view>
     </view>
@@ -150,372 +166,470 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { projectService, ProjectStatus } from '@/core/project'
-import type { Project } from '@/core/project'
+import { onLoad } from '@dcloudio/uni-app'
+import { useProjectStore } from '@/stores/project'
+import { useOffline } from '@/services/offline'
+import { useNotification } from '@/services/notification'
+import NavBar from '@/components/layout/NavBar.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+import Card from '@/components/ui/Card.vue'
+import Badge from '@/components/ui/Badge.vue'
 
-const projects = ref<Project[]>([])
-const loading = ref(false)
-const loadingMore = ref(false)
-const hasMore = ref(true)
-const page = ref(1)
-const pageSize = 20
+const projectStore = useProjectStore()
 
-const searchKeyword = ref('')
-const showFilterPopup = ref(false)
-const filterStatus = ref<string>('')
-const filterPriority = ref<string>('')
+// 离线功能
+const { addOperation, isOnline } = useOffline()
 
-const stats = computed(() => ({
-  total: projects.value.length,
-  inProgress: projects.value.filter(p => p.status === ProjectStatus.IN_PROGRESS).length,
-  completed: projects.value.filter(p => p.status === ProjectStatus.COMPLETED).length
-}))
+// 通知服务
+const { sendNotification, sendProjectNotification } = useNotification()
 
-const statusOptions = [
-  { label: '全部', value: '' },
-  { label: '规划中', value: ProjectStatus.PLANNING },
-  { label: '进行中', value: ProjectStatus.IN_PROGRESS },
-  { label: '已完成', value: ProjectStatus.COMPLETED },
-  { label: '已暂停', value: ProjectStatus.ON_HOLD }
-]
+// 响应式数据
+const searchQuery = ref('')
+const activeTab = ref<'all' | 'active' | 'completed' | 'overdue'>('all')
+const showMenu = ref(false)
+const selectedProject = ref<any>(null)
 
-const priorityOptions = [
-  { label: '全部', value: '' },
-  { label: '低', value: 'low' },
-  { label: '中', value: 'medium' },
-  { label: '高', value: 'high' },
-  { label: '紧急', value: 'urgent' }
-]
+// 计算属性
+const tabs = computed(() => [
+  { label: '全部', value: 'all', count: projectStore.projectStats.total },
+  { label: '进行中', value: 'active', count: projectStore.projectStats.active },
+  { label: '已完成', value: 'completed', count: projectStore.projectStats.completed },
+  { label: '已逾期', value: 'overdue', count: projectStore.projectStats.overdue }
+])
 
-onMounted(() => {
+const filteredProjects = computed(() => {
+  let projects = projectStore.filteredProjects
+  
+  // 标签筛选
+  if (activeTab.value !== 'all') {
+    if (activeTab.value === 'overdue') {
+      projects = projects.filter(project => {
+        if (!project.endDate) return false
+        return new Date(project.endDate) < new Date() && project.status !== 'completed'
+      })
+    } else {
+      projects = projects.filter(project => project.status === activeTab.value)
+    }
+  }
+  
+  return projects
+})
+
+// 生命周期
+onLoad(() => {
+  console.log('项目列表页面加载')
   loadProjects()
 })
 
-const loadProjects = async (refresh = false) => {
-  if (refresh) {
-    page.value = 1
-    projects.value = []
-    hasMore.value = true
-  }
+onMounted(() => {
+  // 设置搜索查询
+  projectStore.setSearchQuery(searchQuery.value)
+})
 
-  if (loading.value || loadingMore.value) return
+// 方法
+const loadProjects = async () => {
+  await projectStore.loadProjects()
+}
 
-  if (page.value === 1) {
-    loading.value = true
+const handleSearch = () => {
+  projectStore.setSearchQuery(searchQuery.value)
+}
+
+const clearSearch = () => {
+  searchQuery.value = ''
+  projectStore.setSearchQuery('')
+}
+
+const setActiveTab = (tab: 'all' | 'active' | 'completed' | 'overdue') => {
+  activeTab.value = tab
+  
+  // 设置状态筛选
+  if (tab === 'all') {
+    projectStore.setFilterStatus('all')
+  } else if (tab === 'overdue') {
+    projectStore.setFilterStatus('all')
   } else {
-    loadingMore.value = true
+    projectStore.setFilterStatus(tab)
   }
+}
 
-  try {
-    const response = await projectService.getMyProjects({
-      status: filterStatus.value || undefined,
-      page: page.value,
-      pageSize
+const createProject = () => {
+  uni.navigateTo({ url: '/pages/project/create' })
+}
+
+const openProject = (projectId: string) => {
+  uni.navigateTo({ url: `/pages/project/detail?id=${projectId}` })
+}
+
+const showProjectMenu = (project: any) => {
+  selectedProject.value = project
+  showMenu.value = true
+}
+
+const hideProjectMenu = () => {
+  showMenu.value = false
+  selectedProject.value = null
+}
+
+const editProject = () => {
+  if (selectedProject.value) {
+    uni.navigateTo({ 
+      url: `/pages/project/edit?id=${selectedProject.value.id}` 
     })
+    hideProjectMenu()
+  }
+}
 
-    if (refresh) {
-      projects.value = response.list
-    } else {
-      projects.value.push(...response.list)
+const archiveProject = async () => {
+  if (selectedProject.value) {
+    try {
+      // 如果离线，添加到离线队列
+      if (!isOnline.value) {
+        const operationId = addOperation('update', 'project', {
+          id: selectedProject.value.id,
+          status: 'completed'
+        })
+        
+        // 立即更新本地状态
+        projectStore.updateProject(selectedProject.value.id, { 
+          status: 'completed' 
+        })
+        
+        sendNotification({
+          title: '归档操作已保存',
+          message: '网络恢复后将自动同步到服务器',
+          type: 'info',
+          priority: 'normal',
+          category: 'system'
+        })
+      } else {
+        // 在线状态下直接更新
+        await projectStore.updateProject(selectedProject.value.id, { 
+          status: 'completed' 
+        })
+        
+        sendProjectNotification(selectedProject.value.id, 'completed')
+      }
+      
+      uni.showToast({ title: '项目已归档', icon: 'success' })
+    } catch (error) {
+      console.error('归档项目失败:', error)
+      uni.showToast({ title: '操作失败', icon: 'error' })
     }
+    hideProjectMenu()
+  }
+}
 
-    hasMore.value = projects.value.length < response.total
-  } catch (error: any) {
-    uni.showToast({
-      title: error.message || '加载失败',
-      icon: 'none'
+const deleteProject = async () => {
+  if (selectedProject.value) {
+    uni.showModal({
+      title: '确认删除',
+      content: `确定要删除项目"${selectedProject.value.name}"吗？此操作不可恢复。`,
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            // 如果离线，添加到离线队列
+            if (!isOnline.value) {
+              const operationId = addOperation('delete', 'project', {
+                id: selectedProject.value.id
+              })
+              
+              // 立即从本地移除
+              projectStore.deleteProject(selectedProject.value.id)
+              
+              sendNotification({
+                title: '删除操作已保存',
+                message: '网络恢复后将自动同步到服务器',
+                type: 'info',
+                priority: 'normal',
+                category: 'system'
+              })
+            } else {
+              // 在线状态下直接删除
+              await projectStore.deleteProject(selectedProject.value.id)
+              
+              sendNotification({
+                title: '项目已删除',
+                message: `项目"${selectedProject.value.name}"已删除`,
+                type: 'success',
+                priority: 'normal',
+                category: 'project'
+              })
+            }
+            
+            uni.showToast({ title: '项目已删除', icon: 'success' })
+          } catch (error) {
+            console.error('删除项目失败:', error)
+            uni.showToast({ title: '删除失败', icon: 'error' })
+          }
+        }
+        hideProjectMenu()
+      }
     })
-  } finally {
-    loading.value = false
-    loadingMore.value = false
   }
 }
 
-const onLoadMore = () => {
-  if (hasMore.value && !loading.value && !loadingMore.value) {
-    page.value++
-    loadProjects()
+const getStatusVariant = (status: string) => {
+  const variants = {
+    'planning': 'info',
+    'active': 'primary',
+    'paused': 'warning',
+    'completed': 'success',
+    'cancelled': 'error'
   }
+  return variants[status as keyof typeof variants] || 'info'
 }
 
-const onSearch = () => {
-  loadProjects(true)
-}
-
-const onResetFilter = () => {
-  filterStatus.value = ''
-  filterPriority.value = ''
-}
-
-const onConfirmFilter = () => {
-  showFilterPopup.value = false
-  loadProjects(true)
-}
-
-const onProjectClick = (projectId: string) => {
-  uni.navigateTo({
-    url: `/pages/project/detail/index?id=${projectId}`
-  })
-}
-
-const onCreateProject = () => {
-  uni.navigateTo({
-    url: '/pages/project/create/index'
-  })
-}
-
-const getStatusText = (status: ProjectStatus): string => {
-  const map: Record<ProjectStatus, string> = {
-    [ProjectStatus.PLANNING]: '规划中',
-    [ProjectStatus.IN_PROGRESS]: '进行中',
-    [ProjectStatus.ON_HOLD]: '已暂停',
-    [ProjectStatus.COMPLETED]: '已完成',
-    [ProjectStatus.CANCELLED]: '已取消'
+const getStatusText = (status: string) => {
+  const texts = {
+    'planning': '规划中',
+    'active': '进行中',
+    'paused': '已暂停',
+    'completed': '已完成',
+    'cancelled': '已取消'
   }
-  return map[status] || status
+  return texts[status as keyof typeof texts] || status
+}
+
+const formatDate = (date: Date) => {
+  return new Date(date).toLocaleDateString('zh-CN')
 }
 </script>
 
 <style lang="scss" scoped>
-.project-list-container {
+@import '@/styles/theme.scss';
+
+.project-list {
   min-height: 100vh;
-  background: #F9FAFB;
-  padding-bottom: 120rpx;
+  background: $bg-secondary;
 }
 
-.search-bar {
-  display: flex;
-  gap: 16rpx;
-  padding: 24rpx 32rpx;
-  background: #ffffff;
+.filters {
+  background: $bg-primary;
+  padding: $spacing-md;
+  border-bottom: 1px solid $border-color;
 }
 
-.search-input {
-  flex: 1;
+.search-box {
   display: flex;
   align-items: center;
-  background: #F3F4F6;
-  border-radius: 12rpx;
-  padding: 16rpx 20rpx;
+  background: $bg-tertiary;
+  border-radius: $border-radius-md;
+  padding: $spacing-sm $spacing-md;
+  margin-bottom: $spacing-md;
+  
+  .search-icon {
+    margin-right: $spacing-sm;
+    font-size: $font-size-lg;
+    color: $text-placeholder;
+  }
+  
+  .search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: $font-size-md;
+    color: $text-primary;
+    
+    &::placeholder {
+      color: $text-placeholder;
+    }
+  }
 }
 
-.search-icon {
-  font-size: 32rpx;
-  margin-right: 12rpx;
-}
-
-.input {
-  flex: 1;
-  font-size: 28rpx;
-  color: #1F2937;
-}
-
-.filter-btn {
-  width: 80rpx;
-  height: 80rpx;
+.filter-tabs {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #F3F4F6;
-  border-radius: 12rpx;
-  font-size: 32rpx;
+  gap: $spacing-md;
+  
+  .tab-item {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    padding: $spacing-xs $spacing-md;
+    border-radius: $border-radius-full;
+    background: $bg-tertiary;
+    color: $text-secondary;
+    font-size: $font-size-sm;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &.active {
+      background: $primary-color;
+      color: $text-white;
+    }
+    
+    &:active {
+      opacity: 0.7;
+    }
+  }
 }
 
-.stats-cards {
-  display: flex;
-  gap: 16rpx;
-  padding: 0 32rpx 24rpx;
-  background: #ffffff;
+.content {
+  height: calc(100vh - 200rpx);
+  padding: $spacing-md;
 }
 
-.stat-card {
-  flex: 1;
+.loading-state {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 24rpx;
-  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-  border-radius: 16rpx;
-  color: #ffffff;
+  justify-content: center;
+  padding: 120rpx 0;
+  
+  .loading-spinner {
+    width: 60rpx;
+    height: 60rpx;
+    border: 4rpx solid $neutral-200;
+    border-top: 4rpx solid $primary-color;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: $spacing-md;
+  }
+  
+  .loading-text {
+    color: $text-secondary;
+    font-size: $font-size-md;
+  }
 }
 
-.stat-value {
-  font-size: 40rpx;
-  font-weight: bold;
-  margin-bottom: 8rpx;
-}
-
-.stat-label {
-  font-size: 24rpx;
-  opacity: 0.9;
-}
-
-.project-list {
-  flex: 1;
-  padding: 24rpx 32rpx;
-}
-
-.loading-state,
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 120rpx 48rpx;
+  padding: 120rpx $spacing-md;
   text-align: center;
+  
+  .empty-icon {
+    font-size: 120rpx;
+    margin-bottom: $spacing-lg;
+    opacity: 0.3;
+  }
+  
+  .empty-text {
+    font-size: $font-size-lg;
+    color: $text-secondary;
+    margin-bottom: $spacing-sm;
+  }
+  
+  .empty-desc {
+    font-size: $font-size-md;
+    color: $text-placeholder;
+    line-height: 1.6;
+    margin-bottom: $spacing-lg;
+  }
 }
 
-.loading-text {
-  font-size: 28rpx;
-  color: #9CA3AF;
-}
-
-.empty-icon {
-  font-size: 120rpx;
-  margin-bottom: 32rpx;
-}
-
-.empty-text {
-  font-size: 32rpx;
-  color: #6B7280;
-  margin-bottom: 32rpx;
-}
-
-.create-btn {
-  padding: 16rpx 48rpx;
-  background: linear-gradient(90deg, #10B981 0%, #059669 100%);
-  border-radius: 12rpx;
-  font-size: 28rpx;
-  color: #ffffff;
-  border: none;
+.projects-grid {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
 }
 
 .project-card {
-  background: #ffffff;
-  border-radius: 16rpx;
-  padding: 32rpx;
-  margin-bottom: 24rpx;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16rpx;
-}
-
-.project-name {
-  flex: 1;
-  font-size: 32rpx;
-  font-weight: bold;
-  color: #1F2937;
-}
-
-.status-badge {
-  padding: 8rpx 16rpx;
-  border-radius: 8rpx;
-  font-size: 24rpx;
-  color: #ffffff;
-
-  &.status-planning {
-    background: #6B7280;
+  .project-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: $spacing-md;
+    
+    .project-avatar {
+      width: 80rpx;
+      height: 80rpx;
+      border-radius: $border-radius-lg;
+      background: linear-gradient(135deg, $primary-color, $primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: $font-size-2xl;
+      margin-right: $spacing-md;
+    }
+    
+    .project-info {
+      flex: 1;
+      
+      .project-name {
+        display: block;
+        font-size: $font-size-lg;
+        font-weight: $font-weight-semibold;
+        color: $text-primary;
+        margin-bottom: $spacing-xs;
+      }
+      
+      .project-meta {
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+        
+        .project-date {
+          font-size: $font-size-sm;
+          color: $text-placeholder;
+        }
+      }
+    }
   }
-
-  &.status-in_progress {
-    background: #10B981;
+  
+  .project-description {
+    color: $text-secondary;
+    font-size: $font-size-md;
+    line-height: 1.5;
+    margin-bottom: $spacing-md;
   }
-
-  &.status-completed {
-    background: #3B82F6;
+  
+  .project-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    
+    .project-progress {
+      flex: 1;
+      
+      .progress-label {
+        display: block;
+        font-size: $font-size-sm;
+        color: $text-secondary;
+        margin-bottom: $spacing-xs;
+      }
+      
+      .progress-bar {
+        width: 100%;
+        height: 8rpx;
+        background: $neutral-200;
+        border-radius: $border-radius-full;
+        overflow: hidden;
+        margin-bottom: $spacing-xs;
+        
+        .progress-fill {
+          height: 100%;
+          background: linear-gradient(90deg, $primary-color, $primary-light);
+          border-radius: $border-radius-full;
+          transition: width 0.3s ease;
+        }
+      }
+      
+      .progress-value {
+        font-size: $font-size-sm;
+        color: $text-secondary;
+      }
+    }
+    
+    .project-actions {
+      margin-left: $spacing-md;
+    }
   }
-
-  &.status-on_hold {
-    background: #F59E0B;
-  }
 }
 
-.project-desc {
-  font-size: 28rpx;
-  color: #6B7280;
-  line-height: 1.6;
-  margin-bottom: 16rpx;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.project-meta {
-  display: flex;
-  gap: 24rpx;
-  margin-bottom: 16rpx;
-}
-
-.meta-item {
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
-  font-size: 24rpx;
-  color: #9CA3AF;
-}
-
-.meta-icon {
-  font-size: 28rpx;
-}
-
-.progress-bar {
-  height: 8rpx;
-  background: #E5E7EB;
-  border-radius: 4rpx;
-  overflow: hidden;
-  margin-bottom: 8rpx;
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #10B981 0%, #059669 100%);
-  transition: width 0.3s;
-}
-
-.progress-text {
-  font-size: 24rpx;
-  color: #9CA3AF;
-  text-align: right;
-  display: block;
-}
-
-.load-more {
-  padding: 32rpx;
+.stats-footer {
   text-align: center;
+  padding: $spacing-lg 0;
+  
+  .stats-text {
+    font-size: $font-size-sm;
+    color: $text-placeholder;
+  }
 }
 
-.load-more-text {
-  font-size: 28rpx;
-  color: #9CA3AF;
-}
-
-.fab {
-  position: fixed;
-  right: 48rpx;
-  bottom: 48rpx;
-  width: 112rpx;
-  height: 112rpx;
-  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8rpx 24rpx rgba(16, 185, 129, 0.4);
-}
-
-.fab-icon {
-  font-size: 64rpx;
-  font-weight: 300;
-  color: #ffffff;
-}
-
-.popup-mask {
+.action-menu {
   position: fixed;
   top: 0;
   left: 0;
@@ -525,87 +639,50 @@ const getStatusText = (status: ProjectStatus): string => {
   display: flex;
   align-items: flex-end;
   z-index: 1000;
-}
-
-.popup-content {
-  width: 100%;
-  max-height: 80vh;
-  background: #ffffff;
-  border-radius: 32rpx 32rpx 0 0;
-  padding: 32rpx;
-}
-
-.popup-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 32rpx;
-}
-
-.popup-title {
-  font-size: 36rpx;
-  font-weight: bold;
-  color: #1F2937;
-}
-
-.popup-close {
-  font-size: 48rpx;
-  color: #9CA3AF;
-}
-
-.filter-section {
-  margin-bottom: 32rpx;
-}
-
-.filter-label {
-  display: block;
-  font-size: 28rpx;
-  font-weight: 500;
-  color: #6B7280;
-  margin-bottom: 16rpx;
-}
-
-.filter-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16rpx;
-}
-
-.filter-option {
-  padding: 12rpx 24rpx;
-  background: #F3F4F6;
-  border-radius: 8rpx;
-  font-size: 28rpx;
-  color: #6B7280;
-
-  &.active {
-    background: #10B981;
-    color: #ffffff;
+  
+  .menu-content {
+    background: $bg-primary;
+    border-radius: $border-radius-lg $border-radius-lg 0 0;
+    padding: $spacing-md;
+    width: 100%;
+    
+    .menu-item {
+      display: flex;
+      align-items: center;
+      padding: $spacing-lg $spacing-md;
+      border-radius: $border-radius-md;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      
+      &:active {
+        background: $neutral-100;
+      }
+      
+      &.danger {
+        color: $error-color;
+      }
+      
+      .menu-icon {
+        margin-right: $spacing-md;
+        font-size: $font-size-lg;
+      }
+      
+      .menu-text {
+        font-size: $font-size-md;
+        font-weight: $font-weight-medium;
+      }
+    }
+    
+    .menu-divider {
+      height: 1px;
+      background: $border-color;
+      margin: $spacing-sm 0;
+    }
   }
 }
 
-.popup-actions {
-  display: flex;
-  gap: 16rpx;
-  margin-top: 32rpx;
-}
-
-.action-btn {
-  flex: 1;
-  height: 88rpx;
-  border-radius: 12rpx;
-  font-size: 32rpx;
-  font-weight: 500;
-  border: none;
-
-  &.reset {
-    background: #F3F4F6;
-    color: #6B7280;
-  }
-
-  &.confirm {
-    background: linear-gradient(90deg, #10B981 0%, #059669 100%);
-    color: #ffffff;
-  }
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>

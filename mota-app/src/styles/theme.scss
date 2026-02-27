@@ -1,0 +1,119 @@
+/* 与web版本一致的设计系统主题配置 */
+
+// 主色调 - 与web版本一致的绿色系
+$primary-color: #059669; // 深绿 - 与web版本一致
+$primary-light: #10B981;
+$primary-lighter: #34D399;
+$primary-dark: #047857;
+
+// 辅助色系 - 专业灰调
+$secondary-color: #475569; // 深灰
+$secondary-light: #64748B;
+$secondary-lighter: #94A3B8;
+$secondary-dark: #334155;
+
+// 强调色 - 专业金色（银行常用）
+$accent-color: #D97706; // 金色
+$accent-light: #F59E0B;
+
+// 中性色系 - 精致层次
+$neutral-50: #F9FAFB;
+$neutral-100: #F3F4F6;
+$neutral-200: #E5E7EB;
+$neutral-300: #D1D5DB;
+$neutral-400: #9CA3AF;
+$neutral-500: #6B7280;
+$neutral-600: #4B5563;
+$neutral-700: #374151;
+$neutral-800: #1F2937;
+$neutral-900: #111827;
+
+// 语义色
+$success-color: #059669;
+$warning-color: #D97706;
+$error-color: #DC2626;
+$info-color: #1E40AF;
+
+// 背景色 - 主题绿、雪白、灰色调
+$bg-primary: #FFFFFF; // 雪白色背景
+$bg-secondary: #F0F9F5; // 极浅绿色背景，体现主题绿
+$bg-tertiary: #ECFDF5; // 浅绿色背景
+$bg-green-light: #F0F9F5; // 浅绿色
+$bg-green-lighter: #ECFDF5; // 极浅绿色
+$bg-gray-light: #F9FAFB; // 浅灰色
+$bg-gray-lighter: #F3F4F6; // 极浅灰色
+$bg-overlay: rgba(255, 255, 255, 0.8); // 叠加背景
+
+// 文字色
+$text-primary: #1E293B; // 深蓝灰文字
+$text-secondary: #475569; // 中灰文字
+$text-tertiary: #64748B; // 浅灰文字
+$text-placeholder: #94A3B8; // 占位符文字
+$text-white: #FFFFFF;
+
+// 边框色
+$border-color: #E2E8F0;
+$border-light: #F1F5F9;
+$border-dark: #CBD5E1;
+
+// 阴影 - 精致层次阴影
+$shadow-xs: 0 1rpx 2rpx rgba(0, 0, 0, 0.05);
+$shadow-sm: 0 1rpx 3rpx rgba(0, 0, 0, 0.1), 0 1rpx 2rpx rgba(0, 0, 0, 0.06);
+$shadow-md: 0 4rpx 6rpx rgba(0, 0, 0, 0.1), 0 2rpx 4rpx rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 10rpx 15rpx rgba(0, 0, 0, 0.1), 0 4rpx 6rpx rgba(0, 0, 0, 0.05);
+$shadow-xl: 0 20rpx 25rpx rgba(0, 0, 0, 0.1), 0 10rpx 10rpx rgba(0, 0, 0, 0.04);
+$shadow-2xl: 0 25rpx 50rpx rgba(0, 0, 0, 0.15);
+
+// 圆角
+$border-radius-xs: 4rpx;
+$border-radius-sm: 8rpx;
+$border-radius-md: 12rpx;
+$border-radius-lg: 16rpx;
+$border-radius-xl: 24rpx;
+$border-radius-full: 9999rpx;
+
+// 间距
+$spacing-xs: 8rpx;
+$spacing-sm: 16rpx;
+$spacing-md: 24rpx;
+$spacing-lg: 32rpx;
+$spacing-xl: 48rpx;
+$spacing-2xl: 64rpx;
+
+// 字体大小
+$font-size-xs: 20rpx;
+$font-size-sm: 24rpx;
+$font-size-md: 28rpx;
+$font-size-lg: 32rpx;
+$font-size-xl: 36rpx;
+$font-size-2xl: 40rpx;
+$font-size-3xl: 48rpx;
+$font-size-4xl: 56rpx;
+
+// 字体粗细
+$font-weight-light: 300;
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// 行高
+$line-height-tight: 1.25;
+$line-height-normal: 1.5;
+$line-height-relaxed: 1.75;
+
+// 动画
+$transition-fast: 0.15s ease-in-out;
+$transition-normal: 0.3s ease-in-out;
+$transition-slow: 0.5s ease-in-out;
+
+// 响应式断点
+$breakpoint-sm: 576px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 992px;
+$breakpoint-xl: 1200px;
+
+// 组件特定变量
+$header-height: 88rpx;
+$tabbar-height: 100rpx;
+$sidebar-width: 240rpx;
