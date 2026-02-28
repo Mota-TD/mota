@@ -105,3 +105,7 @@ springdoc:
 mota:
   tenant:
     enabled: false  # 暂时禁用多租户功能
+  security:
+    enabled: false  # 禁用 mota-common-security 的通用安全配置
+    user-header-filter:
+      enabled: false  # 禁用用户请求头过滤器（认证服务不需要）

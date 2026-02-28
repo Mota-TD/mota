@@ -274,7 +274,7 @@ const TenantList: React.FC = () => {
               keyword: params.name || params.code,
             });
 
-            if (response.code === 0) {
+            if (response.code === 200) {
               return {
                 data: response.data.list || [],
                 total: response.data.total || 0,

@@ -13,15 +13,16 @@
 ✅ 后端服务已启动
 ✅ 前端服务已启动
 ✅ 前端登录表单已修复（移除了不支持的字段）
-⚠️ 登录接口仍返回403错误
+✅ Spring Security CORS配置已修复
+✅ 前端响应码检查已修复 (code === 200)
 
-## 问题诊断
+## 问题诊断（已解决）
 
-根据日志分析，登录请求已经到达认证服务，但被Spring Security拦截。可能的原因：
+根据日志分析，登录请求已经到达认证服务，但被Spring Security拦截。原因已确认：
 
-1. **CSRF保护**: Spring Security默认启用CSRF保护，可能阻止了POST请求
-2. **CORS配置**: 虽然网关配置了CORS，但认证服务可能有自己的CORS配置
-3. **Spring Security配置**: 认证服务的安全配置可能没有正确放行登录接口
+1. **CSRF保护**: ✅ 已禁用 (`.csrf(csrf -> csrf.disable())`)
+2. **CORS配置**: ✅ 已修复 - 认证服务原先使用 `.cors(cors -> cors.disable())` 禁用了CORS，但又定义了 `corsConfigurationSource()` Bean，配置矛盾。现已修复为 `.cors(cors -> cors.configurationSource(corsConfigurationSource()))`
+3. **Spring Security配置**: ✅ 已正确配置 `/api/v1/auth/**` 路径 permitAll
 
 ## 注意事项
 
@@ -36,6 +37,11 @@
 1. ✅ 登录请求参数已调整为后端期望的格式（移除了 `type` 和 `autoLogin` 字段）
 2. ✅ 前端类型定义已更新以匹配后端API响应
 3. ✅ 登录成功码已从 `0` 改为 `200`
+4. ✅ 认证服务 Spring Security CORS 配置已修复
+5. ✅ 前端3处响应码检查已修复:
+   - `mota-admin/src/utils/refreshToken.ts` 第90行
+   - `mota-admin/src/pages/Tenant/TenantDetail/index.tsx` 第49行
+   - `mota-admin/src/pages/Tenant/TenantList/index.tsx` 第277行
 
 ## 建议的解决方案
 
@@ -68,9 +74,9 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
 
 ## 待修复的问题
 
-1. ❌ 登录接口返回403，需要检查Spring Security配置
-2. ❌ `/api/v1/auth/current-user` 接口返回500错误
-3. ❌ 需要后端修复认证服务的安全配置
+1. ✅ ~~登录接口返回403~~ - 已修复 Spring Security CORS 配置
+2. ⚠️ `/api/v1/auth/current-user` 接口返回500错误 - 建议从JWT中解析用户信息作为备选方案（前端已实现）
+3. ✅ ~~后端认证服务的安全配置~~ - 已修复
 
 ## API端点
 

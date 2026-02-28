@@ -200,37 +200,101 @@ public interface CommonConstants {
      */
     String LOCK_PREFIX = CACHE_PREFIX + "lock:";
 
+    // ========== 时间常量（秒） ==========
+
+    /**
+     * 1分钟（秒）
+     */
+    long SECONDS_PER_MINUTE = 60L;
+
+    /**
+     * 1小时（秒）
+     */
+    long SECONDS_PER_HOUR = 3600L;
+
+    /**
+     * 1天（秒）
+     */
+    long SECONDS_PER_DAY = 86400L;
+
+    /**
+     * 1周（秒）
+     */
+    long SECONDS_PER_WEEK = 604800L;
+
+    /**
+     * 1月（秒，按30天计）
+     */
+    long SECONDS_PER_MONTH = 2592000L;
+
+    // ========== 时间常量（毫秒） ==========
+
+    /**
+     * 1分钟（毫秒）
+     */
+    long MILLIS_PER_MINUTE = 60000L;
+
+    /**
+     * 1小时（毫秒）
+     */
+    long MILLIS_PER_HOUR = 3600000L;
+
+    /**
+     * 1天（毫秒）
+     */
+    long MILLIS_PER_DAY = 86400000L;
+
+    /**
+     * 1周（毫秒）
+     */
+    long MILLIS_PER_WEEK = 604800000L;
+
     // ========== 缓存过期时间（秒） ==========
 
     /**
      * 默认缓存过期时间（1小时）
      */
-    long CACHE_DEFAULT_EXPIRE = 3600L;
+    long CACHE_DEFAULT_EXPIRE = SECONDS_PER_HOUR;
 
     /**
      * 短期缓存过期时间（5分钟）
      */
-    long CACHE_SHORT_EXPIRE = 300L;
+    long CACHE_SHORT_EXPIRE = 5 * SECONDS_PER_MINUTE;
 
     /**
      * 长期缓存过期时间（24小时）
      */
-    long CACHE_LONG_EXPIRE = 86400L;
+    long CACHE_LONG_EXPIRE = SECONDS_PER_DAY;
 
     /**
      * 验证码过期时间（5分钟）
      */
-    long CAPTCHA_EXPIRE = 300L;
+    long CAPTCHA_EXPIRE = 5 * SECONDS_PER_MINUTE;
 
     /**
-     * Token过期时间（7天）
+     * Access Token过期时间（1天，秒）
      */
-    long TOKEN_EXPIRE = 604800L;
+    long ACCESS_TOKEN_EXPIRE = SECONDS_PER_DAY;
 
     /**
-     * 刷新Token过期时间（30天）
+     * Access Token过期时间（1天，毫秒）
      */
-    long REFRESH_TOKEN_EXPIRE = 2592000L;
+    long ACCESS_TOKEN_EXPIRE_MILLIS = MILLIS_PER_DAY;
+
+    /**
+     * Refresh Token过期时间（7天，秒）
+     */
+    long REFRESH_TOKEN_EXPIRE = SECONDS_PER_WEEK;
+
+    /**
+     * Refresh Token过期时间（7天，毫秒）
+     */
+    long REFRESH_TOKEN_EXPIRE_MILLIS = MILLIS_PER_WEEK;
+
+    /**
+     * CORS预检请求缓存时间（1小时，秒）
+     */
+    long CORS_MAX_AGE = SECONDS_PER_HOUR;
 
     // ========== 数据权限范围 ==========
 

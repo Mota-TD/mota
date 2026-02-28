@@ -8,6 +8,7 @@ import com.mota.api.auth.dto.RegisterResponse;
 import com.mota.auth.entity.*;
 import com.mota.auth.mapper.*;
 import com.mota.auth.service.AuthService;
+import com.mota.common.core.constant.CommonConstants;
 import com.mota.common.core.exception.BusinessException;
 import com.mota.common.core.result.ResultCode;
 import com.mota.common.redis.service.RedisService;
@@ -165,7 +166,7 @@ public class AuthServiceImpl implements AuthService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .tokenType("Bearer")
-                .expiresIn(86400L)
+                .expiresIn(CommonConstants.ACCESS_TOKEN_EXPIRE)
                 .userId(user.getId())
                 .username(user.getUsername())
                 .nickname(user.getNickname())
@@ -415,7 +416,7 @@ public class AuthServiceImpl implements AuthService {
                 .accessToken(newAccessToken)
                 .refreshToken(newRefreshToken)
                 .tokenType("Bearer")
-                .expiresIn(86400L)
+                .expiresIn(CommonConstants.ACCESS_TOKEN_EXPIRE)
                 .userId(user.getId())
                 .username(user.getUsername())
                 .nickname(user.getNickname())

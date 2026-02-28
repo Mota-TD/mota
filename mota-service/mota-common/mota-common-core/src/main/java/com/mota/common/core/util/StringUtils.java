@@ -1,16 +1,18 @@
 package com.mota.common.core.util;
 
-import java.util.*;
-import java.util.regex.Matcher;
+import java.util.Collection;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
  * 字符串工具类
  * 
+ * 提供常用的字符串操作方法，避免代码重复
+ *
  * @author Mota
  * @since 1.0.0
  */
-public class StringUtils {
+public final class StringUtils {
 
     /**
      * 空字符串
@@ -23,16 +25,6 @@ public class StringUtils {
     public static final String SPACE = " ";
 
     /**
-     * 下划线
-     */
-    public static final String UNDERSCORE = "_";
-
-    /**
-     * 中划线
-     */
-    public static final String HYPHEN = "-";
-
-    /**
      * 逗号
      */
     public static final String COMMA = ",";
@@ -43,24 +35,24 @@ public class StringUtils {
     public static final String DOT = ".";
 
     /**
-     * 冒号
-     */
-    public static final String COLON = ":";
-
-    /**
      * 斜杠
      */
     public static final String SLASH = "/";
 
     /**
-     * 驼峰转下划线正则
+     * 下划线
      */
-    private static final Pattern CAMEL_PATTERN = Pattern.compile("[A-Z]");
+    public static final String UNDERSCORE = "_";
 
     /**
-     * 下划线转驼峰正则
+     * 连字符
      */
-    private static final Pattern UNDERSCORE_PATTERN = Pattern.compile("_([a-z])");
+    public static final String HYPHEN = "-";
+
+    /**
+     * 冒号
+     */
+    public static final String COLON = ":";
 
     /**
      * 手机号正则
@@ -75,51 +67,47 @@ public class StringUtils {
     /**
      * URL正则
      */
-    private static final Pattern URL_PATTERN = Pattern.compile("^(https?|ftp)://[^\\s/$.?#].[^\\s]*$");
+    private static final Pattern URL_PATTERN = Pattern.compile("^(https?|ftp)://[^\\s/$.?#].[^\\s]*$", Pattern.CASE_INSENSITIVE);
 
     /**
-     * 身份证号正则（简单校验）
+     * 身份证正则（18位）
      */
-    private static final Pattern ID_CARD_PATTERN = Pattern.compile("^\\d{17}[\\dXx]$");
+    private static final Pattern ID_CARD_PATTERN = Pattern.compile("^[1-9]\\d{5}(19|20)\\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])\\d{3}[\\dXx]$");
+
+    /**
+     * 中文正则
+     */
+    private static final Pattern CHINESE_PATTERN = Pattern.compile("[\\u4e00-\\u9fa5]");
 
     private StringUtils() {
-        // 私有构造函数
+        throw new UnsupportedOperationException("工具类不允许实例化");
     }
 
-    // ========== 判空 ==========
+    // ========== 空值判断 ==========
 
     /**
      * 判断字符串是否为空
-     *
-     * @param str 字符串
-     * @return 是否为空
      */
-    public static boolean isEmpty(CharSequence str) {
-        return str == null || str.length() == 0;
+    public static boolean isEmpty(CharSequence cs) {
+        return cs == null || cs.length() == 0;
     }
 
     /**
      * 判断字符串是否不为空
-     *
-     * @param str 字符串
-     * @return 是否不为空
      */
-    public static boolean isNotEmpty(CharSequence str) {
-        return !isEmpty(str);
+    public static boolean isNotEmpty(CharSequence cs) {
+        return !isEmpty(cs);
     }
 
     /**
-     * 判断字符串是否为空白
-     *
-     * @param str 字符串
-     * @return 是否为空白
+     * 判断字符串是否为空白（空或只包含空白字符）
      */
-    public static boolean isBlank(CharSequence str) {
-        if (isEmpty(str)) {
+    public static boolean isBlank(CharSequence cs) {
+        if (isEmpty(cs)) {
             return true;
         }
-        for (int i = 0; i < str.length(); i++) {
-            if (!Character.isWhitespace(str.charAt(i))) {
+        for (int i = 0; i < cs.length(); i++) {
+            if (!Character.isWhitespace(cs.charAt(i))) {
                 return false;
             }
         }
@@ -128,26 +116,20 @@ public class StringUtils {
 
     /**
      * 判断字符串是否不为空白
-     *
-     * @param str 字符串
-     * @return 是否不为空白
      */
-    public static boolean isNotBlank(CharSequence str) {
-        return !isBlank(str);
+    public static boolean isNotBlank(CharSequence cs) {
+        return !isBlank(cs);
     }
 
     /**
-     * 判断多个字符串是否都不为空
-     *
-     * @param strs 字符串数组
-     * @return 是否都不为空
+     * 判断所有字符串是否都不为空
      */
-    public static boolean isAllNotEmpty(CharSequence... strs) {
-        if (strs == null || strs.length == 0) {
+    public static boolean isNoneEmpty(CharSequence... css) {
+        if (css == null || css.length == 0) {
             return false;
         }
-        for (CharSequence str : strs) {
-            if (isEmpty(str)) {
+        for (CharSequence cs : css) {
+            if (isEmpty(cs)) {
                 return false;
             }
         }
@@ -155,165 +137,60 @@ public class StringUtils {
     }
 
     /**
-     * 判断多个字符串是否有任一为空
-     *
-     * @param strs 字符串数组
-     * @return 是否有任一为空
+     * 判断所有字符串是否都不为空白
      */
-    public static boolean isAnyEmpty(CharSequence... strs) {
-        return !isAllNotEmpty(strs);
+    public static boolean isNoneBlank(CharSequence... css) {
+        if (css == null || css.length == 0) {
+            return false;
+        }
+        for (CharSequence cs : css) {
+            if (isBlank(cs)) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    // ========== 处理 ==========
+    // ========== 字符串处理 ==========
 
     /**
      * 去除首尾空白
-     *
-     * @param str 字符串
-     * @return 处理后的字符串
      */
     public static String trim(String str) {
-        return str != null ? str.trim() : null;
+        return str == null ? null : str.trim();
     }
 
     /**
-     * 去除所有空白
-     *
-     * @param str 字符串
-     * @return 处理后的字符串
+     * 去除首尾空白，null返回空字符串
      */
-    public static String trimAll(String str) {
-        return str != null ? str.replaceAll("\\s+", "") : null;
+    public static String trimToEmpty(String str) {
+        return str == null ? EMPTY : str.trim();
     }
 
     /**
-     * 如果为空则返回默认值
-     *
-     * @param str        字符串
-     * @param defaultStr 默认值
-     * @return 结果
+     * 去除首尾空白，空返回null
+     */
+    public static String trimToNull(String str) {
+        String trimmed = trim(str);
+        return isEmpty(trimmed) ? null : trimmed;
+    }
+
+    /**
+     * 默认值处理
      */
     public static String defaultIfEmpty(String str, String defaultStr) {
         return isEmpty(str) ? defaultStr : str;
     }
 
     /**
-     * 如果为空白则返回默认值
-     *
-     * @param str        字符串
-     * @param defaultStr 默认值
-     * @return 结果
+     * 默认值处理（空白）
      */
     public static String defaultIfBlank(String str, String defaultStr) {
         return isBlank(str) ? defaultStr : str;
     }
 
     /**
-     * 截取字符串
-     *
-     * @param str    字符串
-     * @param start  开始位置
-     * @param length 长度
-     * @return 截取后的字符串
-     */
-    public static String substring(String str, int start, int length) {
-        if (isEmpty(str)) {
-            return str;
-        }
-        int end = Math.min(start + length, str.length());
-        return str.substring(start, end);
-    }
-
-    /**
-     * 左填充
-     *
-     * @param str    字符串
-     * @param length 目标长度
-     * @param padStr 填充字符
-     * @return 填充后的字符串
-     */
-    public static String leftPad(String str, int length, String padStr) {
-        if (str == null) {
-            str = EMPTY;
-        }
-        if (str.length() >= length) {
-            return str;
-        }
-        StringBuilder sb = new StringBuilder();
-        while (sb.length() < length - str.length()) {
-            sb.append(padStr);
-        }
-        sb.append(str);
-        return sb.substring(sb.length() - length);
-    }
-
-    /**
-     * 右填充
-     *
-     * @param str    字符串
-     * @param length 目标长度
-     * @param padStr 填充字符
-     * @return 填充后的字符串
-     */
-    public static String rightPad(String str, int length, String padStr) {
-        if (str == null) {
-            str = EMPTY;
-        }
-        if (str.length() >= length) {
-            return str;
-        }
-        StringBuilder sb = new StringBuilder(str);
-        while (sb.length() < length) {
-            sb.append(padStr);
-        }
-        return sb.substring(0, length);
-    }
-
-    // ========== 转换 ==========
-
-    /**
-     * 驼峰转下划线
-     *
-     * @param str 驼峰字符串
-     * @return 下划线字符串
-     */
-    public static String camelToUnderscore(String str) {
-        if (isEmpty(str)) {
-            return str;
-        }
-        Matcher matcher = CAMEL_PATTERN.matcher(str);
-        StringBuffer sb = new StringBuffer();
-        while (matcher.find()) {
-            matcher.appendReplacement(sb, "_" + matcher.group(0).toLowerCase());
-        }
-        matcher.appendTail(sb);
-        return sb.toString().toLowerCase();
-    }
-
-    /**
-     * 下划线转驼峰
-     *
-     * @param str 下划线字符串
-     * @return 驼峰字符串
-     */
-    public static String underscoreToCamel(String str) {
-        if (isEmpty(str)) {
-            return str;
-        }
-        Matcher matcher = UNDERSCORE_PATTERN.matcher(str.toLowerCase());
-        StringBuffer sb = new StringBuffer();
-        while (matcher.find()) {
-            matcher.appendReplacement(sb, matcher.group(1).toUpperCase());
-        }
-        matcher.appendTail(sb);
-        return sb.toString();
-    }
-
-    /**
      * 首字母大写
-     *
-     * @param str 字符串
-     * @return 首字母大写的字符串
      */
     public static String capitalize(String str) {
         if (isEmpty(str)) {
@@ -324,9 +201,6 @@ public class StringUtils {
 
     /**
      * 首字母小写
-     *
-     * @param str 字符串
-     * @return 首字母小写的字符串
      */
     public static String uncapitalize(String str) {
         if (isEmpty(str)) {
@@ -335,108 +209,198 @@ public class StringUtils {
         return Character.toLowerCase(str.charAt(0)) + str.substring(1);
     }
 
-    // ========== 分割与连接 ==========
-
     /**
-     * 分割字符串
-     *
-     * @param str       字符串
-     * @param separator 分隔符
-     * @return 分割后的数组
+     * 下划线转驼峰
      */
-    public static String[] split(String str, String separator) {
+    public static String toCamelCase(String str) {
         if (isEmpty(str)) {
-            return new String[0];
+            return str;
         }
-        return str.split(Pattern.quote(separator));
+        StringBuilder result = new StringBuilder();
+        boolean nextUpper = false;
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            if (c == '_') {
+                nextUpper = true;
+            } else {
+                if (nextUpper) {
+                    result.append(Character.toUpperCase(c));
+                    nextUpper = false;
+                } else {
+                    result.append(Character.toLowerCase(c));
+                }
+            }
+        }
+        return result.toString();
     }
 
     /**
-     * 分割字符串为列表
-     *
-     * @param str       字符串
-     * @param separator 分隔符
-     * @return 分割后的列表
+     * 驼峰转下划线
      */
-    public static List<String> splitToList(String str, String separator) {
-        return Arrays.asList(split(str, separator));
+    public static String toSnakeCase(String str) {
+        if (isEmpty(str)) {
+            return str;
+        }
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            if (Character.isUpperCase(c)) {
+                if (i > 0) {
+                    result.append('_');
+                }
+                result.append(Character.toLowerCase(c));
+            } else {
+                result.append(c);
+            }
+        }
+        return result.toString();
+    }
+
+    // ========== 字符串截取 ==========
+
+    /**
+     * 截取字符串（安全）
+     */
+    public static String substring(String str, int start, int end) {
+        if (str == null) {
+            return null;
+        }
+        if (start < 0) {
+            start = 0;
+        }
+        if (end > str.length()) {
+            end = str.length();
+        }
+        if (start > end) {
+            return EMPTY;
+        }
+        return str.substring(start, end);
+    }
+
+    /**
+     * 截取字符串，超出部分用省略号
+     */
+    public static String abbreviate(String str, int maxLength) {
+        if (str == null || str.length() <= maxLength) {
+            return str;
+        }
+        return str.substring(0, maxLength - 3) + "...";
+    }
+
+    /**
+     * 左填充
+     */
+    public static String leftPad(String str, int size, char padChar) {
+        if (str == null) {
+            str = EMPTY;
+        }
+        int padLength = size - str.length();
+        if (padLength <= 0) {
+            return str;
+        }
+        return String.valueOf(padChar).repeat(padLength) + str;
+    }
+
+    /**
+     * 右填充
+     */
+    public static String rightPad(String str, int size, char padChar) {
+        if (str == null) {
+            str = EMPTY;
+        }
+        int padLength = size - str.length();
+        if (padLength <= 0) {
+            return str;
+        }
+        return str + String.valueOf(padChar).repeat(padLength);
+    }
+
+    // ========== 字符串连接 ==========
+
+    /**
+     * 连接字符串
+     */
+    public static String join(Collection<?> collection, String separator) {
+        if (collection == null || collection.isEmpty()) {
+            return EMPTY;
+        }
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (Object item : collection) {
+            if (!first) {
+                sb.append(separator);
+            }
+            sb.append(item);
+            first = false;
+        }
+        return sb.toString();
     }
 
     /**
      * 连接字符串
-     *
-     * @param separator 分隔符
-     * @param elements  元素
-     * @return 连接后的字符串
      */
-    public static String join(String separator, String... elements) {
-        if (elements == null || elements.length == 0) {
+    public static String join(Object[] array, String separator) {
+        if (array == null || array.length == 0) {
             return EMPTY;
         }
-        return String.join(separator, elements);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < array.length; i++) {
+            if (i > 0) {
+                sb.append(separator);
+            }
+            sb.append(array[i]);
+        }
+        return sb.toString();
+    }
+
+    // ========== 生成 ==========
+
+    /**
+     * 生成UUID（带连字符）
+     */
+    public static String uuid() {
+        return UUID.randomUUID().toString();
     }
 
     /**
-     * 连接集合
-     *
-     * @param separator 分隔符
-     * @param elements  元素集合
-     * @return 连接后的字符串
+     * 生成UUID（不带连字符）
      */
-    public static String join(String separator, Collection<String> elements) {
-        if (elements == null || elements.isEmpty()) {
-            return EMPTY;
-        }
-        return String.join(separator, elements);
+    public static String simpleUuid() {
+        return UUID.randomUUID().toString().replace("-", "");
     }
 
-    // ========== 校验 ==========
+    /**
+     * 生成短UUID（16位）
+     */
+    public static String shortUuid() {
+        return simpleUuid().substring(0, 16);
+    }
+
+    // ========== 格式验证 ==========
 
     /**
-     * 判断是否是手机号
-     *
-     * @param str 字符串
-     * @return 是否是手机号
+     * 验证手机号
      */
     public static boolean isMobile(String str) {
         return isNotEmpty(str) && MOBILE_PATTERN.matcher(str).matches();
     }
 
     /**
-     * 判断是否是邮箱
-     *
-     * @param str 字符串
-     * @return 是否是邮箱
+     * 验证邮箱
      */
     public static boolean isEmail(String str) {
         return isNotEmpty(str) && EMAIL_PATTERN.matcher(str).matches();
     }
 
     /**
-     * 判断是否是URL
-     *
-     * @param str 字符串
-     * @return 是否是URL
+     * 判断是否包含中文
      */
-    public static boolean isUrl(String str) {
-        return isNotEmpty(str) && URL_PATTERN.matcher(str).matches();
+    public static boolean containsChinese(String str) {
+        return isNotEmpty(str) && CHINESE_PATTERN.matcher(str).find();
     }
 
     /**
-     * 判断是否是身份证号
-     *
-     * @param str 字符串
-     * @return 是否是身份证号
-     */
-    public static boolean isIdCard(String str) {
-        return isNotEmpty(str) && ID_CARD_PATTERN.matcher(str).matches();
-    }
-
-    /**
-     * 判断是否是数字
-     *
-     * @param str 字符串
-     * @return 是否是数字
+     * 判断是否为数字
      */
     public static boolean isNumeric(String str) {
         if (isEmpty(str)) {
@@ -451,34 +415,40 @@ public class StringUtils {
     }
 
     /**
-     * 判断是否包含中文
-     *
-     * @param str 字符串
-     * @return 是否包含中文
+     * 验证URL格式
      */
-    public static boolean containsChinese(String str) {
-        if (isEmpty(str)) {
-            return false;
-        }
-        for (int i = 0; i < str.length(); i++) {
-            char c = str.charAt(i);
-            if (c >= 0x4E00 && c <= 0x9FA5) {
-                return true;
-            }
-        }
-        return false;
+    public static boolean isUrl(String str) {
+        return isNotEmpty(str) && URL_PATTERN.matcher(str).matches();
     }
 
-    // ========== 脱敏 ==========
+    /**
+     * 验证身份证号码（18位）
+     */
+    public static boolean isIdCard(String str) {
+        if (isEmpty(str) || str.length() != 18) {
+            return false;
+        }
+        if (!ID_CARD_PATTERN.matcher(str).matches()) {
+            return false;
+        }
+        // 校验位验证
+        int[] weights = {7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2};
+        char[] checkCodes = {'1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2'};
+        int sum = 0;
+        for (int i = 0; i < 17; i++) {
+            sum += (str.charAt(i) - '0') * weights[i];
+        }
+        char checkCode = checkCodes[sum % 11];
+        return Character.toUpperCase(str.charAt(17)) == checkCode;
+    }
+
+    // ========== 脱敏处理 ==========
 
     /**
-     * 手机号脱敏
-     *
-     * @param mobile 手机号
-     * @return 脱敏后的手机号
+     * 手机号脱敏（中间4位用****替换）
      */
     public static String maskMobile(String mobile) {
-        if (isEmpty(mobile) || mobile.length() != 11) {
+        if (isEmpty(mobile) || mobile.length() < 11) {
             return mobile;
         }
         return mobile.substring(0, 3) + "****" + mobile.substring(7);
@@ -486,9 +456,6 @@ public class StringUtils {
 
     /**
      * 邮箱脱敏
-     *
-     * @param email 邮箱
-     * @return 脱敏后的邮箱
      */
     public static String maskEmail(String email) {
         if (isEmpty(email) || !email.contains("@")) {
@@ -502,141 +469,28 @@ public class StringUtils {
     }
 
     /**
-     * 身份证号脱敏
-     *
-     * @param idCard 身份证号
-     * @return 脱敏后的身份证号
+     * 身份证脱敏（中间8位用****替换）
      */
     public static String maskIdCard(String idCard) {
-        if (isEmpty(idCard) || idCard.length() < 8) {
+        if (isEmpty(idCard) || idCard.length() < 15) {
             return idCard;
         }
-        return idCard.substring(0, 4) + "**********" + idCard.substring(idCard.length() - 4);
+        return idCard.substring(0, 6) + "********" + idCard.substring(14);
     }
 
     /**
      * 姓名脱敏
-     *
-     * @param name 姓名
-     * @return 脱敏后的姓名
      */
     public static String maskName(String name) {
         if (isEmpty(name)) {
             return name;
         }
-        if (name.length() == 1) {
-            return "*";
-        }
         if (name.length() == 2) {
             return name.charAt(0) + "*";
         }
-        StringBuilder sb = new StringBuilder();
-        sb.append(name.charAt(0));
-        for (int i = 1; i < name.length() - 1; i++) {
-            sb.append("*");
+        if (name.length() > 2) {
+            return name.charAt(0) + "*".repeat(name.length() - 2) + name.charAt(name.length() - 1);
         }
-        sb.append(name.charAt(name.length() - 1));
-        return sb.toString();
-    }
-
-    /**
-     * 银行卡号脱敏
-     *
-     * @param bankCard 银行卡号
-     * @return 脱敏后的银行卡号
-     */
-    public static String maskBankCard(String bankCard) {
-        if (isEmpty(bankCard) || bankCard.length() < 8) {
-            return bankCard;
-        }
-        return bankCard.substring(0, 4) + " **** **** " + bankCard.substring(bankCard.length() - 4);
-    }
-
-    // ========== 其他 ==========
-
-    /**
-     * 生成随机字符串
-     *
-     * @param length 长度
-     * @return 随机字符串
-     */
-    public static String randomString(int length) {
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        Random random = new Random();
-        StringBuilder sb = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            sb.append(chars.charAt(random.nextInt(chars.length())));
-        }
-        return sb.toString();
-    }
-
-    /**
-     * 生成随机数字字符串
-     *
-     * @param length 长度
-     * @return 随机数字字符串
-     */
-    public static String randomNumeric(int length) {
-        String chars = "0123456789";
-        Random random = new Random();
-        StringBuilder sb = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            sb.append(chars.charAt(random.nextInt(chars.length())));
-        }
-        return sb.toString();
-    }
-
-    /**
-     * 生成UUID
-     *
-     * @return UUID字符串
-     */
-    public static String uuid() {
-        return UUID.randomUUID().toString();
-    }
-
-    /**
-     * 生成简化UUID（无横线）
-     *
-     * @return 简化UUID字符串
-     */
-    public static String simpleUuid() {
-        return UUID.randomUUID().toString().replace("-", "");
-    }
-
-    /**
-     * 格式化字符串
-     *
-     * @param template 模板
-     * @param args     参数
-     * @return 格式化后的字符串
-     */
-    public static String format(String template, Object... args) {
-        if (isEmpty(template) || args == null || args.length == 0) {
-            return template;
-        }
-        return String.format(template, args);
-    }
-
-    /**
-     * 占位符替换
-     *
-     * @param template 模板（使用{}作为占位符）
-     * @param args     参数
-     * @return 替换后的字符串
-     */
-    public static String formatPlaceholder(String template, Object... args) {
-        if (isEmpty(template) || args == null || args.length == 0) {
-            return template;
-        }
-        StringBuilder sb = new StringBuilder(template);
-        for (Object arg : args) {
-            int index = sb.indexOf("{}");
-            if (index == -1) {
-                break;
-            }
-            sb.replace(index, index + 2, String.valueOf(arg));
-        }
-        return sb.toString();
+        return name;
     }
 }

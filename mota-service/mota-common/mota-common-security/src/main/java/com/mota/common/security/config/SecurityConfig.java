@@ -3,10 +3,11 @@ package com.mota.common.security.config;
 import com.mota.common.security.filter.UserHeaderFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -16,17 +17,21 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  * 通用安全配置
  * 禁用 HTTP Basic 认证，防止返回 WWW-Authenticate 头
  * 认证由网关统一处理，各微服务从请求头读取用户信息
+ *
+ * 注意：不再使用 @EnableWebSecurity，由各服务自己决定是否启用
+ * 此配置仅在没有其他 SecurityFilterChain 时生效
  */
 @Configuration
-@EnableWebSecurity
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "mota.security.enabled", havingValue = "true", matchIfMissing = true)
 public class SecurityConfig {
 
     private final UserHeaderFilter userHeaderFilter;
 
     @Bean
+    @Order(200)  // 低优先级，让服务自己的配置优先
     @ConditionalOnMissingBean(SecurityFilterChain.class)
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain commonSecurityFilterChain(HttpSecurity http) throws Exception {
         http
             // 禁用 CSRF
             .csrf(AbstractHttpConfigurer::disable)

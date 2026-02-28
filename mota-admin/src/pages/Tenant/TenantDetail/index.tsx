@@ -46,7 +46,7 @@ const TenantDetail: React.FC = () => {
     setLoading(true);
     try {
       const response = await getTenantDetail(id || '');
-      if (response.code === 0) {
+      if (response.code === 200) {
         setTenant(response.data);
       }
     } catch (_error) {

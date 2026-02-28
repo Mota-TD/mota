@@ -9,6 +9,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -38,11 +39,15 @@ import java.util.stream.Collectors;
  * - X-Data-Scope: 数据权限范围
  * - X-Super-Admin: 是否超级管理员
  *
+ * 注意：此过滤器可通过配置 mota.security.user-header-filter.enabled=false 禁用
+ * 认证服务（auth-service）应禁用此过滤器，因为它是生成用户信息的服务
+ *
  * @author Mota
  * @since 1.0.0
  */
 @Slf4j
 @Component
+@ConditionalOnProperty(name = "mota.security.user-header-filter.enabled", havingValue = "true", matchIfMissing = true)
 public class UserHeaderFilter extends OncePerRequestFilter {
 
     @Override

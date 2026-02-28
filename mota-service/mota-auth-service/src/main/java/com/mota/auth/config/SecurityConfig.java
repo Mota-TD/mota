@@ -1,7 +1,10 @@
 package com.mota.auth.config;
 
+import com.mota.common.core.constant.CommonConstants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -19,6 +22,9 @@ import java.util.List;
 
 /**
  * 认证服务安全配置
+ *
+ * 此配置优先于 mota-common-security 的配置
+ * 认证服务不需要从请求头读取用户信息，因为它是生成用户信息的服务
  */
 @Configuration("authSecurityConfig")
 @EnableWebSecurity
@@ -37,7 +43,7 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);
+        configuration.setMaxAge(CommonConstants.CORS_MAX_AGE);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -45,9 +51,12 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    @Primary
+    @Order(1)  // 高优先级，确保此配置优先于 common 的配置
+    public SecurityFilterChain authSecurityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.disable())
+            // 启用CORS并使用自定义配置源，确保跨域请求能被正确处理
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             // 禁用 HTTP Basic 认证，防止返回 WWW-Authenticate 头
             .httpBasic(AbstractHttpConfigurer::disable)

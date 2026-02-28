@@ -1,5 +1,6 @@
 package com.mota.api.auth.dto;
 
+import com.mota.common.core.validation.Password;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -31,9 +32,9 @@ public class RegisterRequest implements Serializable {
     @Email(message = "邮箱格式不正确")
     private String email;
 
-    @Schema(description = "密码", example = "password123")
+    @Schema(description = "密码（至少8位，需包含大写字母、小写字母和数字）", example = "Password123")
     @NotBlank(message = "密码不能为空")
-    @Size(min = 6, max = 50, message = "密码长度必须在6-50个字符之间")
+    @Password(minLength = 8, maxLength = 50, requireUpperCase = true, requireLowerCase = true, requireDigit = true, requireSpecialChar = false)
     private String password;
 
     @Schema(description = "确认密码", example = "password123")

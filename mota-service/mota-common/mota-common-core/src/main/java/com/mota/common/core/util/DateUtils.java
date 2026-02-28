@@ -1,5 +1,7 @@
 package com.mota.common.core.util;
 
+import com.mota.common.core.constant.CommonConstants;
+
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -9,93 +11,94 @@ import java.util.Date;
 /**
  * 日期时间工具类
  * 
+ * 提供常用的日期时间操作方法，避免代码重复
+ * 所有方法使用Java 8+ 时间API
+ *
  * @author Mota
  * @since 1.0.0
  */
-public class DateUtils {
+public final class DateUtils {
+
+    // ========== 常用日期格式 ==========
 
     /**
-     * 默认日期格式
+     * 日期格式：yyyy-MM-dd
      */
     public static final String DATE_PATTERN = "yyyy-MM-dd";
 
     /**
-     * 默认时间格式
+     * 时间格式：HH:mm:ss
      */
     public static final String TIME_PATTERN = "HH:mm:ss";
 
     /**
-     * 默认日期时间格式
+     * 日期时间格式：yyyy-MM-dd HH:mm:ss
      */
     public static final String DATETIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
     /**
-     * ISO日期时间格式
+     * 日期时间格式（带���秒）：yyyy-MM-dd HH:mm:ss.SSS
      */
-    public static final String ISO_DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss";
+    public static final String DATETIME_MS_PATTERN = "yyyy-MM-dd HH:mm:ss.SSS";
 
     /**
-     * 紧凑日期格式
+     * ISO 8601格式：yyyy-MM-dd'T'HH:mm:ss'Z'
+     */
+    public static final String ISO_DATETIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+
+    /**
+     * 紧凑日期格式：yyyyMMdd
      */
     public static final String COMPACT_DATE_PATTERN = "yyyyMMdd";
 
     /**
-     * 紧凑日期时间格式
+     * 紧凑日期时间格式：yyyyMMddHHmmss
      */
     public static final String COMPACT_DATETIME_PATTERN = "yyyyMMddHHmmss";
 
-    /**
-     * 默认日期格式化器
-     */
+    // ========== 预编译的格式化器 ==========
+
     public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_PATTERN);
-
-    /**
-     * 默认时间格式化器
-     */
     public static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern(TIME_PATTERN);
+    public static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern(DATETIME_PATTERN);
+    public static final DateTimeFormatter DATETIME_MS_FORMATTER = DateTimeFormatter.ofPattern(DATETIME_MS_PATTERN);
+    public static final DateTimeFormatter COMPACT_DATE_FORMATTER = DateTimeFormatter.ofPattern(COMPACT_DATE_PATTERN);
+    public static final DateTimeFormatter COMPACT_DATETIME_FORMATTER = DateTimeFormatter.ofPattern(COMPACT_DATETIME_PATTERN);
 
     /**
-     * 默认日期时间格式化器
+     * 默认时区
      */
-    public static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern(DATETIME_PATTERN);
+    public static final ZoneId DEFAULT_ZONE = ZoneId.of(CommonConstants.DEFAULT_TIMEZONE);
 
     private DateUtils() {
-        // 私有构造函数
+        throw new UnsupportedOperationException("工具类不允许实例化");
     }
 
     // ========== 获取当前时间 ==========
 
     /**
      * 获取当前日期
-     *
-     * @return 当前日期
      */
     public static LocalDate today() {
-        return LocalDate.now();
+        return LocalDate.now(DEFAULT_ZONE);
     }
 
     /**
      * 获取当前时间
-     *
-     * @return 当前时间
      */
     public static LocalTime now() {
-        return LocalTime.now();
+        return LocalTime.now(DEFAULT_ZONE);
     }
 
     /**
      * 获取当前日期时间
-     *
-     * @return 当前日期时间
      */
     public static LocalDateTime nowDateTime() {
-        return LocalDateTime.now();
+        return LocalDateTime.now(DEFAULT_ZONE);
     }
 
     /**
      * 获取当前时间戳（毫秒）
-     *
-     * @return 时间戳
      */
     public static long currentTimeMillis() {
         return System.currentTimeMillis();
@@ -103,8 +106,6 @@ public class DateUtils {
 
     /**
      * 获取当前时间戳（秒）
-     *
-     * @return 时间戳
      */
     public static long currentTimeSeconds() {
         return System.currentTimeMillis() / 1000;
@@ -113,370 +114,278 @@ public class DateUtils {
     // ========== 格式化 ==========
 
     /**
-     * 格式化日期
-     *
-     * @param date 日期
-     * @return 格式化后的字符串
+     * 格式化日期：yyyy-MM-dd
      */
-    public static String format(LocalDate date) {
+    public static String formatDate(LocalDate date) {
         return date != null ? date.format(DATE_FORMATTER) : null;
     }
 
     /**
-     * 格式化日期时间
-     *
-     * @param dateTime 日期时间
-     * @return 格式化后的字符串
+     * 格式化时间：HH:mm:ss
      */
-    public static String format(LocalDateTime dateTime) {
+    public static String formatTime(LocalTime time) {
+        return time != null ? time.format(TIME_FORMATTER) : null;
+    }
+
+    /**
+     * 格式化日期时间：yyyy-MM-dd HH:mm:ss
+     */
+    public static String formatDateTime(LocalDateTime dateTime) {
         return dateTime != null ? dateTime.format(DATETIME_FORMATTER) : null;
     }
 
     /**
-     * 格式化日期
-     *
-     * @param date    日期
-     * @param pattern 格式
-     * @return 格式化后的字符串
-     */
-    public static String format(LocalDate date, String pattern) {
-        return date != null ? date.format(DateTimeFormatter.ofPattern(pattern)) : null;
-    }
-
-    /**
-     * 格式化日期时间
-     *
-     * @param dateTime 日期时间
-     * @param pattern  格式
-     * @return 格式化后的字符串
+     * 格式化日期时间（自定义格式）
      */
     public static String format(LocalDateTime dateTime, String pattern) {
         return dateTime != null ? dateTime.format(DateTimeFormatter.ofPattern(pattern)) : null;
     }
 
+    /**
+     * 格式化Date为字符串：yyyy-MM-dd HH:mm:ss
+     */
+    public static String formatDate(Date date) {
+        return date != null ? formatDateTime(toLocalDateTime(date)) : null;
+    }
+
     // ========== 解析 ==========
 
     /**
-     * 解析日期
-     *
-     * @param dateStr 日期字符串
-     * @return 日期
+     * 解析日期：yyyy-MM-dd
      */
     public static LocalDate parseDate(String dateStr) {
-        return dateStr != null ? LocalDate.parse(dateStr, DATE_FORMATTER) : null;
+        return dateStr != null && !dateStr.isEmpty() ? LocalDate.parse(dateStr, DATE_FORMATTER) : null;
     }
 
     /**
-     * 解析日期时间
-     *
-     * @param dateTimeStr 日期时间字符串
-     * @return 日期时间
+     * 解析时间：HH:mm:ss
+     */
+    public static LocalTime parseTime(String timeStr) {
+        return timeStr != null && !timeStr.isEmpty() ? LocalTime.parse(timeStr, TIME_FORMATTER) : null;
+    }
+
+    /**
+     * 解析日期时间：yyyy-MM-dd HH:mm:ss
      */
     public static LocalDateTime parseDateTime(String dateTimeStr) {
-        return dateTimeStr != null ? LocalDateTime.parse(dateTimeStr, DATETIME_FORMATTER) : null;
+        return dateTimeStr != null && !dateTimeStr.isEmpty() 
+                ? LocalDateTime.parse(dateTimeStr, DATETIME_FORMATTER) : null;
     }
 
     /**
-     * 解析日期
-     *
-     * @param dateStr 日期字符串
-     * @param pattern 格式
-     * @return 日期
+     * 解析日期时间（自定义格式）
      */
-    public static LocalDate parseDate(String dateStr, String pattern) {
-        return dateStr != null ? LocalDate.parse(dateStr, DateTimeFormatter.ofPattern(pattern)) : null;
+    public static LocalDateTime parse(String dateTimeStr, String pattern) {
+        return dateTimeStr != null && !dateTimeStr.isEmpty()
+                ? LocalDateTime.parse(dateTimeStr, DateTimeFormatter.ofPattern(pattern)) : null;
     }
 
+    // ========== 类型转换 ==========
+
     /**
-     * 解析日期时间
-     *
-     * @param dateTimeStr 日期时间字符串
-     * @param pattern     格式
-     * @return 日期时间
+     * LocalDateTime 转 Date
      */
-    public static LocalDateTime parseDateTime(String dateTimeStr, String pattern) {
-        return dateTimeStr != null ? LocalDateTime.parse(dateTimeStr, DateTimeFormatter.ofPattern(pattern)) : null;
+    public static Date toDate(LocalDateTime localDateTime) {
+        if (localDateTime == null) return null;
+        return Date.from(localDateTime.atZone(DEFAULT_ZONE).toInstant());
     }
 
-    // ========== 转换 ==========
+    /**
+     * LocalDate 转 Date
+     */
+    public static Date toDate(LocalDate localDate) {
+        if (localDate == null) return null;
+        return Date.from(localDate.atStartOfDay(DEFAULT_ZONE).toInstant());
+    }
 
     /**
-     * Date转LocalDateTime
-     *
-     * @param date Date对象
-     * @return LocalDateTime
+     * Date 转 LocalDateTime
      */
     public static LocalDateTime toLocalDateTime(Date date) {
-        return date != null ? LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault()) : null;
+        if (date == null) return null;
+        return LocalDateTime.ofInstant(date.toInstant(), DEFAULT_ZONE);
     }
 
     /**
-     * Date转LocalDate
-     *
-     * @param date Date对象
-     * @return LocalDate
+     * Date 转 LocalDate
      */
     public static LocalDate toLocalDate(Date date) {
-        return date != null ? toLocalDateTime(date).toLocalDate() : null;
+        if (date == null) return null;
+        return toLocalDateTime(date).toLocalDate();
     }
 
     /**
-     * LocalDateTime转Date
-     *
-     * @param dateTime LocalDateTime对象
-     * @return Date
+     * 时间戳（毫秒）转 LocalDateTime
      */
-    public static Date toDate(LocalDateTime dateTime) {
-        return dateTime != null ? Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant()) : null;
+    public static LocalDateTime fromMillis(long millis) {
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), DEFAULT_ZONE);
     }
 
     /**
-     * LocalDate转Date
-     *
-     * @param date LocalDate对象
-     * @return Date
+     * LocalDateTime 转时间戳（毫秒）
      */
-    public static Date toDate(LocalDate date) {
-        return date != null ? Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()) : null;
+    public static long toMillis(LocalDateTime localDateTime) {
+        return localDateTime.atZone(DEFAULT_ZONE).toInstant().toEpochMilli();
+    }
+
+    // ========== 日期计算 ==========
+
+    /**
+     * 获取今天开始时间（00:00:00）
+     */
+    public static LocalDateTime startOfToday() {
+        return today().atStartOfDay();
     }
 
     /**
-     * 时间戳转LocalDateTime
-     *
-     * @param timestamp 时间戳（毫秒）
-     * @return LocalDateTime
+     * 获取今天结束时间（23:59:59.999999999）
      */
-    public static LocalDateTime toLocalDateTime(long timestamp) {
-        return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
+    public static LocalDateTime endOfToday() {
+        return today().atTime(LocalTime.MAX);
     }
 
     /**
-     * LocalDateTime转时间戳
-     *
-     * @param dateTime LocalDateTime对象
-     * @return 时间戳（毫秒）
+     * 获取指定日期的开始时间
      */
-    public static long toTimestamp(LocalDateTime dateTime) {
-        return dateTime != null ? dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() : 0;
+    public static LocalDateTime startOfDay(LocalDate date) {
+        return date != null ? date.atStartOfDay() : null;
     }
 
-    // ========== 计算 ==========
+    /**
+     * 获取指定日期的结束时间
+     */
+    public static LocalDateTime endOfDay(LocalDate date) {
+        return date != null ? date.atTime(LocalTime.MAX) : null;
+    }
+
+    /**
+     * 获取本周一
+     */
+    public static LocalDate mondayOfThisWeek() {
+        return today().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+    }
+
+    /**
+     * 获取本月第一天
+     */
+    public static LocalDate firstDayOfMonth() {
+        return today().with(TemporalAdjusters.firstDayOfMonth());
+    }
+
+    /**
+     * 获取本月最后一天
+     */
+    public static LocalDate lastDayOfMonth() {
+        return today().with(TemporalAdjusters.lastDayOfMonth());
+    }
 
     /**
      * 计算两个日期之间的天数
-     *
-     * @param start 开始日期
-     * @param end   结束日期
-     * @return 天数
      */
     public static long daysBetween(LocalDate start, LocalDate end) {
         return ChronoUnit.DAYS.between(start, end);
     }
 
     /**
-     * 计算两个日期时间之间的小时数
-     *
-     * @param start 开始时间
-     * @param end   结束时间
-     * @return 小时数
+     * 计算两个时间之间的小时数
      */
     public static long hoursBetween(LocalDateTime start, LocalDateTime end) {
         return ChronoUnit.HOURS.between(start, end);
     }
 
     /**
-     * 计算两个日期时间之间的分钟数
-     *
-     * @param start 开始时间
-     * @param end   结束时间
-     * @return 分钟数
+     * 计算两个时间之间的分钟数
      */
     public static long minutesBetween(LocalDateTime start, LocalDateTime end) {
         return ChronoUnit.MINUTES.between(start, end);
     }
 
     /**
-     * 日期加天数
-     *
-     * @param date 日期
-     * @param days 天数
-     * @return 新日期
-     */
-    public static LocalDate plusDays(LocalDate date, long days) {
-        return date.plusDays(days);
-    }
-
-    /**
-     * 日期减天数
-     *
-     * @param date 日期
-     * @param days 天数
-     * @return 新日期
-     */
-    public static LocalDate minusDays(LocalDate date, long days) {
-        return date.minusDays(days);
-    }
-
-    /**
-     * 日期时间加小时
-     *
-     * @param dateTime 日期时间
-     * @param hours    小时数
-     * @return 新日期时间
-     */
-    public static LocalDateTime plusHours(LocalDateTime dateTime, long hours) {
-        return dateTime.plusHours(hours);
-    }
-
-    /**
-     * 日期时间减小时
-     *
-     * @param dateTime 日期时间
-     * @param hours    小时数
-     * @return 新日期时间
-     */
-    public static LocalDateTime minusHours(LocalDateTime dateTime, long hours) {
-        return dateTime.minusHours(hours);
-    }
-
-    // ========== 边界 ==========
-
-    /**
-     * 获取一天的开始时间
-     *
-     * @param date 日期
-     * @return 开始时间
-     */
-    public static LocalDateTime startOfDay(LocalDate date) {
-        return date.atStartOfDay();
-    }
-
-    /**
-     * 获取一天的结束时间
-     *
-     * @param date 日期
-     * @return 结束时间
-     */
-    public static LocalDateTime endOfDay(LocalDate date) {
-        return date.atTime(LocalTime.MAX);
-    }
-
-    /**
-     * 获取本周第一天
-     *
-     * @return 本周第一天
-     */
-    public static LocalDate firstDayOfWeek() {
-        return LocalDate.now().with(DayOfWeek.MONDAY);
-    }
-
-    /**
-     * 获取本周最后一天
-     *
-     * @return 本周最后一天
-     */
-    public static LocalDate lastDayOfWeek() {
-        return LocalDate.now().with(DayOfWeek.SUNDAY);
-    }
-
-    /**
-     * 获取本月第一天
-     *
-     * @return 本月第一天
-     */
-    public static LocalDate firstDayOfMonth() {
-        return LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
-    }
-
-    /**
-     * 获取本月最后一天
-     *
-     * @return 本月最后一天
-     */
-    public static LocalDate lastDayOfMonth() {
-        return LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
-    }
-
-    /**
-     * 获取本年第一天
-     *
-     * @return 本年第一天
-     */
-    public static LocalDate firstDayOfYear() {
-        return LocalDate.now().with(TemporalAdjusters.firstDayOfYear());
-    }
-
-    /**
-     * 获取本年最后一天
-     *
-     * @return 本年最后一天
-     */
-    public static LocalDate lastDayOfYear() {
-        return LocalDate.now().with(TemporalAdjusters.lastDayOfYear());
-    }
-
-    // ========== 判断 ==========
-
-    /**
      * 判断是否是今天
-     *
-     * @param date 日期
-     * @return 是否是今天
      */
     public static boolean isToday(LocalDate date) {
-        return date != null && date.equals(LocalDate.now());
+        return date != null && date.equals(today());
     }
 
     /**
-     * 判断是否是过去
-     *
-     * @param dateTime 日期时间
-     * @return 是否是过去
+     * 判断是否是同一天
      */
-    public static boolean isPast(LocalDateTime dateTime) {
-        return dateTime != null && dateTime.isBefore(LocalDateTime.now());
+    public static boolean isSameDay(LocalDateTime dateTime1, LocalDateTime dateTime2) {
+        if (dateTime1 == null || dateTime2 == null) return false;
+        return dateTime1.toLocalDate().equals(dateTime2.toLocalDate());
     }
 
     /**
-     * 判断是否是未来
-     *
-     * @param dateTime 日期时间
-     * @return 是否是未来
+     * 判断日期是否在范围内（包含边界）
      */
-    public static boolean isFuture(LocalDateTime dateTime) {
-        return dateTime != null && dateTime.isAfter(LocalDateTime.now());
+    public static boolean isBetween(LocalDate date, LocalDate start, LocalDate end) {
+        if (date == null || start == null || end == null) return false;
+        return !date.isBefore(start) && !date.isAfter(end);
     }
 
     /**
-     * 判断是否在指定范围内
-     *
-     * @param dateTime 日期时间
-     * @param start    开始时间
-     * @param end      结束时间
-     * @return 是否在范围内
+     * 加天数
      */
-    public static boolean isBetween(LocalDateTime dateTime, LocalDateTime start, LocalDateTime end) {
-        return dateTime != null && !dateTime.isBefore(start) && !dateTime.isAfter(end);
+    public static LocalDateTime plusDays(LocalDateTime dateTime, long days) {
+        return dateTime != null ? dateTime.plusDays(days) : null;
     }
 
     /**
-     * 判断是否是工作日
-     *
-     * @param date 日期
-     * @return 是否是工作日
+     * 加小时
      */
-    public static boolean isWeekday(LocalDate date) {
-        DayOfWeek dayOfWeek = date.getDayOfWeek();
-        return dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY;
+    public static LocalDateTime plusHours(LocalDateTime dateTime, long hours) {
+        return dateTime != null ? dateTime.plusHours(hours) : null;
     }
 
     /**
-     * 判断是否是周末
-     *
-     * @param date 日期
-     * @return 是否是周末
+     * 加分钟
      */
-    public static boolean isWeekend(LocalDate date) {
-        return !isWeekday(date);
+    public static LocalDateTime plusMinutes(LocalDateTime dateTime, long minutes) {
+        return dateTime != null ? dateTime.plusMinutes(minutes) : null;
+    }
+
+    /**
+     * 计算过期时间
+     * 
+     * @param expireSeconds 过期秒数
+     * @return 过期时间点
+     */
+    public static LocalDateTime expireAt(long expireSeconds) {
+        return nowDateTime().plusSeconds(expireSeconds);
+    }
+
+    /**
+     * 判断是否已过期
+     */
+    public static boolean isExpired(LocalDateTime expireTime) {
+        return expireTime != null && expireTime.isBefore(nowDateTime());
+    }
+
+    /**
+     * 获取友好的时间描述（如：刚刚、5分钟前、1小��前等）
+     */
+    public static String friendlyTime(LocalDateTime dateTime) {
+        if (dateTime == null) return "";
+        
+        LocalDateTime now = nowDateTime();
+        long minutes = minutesBetween(dateTime, now);
+        
+        if (minutes < 0) {
+            return "未来";
+        } else if (minutes < 1) {
+            return "刚刚";
+        } else if (minutes < 60) {
+            return minutes + "分钟前";
+        } else if (minutes < 1440) { // 24小时
+            return (minutes / 60) + "小时前";
+        } else if (minutes < 10080) { // 7天
+            return (minutes / 1440) + "天前";
+        } else if (minutes < 43200) { // 30天
+            return (minutes / 10080) + "周前";
+        } else if (minutes < 525600) { // 365天
+            return (minutes / 43200) + "月前";
+        } else {
+            return (minutes / 525600) + "年前";
+        }
     }
 }
