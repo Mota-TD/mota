@@ -111,8 +111,32 @@ public class MilestoneController {
         }
         try {
             log.info("Querying milestone tasks for userId: {}", currentUserId);
-            List<MilestoneTask> tasks = milestoneTaskService.getByAssigneeId(currentUserId);
+            
+            // 1. 获取用户负责的里程碑任务
+            List<MilestoneTask> tasks = new java.util.ArrayList<>(milestoneTaskService.getByAssigneeId(currentUserId));
             log.info("Found {} milestone tasks for userId: {}", tasks.size(), currentUserId);
+            
+            // 2. 获取用户作为里程碑负责人的里程碑，转换为虚拟任务
+            List<Milestone> myMilestones = milestoneService.getMilestonesByAssignee(currentUserId);
+            log.info("Found {} milestones where user {} is assignee", myMilestones.size(), currentUserId);
+            
+            for (Milestone milestone : myMilestones) {
+                MilestoneTask virtualTask = new MilestoneTask();
+                virtualTask.setId(milestone.getId());
+                virtualTask.setMilestoneId(milestone.getId());
+                virtualTask.setProjectId(milestone.getProjectId());
+                virtualTask.setName("[里程碑] " + milestone.getName());
+                virtualTask.setDescription(milestone.getDescription());
+                virtualTask.setAssigneeId(currentUserId);
+                virtualTask.setStatus(milestone.getStatus());
+                virtualTask.setPriority("high"); // 里程碑默认高优先级
+                virtualTask.setProgress(milestone.getProgress() != null ? milestone.getProgress() : 0);
+                virtualTask.setDueDate(milestone.getTargetDate());
+                virtualTask.setMilestoneName(milestone.getName());
+                tasks.add(virtualTask);
+            }
+            
+            log.info("Total tasks (including milestone virtual tasks) for userId: {}: {}", currentUserId, tasks.size());
             return Result.success(tasks);
         } catch (Exception e) {
             log.error("Failed to query milestone tasks for userId: {}, error: {}", currentUserId, e.getMessage(), e);

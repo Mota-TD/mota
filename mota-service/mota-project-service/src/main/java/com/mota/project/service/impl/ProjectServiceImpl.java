@@ -161,6 +161,10 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
         project.setKey(generatedKey);
         
         // 设置默认值
+        // 设置租户ID（当前系统暂时使用默认租户0）
+        if (project.getTenantId() == null) {
+            project.setTenantId(0L);
+        }
         if (!StringUtils.hasText(project.getOrgId())) {
             project.setOrgId("default");
         }
@@ -218,6 +222,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
         project.setVisibility(StringUtils.hasText(request.getVisibility()) ? request.getVisibility() : Project.Visibility.PRIVATE);
         
         // 设置默认值
+        // 设置租户ID（当前系统暂时使用默认租户0）
+        project.setTenantId(0L);
         project.setOrgId("default");
         project.setStatus(Project.Status.ACTIVE);
         project.setProgress(0);
