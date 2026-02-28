@@ -69,11 +69,12 @@ export async function logout(params?: LogoutParams) {
  * 获取当前登录用户信息
  *
  * 获取当前已认证用户的详细信息，包括权限列表。
+ * 注意：调用的是 user-service 的 /users/me 接口
  *
  * @returns 当前用户信息
  */
 export async function getCurrentUser() {
-  return request<ApiResponse<UserInfo>>('/auth/current-user', {
+  return request<ApiResponse<UserInfo>>('/users/me', {
     method: 'GET',
   });
 }

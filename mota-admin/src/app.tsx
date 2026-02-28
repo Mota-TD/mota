@@ -29,6 +29,40 @@ const loginPath = '/user/login';
 let refreshTimer: NodeJS.Timeout | null = null;
 
 /**
+ * 将后端 UserVO 数据映射为前端 API.CurrentUser 格式
+ *
+ * 后端 /api/v1/users/me 返回的字段:
+ * - id: 用户ID
+ * - username: 用户名
+ * - nickname: 昵称
+ * - email: 邮箱
+ * - phone: 手机号
+ * - avatar: 头像
+ * - status: 状态 ("active" 或 "inactive")
+ * - role: 角色 (admin, member 等)
+ *
+ * @param userVO 后端返回的用户数据
+ * @returns 前端使用的用户数据格式
+ */
+function mapUserVOToCurrentUser(userVO: any): API.CurrentUser {
+  // 根据 role 映射权限
+  // role: admin=管理员, member=普通成员
+  let access = 'user';
+  if (userVO.role === 'admin' || userVO.role === 'super_admin') {
+    access = 'admin';
+  }
+
+  return {
+    userid: String(userVO.id || ''),
+    name: userVO.nickname || userVO.username || '',
+    email: userVO.email || '',
+    phone: userVO.phone || '',
+    avatar: userVO.avatar || '',
+    access,
+  };
+}
+
+/**
  * 从JWT Token中解析用户信息（作为getCurrentUser接口的备选方案）
  */
 function parseUserInfoFromToken(token: string): API.CurrentUser | undefined {
@@ -40,6 +74,8 @@ function parseUserInfoFromToken(token: string): API.CurrentUser | undefined {
     return {
       userid: String(payload.userId || ''),
       name: payload.username || '',
+      email: '',
+      phone: '',
       access: 'admin', // 默认管理员权限
     };
   } catch {
@@ -68,11 +104,12 @@ export async function getInitialState(): Promise<{
       try {
         const response = await getCurrentUser();
         if (response.code === 200 && response.data) {
-          return response.data;
+          // 将后端 UserVO 映射为前端 API.CurrentUser 格式
+          return mapUserVOToCurrentUser(response.data);
         }
-      } catch {
+      } catch (err) {
         // getCurrentUser 接口失败，使用JWT中的信息作为备选
-        console.warn('getCurrentUser接口不可用，使用JWT中的用户信息');
+        console.warn('getCurrentUser接口不可用，使用JWT中的用户信息', err);
       }
 
       // 从JWT Token中解析用户信息作为备选

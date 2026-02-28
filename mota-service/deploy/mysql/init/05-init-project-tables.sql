@@ -385,6 +385,26 @@ CREATE TABLE IF NOT EXISTS user (
     INDEX idx_username (username)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户表';
 
+-- 通知偏好设置表 (用于用户个人设置页面)
+CREATE TABLE IF NOT EXISTS notification_preferences (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
+    user_id BIGINT NOT NULL COMMENT '用户ID',
+    enable_aggregation TINYINT(1) DEFAULT 1 COMMENT '是否启用通知聚合',
+    aggregation_interval INT DEFAULT 30 COMMENT '聚合间隔（分钟）',
+    enable_ai_classification TINYINT(1) DEFAULT 1 COMMENT '是否启用AI智能分类',
+    auto_collapse_threshold INT DEFAULT 30 COMMENT '自动折叠阈值',
+    auto_pin_urgent TINYINT(1) DEFAULT 1 COMMENT '自动置顶紧急通知',
+    auto_pin_mentions TINYINT(1) DEFAULT 0 COMMENT '自动置顶@提及',
+    show_low_priority_collapsed TINYINT(1) DEFAULT 1 COMMENT '低优先级默认折叠',
+    max_visible_notifications INT DEFAULT 50 COMMENT '最大显示数量',
+    email_digest_enabled TINYINT(1) DEFAULT 0 COMMENT '是否启用邮件摘要',
+    email_digest_frequency VARCHAR(20) DEFAULT 'daily' COMMENT '邮件摘要频率',
+    email_digest_time VARCHAR(10) DEFAULT '09:00' COMMENT '每日摘要发送时间',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE INDEX uk_user_id (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='通知偏好设置表';
+
 -- 工作流模板表
 CREATE TABLE IF NOT EXISTS workflow_template (
     id BIGINT PRIMARY KEY COMMENT '主键ID',

@@ -63,15 +63,30 @@ public class UserController {
 
     /**
      * 获取当前用户信息
+     *
+     * 如果用户在本地数据库中不存在，则从网关传递的请求头中获取用户信息
      */
     @GetMapping("/me")
-    public Result<Map<String, Object>> getCurrentUser() {
+    public Result<Map<String, Object>> getCurrentUser(
+            @RequestHeader(value = "X-User-Id", required = false) String headerUserId,
+            @RequestHeader(value = "X-Username", required = false) String headerUsername,
+            @RequestHeader(value = "X-Nickname", required = false) String headerNickname,
+            @RequestHeader(value = "X-Roles", required = false) String headerRoles) {
+        
         Long userId = null;
         try {
             userId = SecurityUtils.getUserId();
         } catch (Exception e) {
-            // 未登录
+            // 尝试从请求头获取
+            if (headerUserId != null && !headerUserId.isEmpty() && !"null".equals(headerUserId)) {
+                try {
+                    userId = Long.parseLong(headerUserId);
+                } catch (NumberFormatException ex) {
+                    // 忽略
+                }
+            }
         }
+        
         if (userId == null) {
             // 如果没有登录用户，返回默认信息
             Map<String, Object> defaultUser = new HashMap<>();
@@ -85,8 +100,35 @@ public class UserController {
             defaultUser.put("role", "guest");
             return Result.success(defaultUser);
         }
-        User user = userService.getUserById(userId);
-        return Result.success(convertToMap(user));
+        
+        // 尝试从本地数据库获取用户信息
+        try {
+            User user = userService.getUserById(userId);
+            return Result.success(convertToMap(user));
+        } catch (Exception e) {
+            // 用户在本地数据库不存在，从请求头构建用户信息
+            // 这种情况发生在用户通过 auth-service 注册但尚未同步到 project-service 时
+            Map<String, Object> userFromHeader = new HashMap<>();
+            userFromHeader.put("id", userId);
+            userFromHeader.put("username", headerUsername != null && !"null".equals(headerUsername) ? headerUsername : "user_" + userId);
+            userFromHeader.put("nickname", headerNickname != null && !"null".equals(headerNickname) ? headerNickname : headerUsername);
+            userFromHeader.put("email", "");
+            userFromHeader.put("phone", "");
+            userFromHeader.put("avatar", "");
+            userFromHeader.put("status", "active");
+            // 从请求头的角色信息判断
+            String role = "member";
+            if (headerRoles != null && headerRoles.contains("admin")) {
+                role = "admin";
+            }
+            userFromHeader.put("role", role);
+            userFromHeader.put("departmentId", null);
+            userFromHeader.put("departmentName", null);
+            userFromHeader.put("createdAt", "");
+            userFromHeader.put("updatedAt", "");
+            
+            return Result.success(userFromHeader);
+        }
     }
 
     /**
